@@ -113,11 +113,11 @@ After the upgrade to 5.8 the frame drew dark, because its engine material wasn't
 
 Seeds and harvests are now items in an inventory on the player state. `BP_PlayerState` was made, and `BP_ThirdPersonGameMode` and `BP_Farmer` were changed, by a headless editor script, so the editor hasn't shown them yet. Back up `Saved/SaveGames/` first: your save is upgraded to version 2 on the first new day.
 
-- [ ] **Old save** (a3ace26): pressing Play loads your farm, and the HUD's inventory line reads "Bag: Turnip Seeds N   Turnip M" with the seed and harvest counts you had. Sleep once: the game saves, and stopping and playing again brings the same bag back.
-- [ ] **New game** (a3ace26): F9 starts with "Bag: Turnip Seeds 10".
-- [ ] **Planting and harvesting** (a3ace26): planting lowers the seeds by one; harvesting a ripe turnip adds a Turnip stack (or raises it). With no seeds left, the seeds tool says "Out of seeds." and the Turnip Seeds entry disappears from the line.
-- [ ] **Assets** (a3ace26): `Content/Farm/Blueprints/BP_PlayerState` opens; its **Inventory** component shows Slot Count 24 and Starting Items with `FarmItem:Base.TurnipSeeds` × 10. `BP_ThirdPersonGameMode` shows Player State Class `BP_PlayerState`. `BP_Farmer`'s **Farming** component shows Seed Item Id `FarmItem:Base.TurnipSeeds`, and its picker lists only items. None of them asks to be saved when you close it.
-- [ ] **Solution** (a3ace26): after regenerating the project files, the solution shows the new `Inventory` folder under `Source/Vestige`.
+- [x] **Old save** (a3ace26): pressing Play loads your farm, and the HUD's inventory line reads "Bag: Turnip Seeds N   Turnip M" with the seed and harvest counts you had. Sleep once: the game saves, and stopping and playing again brings the same bag back.
+- [x] **New game** (a3ace26): F9 starts with "Bag: Turnip Seeds 10".
+- [x] **Planting and harvesting** (a3ace26): planting lowers the seeds by one; harvesting a ripe turnip adds a Turnip stack (or raises it). With no seeds left, the seeds tool says "Out of seeds." and the Turnip Seeds entry disappears from the line.
+- [x] **Assets** (a3ace26): `Content/Farm/Blueprints/BP_PlayerState` opens; its **Inventory** component shows Slot Count 24 and Starting Items with `FarmItem:Base.TurnipSeeds` × 10. `BP_ThirdPersonGameMode` shows Player State Class `BP_PlayerState`. `BP_Farmer`'s **Farming** component shows Seed Item Id `FarmItem:Base.TurnipSeeds`, and its picker lists only items. None of them asks to be saved when you close it.
+- [x] **Solution** (a3ace26): after regenerating the project files, the solution shows the new `Inventory` folder under `Source/Vestige`.
 
 ### Editor chores
 
