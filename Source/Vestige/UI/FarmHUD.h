@@ -14,10 +14,11 @@ class APawn;
 class SFarmHudWidget;
 class UFarmingComponent;
 class UFarmToolData;
+class UVestigeInventoryComponent;
 
 /**
- * Shows the farming HUD for its player: the day and time from the world's AFarmDayCycle, the tool and inventory from
- * the player's UFarmingComponent, the farmer's key hints and the feedback messages UFarmFeedbackSubsystem carries.
+ * Shows the farming HUD for its player: the day and time from the world's AFarmDayCycle, the tool from the pawn's
+ * UFarmingComponent, the items from the inventory on the player state, the farmer's key hints and the feedback messages UFarmFeedbackSubsystem carries.
  * It only displays. It builds each text when an event says what it shows has changed, so the widget's per-frame
  * bindings only read finished text; the messages are the one thing it keeps, and only until they fade.
  */
@@ -33,7 +34,7 @@ public:
 	 */
 	FText GetStatusText() const;
 
-	/** "Seeds: 9   Harvested: 2". Rebuilt when the farming component's inventory changes. */
+	/** "Bag: Turnip Seeds 9   Turnip 2", the non-empty slots in order. Rebuilt when the inventory changes. */
 	const FText& GetInventoryText() const { return InventoryText; }
 
 	/** The key hints, built from the farmer's input mappings. Rebuilt when the toolbar or the pawn changes. */
@@ -62,7 +63,10 @@ private:
 	/** Rebuilds the tool's name and the key hints, which name the toolbar's tools. Bound to OnToolChanged. */
 	void RefreshToolTexts(const UFarmToolData* Tool);
 
-	/** Bound to OnInventoryChanged. */
+	/** Follows the inventory on the player state, which outlives the pawn, so this happens once, at BeginPlay. */
+	void FollowInventory();
+
+	/** Bound to the inventory's OnInventoryChanged. */
 	void RefreshInventoryText();
 
 	void RefreshControlsText();
@@ -82,6 +86,7 @@ private:
 
 	TWeakObjectPtr<const AFarmDayCycle> DayCycle;
 	TWeakObjectPtr<UFarmingComponent> Farming;
+	TWeakObjectPtr<UVestigeInventoryComponent> Inventory;
 	TWeakObjectPtr<const AFarmerCharacter> Farmer;
 
 	FText ToolText;

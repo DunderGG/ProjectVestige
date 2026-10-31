@@ -17,7 +17,7 @@ namespace FarmArchitectureTests
 	 * added here, in its layer, before files go in it.
 	 */
 	const TCHAR* const LayerOrder[] = {
-		TEXT("Core"), TEXT("Content"), TEXT("Time"), TEXT("Farming"), TEXT("Save"), TEXT("Player"), TEXT("UI")};
+		TEXT("Core"), TEXT("Content"), TEXT("Time"), TEXT("Inventory"), TEXT("Farming"), TEXT("Save"), TEXT("Player"), TEXT("UI")};
 
 	/** Tests may include anything, and nothing may include a test. Their files aren't checked. */
 	const TCHAR* const TestsFolder = TEXT("Tests");

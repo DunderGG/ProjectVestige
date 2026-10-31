@@ -11,6 +11,8 @@
 #include "Farming/FarmGrid.h"
 #include "Farming/FarmingComponent.h"
 #include "GameFramework/Pawn.h"
+#include "GameFramework/PlayerState.h"
+#include "Inventory/VestigeInventoryComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "ProfilingDebugging/CpuProfilerTrace.h"
 #include "Save/FarmSaveGame.h"
@@ -68,6 +70,25 @@ namespace FarmSaveUpgrade
 		}
 		Save.SaveVersion = 1;
 		return true;
+	}
+
+	/** Version 1 counted seeds and harvested crops, and the turnip was the only seed and crop. */
+	const FName Version1SeedItemId(TEXT("Base.TurnipSeeds"));
+	const FName Version1HarvestItemId(TEXT("Base.Turnip"));
+
+	/** Turns the seed and harvest counts into stacks in the first two inventory slots. */
+	void UpgradeFromVersion1(UFarmSaveGame& Save)
+	{
+		const TPair<FName, int32> Stacks[] = {
+			{Version1SeedItemId, Save.Farming.Seeds}, {Version1HarvestItemId, Save.Farming.HarvestedCrops}};
+		for (const TPair<FName, int32>& Stack : Stacks)
+		{
+			if (Stack.Value > 0)
+			{
+				Save.Inventory.Slots.Add({Save.Inventory.Slots.Num(), Stack.Key, Stack.Value});
+			}
+		}
+		Save.SaveVersion = 2;
 	}
 }
 
@@ -153,6 +174,10 @@ bool UFarmSaveSubsystem::UpgradeToCurrentVersion(UFarmSaveGame& Save, int32 Grid
 	{
 		return false;
 	}
+	if (Save.SaveVersion == 1)
+	{
+		FarmSaveUpgrade::UpgradeFromVersion1(Save);
+	}
 	return Save.SaveVersion == UFarmSaveGame::CurrentVersion;
 }
 
@@ -213,7 +238,8 @@ void UFarmSaveSubsystem::SaveFarm(int32 NewDay)
 	TRACE_CPUPROFILER_EVENT_SCOPE(UFarmSaveSubsystem::SaveFarm);
 
 	const UFarmingComponent* Farming = GetPlayerFarming();
-	if (!Farming)
+	const UVestigeInventoryComponent* Inventory = GetPlayerInventory();
+	if (!Farming || !Inventory)
 	{
 		return;
 	}
@@ -228,6 +254,7 @@ void UFarmSaveSubsystem::SaveFarm(int32 NewDay)
 	Save->SaveSequence = NewestSequence + 1;
 	Save->Clock = DayCycle->GetSaveData();
 	Save->Farming = Farming->GetSaveData();
+	Save->Inventory = Inventory->GetSaveData();
 	Save->Tiles = Grid->GetTilesSaveData();
 
 	const int32 Slot = GetSlotToWrite(NewestSlot);
@@ -248,8 +275,10 @@ void UFarmSaveSubsystem::LoadFarm()
 	TRACE_CPUPROFILER_EVENT_SCOPE(UFarmSaveSubsystem::LoadFarm);
 
 	UFarmingComponent* Farming = GetPlayerFarming();
-	if (!Farming)
+	UVestigeInventoryComponent* Inventory = GetPlayerInventory();
+	if (!Farming || !Inventory)
 	{
+		UE_LOG(LogVestige, Warning, TEXT("Not loading the save: the player has no farming component or no inventory."));
 		return;
 	}
 
@@ -309,7 +338,7 @@ void UFarmSaveSubsystem::LoadFarm()
 		UFarmSaveGame::SlotNames[Decision.Slot], SavedVersion, Save.SaveSequence);
 	NewestSlot = Decision.Slot;
 	NewestSequence = Save.SaveSequence;
-	if (ApplySave(Save, *Farming) > 0)
+	if (ApplySave(Save, *Farming, *Inventory) > 0)
 	{
 		UFarmFeedbackSubsystem::Notify(
 			GetWorld(), LOCTEXT("ContentMissing", "Some saved things no longer exist in the game and were left out."));
@@ -318,7 +347,7 @@ void UFarmSaveSubsystem::LoadFarm()
 		GetWorld(), FText::FormatNamed(LOCTEXT("Loaded", "Welcome back. Day {Day}."), TEXT("Day"), Save.Clock.Day));
 }
 
-int32 UFarmSaveSubsystem::ApplySave(const UFarmSaveGame& Save, UFarmingComponent& Farming)
+int32 UFarmSaveSubsystem::ApplySave(const UFarmSaveGame& Save, UFarmingComponent& Farming, UVestigeInventoryComponent& Inventory)
 {
 	int32 SkippedCount = 0;
 	DayCycle->RestoreFromSaveData(Save.Clock);
@@ -326,6 +355,7 @@ int32 UFarmSaveSubsystem::ApplySave(const UFarmSaveGame& Save, UFarmingComponent
 	{
 		++SkippedCount;
 	}
+	SkippedCount += Inventory.RestoreFromSaveData(Save.Inventory);
 	SkippedCount += Grid->RestoreTilesFromSaveData(Save.Tiles, FarmSaveSlots::LoadSavedCrops(Save.Tiles));
 	return SkippedCount;
 }
@@ -360,6 +390,12 @@ UFarmingComponent* UFarmSaveSubsystem::GetPlayerFarming() const
 {
 	const APawn* Pawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
 	return Pawn ? Pawn->FindComponentByClass<UFarmingComponent>() : nullptr;
+}
+
+UVestigeInventoryComponent* UFarmSaveSubsystem::GetPlayerInventory() const
+{
+	const APlayerState* PlayerState = UGameplayStatics::GetPlayerState(GetWorld(), 0);
+	return PlayerState ? PlayerState->FindComponentByClass<UVestigeInventoryComponent>() : nullptr;
 }
 
 #undef LOCTEXT_NAMESPACE

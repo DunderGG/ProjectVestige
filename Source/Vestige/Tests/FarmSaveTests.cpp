@@ -8,7 +8,6 @@
 #include "Content/FarmCropData.h"
 #include "CQTest.h"
 #include "Farming/FarmGrid.h"
-#include "Farming/FarmingComponent.h"
 #include "Farming/FarmTile.h"
 #include "Save/FarmSaveGame.h"
 #include "Save/FarmSaveSubsystem.h"
@@ -121,8 +120,9 @@ namespace FarmSaveTests
 			ASSERT_THAT(IsTrue(SaveGame.SaveVersion == UFarmSaveGame::CurrentVersion));
 			ASSERT_THAT(IsTrue(SaveGame.Clock.Day == 4));
 			ASSERT_THAT(IsTrue(SaveGame.Clock.TimeOfDay == 9.5f));
-			ASSERT_THAT(IsTrue(SaveGame.Farming.Seeds == 7));
-			ASSERT_THAT(IsTrue(SaveGame.Farming.HarvestedCrops == 2));
+			ASSERT_THAT(IsTrue(SaveGame.Inventory.Slots.Num() == 2));
+			ASSERT_THAT(IsTrue(SaveGame.Inventory.Slots[0].Count == 7));
+			ASSERT_THAT(IsTrue(SaveGame.Inventory.Slots[1].Count == 2));
 			ASSERT_THAT(IsTrue(SaveGame.Farming.CurrentToolId == TEXT("Base.WateringCan")));
 			ASSERT_THAT(IsTrue(SaveGame.Tiles[9].Coordinates == FIntPoint(1, 1)));
 			ASSERT_THAT(IsTrue(SaveGame.Tiles[9].CropId == TEXT("Base.Turnip")));
@@ -156,18 +156,33 @@ namespace FarmSaveTests
 			ASSERT_THAT(IsTrue(Restored.GetTimeOfDay() == Saved.GetTimeOfDay()));
 		}
 
-		TEST_METHOD(InventoryRoundTripsAndNegativeCountsBecomeZero)
+		TEST_METHOD(Version1SeedsAndHarvestBecomeTurnipItems)
 		{
-			AActor& Owner = Spawner.SpawnActor<AActor>();
-			UFarmingComponent* Farming = NewObject<UFarmingComponent>(&Owner);
-			FFarmFarmingSaveData Data;
-			Data.Seeds = 6;
-			Data.HarvestedCrops = -3;
+			UFarmSaveGame& SaveGame = Spawner.SpawnObject<UFarmSaveGame>();
+			SaveGame.SaveVersion = 1;
+			SaveGame.Farming.Seeds = 5;
+			SaveGame.Farming.HarvestedCrops = 3;
 
-			Farming->RestoreFromSaveData(Data);
+			ASSERT_THAT(IsTrue(UFarmSaveSubsystem::UpgradeToCurrentVersion(SaveGame, 8)));
 
-			ASSERT_THAT(IsTrue(Farming->GetSaveData().Seeds == 6));
-			ASSERT_THAT(IsTrue(Farming->GetSaveData().HarvestedCrops == 0));
+			ASSERT_THAT(IsTrue(SaveGame.SaveVersion == UFarmSaveGame::CurrentVersion));
+			ASSERT_THAT(IsTrue(SaveGame.Inventory.Slots.Num() == 2));
+			ASSERT_THAT(IsTrue(SaveGame.Inventory.Slots[0].Slot == 0));
+			ASSERT_THAT(IsTrue(SaveGame.Inventory.Slots[0].ItemId == TEXT("Base.TurnipSeeds")));
+			ASSERT_THAT(IsTrue(SaveGame.Inventory.Slots[0].Count == 5));
+			ASSERT_THAT(IsTrue(SaveGame.Inventory.Slots[1].Slot == 1));
+			ASSERT_THAT(IsTrue(SaveGame.Inventory.Slots[1].ItemId == TEXT("Base.Turnip")));
+			ASSERT_THAT(IsTrue(SaveGame.Inventory.Slots[1].Count == 3));
+		}
+
+		TEST_METHOD(Version1WithoutSeedsOrHarvestUpgradesToAnEmptyBag)
+		{
+			UFarmSaveGame& SaveGame = Spawner.SpawnObject<UFarmSaveGame>();
+			SaveGame.SaveVersion = 1;
+			SaveGame.Farming.HarvestedCrops = -2;
+
+			ASSERT_THAT(IsTrue(UFarmSaveSubsystem::UpgradeToCurrentVersion(SaveGame, 8)));
+			ASSERT_THAT(IsTrue(SaveGame.Inventory.Slots.IsEmpty()));
 		}
 
 		TEST_METHOD(TilesRoundTripByCoordinatesWithTheirOwnCrop)

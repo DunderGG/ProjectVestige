@@ -29,7 +29,9 @@ Follow the two Docs files for every change. The rules below are the ones most of
    - `AFarmTile` and its `FFarmTileState`: one tile's state and rules (including the crop planted in it), and its visuals.
    - `AFarmGrid`: spawns tiles, finds a tile by location, advances tiles on a new day. No clock, no lighting.
    - `AFarmDayCycle`: day number, clock, sun, sky light, night exposure. Broadcasts `OnNewDay`, then `OnNewDayFinished`, and `OnDayEndReached` when the clock reaches the end of the day.
-   - `UFarmingComponent`: the toolbar and the tool in hand, seeds and the crop they plant, harvest count, tile targeting, using tools.
+   - `UFarmingComponent`: the toolbar and the tool in hand, which seed item the Seeds tool plants and its crop, tile targeting, using tools (taking seeds from and putting harvests into the inventory).
+   - `AVestigePlayerState`: the player's data that outlives the pawn; holds the inventory (later the ability system).
+   - `UVestigeInventoryComponent` and its `FVestigeInventory`: the items the player carries, in slots with stacks, by item ID, and the starting items. No money yet.
    - `UFarmRestComponent`: the end of the player's day: sleeping and passing out (later the late-night rules and exhaustion).
    - `UFarmCharacterMovementComponent`: how the farmer walks and turns; without input it turns toward the aimed tile.
    - `UFarmTargetHighlightComponent`: the frame around the targeted tile (presentation only).

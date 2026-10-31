@@ -3,6 +3,7 @@
 
 #include "UI/FarmHUD.h"
 
+#include "Content/FarmItemData.h"
 #include "Content/FarmToolData.h"
 #include "Core/FarmFeedbackSubsystem.h"
 #include "Engine/GameViewportClient.h"
@@ -10,6 +11,8 @@
 #include "Farming/FarmingComponent.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerController.h"
+#include "GameFramework/PlayerState.h"
+#include "Inventory/VestigeInventoryComponent.h"
 #include "Player/FarmerCharacter.h"
 #include "Time/FarmDayCycle.h"
 #include "TimerManager.h"
@@ -68,6 +71,7 @@ void AFarmHUD::BeginPlay()
 	DayCycle = AFarmDayCycle::Get(GetWorld());
 	PlayerOwner->OnPossessedPawnChanged.AddDynamic(this, &AFarmHUD::FollowPawn);
 	FollowPawn(nullptr, PlayerOwner->GetPawn());
+	FollowInventory();
 	if (UFarmFeedbackSubsystem* Feedback = GetWorld()->GetSubsystem<UFarmFeedbackSubsystem>())
 	{
 		Feedback->OnFeedback.AddUObject(this, &AFarmHUD::ShowMessage);
@@ -84,6 +88,10 @@ void AFarmHUD::EndPlay(const EEndPlayReason::Type EndPlayReason)
 		PlayerOwner->OnPossessedPawnChanged.RemoveDynamic(this, &AFarmHUD::FollowPawn);
 	}
 	StopFollowingFarming();
+	if (UVestigeInventoryComponent* CurrentInventory = Inventory.Get())
+	{
+		CurrentInventory->OnInventoryChanged.RemoveAll(this);
+	}
 	if (UFarmFeedbackSubsystem* Feedback = UWorld::GetSubsystem<UFarmFeedbackSubsystem>(GetWorld()))
 	{
 		Feedback->OnFeedback.RemoveAll(this);
@@ -129,10 +137,8 @@ void AFarmHUD::FollowPawn(APawn* OldPawn, APawn* NewPawn)
 	if (NewFarming)
 	{
 		NewFarming->OnToolChanged.AddUObject(this, &AFarmHUD::RefreshToolTexts);
-		NewFarming->OnInventoryChanged.AddUObject(this, &AFarmHUD::RefreshInventoryText);
 	}
 	RefreshToolTexts(NewFarming ? NewFarming->GetCurrentTool() : nullptr);
-	RefreshInventoryText();
 }
 
 void AFarmHUD::StopFollowingFarming()
@@ -140,8 +146,18 @@ void AFarmHUD::StopFollowingFarming()
 	if (UFarmingComponent* OldFarming = Farming.Get())
 	{
 		OldFarming->OnToolChanged.RemoveAll(this);
-		OldFarming->OnInventoryChanged.RemoveAll(this);
 	}
+}
+
+void AFarmHUD::FollowInventory()
+{
+	const APlayerState* PlayerState = PlayerOwner ? PlayerOwner->PlayerState.Get() : nullptr;
+	Inventory = PlayerState ? PlayerState->FindComponentByClass<UVestigeInventoryComponent>() : nullptr;
+	if (UVestigeInventoryComponent* CurrentInventory = Inventory.Get())
+	{
+		CurrentInventory->OnInventoryChanged.AddUObject(this, &AFarmHUD::RefreshInventoryText);
+	}
+	RefreshInventoryText();
 }
 
 void AFarmHUD::RefreshToolTexts(const UFarmToolData* Tool)
@@ -155,14 +171,24 @@ void AFarmHUD::RefreshToolTexts(const UFarmToolData* Tool)
 
 void AFarmHUD::RefreshInventoryText()
 {
-	const UFarmingComponent* CurrentFarming = Farming.Get();
-	if (!CurrentFarming)
+	const UVestigeInventoryComponent* CurrentInventory = Inventory.Get();
+	if (!CurrentInventory)
 	{
 		InventoryText = FText::GetEmpty();
 		return;
 	}
-	InventoryText = FText::FormatNamed(LOCTEXT("Inventory", "Seeds: {Seeds}   Harvested: {Harvested}"), TEXT("Seeds"),
-		CurrentFarming->GetSeeds(), TEXT("Harvested"), CurrentFarming->GetHarvestedCrops());
+
+	TArray<FText> Stacks;
+	for (const FVestigeInventorySlot& Slot : CurrentInventory->GetSlots())
+	{
+		if (!Slot.IsEmpty())
+		{
+			Stacks.Add(FText::FormatNamed(
+				LOCTEXT("Stack", "{Item} {Count}"), TEXT("Item"), Slot.Item->GetDisplayName(), TEXT("Count"), Slot.Count));
+		}
+	}
+	const FText Contents = Stacks.IsEmpty() ? LOCTEXT("BagEmpty", "empty") : FText::Join(FText::AsCultureInvariant(TEXT("   ")), Stacks);
+	InventoryText = FText::FormatNamed(LOCTEXT("Inventory", "Bag: {Contents}"), TEXT("Contents"), Contents);
 }
 
 void AFarmHUD::RefreshControlsText()

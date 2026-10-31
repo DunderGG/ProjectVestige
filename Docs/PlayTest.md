@@ -22,7 +22,7 @@ The one place for what to check by hand in the editor.
   Every test logs `Result={Success}`. Two `LogAutomationTest: Error: Condition failed` lines at startup come from the engine and can be ignored.
 - **Start the game:** open `/Game/Maps/L_Farm` (Content Browser > `Content/Maps`, double-click), then Play (Alt+P) for Play in Editor. For what players get, and for any performance numbers, use the arrow next to Play > Standalone Game instead.
 - **Graphics settings (scalability):** the quickest way, which works in Play in Editor and in Standalone Game, is the console ([see below](#1-before-you-test)). While playing, open it, type `scalability 2` and press Enter for High, or `scalability 3` for Epic (0 is Low, 1 Medium). Everything switches at once. To see whether hardware ray tracing is on, type `r.Lumen.HardwareRayTracing` on its own: it prints 0 at High and 1 at Epic. New players start at **High**. The level viewport keeps its own setting between sessions (its Settings menu > Engine Scalability Settings); the console changes it too.
-- **Saves** live in `Saved/SaveGames/`: `Farm.sav` and `Farm2.sav` are the two slots saves alternate between, and `Farm_Version0.sav` is the backup of a save from before save versions. Before testing anything that writes saves, copy the folder somewhere safe, and copy it back afterwards to get your farm back. F9 in the game deletes both slots and starts a new game on day 1; the backups stay.
+- **Saves** live in `Saved/SaveGames/`: `Farm.sav` and `Farm2.sav` are the two slots saves alternate between, and `Farm_Version0.sav` and `Farm_Version1.sav` are backups of saves from older save versions, made before their first upgrade. Before testing anything that writes saves, copy the folder somewhere safe, and copy it back afterwards to get your farm back. F9 in the game deletes both slots and starts a new game on day 1; the backups stay.
 - **Logs:** Window > Output Log. Our messages are under `LogVestige`; note any warning or error even if the game looks fine.
 - **Console**, for `scalability`, `stat fps`, `stat unit` and similar commands. While playing, press **§** (the key under Esc on a Swedish keyboard) or the key left of Backspace (´ and `), the US layout's console key. If neither works, press Shift+F1 to free the mouse, click the **Cmd** box at the bottom of the editor (in the Output Log panel, or the status bar at the bottom left), type the command there and press Enter; it goes to the game you are playing. Click back into the game viewport afterwards.
 
@@ -109,6 +109,16 @@ After the upgrade to 5.8 the frame drew dark, because its engine material wasn't
 - [x] **No warning** (a397e1c): the Output Log (Window > Output Log) has no "missing usage flag" warning after playing.
 - [x] **Asset** (a397e1c): `M_TileHighlight` opens in the material editor with Blend Mode Opaque, Shading Model Unlit and Usage > Used with Instanced Static Meshes ticked, and the editor doesn't ask to save it.
 
+### Inventory, 2026-10-31
+
+Seeds and harvests are now items in an inventory on the player state. `BP_PlayerState` was made, and `BP_ThirdPersonGameMode` and `BP_Farmer` were changed, by a headless editor script, so the editor hasn't shown them yet. Back up `Saved/SaveGames/` first: your save is upgraded to version 2 on the first new day.
+
+- [ ] **Old save** (inventory commit): pressing Play loads your farm, and the HUD's inventory line reads "Bag: Turnip Seeds N   Turnip M" with the seed and harvest counts you had. Sleep once: the game saves, and stopping and playing again brings the same bag back.
+- [ ] **New game** (inventory commit): F9 starts with "Bag: Turnip Seeds 10".
+- [ ] **Planting and harvesting** (inventory commit): planting lowers the seeds by one; harvesting a ripe turnip adds a Turnip stack (or raises it). With no seeds left, the seeds tool says "Out of seeds." and the Turnip Seeds entry disappears from the line.
+- [ ] **Assets** (inventory commit): `Content/Farm/Blueprints/BP_PlayerState` opens; its **Inventory** component shows Slot Count 24 and Starting Items with `FarmItem:Base.TurnipSeeds` × 10. `BP_ThirdPersonGameMode` shows Player State Class `BP_PlayerState`. `BP_Farmer`'s **Farming** component shows Seed Item Id `FarmItem:Base.TurnipSeeds`, and its picker lists only items. None of them asks to be saved when you close it.
+- [ ] **Solution** (inventory commit): after regenerating the project files, the solution shows the new `Inventory` folder under `Source/Vestige`.
+
 ### Editor chores
 
 Changes only the editor can make safely. The steps are in [Roadmap.md, Housekeeping](Roadmap.md#3-housekeeping): re-saving the template Blueprints and `L_Farm`, moving `BP_FarmTile` and the materials with redirectors fixed, and regenerating the Android File Server token if it was ever used. After each one, run the [smoke test](#3-smoke-test).
@@ -117,11 +127,11 @@ Changes only the editor can make safely. The steps are in [Roadmap.md, Housekeep
 
 About five minutes in `L_Farm`, in Play in Editor at High. Run it before pushing and at the end of each milestone, and after any editor chore. Back up `Saved/SaveGames/` first.
 
-1. **Start:** a new game (F9) starts on day 1 at 06:00. The HUD shows the day, the clock, the tool, seeds and harvested crops, and the key hints; the Output Log has no `LogVestige` errors.
+1. **Start:** a new game (F9) starts on day 1 at 06:00. The HUD shows the day, the clock, the tool, the bag ("Bag: Turnip Seeds 10") and the key hints; the Output Log has no `LogVestige` errors.
 2. **Tools:** with each tool on the tile in front of you: the hoe (1) tills grass, the seeds (2) plant in tilled soil and use a seed, the watering can (3) darkens the soil, and the hand (4) does nothing on an unripe crop. The tool in hand changes with each key. Each action shows a short message; facing away from the field says "Stand facing a farm tile."
-3. **Growing:** water a planted tile and sleep (N), a few times. The crop grows one stage per watered night, and a tile left dry doesn't grow. Harvest the ripe crop with the hand; the harvest count goes up.
+3. **Growing:** water a planted tile and sleep (N), a few times. The crop grows one stage per watered night, and a tile left dry doesn't grow. Harvest the ripe crop with the hand; a Turnip stack appears in the bag or grows.
 4. **Day and night:** let the clock run through an evening (it moves about one hour every 40 seconds unless the level's day cycle is set faster). The sun sets with warm light, the night is properly dark with faint moonlight, and at 02:00 the farmer passes out into the next day.
-5. **Saving:** sleep ("Game saved."), stop the game and play again. The day, seeds, harvest count, tool in hand and every tile, crops included, come back.
+5. **Saving:** sleep ("Game saved."), stop the game and play again. The day, the bag, the tool in hand and every tile, crops included, come back.
 6. **Highlight:** walk along the field edge and turn. The frame is bright yellow, by day and at night, follows the tile in front of you and disappears off the field.
 7. **Performance:** in the console, `stat fps` and `stat unit`. In a busy part of the farm, by day and by night, the frame stays under 16.6 ms (60 fps), and sleeping shows no visible hitch ([Architecture.md, section 10](Architecture.md#10-performance-by-design)). Play in Editor adds its own cost, so check a doubtful number in Standalone Game. For a hitch on the new day, start the game with `-trace=default` and open the trace in Unreal Insights (`Engine\Binaries\Win64\UnrealInsights.exe`): `AFarmDayCycle::StartNextDay` shows the whole new day, with the tiles, the save and the load inside it.
 
@@ -129,6 +139,6 @@ Put the save folder back afterwards if you want your farm as it was.
 
 ## 4. What isn't manual
 
-- **Game rules are tested automatically**, by the `Vestige` automation tests: tile states and growth, tools and seeds, the clock, sleeping and passing out, the save rules and upgrades, content IDs, the include direction between source folders and the rendering settings. A rule is never covered by a manual check alone. If a check here ever finds a rule broken, the fix comes with a test that would have caught it.
+- **Game rules are tested automatically**, by the `Vestige` automation tests: tile states and growth, tools and seeds, the inventory's stacking and saving, the clock, sleeping and passing out, the save rules and upgrades, content IDs, the include direction between source folders and the rendering settings. A rule is never covered by a manual check alone. If a check here ever finds a rule broken, the fix comes with a test that would have caught it.
 - **This document is for what tests can't judge:** how the game looks and feels, lighting, the HUD as you see it, input, saves on real files across sessions, performance, and steps that need the editor.
 - **When a change needs a manual check**, the commit that makes it adds a line to [Pending checks](#2-pending-checks) under a dated heading, with the commit and what to look for. A system that gains lasting behavior also gets a line in the [smoke test](#3-smoke-test).

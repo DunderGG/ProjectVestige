@@ -11,6 +11,7 @@ class AFarmDayCycle;
 class AFarmGrid;
 class UFarmingComponent;
 class UFarmSaveGame;
+class UVestigeInventoryComponent;
 
 /** What reading one save slot found. */
 struct FFarmSaveSlotRead
@@ -101,7 +102,7 @@ private:
 	void LoadFarm();
 
 	/** Hands each owner its part of Save. Returns how many saved entries named content that no longer exists. */
-	int32 ApplySave(const UFarmSaveGame& Save, UFarmingComponent& Farming);
+	int32 ApplySave(const UFarmSaveGame& Save, UFarmingComponent& Farming, UVestigeInventoryComponent& Inventory);
 
 	/** Turns saving off for the rest of the session and tells the player why. */
 	void RefuseToSave(const FText& Reason);
@@ -110,6 +111,7 @@ private:
 	void BackUpBeforeUpgrade(int32 Slot, int32 Version) const;
 
 	UFarmingComponent* GetPlayerFarming() const;
+	UVestigeInventoryComponent* GetPlayerInventory() const;
 
 	UPROPERTY()
 	TObjectPtr<AFarmDayCycle> DayCycle;

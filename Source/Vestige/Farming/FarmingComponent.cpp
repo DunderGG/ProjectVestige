@@ -6,6 +6,8 @@
 #include "Components/SceneComponent.h"
 #include "Content/FarmContentData.h"
 #include "Content/FarmCropData.h"
+#include "Content/FarmItemData.h"
+#include "Content/FarmSeedFragment.h"
 #include "Content/FarmToolData.h"
 #include "Core/FarmFeedbackSubsystem.h"
 #include "Core/Vestige.h"
@@ -14,6 +16,9 @@
 #include "Farming/FarmGrid.h"
 #include "Farming/FarmTile.h"
 #include "Farming/FarmTileTargeting.h"
+#include "GameFramework/Pawn.h"
+#include "GameFramework/PlayerState.h"
+#include "Inventory/VestigeInventoryComponent.h"
 #include "ProfilingDebugging/CpuProfilerTrace.h"
 #include "TimerManager.h"
 
@@ -28,7 +33,6 @@ void UFarmingComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	Seeds = StartingSeeds;
 	LoadSeedCrop();
 	LoadToolbar();
 	Grid = AFarmGrid::Find(GetWorld());
@@ -85,12 +89,15 @@ void UFarmingComponent::LoadSeedCrop()
 	TRACE_CPUPROFILER_EVENT_SCOPE(UFarmingComponent::LoadSeedCrop);
 
 	// Waiting is fine at play start, and with the meshes loaded now, planting never stalls on a load.
-	SeedCrop = Cast<UFarmCropData>(UFarmContentData::LoadWithVisuals(SeedCropId));
-	if (!SeedCrop)
+	const UFarmItemData* SeedItem = Cast<UFarmItemData>(UFarmContentData::LoadWithVisuals(SeedItemId));
+	const UFarmSeedFragment* Seed = SeedItem ? SeedItem->FindFragment<UFarmSeedFragment>() : nullptr;
+	if (!Seed)
 	{
-		UE_LOG(LogVestige, Warning, TEXT("%s's Seed Crop Id (%s) names no crop asset, so nothing can be planted."), *GetPathName(),
-			*SeedCropId.ToString());
+		UE_LOG(LogVestige, Warning, TEXT("%s's Seed Item Id (%s) names no item with a seed fragment, so nothing can be planted."),
+			*GetPathName(), *SeedItemId.ToString());
+		return;
 	}
+	SeedCrop = Cast<UFarmCropData>(UFarmContentData::LoadWithVisuals(Seed->GetCropId()));
 }
 
 void UFarmingComponent::LoadToolbar()
@@ -142,8 +149,6 @@ bool UFarmingComponent::RestoreCurrentTool(FName ToolContentId)
 FFarmFarmingSaveData UFarmingComponent::GetSaveData() const
 {
 	FFarmFarmingSaveData Data;
-	Data.Seeds = Seeds;
-	Data.HarvestedCrops = HarvestedCrops;
 	const UFarmToolData* Tool = GetCurrentTool();
 	Data.CurrentToolId = Tool ? Tool->GetContentId() : NAME_None;
 	return Data;
@@ -151,9 +156,6 @@ FFarmFarmingSaveData UFarmingComponent::GetSaveData() const
 
 bool UFarmingComponent::RestoreFromSaveData(const FFarmFarmingSaveData& Data)
 {
-	Seeds = FMath::Max(0, Data.Seeds);
-	HarvestedCrops = FMath::Max(0, Data.HarvestedCrops);
-	OnInventoryChanged.Broadcast();
 	return RestoreCurrentTool(Data.CurrentToolId);
 }
 
@@ -180,20 +182,7 @@ void UFarmingComponent::UseTool()
 		break;
 
 	case EFarmToolAction::Plant:
-		if (Seeds <= 0 || !SeedCrop)
-		{
-			Notify(LOCTEXT("OutOfSeeds", "Out of seeds."));
-		}
-		else if (Tile->Plant(SeedCrop))
-		{
-			--Seeds;
-			OnInventoryChanged.Broadcast();
-			Notify(LOCTEXT("Planted", "Planted a seed."));
-		}
-		else
-		{
-			Notify(LOCTEXT("CantPlant", "Seeds need empty tilled soil."));
-		}
+		Plant(*Tile);
 		break;
 
 	case EFarmToolAction::Water:
@@ -201,18 +190,56 @@ void UFarmingComponent::UseTool()
 		break;
 
 	case EFarmToolAction::Harvest:
-		if (const UFarmCropData* RipeCrop = Tile->GetCrop(); RipeCrop && Tile->Harvest())
-		{
-			HarvestedCrops += RipeCrop->GetYield();
-			OnInventoryChanged.Broadcast();
-			Notify(LOCTEXT("Harvested", "Harvested a crop!"));
-		}
-		else
-		{
-			Notify(LOCTEXT("NothingRipe", "Nothing ripe here."));
-		}
+		Harvest(*Tile);
 		break;
 	}
+}
+
+void UFarmingComponent::Plant(AFarmTile& Tile)
+{
+	UVestigeInventoryComponent* Inventory = GetInventory();
+	if (!Inventory || !SeedCrop || Inventory->GetItemCount(SeedItemId) <= 0)
+	{
+		Notify(LOCTEXT("OutOfSeeds", "Out of seeds."));
+		return;
+	}
+	if (!Tile.Plant(SeedCrop))
+	{
+		Notify(LOCTEXT("CantPlant", "Seeds need empty tilled soil."));
+		return;
+	}
+	Inventory->TryRemoveItem(SeedItemId, 1);
+	Notify(LOCTEXT("Planted", "Planted a seed."));
+}
+
+void UFarmingComponent::Harvest(AFarmTile& Tile)
+{
+	const UFarmCropData* Crop = Tile.GetCrop();
+	if (!Crop || !Tile.IsRipe())
+	{
+		Notify(LOCTEXT("NothingRipe", "Nothing ripe here."));
+		return;
+	}
+
+	// Asked before harvesting, so a full bag leaves the crop in the ground instead of destroying it.
+	UVestigeInventoryComponent* Inventory = GetInventory();
+	if (!Inventory || !Inventory->CanAddItem(Crop->GetHarvestItemId(), Crop->GetYield()))
+	{
+		Notify(LOCTEXT("BagFull", "No room in your bag."));
+		return;
+	}
+	if (Tile.Harvest())
+	{
+		Inventory->TryAddItem(Crop->GetHarvestItemId(), Crop->GetYield());
+		Notify(LOCTEXT("Harvested", "Harvested a crop!"));
+	}
+}
+
+UVestigeInventoryComponent* UFarmingComponent::GetInventory() const
+{
+	const APawn* Pawn = Cast<APawn>(GetOwner());
+	const APlayerState* PlayerState = Pawn ? Pawn->GetPlayerState() : nullptr;
+	return PlayerState ? PlayerState->FindComponentByClass<UVestigeInventoryComponent>() : nullptr;
 }
 
 void UFarmingComponent::AimAt(const FVector& WorldDirection)

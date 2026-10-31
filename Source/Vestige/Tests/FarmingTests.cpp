@@ -5,12 +5,17 @@
 
 #include "Components/ActorTestSpawner.h"
 #include "Content/FarmCropData.h"
+#include "Content/FarmItemData.h"
 #include "CQTest.h"
+#include "Engine/AssetManager.h"
 #include "Farming/FarmFarmingSaveData.h"
 #include "Farming/FarmGrid.h"
 #include "Farming/FarmingComponent.h"
 #include "Farming/FarmTile.h"
+#include "Inventory/VestigeInventoryComponent.h"
+#include "Inventory/VestigeInventorySaveData.h"
 #include "Player/FarmerCharacter.h"
+#include "Player/VestigePlayerState.h"
 
 // A namespace keeps the fixture's short name from hiding other declarations in unity builds.
 namespace FarmingTests
@@ -21,35 +26,66 @@ namespace FarmingTests
 		AFarmGrid* Grid = nullptr;
 		AFarmerCharacter* Farmer = nullptr;
 		UFarmingComponent* FarmingComponent = nullptr;
+		UVestigeInventoryComponent* Inventory = nullptr;
 
 		/**
-		 * A default grid and the farmer Blueprint the game uses, standing in front of tile (3, 0). The Blueprint is used
-		 * because it holds the real toolbar and seed crop, which load from the base content at BeginPlay.
+		 * A default grid and the farmer Blueprint the game uses, standing in front of tile (3, 0), with a player state
+		 * whose inventory knows the base items. The Blueprint is used because it holds the real toolbar and seed item,
+		 * which load from the base content at BeginPlay.
 		 */
 		BEFORE_EACH()
 		{
 			Grid = &Spawner.SpawnActor<AFarmGrid>();
 			Grid->DispatchBeginPlay();
 
+			AVestigePlayerState& PlayerState = Spawner.SpawnActor<AVestigePlayerState>();
+			PlayerState.DispatchBeginPlay();
+			Inventory = PlayerState.GetInventory();
+			ASSERT_THAT(IsNotNull(Inventory));
+
 			UClass* FarmerClass = LoadClass<AFarmerCharacter>(nullptr, TEXT("/Game/Farm/Blueprints/BP_Farmer.BP_Farmer_C"));
 			ASSERT_THAT(IsNotNull(FarmerClass));
 			Farmer = &Spawner.SpawnActor<AFarmerCharacter>(FActorSpawnParameters(), FarmerClass);
 			Farmer->DispatchBeginPlay();
 			Farmer->SetActorLocationAndRotation(FVector(250.f, 50.f, 0.f), FRotator::ZeroRotator);
+			Farmer->SetPlayerState(&PlayerState);
 			FarmingComponent = Farmer->FindComponentByClass<UFarmingComponent>();
 			ASSERT_THAT(IsNotNull(FarmingComponent));
 		}
 
-		/** Puts this tool in hand and sets the seed count, through the same restore loading uses. */
+		/** Puts this tool in hand, through the same restore loading uses, and makes the bag hold only this many seeds. */
 		void Hold(FName ToolId, int32 Seeds)
 		{
 			FFarmFarmingSaveData Data;
-			Data.Seeds = Seeds;
 			Data.CurrentToolId = ToolId;
 			ASSERT_THAT(IsTrue(FarmingComponent->RestoreFromSaveData(Data)));
+
+			FVestigeInventorySaveData Bag;
+			Bag.Slots.Add({0, FarmingComponent->GetSeedItemId().PrimaryAssetName, Seeds});
+			ASSERT_THAT(IsTrue(Inventory->RestoreFromSaveData(Bag) == 0));
 		}
 
+		int32 GetSeeds() const { return Inventory->GetItemCount(FarmingComponent->GetSeedItemId()); }
+
 		AFarmTile* TargetTile() const { return Grid->GetTileAt(FIntPoint(3, 0)); }
+
+		/** Plants a seed in the target tile and grows it until it is ripe. */
+		const UFarmCropData* GrowRipeCrop()
+		{
+			TargetTile()->Till();
+			Hold(TEXT("Base.Seeds"), 1);
+			FarmingComponent->UseTool();
+			const UFarmCropData* Crop = TargetTile()->GetCrop();
+			if (Crop)
+			{
+				for (int32 Day = 0; Day < Crop->GetDaysToMature(); ++Day)
+				{
+					TargetTile()->Water();
+					TargetTile()->AdvanceDay();
+				}
+			}
+			return Crop;
+		}
 
 		TEST_METHOD(PlantingUsesASeed)
 		{
@@ -59,7 +95,18 @@ namespace FarmingTests
 			FarmingComponent->UseTool();
 
 			ASSERT_THAT(IsTrue(TargetTile()->GetState() == EFarmTileState::Planted));
-			ASSERT_THAT(IsTrue(FarmingComponent->GetSeeds() == 4));
+			ASSERT_THAT(IsTrue(GetSeeds() == 4));
+		}
+
+		TEST_METHOD(TheSeedItemPlantsTheCropItsFragmentNames)
+		{
+			TargetTile()->Till();
+			Hold(TEXT("Base.Seeds"), 1);
+
+			FarmingComponent->UseTool();
+
+			ASSERT_THAT(IsNotNull(TargetTile()->GetCrop()));
+			ASSERT_THAT(IsTrue(TargetTile()->GetCrop()->GetContentId() == TEXT("Base.Turnip")));
 		}
 
 		TEST_METHOD(WithoutSeedsNothingIsPlanted)
@@ -70,7 +117,18 @@ namespace FarmingTests
 			FarmingComponent->UseTool();
 
 			ASSERT_THAT(IsTrue(TargetTile()->GetState() == EFarmTileState::Tilled));
-			ASSERT_THAT(IsTrue(FarmingComponent->GetSeeds() == 0));
+			ASSERT_THAT(IsTrue(GetSeeds() == 0));
+		}
+
+		TEST_METHOD(WithoutAPlayerStateNothingIsPlanted)
+		{
+			TargetTile()->Till();
+			Hold(TEXT("Base.Seeds"), 5);
+			Farmer->SetPlayerState(nullptr);
+
+			FarmingComponent->UseTool();
+
+			ASSERT_THAT(IsTrue(TargetTile()->GetState() == EFarmTileState::Tilled));
 		}
 
 		TEST_METHOD(TheHoeTillsTheTileInFront)
@@ -82,24 +140,38 @@ namespace FarmingTests
 			ASSERT_THAT(IsTrue(TargetTile()->GetState() == EFarmTileState::Tilled));
 		}
 
-		TEST_METHOD(HarvestingAddsTheCropsYield)
+		TEST_METHOD(HarvestingAddsTheCropsYieldOfItsItem)
 		{
-			TargetTile()->Till();
-			Hold(TEXT("Base.Seeds"), 1);
-			FarmingComponent->UseTool();
-			const UFarmCropData* Crop = TargetTile()->GetCrop();
+			const UFarmCropData* Crop = GrowRipeCrop();
 			ASSERT_THAT(IsNotNull(Crop));
-			for (int32 Day = 0; Day < Crop->GetDaysToMature(); ++Day)
-			{
-				TargetTile()->Water();
-				TargetTile()->AdvanceDay();
-			}
 			Hold(TEXT("Base.Hand"), 0);
 
 			FarmingComponent->UseTool();
 
-			ASSERT_THAT(IsTrue(FarmingComponent->GetHarvestedCrops() == Crop->GetYield()));
+			ASSERT_THAT(IsTrue(Inventory->GetItemCount(Crop->GetHarvestItemId()) == Crop->GetYield()));
 			ASSERT_THAT(IsTrue(TargetTile()->GetState() == EFarmTileState::Tilled));
+		}
+
+		TEST_METHOD(AFullBagLeavesTheCropInTheGround)
+		{
+			const UFarmCropData* Crop = GrowRipeCrop();
+			ASSERT_THAT(IsNotNull(Crop));
+			Hold(TEXT("Base.Hand"), 0);
+
+			// Every slot holds a full stack of seeds, so the harvest has nowhere to go.
+			const UFarmItemData* Seed = UAssetManager::Get().GetPrimaryAssetObject<UFarmItemData>(FarmingComponent->GetSeedItemId());
+			ASSERT_THAT(IsNotNull(Seed));
+			FVestigeInventorySaveData FullBag;
+			for (int32 Slot = 0; Slot < Inventory->GetSlots().Num(); ++Slot)
+			{
+				FullBag.Slots.Add({Slot, Seed->GetContentId(), Seed->GetMaxStackSize()});
+			}
+			ASSERT_THAT(IsTrue(Inventory->RestoreFromSaveData(FullBag) == 0));
+
+			FarmingComponent->UseTool();
+
+			ASSERT_THAT(IsTrue(Inventory->GetItemCount(Crop->GetHarvestItemId()) == 0));
+			ASSERT_THAT(IsTrue(TargetTile()->IsRipe()));
 		}
 
 		TEST_METHOD(UsingAToolAwayFromTheFieldChangesNothing)
@@ -109,7 +181,7 @@ namespace FarmingTests
 
 			FarmingComponent->UseTool();
 
-			ASSERT_THAT(IsTrue(FarmingComponent->GetSeeds() == 3));
+			ASSERT_THAT(IsTrue(GetSeeds() == 3));
 		}
 
 		TEST_METHOD(AnUnknownSavedToolPutsTheFirstSlotInHand)

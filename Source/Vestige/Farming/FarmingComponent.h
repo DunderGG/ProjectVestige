@@ -12,16 +12,16 @@ class AFarmGrid;
 class AFarmTile;
 class UFarmCropData;
 class UFarmToolData;
+class UVestigeInventoryComponent;
 struct FFarmFarmingSaveData;
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnFarmToolChanged, const UFarmToolData* /* Tool */);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnFarmTargetTileChanged, const AFarmTile* /* Tile */);
-DECLARE_MULTICAST_DELEGATE(FOnFarmInventoryChanged);
 
 /**
- * Gives its owner farming tools and a tiny inventory.
- * Works on the tile next to the owner's in the direction the owner aims, and tells the player what happened through
- * UFarmFeedbackSubsystem.
+ * Gives its owner, a pawn, farming tools. Works on the tile next to the owner's in the direction the owner aims, takes
+ * seeds from and puts harvests into the inventory on the owner's player state, and tells the player what happened
+ * through UFarmFeedbackSubsystem.
  */
 UCLASS(ClassGroup = (Farming), meta = (BlueprintSpawnableComponent))
 class UFarmingComponent : public UActorComponent
@@ -41,16 +41,15 @@ public:
 	/** Uses the tool in hand on the target tile. Does nothing to the farm without a target or a tool. */
 	void UseTool();
 
-	int32 GetSeeds() const { return Seeds; }
-	int32 GetHarvestedCrops() const { return HarvestedCrops; }
+	/** The item the Seeds tool plants (FarmItem:Base.TurnipSeeds). */
+	const FPrimaryAssetId& GetSeedItemId() const { return SeedItemId; }
 
-	/** The inventory and the tool in hand, for saving. */
+	/** The tool in hand, for saving. */
 	FFarmFarmingSaveData GetSaveData() const;
 
 	/**
-	 * Puts the saved inventory and tool back, without replaying any action, and broadcasts OnInventoryChanged and
-	 * OnToolChanged. Negative counts become 0. Returns false if the saved tool isn't on the toolbar: the first slot is in
-	 * hand then, with a warning.
+	 * Puts the saved tool back in hand, without replaying any action, and broadcasts OnToolChanged. Returns false if the
+	 * saved tool isn't on the toolbar: the first slot is in hand then, with a warning.
 	 */
 	bool RestoreFromSaveData(const FFarmFarmingSaveData& Data);
 
@@ -76,9 +75,6 @@ public:
 	/** Broadcast when the target tile changes, with nullptr when there stops being one. */
 	FOnFarmTargetTileChanged OnTargetTileChanged;
 
-	/** Broadcast when the seed or harvest count changes, including when a save is loaded. */
-	FOnFarmInventoryChanged OnInventoryChanged;
-
 protected:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
@@ -99,18 +95,17 @@ private:
 	/** Bound to the owner's root component, so the target follows the owner from tile to tile without ticking. */
 	void FollowOwnerTransform(USceneComponent* UpdatedComponent, EUpdateTransformFlags UpdateTransformFlags, ETeleportType Teleport);
 
+	/**
+	 * The inventory on the owner's player state, or nullptr if the owner isn't possessed or has none. Asked for on each
+	 * action rather than kept, because a pawn begins play before it is possessed.
+	 */
+	UVestigeInventoryComponent* GetInventory() const;
+
+	void Plant(AFarmTile& Tile);
+	void Harvest(AFarmTile& Tile);
+
 	/** Tells the player what happened, through UFarmFeedbackSubsystem. */
 	void Notify(const FText& Message) const;
-
-	/** Seeds the farmer has when a game starts without a save. */
-	UPROPERTY(EditDefaultsOnly, Category = "Farming", meta = (AllowPrivateAccess = "true", ClampMin = 0))
-	int32 StartingSeeds = 10;
-
-	UPROPERTY(VisibleInstanceOnly, Category = "Farming")
-	int32 Seeds = 0;
-
-	UPROPERTY(VisibleInstanceOnly, Category = "Farming")
-	int32 HarvestedCrops = 0;
 
 	UPROPERTY()
 	TObjectPtr<AFarmGrid> Grid;
@@ -123,10 +118,11 @@ private:
 	/** The owner's tile when the target was last found, so moving within a tile does no work. */
 	FIntPoint OwnerCoordinates = FIntPoint::ZeroValue;
 
-	/** Crop asset the Seeds tool plants, picked by its ID (FarmCrop:Base.Turnip). */
-	UPROPERTY(EditDefaultsOnly, Category = "Farming", meta = (AllowPrivateAccess = "true", AllowedTypes = "FarmCrop"))
-	FPrimaryAssetId SeedCropId;
+	/** The seed item the Seeds tool plants, by its ID (FarmItem:Base.TurnipSeeds). Its seed fragment names the crop. */
+	UPROPERTY(EditDefaultsOnly, Category = "Farming", meta = (AllowPrivateAccess = "true", AllowedTypes = "FarmItem"))
+	FPrimaryAssetId SeedItemId;
 
+	/** The crop the seed item grows, loaded with its meshes at BeginPlay. */
 	UPROPERTY()
 	TObjectPtr<const UFarmCropData> SeedCrop;
 
