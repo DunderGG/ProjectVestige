@@ -42,9 +42,9 @@ Not sure where you fit? Open an issue and say what you'd like to do.
 
 ## 2. Getting set up
 
-**[Docs/Setup.md](Docs/Setup.md)** walks you through it step by step on a fresh Windows PC: Git and Git LFS, cloning, Unreal Engine 5.7, Visual Studio with the components the engine needs, the first build, the automated tests, the formatter, Blender, and fixes for common first-build problems.
+**[Docs/Setup.md](Docs/Setup.md)** walks you through it step by step on a fresh Windows PC: Git and Git LFS, cloning, Unreal Engine 5.8, Visual Studio with the components the engine needs, the first build, the automated tests, the formatter, Blender, and fixes for common first-build problems.
 
-In short, you need Windows 10 or 11, Git with **Git LFS**, Unreal Engine **5.7** (never convert the project to another version), and Visual Studio 2026 with the components in `.vsconfig`. Visual Studio is needed even for content work, because the editor compiles the project's C++ module the first time it opens it.
+In short, you need Windows 10 or 11, Git with **Git LFS**, Unreal Engine **5.8** (never convert the project to another version), and Visual Studio 2026 with the components in `.vsconfig`. Visual Studio is needed even for content work, because the editor compiles the project's C++ module the first time it opens it.
 
 ### Controls
 
@@ -179,7 +179,7 @@ Mods will add content the same way, with their own namespace instead of `Base` (
 1. Fork the repository, or create a branch if you have write access. Name the branch after the change: `add-fence-meshes`, `fix-watering-twice`.
 2. Make **small, focused commits** with clear messages: an imperative subject line under about 70 characters ("Add fence meshes"), a blank line, then what changed and why.
 3. Keep moves and renames in their own commits, separate from changes in behavior.
-4. **Never commit** `Binaries/`, `Intermediate/`, `Saved/`, `DerivedDataCache/`, `.vs/` or generated `.sln` files. `.gitignore` handles this; don't force-add them.
+4. **Never commit** `Binaries/`, `Intermediate/`, `Saved/`, `DerivedDataCache/`, `.vs/` or generated `.sln` and `.slnx` files. `.gitignore` handles this; don't force-add them.
 5. **Binary files go through Git LFS.** `.gitattributes` covers the common types. If you add a new binary file type, add it to `.gitattributes` in the same commit.
 6. **Avoid editing the same binary asset as someone else.** `.uasset` and `.umap` files can't be merged. Say in your issue which assets and levels you'll be changing, especially `L_Farm`.
 7. Open a **pull request** against `main`. Describe what it changes and how you tested it, and include screenshots or a short clip for anything visual.

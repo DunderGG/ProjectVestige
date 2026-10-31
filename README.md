@@ -4,13 +4,13 @@
 
 A cozy 3D farming and life-sim game set in a retro-futuristic, post-apocalyptic world. You wake from decades of cryosleep under an overgrown homestead. Humans have almost vanished, and robots carry on with the jobs people gave them. You bring the farm back to life, help the robot town next door, and slowly push out into the wasteland.
 
-Built with **Unreal Engine 5.7** (C++ first, Blueprints for content) and **Blender**.
+Built with **Unreal Engine 5.8** (C++ first, Blueprints for content) and **Blender**.
 
 > **Status: early prototype.** You can till, plant, water, sleep and harvest on a small field, with a day/night clock and saving. The next goal is a one-season vertical slice. See the [roadmap](Docs/Roadmap.md).
 
 ## Getting started
 
-You need Windows 10 or 11, Unreal Engine 5.7, Git with **Git LFS**, and Visual Studio 2026 with the components in `.vsconfig` (the editor compiles the project's C++ the first time, even if you won't write code).
+You need Windows 10 or 11, Unreal Engine 5.8, Git with **Git LFS**, and Visual Studio 2026 with the components in `.vsconfig` (the editor compiles the project's C++ the first time, even if you won't write code).
 
 ```
 git lfs install

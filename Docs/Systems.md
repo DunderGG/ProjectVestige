@@ -230,7 +230,7 @@ Contents
 - Single-player: no prediction keys or replication modes beyond the defaults; the ability system component uses minimal replication settings.
 - Saving: save attribute base values and active long-lived effects by ID; restore them through effects or the set's restore function, not by writing attributes directly.
 
-**Setup:** enable the Gameplay Abilities plugin in `Vestige.uproject`, and add `GameplayAbilities` and `GameplayTasks` to `Vestige.Build.cs` (`GameplayTags` is already there). Lyra calls `UAbilitySystemGlobals::Get().InitGlobalData()` once at startup, from its asset manager's `StartInitialLoading`; check during setup whether Unreal Engine 5.7 still needs that call, and record the answer here.
+**Setup:** enable the Gameplay Abilities plugin in `Vestige.uproject`, and add `GameplayAbilities` and `GameplayTasks` to `Vestige.Build.cs` (`GameplayTags` is already there). Lyra calls `UAbilitySystemGlobals::Get().InitGlobalData()` once at startup, from its asset manager's `StartInitialLoading`; check during setup whether Unreal Engine 5.8 still needs that call, and record the answer here.
 
 **First use: stamina.** The rules in [GameDesign.md, section 5](GameDesign.md#5-time-days-and-seasons) mapped onto the system:
 

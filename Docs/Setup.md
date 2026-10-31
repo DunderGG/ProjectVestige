@@ -9,7 +9,7 @@ Contents
 1. [What you need](#1-what-you-need)
 2. [Git and Git LFS](#2-git-and-git-lfs)
 3. [Get the project](#3-get-the-project)
-4. [Unreal Engine 5.7](#4-unreal-engine-57)
+4. [Unreal Engine 5.8](#4-unreal-engine-58)
 5. [Visual Studio](#5-visual-studio)
 6. [Generate the project files and build](#6-generate-the-project-files-and-build)
 7. [Open the editor](#7-open-the-editor)
@@ -39,7 +39,7 @@ Every path needs a C++ compiler: the project has its own C++ module, and the lau
 - **Windows 10 or 11, 64-bit.** The project is developed and built on Windows only.
 - **A DirectX 12 graphics card that supports Shader Model 6**, with current drivers. The project renders with DirectX 12 and SM6 (`Config/DefaultEngine.ini`). The *Epic* scalability level also uses hardware ray tracing, which needs a ray-tracing card; *High*, the default, doesn't.
 - **RAM:** Epic recommends 32 GB for Unreal Engine 5. 16 GB works for this small project, with slower builds.
-- **Disk:** an SSD with **at least 100 GB free**. The engine takes about 35 GB, Visual Studio about 17 GB plus shared Windows components, and the project folder grows to around 10 GB once it has build files and the shader cache. Engine debug symbols (optional, [step 4](#4-unreal-engine-57)) add a lot more.
+- **Disk:** an SSD with **at least 100 GB free**. The engine takes about 35 GB, Visual Studio about 17 GB plus shared Windows components, and the project folder grows to around 10 GB once it has build files and the shader cache. Engine debug symbols (optional, [step 4](#4-unreal-engine-58)) add a lot more.
 
 Epic's full list is in [Hardware and software specifications](https://dev.epicgames.com/documentation/en-us/unreal-engine/hardware-and-software-specifications-for-unreal-engine).
 
@@ -50,7 +50,7 @@ Epic's full list is in [Hardware and software specifications](https://dev.epicga
 
 ### Time
 
-The downloads are large. Start the engine download in [step 4](#4-unreal-engine-57) as early as you can and do the other steps while it runs. The first build and the first editor start (shaders) take another 10 to 30 minutes, depending on the PC.
+The downloads are large. Start the engine download in [step 4](#4-unreal-engine-58) as early as you can and do the other steps while it runs. The first build and the first editor start (shaders) take another 10 to 30 minutes, depending on the PC.
 
 ## 2. Git and Git LFS
 
@@ -107,12 +107,12 @@ Every file in the list should have a `*` after its ID; a `-` means only the poin
 git lfs pull
 ```
 
-## 4. Unreal Engine 5.7
+## 4. Unreal Engine 5.8
 
-The project is on **Unreal Engine 5.7** (`"EngineAssociation": "5.7"` in `Vestige.uproject`). Any 5.7 hotfix release works; the maintainer is on 5.7.3. **Don't open it with another engine version.** 5.6 or 5.8 offer to convert the project, which rewrites assets so they no longer open in 5.7 for anyone else.
+The project is on **Unreal Engine 5.8** (`"EngineAssociation": "5.8"` in `Vestige.uproject`). Any 5.8 hotfix release works; the maintainer is on 5.8.4. **Don't open it with another engine version.** Other versions offer to convert the project, which rewrites assets so they no longer open in 5.8 for anyone else, and 5.7 or older can't load assets saved in 5.8 at all.
 
 1. Install the **[Epic Games Launcher](https://store.epicgames.com/download)** and sign in.
-2. Go to **Unreal Engine > Library**. Next to *Engine Versions*, press **+**, choose **5.7.x** in the new slot, and press **Install**.
+2. Go to **Unreal Engine > Library**. Next to *Engine Versions*, press **+**, choose **5.8.x** in the new slot, and press **Install**.
 3. In the install options, choose:
 
    | Option | Choice | Why |
@@ -124,16 +124,16 @@ The project is on **Unreal Engine 5.7** (`"EngineAssociation": "5.7"` in `Vestig
    | Editor symbols for debugging | Optional | Large. Only needed to step into engine code in the debugger, or for readable engine call stacks in crash reports. You can add it later from the same menu |
    | Target platforms (Android, iOS, Linux...) | No | The project only builds for Windows |
 
-   You can install to another drive with *Browse*; the rest of this guide assumes the default, `C:\Program Files\Epic Games\UE_5.7`.
+   You can install to another drive with *Browse*; the rest of this guide assumes the default, `C:\Program Files\Epic Games\UE_5.8`.
 4. Let it download and install. Carry on with [step 5](#5-visual-studio) meanwhile, but don't open the project yet.
 
 The launcher also registers `.uproject` files with Windows, which [step 6](#6-generate-the-project-files-and-build) needs for its right-click menu.
 
 ## 5. Visual Studio
 
-Unreal compiles C++ with Microsoft's compiler (MSVC), which comes with Visual Studio. **Visual Studio 2026 Community** (free) is what the maintainer uses, and its clang-format is the project's reference formatter ([step 10](#10-code-formatting)). Visual Studio 2022, version 17.14, also works with UE 5.7.
+Unreal compiles C++ with Microsoft's compiler (MSVC), which comes with Visual Studio. **Visual Studio 2026 Community** (free) is what the maintainer uses, and its clang-format is the project's reference formatter ([step 10](#10-code-formatting)). Visual Studio 2022, version 17.14, also works with UE 5.8.
 
-Unreal 5.7 is picky about compiler versions: it wants the **MSVC 14.44** toolset (the long-term version from Visual Studio 2022 17.14), and refuses some others because of compiler bugs. Visual Studio 2026 installs a newer toolset by default, so 14.44 has to be added. The repository's **`.vsconfig`** file lists everything needed, so you don't have to pick components by hand.
+Unreal 5.8 is picky about compiler versions: with Visual Studio 2026 it wants the **MSVC 14.50** toolset (the long-term version from Visual Studio 2026 18.0), and refuses some others because of compiler bugs, including the first 14.50 compilers (older than 14.50.35723), so keep Visual Studio updated. Visual Studio 2026 can install a newer toolset by default, so 14.50 has to be added. The repository's **`.vsconfig`** file lists everything needed, so you don't have to pick components by hand.
 
 1. Download **[Visual Studio 2026 Community](https://visualstudio.microsoft.com/downloads/)** and run the installer.
 2. On the *Workloads* tab, tick **Game development with C++**. In its optional components on the right, leave the *Unreal Engine installer* unticked (the Epic Games Launcher installs the engine). Install.
@@ -145,25 +145,24 @@ What `.vsconfig` installs, in case you want to check or pick by hand (in the ins
 | Component | What it's for |
 |---|---|
 | Workloads: Game development with C++, Desktop development with C++, .NET desktop development, Visual Studio core editor | The C++ compiler and tools, and the .NET parts Unreal's build tools use |
-| MSVC **14.44** build tools for x64/x86, and the matching ATL | The compiler UE 5.7 prefers |
-| MSVC 14.38 build tools for x64/x86, and the matching ATL | The oldest compiler UE 5.7 accepts, as a fallback |
+| MSVC **14.50** build tools for x64/x86, and the matching ATL | The compiler UE 5.8 prefers with Visual Studio 2026 |
 | MSVC build tools, latest (`VC.Tools.x86.x64`) | The default toolset |
-| **Windows 11 SDK (10.0.22621.0)** | The Windows SDK version UE 5.7 is built against |
+| **Windows 11 SDK (10.0.22621.0)** | The Windows SDK version UE 5.8 is built against |
 | C++ Clang tools for Windows (`VC.Llvm.Clang`) | Includes the `clang-format.exe` the project formats code with |
 | .NET Framework 4.6.2 targeting pack | Used by some of the engine's tools |
 | IDE support for Unreal Engine, and the Unreal Engine debugger | Visual Studio's Unreal integration: Unreal-aware code browsing and debugging |
 
-The same list comes from the engine itself, in `Engine\Config\Windows\Windows_SDK.json` under `VisualStudioSuggestedComponents`. If a future engine hotfix changes it, update `.vsconfig` and this table to match.
+The same list comes from the engine itself, in `Engine\Config\Windows\Windows_SDK.json` under `VisualStudioSuggestedComponents` and `VisualStudio2026SuggestedComponents`. If a future engine hotfix changes it, update `.vsconfig` and this table to match.
 
 **Rider instead of Visual Studio.** JetBrains Rider works with Unreal and reads the repository's `.editorconfig` and `.clang-format`. It still needs the Microsoft compiler and Windows SDK: install the *Build Tools for Visual Studio* and import `.vsconfig` there in the same way. When Rider offers to install its *RiderLink* plugin, install it **into the engine**, not into the project, so it doesn't end up in the repository. Open `Vestige.uproject` directly in Rider and skip the solution steps below. This guide only describes Visual Studio in detail.
 
 ## 6. Generate the project files and build
 
-The repository holds no Visual Studio solution: `Vestige.sln` is generated from the source folders and `Vestige.uproject`, and is ignored by Git.
+The repository holds no Visual Studio solution: `Vestige.slnx` (and an older-format `Vestige.sln`) is generated from the source folders and `Vestige.uproject`, and is ignored by Git.
 
-1. Wait for the engine install from [step 4](#4-unreal-engine-57) to finish.
-2. In Explorer, right-click **`Vestige.uproject`** and choose **Generate Visual Studio project files**. On Windows 11 the entry is under *Show more options*. A small window shows progress; `Vestige.sln` appears next to the `.uproject`.
-3. Double-click **`Vestige.sln`** to open it in Visual Studio. If a yellow bar says components are missing, press *Install* and let it add them.
+1. Wait for the engine install from [step 4](#4-unreal-engine-58) to finish.
+2. In Explorer, right-click **`Vestige.uproject`** and choose **Generate Visual Studio project files**. On Windows 11 the entry is under *Show more options*. A small window shows progress; `Vestige.slnx` and `Vestige.sln` appear next to the `.uproject`.
+3. Double-click **`Vestige.slnx`** to open it in Visual Studio (`Vestige.sln` in Visual Studio 2022). If a yellow bar says components are missing, press *Install* and let it add them.
 4. In the toolbar, set the configuration to **Development Editor** and the platform to **Win64**.
 5. In *Solution Explorer*, open *Games*, right-click **Vestige** and choose **Set as Startup Project**.
 6. Right-click **Vestige** again and choose **Build**. The first build compiles the whole module and takes a few minutes; later builds only compile what changed. The *Output* window ends with `Build: 1 succeeded`.
@@ -173,16 +172,16 @@ The build must finish **with no errors and no warnings**. The project treats som
 **The same from the command line.** Useful when the right-click entry is missing, or for scripts. In a command prompt:
 
 ```
-"C:\Program Files\Epic Games\UE_5.7\Engine\Build\BatchFiles\Build.bat" -projectfiles -project="C:\Unreal Projects\Vestige\Vestige.uproject" -game -rocket -progress
+"C:\Program Files\Epic Games\UE_5.8\Engine\Build\BatchFiles\Build.bat" -projectfiles -project="C:\Unreal Projects\Vestige\Vestige.uproject" -game -rocket -progress
 ```
 
 generates the project files, and
 
 ```
-"C:\Program Files\Epic Games\UE_5.7\Engine\Build\BatchFiles\Build.bat" VestigeEditor Win64 Development -Project="C:\Unreal Projects\Vestige\Vestige.uproject" -WaitMutex
+"C:\Program Files\Epic Games\UE_5.8\Engine\Build\BatchFiles\Build.bat" VestigeEditor Win64 Development -Project="C:\Unreal Projects\Vestige\Vestige.uproject" -WaitMutex
 ```
 
-builds the editor target. It ends with `Result: Succeeded`. The first lines of the log name the compiler and Windows SDK it picked; for UE 5.7 they should say `14.44` and `10.0.22621.0`.
+builds the editor target. It ends with `Result: Succeeded`. The first lines of the log name the compiler and Windows SDK it picked; with Visual Studio 2026 they should say `14.50` and `10.0.22621.0`.
 
 ## 7. Open the editor
 
@@ -195,7 +194,7 @@ Always open it one of these ways. Starting the editor on its own and letting it 
 
 If the editor says **"The following modules are missing or built with a different engine version: Vestige. Would you like to rebuild them now?"**, press *Yes*. That builds the module without Visual Studio open, which is fine for content work. If the rebuild fails, build from Visual Studio as in [step 6](#6-generate-the-project-files-and-build): it shows the real error.
 
-If Visual Studio shows a message about a *Visual Studio Integration Tool* plugin, leave it: the plugin is turned off in `Vestige.uproject` on purpose, and turning it on changes a file every contributor shares.
+`Vestige.uproject` lists Microsoft's *VisualStudioTools* plugin as optional, so the project builds and opens without it. If Visual Studio offers to install it, it goes into `Plugins/VisualStudioTools/`, which Git ignores, and shows which Blueprints use a C++ class or property above the code (Tools > Options > Text Editor > CodeLens > Show Unreal Engine Blueprints References). Never remove the plugin's entry from `Vestige.uproject`.
 
 ## 8. Run the automated tests
 
@@ -205,7 +204,7 @@ The game rules have automated tests, named `Vestige.*`. Run them once now to kno
 - **From the command line**, with the editor closed:
 
   ```
-  "C:\Program Files\Epic Games\UE_5.7\Engine\Binaries\Win64\UnrealEditor-Cmd.exe" "C:\Unreal Projects\Vestige\Vestige.uproject" -ExecCmds="Automation RunTests Vestige; Quit" -unattended -nopause -nullrhi -nosplash -testexit="Automation Test Queue Empty"
+  "C:\Program Files\Epic Games\UE_5.8\Engine\Binaries\Win64\UnrealEditor-Cmd.exe" "C:\Unreal Projects\Vestige\Vestige.uproject" -ExecCmds="Automation RunTests Vestige; Quit" -unattended -nopause -nullrhi -nosplash -testexit="Automation Test Queue Empty"
   ```
 
   Every test logs `Result={Success}`. Two `LogAutomationTest: Error: Condition failed` lines at startup come from the engine and can be ignored.
@@ -282,9 +281,9 @@ git push origin main
 | The editor says assets are missing, corrupt or "unknown file version", or `.uasset` files are a few hundred bytes | Git LFS wasn't set up before cloning, so only pointer files came down. Run `git lfs install`, then `git lfs pull` in the project folder |
 | No *Generate Visual Studio project files* entry when right-clicking `Vestige.uproject` | On Windows 11, look under *Show more options*. If it still isn't there, `.uproject` files aren't registered: open the Epic Games Launcher once, or use the command line in [step 6](#6-generate-the-project-files-and-build) |
 | "Vestige could not be compiled. Try rebuilding from source manually." | The automatic build failed. Build from Visual Studio ([step 6](#6-generate-the-project-files-and-build)) and read the first error in the *Output* window. It is usually a missing Visual Studio component: import `.vsconfig` again |
-| The build log says no suitable compiler was found, or warns that the compiler version isn't preferred or is banned | The MSVC 14.44 toolset or the Windows 11 SDK 10.0.22621 is missing, or an old 14.44 preview is installed. Import `.vsconfig` again and update Visual Studio |
+| The build log says no suitable compiler was found, or warns that the compiler version isn't preferred or is banned | The MSVC 14.50 toolset or the Windows 11 SDK 10.0.22621 is missing, or an early 14.50 compiler is installed. Import `.vsconfig` again and update Visual Studio |
 | "Unable to build while Live Coding is active" | The editor is open. Close it, or press Ctrl+Alt+F11 in the editor to apply the change with Live Coding (function bodies only) |
-| The editor offers to convert the project to another engine version | You opened it with the wrong engine. Press *Cancel*, and open it with 5.7 ([step 4](#4-unreal-engine-57)). Never convert the project |
+| The editor offers to convert the project to another engine version | You opened it with the wrong engine. Press *Cancel*, and open it with 5.8 ([step 4](#4-unreal-engine-58)). Never convert the project |
 | "Modules were built with a different engine version" on a project that just built | The editor was started on its own and auto-opened the project. Close it and open `Vestige.uproject` directly ([step 7](#7-open-the-editor)) |
 | A warning about a variable that "hides class member" stops the build | That warning is an error in this project. Rename your local variable ([CodingGuidelines.md, section 2.4](CodingGuidelines.md#24-never-shadow)) |
 | The game looks wrong or grey right after the first start | Shaders are still compiling (the counter at the bottom right of the editor). Wait for it to finish |

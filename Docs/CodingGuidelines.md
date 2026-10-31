@@ -424,7 +424,7 @@ Game rules get automated tests. They run in seconds without playing the game, an
 - **Running**: from the editor's Test Automation window (Tools menu), filtered on `Vestige`, or from the command line with the editor closed:
 
   ```
-  "C:\Program Files\Epic Games\UE_5.7\Engine\Binaries\Win64\UnrealEditor-Cmd.exe" "C:\Unreal Projects\Vestige\Vestige.uproject" -ExecCmds="Automation RunTests Vestige; Quit" -unattended -nopause -nullrhi -nosplash -testexit="Automation Test Queue Empty"
+  "C:\Program Files\Epic Games\UE_5.8\Engine\Binaries\Win64\UnrealEditor-Cmd.exe" "C:\Unreal Projects\Vestige\Vestige.uproject" -ExecCmds="Automation RunTests Vestige; Quit" -unattended -nopause -nullrhi -nosplash -testexit="Automation Test Queue Empty"
   ```
 
   Each test logs a `Test Completed. Result={Success}` line.
