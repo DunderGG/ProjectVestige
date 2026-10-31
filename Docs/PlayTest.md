@@ -90,7 +90,8 @@ The project now builds only with 5.8. The rest of the upgrade (assets, rendering
 
 Items exist as data but nothing in play uses them yet, so the game itself should behave exactly as before.
 
-- [ ] **Validation** (46bf244): right-click `Content/Farm` > Validate Assets reports no errors, and the Output Log at editor start has no "is used by more than one asset" error.
+- [x] **Validation** (46bf244): right-click `Content/Farm` > Validate Assets reports no errors, and the Output Log at editor start has no "is used by more than one asset" error.
+   - Checked in 5.8 on 2026-10-31 by the agent with the `DataValidation` commandlet: all 23 assets under `Content/Farm` are valid, and the editor logs have no duplicate content ID error.
 - [ ] **Item assets** (46bf244): `Content/Farm/Items` has `DA_Item_Turnip` and `DA_Item_TurnipSeeds`. Opening the seeds shows one **Farm Seed Fragment** under Fragments, with Crop Id `FarmCrop:Base.Turnip`; its Crop Id picker lists only crops. Pressing + on Fragments offers the fragment classes to pick from.
 - [ ] **Turnip crop** (46bf244): `DA_Crop_Turnip` shows Harvest Item Id `FarmItem:Base.Turnip` and Yield under Farming > Harvest, and no Seed Price or Sell Price.
 - [ ] **No change in play** (46bf244): planting, growing and harvesting a turnip work as in the [smoke test](#3-smoke-test).
@@ -104,9 +105,9 @@ Items exist as data but nothing in play uses them yet, so the game itself should
 
 After the upgrade to 5.8 the frame drew dark, because its engine material wasn't flagged for instanced meshes and 5.8 draws the default grey material instead. It now uses `Content/Farm/Materials/M_TileHighlight`, made by script, so the editor hasn't shown it yet.
 
-- [ ] **Bright frame** (a397e1c): in Play in Editor and in Standalone Game, the frame around the targeted tile is bright yellow by day and still clearly visible at night, as before the upgrade.
-- [ ] **No warning** (a397e1c): the Output Log (Window > Output Log) has no "missing usage flag" warning after playing.
-- [ ] **Asset** (a397e1c): `M_TileHighlight` opens in the material editor with Blend Mode Opaque, Shading Model Unlit and Usage > Used with Instanced Static Meshes ticked, and the editor doesn't ask to save it.
+- [x] **Bright frame** (a397e1c): in Play in Editor and in Standalone Game, the frame around the targeted tile is bright yellow by day and still clearly visible at night, as before the upgrade.
+- [x] **No warning** (a397e1c): the Output Log (Window > Output Log) has no "missing usage flag" warning after playing.
+- [x] **Asset** (a397e1c): `M_TileHighlight` opens in the material editor with Blend Mode Opaque, Shading Model Unlit and Usage > Used with Instanced Static Meshes ticked, and the editor doesn't ask to save it.
 
 ### Editor chores
 
