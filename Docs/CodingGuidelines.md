@@ -67,11 +67,15 @@ Follow Epic's naming rules. The `.editorconfig` in the repo enforces the prefixe
 | `T` | Templates | `TFarmPool` |
 | `b` | Booleans (variables, members, parameters) | `bWatered`, `bHasCrop` |
 
-### 2.2 The `Farm` project prefix
+### 2.2 The `Vestige` and `Farm` project prefixes
 
-Like Lyra prefixes its classes with `Lyra` (`ALyraCharacter`, `ULyraHealthComponent`), every class, struct, enum, delegate and log category we add starts with **`Farm`** after the type prefix: `AFarmGrid`, `EFarmTileState`, `FOnFarmNewDay`. This keeps our types apart from engine types in autocomplete and in the editor's class pickers.
+Like Lyra prefixes its classes with `Lyra` (`ALyraCharacter`, `ULyraHealthComponent`), every class, struct, enum, delegate and log category we add starts with a project prefix after the type prefix. This keeps our types apart from engine and plugin types in autocomplete and in the editor's class pickers. A bare name often isn't even possible: `APlayerState` is the engine's own class.
 
-The template classes (`AVestigeCharacter`, `AVestigeGameMode`, `AVestigePlayerController`) keep the template's naming: the module name plus the class role.
+- **`Vestige`** is the project prefix: `AVestigePlayerState`, `UVestigeInventoryComponent`, `FOnVestigeInventoryChanged`. It matches the module, `LogVestige` and the template classes.
+- **`Farm`** is for types about the farm itself: its tiles, grid, crops and the farming actions (`AFarmTile`, `AFarmGrid`, `UFarmCropData`, `UFarmingComponent`, `EFarmTileState`). The game is more than farming, so player, inventory, time, saving, UI and other general types never use it.
+- Types made before 2026-10-31 used `Farm` for everything. The general ones (`AFarmHUD`, `UFarmSaveSubsystem`, `AFarmDayCycle`...) keep it until their rename, which is its own roadmap item; don't rename them in passing.
+
+The template classes (`AVestigeCharacter`, `AVestigeGameMode`, `AVestigePlayerController`) keep the template's naming: the module name plus the class role. They live in `Template/`; our own `Vestige` types live in their layer's folder.
 
 **Epic template code isn't ours to maintain.** The template files (`VestigeCharacter`, `VestigeGameMode`, `VestigePlayerController`) keep Epic's style and copyright header, and this guide doesn't apply to them: don't reformat or tidy them in passing, and don't copy their style (raw `UObject*` properties, their own log category) into new code. Delete a template file once nothing uses it. If we ever need to change one substantially, first bring it up to this guide in a commit of its own.
 
@@ -109,7 +113,7 @@ The repo has a **`.clang-format`** file that encodes these rules, so formatting 
 
 - In Visual Studio, check *Tools > Options > Text Editor > C/C++ > Code Style > Formatting > Enable ClangFormat support*. VS then uses the repo's file. Format a document with *Ctrl+K, Ctrl+D*.
 - **The reference formatter is the clang-format that ships with Visual Studio** (version 22.1 in Visual Studio 2026, at `VC\Tools\Llvm\x64\bin\clang-format.exe`). Other versions can differ in small details; when they disagree, this one wins.
-- All of our files (`Farm*` and `Tests/`) are clean under it. Format the files you change, so a diff only shows your own lines. The Epic template files keep Epic's formatting ([section 2.2](#22-the-farm-project-prefix)).
+- All of our files (everything outside `Template/`) are clean under it. Format the files you change, so a diff only shows your own lines. The Epic template files keep Epic's formatting ([section 2.2](#22-the-vestige-and-farm-project-prefixes)).
 - clang-format can't lay out Slate's declarative syntax. Wrap `SLATE_BEGIN_ARGS` ... `SLATE_END_ARGS()` and each `ChildSlot [ ... ]` layout in `// clang-format off` and `// clang-format on`.
 - The rules below still apply where the formatter has no opinion (blank lines between groups, where to break long expressions).
 
@@ -508,7 +512,7 @@ Before committing, check:
 - [ ] Each change lives on the class that owns that responsibility ([section 1](#1-ownership-and-separation-of-concerns)).
 - [ ] Design changes are reflected in [Architecture.md](Architecture.md) (ownership table, decision log).
 - [ ] The change follows the guide in [Systems.md](Systems.md) for each system it touches, and the guide is updated if the system changed.
-- [ ] Names follow the prefixes, the `Farm` prefix and PascalCase, and nothing shadows a base class member.
+- [ ] Names follow the prefixes, the `Vestige` or `Farm` project prefix and PascalCase, and nothing shadows a base class member.
 - [ ] Changed files are formatted with clang-format.
 - [ ] New source files start with the copyright and SPDX license header.
 - [ ] Headers forward declare; `.cpp` files include what they use, own header first.

@@ -28,8 +28,9 @@ Contents
 - **Now:** the code follows the guidelines and the architecture (both audits' code reviews are closed, 2026-10-29). Next: play-test that clean-up, the editor housekeeping steps in [section 3](#3-housekeeping), then the rest of the milestone 2 foundations.
 - **Next up**, in order:
   1. The inventory on the player state (item data assets are done). The upgrade to Unreal Engine 5.8.4 is done (2026-10-31, [section 4.1, Engine](#41-foundations)).
-  2. The Gameplay Ability System and stamina ([section 4.3](#43-stamina-and-late-nights)).
-  3. The interaction interface (`IFarmInteractable`) and the bed.
+  2. Rename the general `Farm` types to the `Vestige` prefix ([section 4.1, Player data](#41-foundations)).
+  3. The Gameplay Ability System and stamina ([section 4.3](#43-stamina-and-late-nights)).
+  4. The interaction interface (`IFarmInteractable`) and the bed.
 
 ## 2. Milestone 1: playable prototype (done)
 
@@ -172,6 +173,7 @@ The code changes that the slice's content depends on. Doing them first means add
 **Player data**
 
 - [ ] Inventory and money move into an inventory component on the player state, so they outlive the character
+- [ ] Rename the general `Farm` types to the `Vestige` prefix (decision log, 2026-10-31): the HUD and its widget, settings and messages, the save subsystem and save game, the feedback subsystem, the day cycle, the content base, asset manager, tool and item data and the item fragments, the rest and movement components, the farmer character, and their save structs and delegates. Farm types (tile, grid, crops, the farming component, targeting, the toolbar) keep `Farm`. In its own commits, with `[CoreRedirects]` for every class and struct that assets or save files name, a save test that loads a save naming the old classes, and the documents updated. Decide there whether the asset types, the `Farm.` tag root and `Content/Farm/` change too, while no mods exist
 - [x] Seed and harvest counts become private, with a restore function for loading
 - [x] Tunable settings on the tile, grid and day cycle become protected or private
 

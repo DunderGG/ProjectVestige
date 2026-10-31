@@ -43,7 +43,7 @@ Follow the two Docs files for every change. The rules below are the ones most of
    - `UFarmCropData`: one crop's definition (growth, meshes, the item it yields and how many). No runtime state.
    - `UFarmToolData`: one tool's definition (action, held mesh, stamina cost). No runtime state.
    - `UFarmItemData`: one item's definition (stack size, sell price) and its fragments (`UFarmItemFragment` subclasses such as `UFarmSeedFragment`) for what only some items have. No runtime state.
-2. **Epic naming.** `A`/`U`/`S`/`F`/`E`/`I`/`T` type prefixes, `b` for booleans, PascalCase everywhere, and the `Farm` project prefix on every new type (`AFarmShop`, `EFarmSeason`, `FOnFarmNewDay`).
+2. **Epic naming.** `A`/`U`/`S`/`F`/`E`/`I`/`T` type prefixes, `b` for booleans, PascalCase everywhere, and the `Vestige` project prefix on every new type (`AVestigePlayerState`, `FOnVestigeInventoryChanged`). Types about the farm itself (tiles, grid, crops, farming actions) use `Farm` instead (`AFarmTile`, `EFarmTileState`). Older general types still say `Farm` until their rename (`Docs/Roadmap.md`, section 4.1); don't rename them in passing.
 3. **No shadowing.** The build treats MSVC C4458 as an error. Never give a local or parameter the name of a member of the class or any engine base class (`Mesh` in a character, `Owner`, `Controller`, `Tags`...).
 4. **Formatting.** Tabs, braces on their own lines, braces on every block. Format changed files with the repo's `.clang-format`; don't reformat untouched files.
 5. **UObject pointers.** Strong references are `UPROPERTY() TObjectPtr<T>`; non-owning references are `TWeakObjectPtr<T>`, assets loaded on demand are `TSoftObjectPtr<T>` (guidelines section 7). Check pointers that can be null. No `new`/`delete` on UObjects.
