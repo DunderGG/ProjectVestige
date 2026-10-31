@@ -340,6 +340,11 @@ Roughly in the order from [GameDesign.md section 13](GameDesign.md#13-scope-and-
 - [ ] Mod support: base content as a Game Feature plugin, loading mods from a folder, load order, a mod kit, and letting mods override base content
 - [ ] Co-op multiplayer, which needs its own design and changes to the architecture
 
+### Open problems
+> Anything minor we have been putting off.
+
+- [ ] F9 seems to be a hotkey for taking screenshots in the editor, noticed it when starting new game.
+
 ## 6. Before a public release
 
 - [ ] Realistic art direction: Lumen, Nanite and Megascans for the world, custom Blender work for robots, machines and crops. Replace the low-poly placeholders
