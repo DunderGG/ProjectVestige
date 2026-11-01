@@ -35,7 +35,7 @@ Follow the two Docs files for every change. The rules below are the ones most of
    - `UVestigeRestComponent`: the end of the player's day: sleeping and passing out (later the late-night rules and exhaustion).
    - `UVestigeCharacterMovementComponent`: how the farmer walks and turns; without input it turns toward the aimed tile.
    - `UFarmTargetHighlightComponent`: the frame around the targeted tile (presentation only).
-   - `AVestigeFarmerCharacter`: input bindings (and the key hints that describe them), turning movement into the tile aim (the walk eases in, so a tap barely steps), and showing the current tool's held mesh only.
+   - `AVestigePlayerCharacter`: input bindings (and the key hints that describe them), turning movement into the tile aim (the walk eases in, so a tap barely steps), and showing the current tool's held mesh only.
    - `AVestigeHUD` / `SVestigeHudWidget`: display only.
    - `UVestigeHudSettings`: how the HUD shows feedback messages (how many at once, for how long), in Project Settings.
    - `UVestigeFeedbackSubsystem`: carries messages for the player from game code to the HUD. Game code calls `Notify`; it never calls the HUD.

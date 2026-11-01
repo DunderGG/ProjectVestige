@@ -5,7 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "Template/VestigeCharacter.h"
-#include "VestigeFarmerCharacter.generated.h"
+#include "VestigePlayerCharacter.generated.h"
 
 class UEnhancedInputLocalPlayerSubsystem;
 class UFarmingComponent;
@@ -30,12 +30,12 @@ struct FVestigeKeyHint
  * Owns the farming key bindings, and describes them for the HUD's key hints.
  */
 UCLASS()
-class AVestigeFarmerCharacter : public AVestigeCharacter
+class AVestigePlayerCharacter : public AVestigeCharacter
 {
 	GENERATED_BODY()
 
 public:
-	AVestigeFarmerCharacter(const FObjectInitializer& ObjectInitializer);
+	AVestigePlayerCharacter(const FObjectInitializer& ObjectInitializer);
 
 	/** The toolbar keys in slot order, each named after the tool in its slot. Empty slots are left out. */
 	TArray<FVestigeKeyHint> GetToolbarKeyHints() const;

@@ -13,7 +13,7 @@
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/PlayerState.h"
 #include "Inventory/VestigeInventoryComponent.h"
-#include "Player/VestigeFarmerCharacter.h"
+#include "Player/VestigePlayerCharacter.h"
 #include "Time/VestigeDayCycle.h"
 #include "TimerManager.h"
 #include "UI/VestigeHudSettings.h"
@@ -130,7 +130,7 @@ FText AVestigeHUD::GetStatusText() const
 void AVestigeHUD::FollowPawn(APawn* OldPawn, APawn* NewPawn)
 {
 	StopFollowingFarming();
-	Farmer = Cast<AVestigeFarmerCharacter>(NewPawn);
+	Farmer = Cast<AVestigePlayerCharacter>(NewPawn);
 	Farming = NewPawn ? NewPawn->FindComponentByClass<UFarmingComponent>() : nullptr;
 
 	UFarmingComponent* NewFarming = Farming.Get();
@@ -193,7 +193,7 @@ void AVestigeHUD::RefreshInventoryText()
 
 void AVestigeHUD::RefreshControlsText()
 {
-	const AVestigeFarmerCharacter* CurrentFarmer = Farmer.Get();
+	const AVestigePlayerCharacter* CurrentFarmer = Farmer.Get();
 	if (!CurrentFarmer)
 	{
 		ControlsText = FText::GetEmpty();

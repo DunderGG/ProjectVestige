@@ -9,7 +9,7 @@
 #include "VestigeHUD.generated.h"
 
 class AVestigeDayCycle;
-class AVestigeFarmerCharacter;
+class AVestigePlayerCharacter;
 class APawn;
 class SVestigeHudWidget;
 class UFarmingComponent;
@@ -87,7 +87,7 @@ private:
 	TWeakObjectPtr<const AVestigeDayCycle> DayCycle;
 	TWeakObjectPtr<UFarmingComponent> Farming;
 	TWeakObjectPtr<UVestigeInventoryComponent> Inventory;
-	TWeakObjectPtr<const AVestigeFarmerCharacter> Farmer;
+	TWeakObjectPtr<const AVestigePlayerCharacter> Farmer;
 
 	FText ToolText;
 	FText InventoryText;

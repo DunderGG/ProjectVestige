@@ -119,7 +119,7 @@ Contents
 
 ## 5. Input
 
-**Status:** Enhanced Input, with farming actions and their mapping context created once in code (`AVestigeFarmerCharacter`). The HUD's key hints are read from that mapping context. Moving to assets is a milestone 2 decision.
+**Status:** Enhanced Input, with farming actions and their mapping context created once in code (`AVestigePlayerCharacter`). The HUD's key hints are read from that mapping context. Moving to assets is a milestone 2 decision.
 
 **References:** Epic's "Enhanced Input" pages (input actions, mapping contexts, triggers, modifiers, player-mappable key settings); Lyra's `ULyraInputConfig` (a data asset mapping input actions to input tags), `ULyraInputComponent` and `ULyraHeroComponent`, which bind actions by tag to abilities.
 

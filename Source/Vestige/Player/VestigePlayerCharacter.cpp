@@ -1,7 +1,7 @@
 // Copyright (C) 2026 David Bennehag and the Project Vestige contributors.
 // SPDX-License-Identifier: GPL-3.0-or-later WITH AdditionRef-Vestige-Unreal-Exception
 
-#include "Player/VestigeFarmerCharacter.h"
+#include "Player/VestigePlayerCharacter.h"
 
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/StaticMeshComponent.h"
@@ -22,7 +22,7 @@
 #include "Player/VestigeCharacterMovementComponent.h"
 #include "Save/VestigeSaveSubsystem.h"
 
-#define LOCTEXT_NAMESPACE "VestigeFarmerCharacter"
+#define LOCTEXT_NAMESPACE "VestigePlayerCharacter"
 
 namespace FarmerInput
 {
@@ -36,7 +36,7 @@ namespace FarmerMesh
 	const FName HandSocket(TEXT("hand_r"));
 }
 
-AVestigeFarmerCharacter::AVestigeFarmerCharacter(const FObjectInitializer& ObjectInitializer)
+AVestigePlayerCharacter::AVestigePlayerCharacter(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer.SetDefaultSubobjectClass<UVestigeCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
 {
 	// Set here because the template's constructor sets its own rate after the movement component is created.
@@ -54,29 +54,29 @@ AVestigeFarmerCharacter::AVestigeFarmerCharacter(const FObjectInitializer& Objec
 	HeldTool->SetGenerateOverlapEvents(false);
 }
 
-void AVestigeFarmerCharacter::PostInitializeComponents()
+void AVestigePlayerCharacter::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
 
 	CreateInput();
 }
 
-void AVestigeFarmerCharacter::BeginPlay()
+void AVestigePlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
 	// Follow the component's tool so the hand also updates when a save is loaded.
-	Farming->OnToolChanged.AddUObject(this, &AVestigeFarmerCharacter::ShowHeldTool);
+	Farming->OnToolChanged.AddUObject(this, &AVestigePlayerCharacter::ShowHeldTool);
 	ShowHeldTool(Farming->GetCurrentTool());
 }
 
-void AVestigeFarmerCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
+void AVestigePlayerCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Farming->OnToolChanged.RemoveAll(this);
 	Super::EndPlay(EndPlayReason);
 }
 
-void AVestigeFarmerCharacter::CreateInput()
+void AVestigePlayerCharacter::CreateInput()
 {
 	FarmingMappingContext = NewObject<UInputMappingContext>(this, NAME_None, RF_Transient);
 
@@ -93,7 +93,7 @@ void AVestigeFarmerCharacter::CreateInput()
 	}
 }
 
-UInputAction* AVestigeFarmerCharacter::AddInputAction(const FKey& Key, const FText& Description)
+UInputAction* AVestigePlayerCharacter::AddInputAction(const FKey& Key, const FText& Description)
 {
 	UInputAction* Action = NewObject<UInputAction>(this, NAME_None, RF_Transient);
 	Action->ActionDescription = Description;
@@ -101,7 +101,7 @@ UInputAction* AVestigeFarmerCharacter::AddInputAction(const FKey& Key, const FTe
 	return Action;
 }
 
-void AVestigeFarmerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+void AVestigePlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
@@ -113,7 +113,7 @@ void AVestigeFarmerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerI
 
 	EnhancedInput->BindAction(UseToolAction, ETriggerEvent::Started, Farming.Get(), &UFarmingComponent::UseTool);
 	EnhancedInput->BindAction(SleepAction, ETriggerEvent::Started, Rest.Get(), &UVestigeRestComponent::Sleep);
-	EnhancedInput->BindAction(NewGameAction, ETriggerEvent::Started, this, &AVestigeFarmerCharacter::StartNewGame);
+	EnhancedInput->BindAction(NewGameAction, ETriggerEvent::Started, this, &AVestigePlayerCharacter::StartNewGame);
 	for (int32 Slot = 0; Slot < ToolbarSlotActions.Num(); ++Slot)
 	{
 		EnhancedInput->BindAction(
@@ -126,7 +126,7 @@ void AVestigeFarmerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerI
 	}
 }
 
-void AVestigeFarmerCharacter::UnPossessed()
+void AVestigePlayerCharacter::UnPossessed()
 {
 	// Removed while the old controller is still known, so a later possession doesn't stack a second copy.
 	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = GetInputSubsystem())
@@ -136,7 +136,7 @@ void AVestigeFarmerCharacter::UnPossessed()
 	Super::UnPossessed();
 }
 
-void AVestigeFarmerCharacter::DoMove(float Right, float Forward)
+void AVestigePlayerCharacter::DoMove(float Right, float Forward)
 {
 	const AController* CurrentController = GetController();
 	if (!CurrentController)
@@ -157,7 +157,7 @@ void AVestigeFarmerCharacter::DoMove(float Right, float Forward)
 	Super::DoMove(Right * InputScale, Forward * InputScale);
 }
 
-float AVestigeFarmerCharacter::GetMoveInputScale(float HeldSeconds, float RampSeconds)
+float AVestigePlayerCharacter::GetMoveInputScale(float HeldSeconds, float RampSeconds)
 {
 	// Compared before dividing, so the endless hold of on-screen controls (TNumericLimits<float>::Max()) can't overflow.
 	if (RampSeconds <= 0.f || HeldSeconds >= RampSeconds)
@@ -167,7 +167,7 @@ float AVestigeFarmerCharacter::GetMoveInputScale(float HeldSeconds, float RampSe
 	return FMath::Max(HeldSeconds / RampSeconds, 0.f);
 }
 
-float AVestigeFarmerCharacter::GetMoveHeldSeconds() const
+float AVestigePlayerCharacter::GetMoveHeldSeconds() const
 {
 	// Enhanced Input times every action from the moment it starts, and starts again on each press, so the ramp is read here
 	// instead of from a modifier on the template's IA_Move. That keeps the move action and the template as they are, and
@@ -180,13 +180,13 @@ float AVestigeFarmerCharacter::GetMoveHeldSeconds() const
 	return MoveInstance ? MoveInstance->GetElapsedTime() : TNumericLimits<float>::Max();
 }
 
-UEnhancedInputLocalPlayerSubsystem* AVestigeFarmerCharacter::GetInputSubsystem() const
+UEnhancedInputLocalPlayerSubsystem* AVestigePlayerCharacter::GetInputSubsystem() const
 {
 	const APlayerController* PlayerController = Cast<APlayerController>(GetController());
 	return PlayerController ? ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()) : nullptr;
 }
 
-TArray<FVestigeKeyHint> AVestigeFarmerCharacter::GetToolbarKeyHints() const
+TArray<FVestigeKeyHint> AVestigePlayerCharacter::GetToolbarKeyHints() const
 {
 	TArray<FVestigeKeyHint> Hints;
 	const TArray<TObjectPtr<const UVestigeToolData>>& Tools = Farming->GetToolbar().GetTools();
@@ -200,7 +200,7 @@ TArray<FVestigeKeyHint> AVestigeFarmerCharacter::GetToolbarKeyHints() const
 	return Hints;
 }
 
-TArray<FVestigeKeyHint> AVestigeFarmerCharacter::GetActionKeyHints() const
+TArray<FVestigeKeyHint> AVestigePlayerCharacter::GetActionKeyHints() const
 {
 	TArray<FVestigeKeyHint> Hints;
 	if (!FarmingMappingContext)
@@ -217,7 +217,7 @@ TArray<FVestigeKeyHint> AVestigeFarmerCharacter::GetActionKeyHints() const
 	return Hints;
 }
 
-FKey AVestigeFarmerCharacter::GetMappedKey(const UInputAction* Action) const
+FKey AVestigePlayerCharacter::GetMappedKey(const UInputAction* Action) const
 {
 	if (FarmingMappingContext)
 	{
@@ -232,7 +232,7 @@ FKey AVestigeFarmerCharacter::GetMappedKey(const UInputAction* Action) const
 	return EKeys::Invalid;
 }
 
-void AVestigeFarmerCharacter::StartNewGame()
+void AVestigePlayerCharacter::StartNewGame()
 {
 	if (UVestigeSaveSubsystem* Saves = GetWorld()->GetSubsystem<UVestigeSaveSubsystem>())
 	{
@@ -240,7 +240,7 @@ void AVestigeFarmerCharacter::StartNewGame()
 	}
 }
 
-void AVestigeFarmerCharacter::ShowHeldTool(const UVestigeToolData* Tool)
+void AVestigePlayerCharacter::ShowHeldTool(const UVestigeToolData* Tool)
 {
 	HeldTool->SetStaticMesh(Tool ? Tool->GetHeldMesh() : nullptr);
 }

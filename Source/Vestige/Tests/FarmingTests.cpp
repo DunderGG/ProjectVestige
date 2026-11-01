@@ -14,7 +14,7 @@
 #include "Farming/FarmTile.h"
 #include "Inventory/VestigeInventoryComponent.h"
 #include "Inventory/VestigeInventorySaveData.h"
-#include "Player/VestigeFarmerCharacter.h"
+#include "Player/VestigePlayerCharacter.h"
 #include "Player/VestigePlayerState.h"
 
 // A namespace keeps the fixture's short name from hiding other declarations in unity builds.
@@ -24,7 +24,7 @@ namespace FarmingTests
 	{
 		FActorTestSpawner Spawner;
 		AFarmGrid* Grid = nullptr;
-		AVestigeFarmerCharacter* Farmer = nullptr;
+		AVestigePlayerCharacter* Farmer = nullptr;
 		UFarmingComponent* FarmingComponent = nullptr;
 		UVestigeInventoryComponent* Inventory = nullptr;
 
@@ -43,9 +43,9 @@ namespace FarmingTests
 			Inventory = PlayerState.GetInventory();
 			ASSERT_THAT(IsNotNull(Inventory));
 
-			UClass* FarmerClass = LoadClass<AVestigeFarmerCharacter>(nullptr, TEXT("/Game/Vestige/Blueprints/BP_Farmer.BP_Farmer_C"));
+			UClass* FarmerClass = LoadClass<AVestigePlayerCharacter>(nullptr, TEXT("/Game/Vestige/Blueprints/BP_Farmer.BP_Farmer_C"));
 			ASSERT_THAT(IsNotNull(FarmerClass));
-			Farmer = &Spawner.SpawnActor<AVestigeFarmerCharacter>(FActorSpawnParameters(), FarmerClass);
+			Farmer = &Spawner.SpawnActor<AVestigePlayerCharacter>(FActorSpawnParameters(), FarmerClass);
 			Farmer->DispatchBeginPlay();
 			Farmer->SetActorLocationAndRotation(FVector(250.f, 50.f, 0.f), FRotator::ZeroRotator);
 			Farmer->SetPlayerState(&PlayerState);

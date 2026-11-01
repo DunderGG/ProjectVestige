@@ -6,18 +6,18 @@
 #include "Components/ActorTestSpawner.h"
 #include "CQTest.h"
 #include "Player/VestigeCharacterMovementComponent.h"
-#include "Player/VestigeFarmerCharacter.h"
+#include "Player/VestigePlayerCharacter.h"
 
 // A namespace keeps the fixture's short name from hiding other declarations in unity builds.
-namespace VestigeFarmerTests
+namespace VestigePlayerCharacterTests
 {
-	TEST_CLASS(Farmer, "Vestige")
+	TEST_CLASS(PlayerCharacter, "Vestige")
 	{
 		FActorTestSpawner Spawner;
 
 		TEST_METHOD(ActionKeyHintsNameTheBoundKeys)
 		{
-			const AVestigeFarmerCharacter& Farmer = Spawner.SpawnActor<AVestigeFarmerCharacter>();
+			const AVestigePlayerCharacter& Farmer = Spawner.SpawnActor<AVestigePlayerCharacter>();
 
 			const TArray<FVestigeKeyHint> Hints = Farmer.GetActionKeyHints();
 
@@ -35,18 +35,18 @@ namespace VestigeFarmerTests
 		{
 			constexpr float RampSeconds = 0.15f;
 
-			ASSERT_THAT(IsTrue(AVestigeFarmerCharacter::GetMoveInputScale(0.f, RampSeconds) == 0.f));
-			ASSERT_THAT(IsTrue(FMath::IsNearlyEqual(AVestigeFarmerCharacter::GetMoveInputScale(RampSeconds * 0.5f, RampSeconds), 0.5f)));
-			ASSERT_THAT(IsTrue(AVestigeFarmerCharacter::GetMoveInputScale(RampSeconds, RampSeconds) == 1.f));
-			ASSERT_THAT(IsTrue(AVestigeFarmerCharacter::GetMoveInputScale(2.f, RampSeconds) == 1.f));
-			ASSERT_THAT(IsTrue(AVestigeFarmerCharacter::GetMoveInputScale(TNumericLimits<float>::Max(), RampSeconds) == 1.f));
+			ASSERT_THAT(IsTrue(AVestigePlayerCharacter::GetMoveInputScale(0.f, RampSeconds) == 0.f));
+			ASSERT_THAT(IsTrue(FMath::IsNearlyEqual(AVestigePlayerCharacter::GetMoveInputScale(RampSeconds * 0.5f, RampSeconds), 0.5f)));
+			ASSERT_THAT(IsTrue(AVestigePlayerCharacter::GetMoveInputScale(RampSeconds, RampSeconds) == 1.f));
+			ASSERT_THAT(IsTrue(AVestigePlayerCharacter::GetMoveInputScale(2.f, RampSeconds) == 1.f));
+			ASSERT_THAT(IsTrue(AVestigePlayerCharacter::GetMoveInputScale(TNumericLimits<float>::Max(), RampSeconds) == 1.f));
 		}
 
-		TEST_METHOD(WithoutARampTheInputIsFullAtOnce) { ASSERT_THAT(IsTrue(AVestigeFarmerCharacter::GetMoveInputScale(0.f, 0.f) == 1.f)); }
+		TEST_METHOD(WithoutARampTheInputIsFullAtOnce) { ASSERT_THAT(IsTrue(AVestigePlayerCharacter::GetMoveInputScale(0.f, 0.f) == 1.f)); }
 
 		TEST_METHOD(TheFarmerTurnsWithTheVestigeMovementComponent)
 		{
-			const AVestigeFarmerCharacter& Farmer = Spawner.SpawnActor<AVestigeFarmerCharacter>();
+			const AVestigePlayerCharacter& Farmer = Spawner.SpawnActor<AVestigePlayerCharacter>();
 
 			// The template's constructor sets its own rate, so this catches the farmer's rate being overwritten.
 			const UVestigeCharacterMovementComponent* Movement = Farmer.GetCharacterMovement<UVestigeCharacterMovementComponent>();
@@ -56,19 +56,19 @@ namespace VestigeFarmerTests
 
 		TEST_METHOD(TheFarmerBlueprintTurnsWithTheVestigeMovementComponent)
 		{
-			const UClass* FarmerClass = LoadClass<AVestigeFarmerCharacter>(nullptr, TEXT("/Game/Vestige/Blueprints/BP_Farmer.BP_Farmer_C"));
+			const UClass* FarmerClass = LoadClass<AVestigePlayerCharacter>(nullptr, TEXT("/Game/Vestige/Blueprints/BP_Farmer.BP_Farmer_C"));
 			ASSERT_THAT(IsNotNull(FarmerClass));
 
 			// The Blueprint's rate is tuning, so any rate that turns at all passes.
 			const UVestigeCharacterMovementComponent* Movement =
-				FarmerClass->GetDefaultObject<AVestigeFarmerCharacter>()->GetCharacterMovement<UVestigeCharacterMovementComponent>();
+				FarmerClass->GetDefaultObject<AVestigePlayerCharacter>()->GetCharacterMovement<UVestigeCharacterMovementComponent>();
 			ASSERT_THAT(IsNotNull(Movement));
 			ASSERT_THAT(IsTrue(Movement->RotationRate.Yaw > 0.f));
 		}
 
 		TEST_METHOD(ToolbarKeyHintsLeaveOutEmptySlots)
 		{
-			const AVestigeFarmerCharacter& Farmer = Spawner.SpawnActor<AVestigeFarmerCharacter>();
+			const AVestigePlayerCharacter& Farmer = Spawner.SpawnActor<AVestigePlayerCharacter>();
 
 			// The C++ farmer has no toolbar; the Blueprint fills it.
 			ASSERT_THAT(IsTrue(Farmer.GetToolbarKeyHints().IsEmpty()));
