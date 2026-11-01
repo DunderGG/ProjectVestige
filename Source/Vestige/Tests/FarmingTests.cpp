@@ -22,6 +22,8 @@
 #include "Inventory/VestigeInventorySaveData.h"
 #include "Player/VestigePlayerCharacter.h"
 #include "Player/VestigePlayerState.h"
+#include "Tests/VestigeTestEventRecorder.h"
+#include "UObject/StrongObjectPtr.h"
 
 // A namespace keeps the fixture's short name from hiding other declarations in unity builds.
 namespace FarmingTests
@@ -131,6 +133,15 @@ namespace FarmingTests
 				}
 			}
 			return Crop;
+		}
+
+		/** A recorder bound to the farming component's Blueprint events, the way a Blueprint binds them. */
+		TStrongObjectPtr<UVestigeTestEventRecorder> ListenToBlueprintEvents() const
+		{
+			TStrongObjectPtr<UVestigeTestEventRecorder> Recorder(NewObject<UVestigeTestEventRecorder>());
+			FarmingComponent->OnCropHarvested.AddDynamic(Recorder.Get(), &UVestigeTestEventRecorder::RecordCropHarvested);
+			FarmingComponent->OnToolUsed.AddDynamic(Recorder.Get(), &UVestigeTestEventRecorder::RecordToolUsed);
+			return Recorder;
 		}
 
 		TEST_METHOD(PlantingUsesASeed)
@@ -289,6 +300,42 @@ namespace FarmingTests
 
 			ASSERT_THAT(IsTrue(RestedSeconds == GetHeldTool().GetUseSeconds()));
 			ASSERT_THAT(IsTrue(UseTool->GetUseSeconds(GetHeldTool(), *AbilitySystem) == 2.f * RestedSeconds));
+		}
+
+		TEST_METHOD(AUseThatChangesTheFarmTellsBlueprintsTheToolAndTheTile)
+		{
+			Hold(TEXT("Base.Hoe"), 0);
+			const TStrongObjectPtr<UVestigeTestEventRecorder> Recorder = ListenToBlueprintEvents();
+
+			UseToolAndFinish();
+
+			const TArray<FString> Expected = {FString::Printf(TEXT("ToolUsed Base.Hoe %s"), *GetNameSafe(TargetTile()))};
+			ASSERT_THAT(IsTrue(Recorder->GetEvents() == Expected));
+		}
+
+		TEST_METHOD(HarvestingTellsBlueprintsTheCropThenTheTool)
+		{
+			const UFarmCropData* Crop = GrowRipeCrop();
+			ASSERT_THAT(IsNotNull(Crop));
+			Hold(TEXT("Base.Hand"), 0);
+			const TStrongObjectPtr<UVestigeTestEventRecorder> Recorder = ListenToBlueprintEvents();
+
+			UseToolAndFinish();
+
+			const FString Tile = GetNameSafe(TargetTile());
+			const TArray<FString> Expected = {FString::Printf(TEXT("CropHarvested %s %s"), *Crop->GetContentId().ToString(), *Tile),
+				FString::Printf(TEXT("ToolUsed Base.Hand %s"), *Tile)};
+			ASSERT_THAT(IsTrue(Recorder->GetEvents() == Expected));
+		}
+
+		TEST_METHOD(AUseThatChangesNothingTellsBlueprintsNothing)
+		{
+			Hold(TEXT("Base.WateringCan"), 0);
+			const TStrongObjectPtr<UVestigeTestEventRecorder> Recorder = ListenToBlueprintEvents();
+
+			UseToolAndFinish();
+
+			ASSERT_THAT(IsTrue(Recorder->GetEvents().IsEmpty()));
 		}
 
 		TEST_METHOD(AnUnknownSavedToolPutsTheFirstSlotInHand)

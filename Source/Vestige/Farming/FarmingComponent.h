@@ -17,6 +17,8 @@ struct FFarmFarmingSaveData;
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnFarmToolChanged, const UVestigeToolData* /* Tool */);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnFarmTargetTileChanged, const AFarmTile* /* Tile */);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnFarmCropHarvested, const UFarmCropData*, Crop, const AFarmTile*, Tile);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnFarmToolUsed, const UVestigeToolData*, Tool, const AFarmTile*, Tile);
 
 /**
  * Gives its owner, a pawn, farming tools. Works on the tile next to the owner's in the direction the owner aims, takes
@@ -86,6 +88,20 @@ public:
 	/** Broadcast when the target tile changes, with nullptr when there stops being one. */
 	FOnFarmTargetTileChanged OnTargetTileChanged;
 
+	/**
+	 * Extension point: broadcast when the owner harvests Crop from Tile, once the harvest is in the bag and the tile is
+	 * tilled soil again. Before OnToolUsed for the same use.
+	 */
+	UPROPERTY(BlueprintAssignable, Category = "Farming")
+	FOnFarmCropHarvested OnCropHarvested;
+
+	/**
+	 * Extension point: broadcast when a use of Tool changed the farm at Tile, after the change. A use that changes
+	 * nothing (no target, nothing to water, out of seeds, a full bag) isn't broadcast, as it costs nothing.
+	 */
+	UPROPERTY(BlueprintAssignable, Category = "Farming")
+	FOnFarmToolUsed OnToolUsed;
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
@@ -112,7 +128,8 @@ private:
 	 */
 	UVestigeInventoryComponent* GetInventory() const;
 
-	/** Each returns whether the tile changed. */
+	/** Applies Tool's action to Tile. Each of these returns whether the tile changed. */
+	bool ApplyTool(const UVestigeToolData& Tool, AFarmTile& Tile);
 	bool Till(AFarmTile& Tile) const;
 	bool Plant(AFarmTile& Tile);
 	bool Water(AFarmTile& Tile) const;

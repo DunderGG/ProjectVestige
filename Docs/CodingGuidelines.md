@@ -88,7 +88,7 @@ The template classes (`AVestigeCharacter`, `AVestigeGameMode`, `AVestigePlayerCo
 - Functions that only **query state** and return a `bool` ask a **question**: `IsRipe()`, `AreTilesReady()`, `HasMessages()`.
 - Functions that **do something that can fail** keep their verb name and return `bool` for success: `AFarmTile::Till()` returns `false` when the tile isn't grass. Say in the `/** */` comment what `false` means. Don't rename them as questions (`DidTillSucceed()`) or add a `Try` prefix.
 - Getters use `Get`: `GetCurrentDay()`. `Find` returns `nullptr` when nothing exists; `Get` may create it (see `AVestigeDayCycle::Find` vs `AVestigeDayCycle::Get`).
-- Delegates: the type is `FOn<Prefix><Event>` with the type's project prefix, the member is `On<Event>`: `FOnVestigeNewDay OnNewDay`.
+- Delegates: the type is `FOn<Prefix><Event>` with the type's project prefix, the member is `On<Event>`: `FOnVestigeNewDay OnNewDay`. A Blueprint twin of a native delegate ([Architecture.md, section 4](Architecture.md#4-how-systems-talk-to-each-other)) adds `Blueprint` to both: `FOnVestigeNewDayBlueprint OnNewDayBlueprint`, shown to Blueprints with `DisplayName = "On New Day"`.
 - Event handlers are named for what they do, not when they run: `AdvanceTiles(int32 NewDay)`, `SaveFarm(int32 NewDay)`, not `HandleOnNewDay`.
 - Units go in the name or the comment when not obvious: `RealSecondsPerGameHour`, `TileSize` with `/** ...in cm */`.
 - Out parameters start with `Out`: `void GetBounds(FVector& OutOrigin, FVector& OutExtent)`.
@@ -455,7 +455,7 @@ Source/Vestige/
     Player/         The player character, its movement component and the player state
     UI/             The HUD and its widgets
     Template/       Epic's template classes (character, game mode, player controller); not maintained to this guide
-    Tests/          CQTest tests
+    Tests/          CQTest tests, and test-only helpers such as UVestigeTestEventRecorder (WITH_TESTS only)
 ```
 
 - **A folder includes only from its own layer and the layers below it.** `Farming/` may include `Time/`, `Content/` and `Core/`, never `Save/`, `Player/` or `UI/`. When a lower layer needs to tell a higher one something, it broadcasts an event and the higher one listens ([Architecture.md, section 4](Architecture.md#4-how-systems-talk-to-each-other)). `Tests/` may include anything, and nothing includes `Tests/`. `Template/` isn't maintained to this guide, but its includes are checked: it is app-level wiring that may include any layer (the game mode names the HUD class), so only `Player/` and `UI/` may include it.

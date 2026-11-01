@@ -107,6 +107,7 @@ Contents
 **Rules:**
 
 - One owner of game time (`AVestigeDayCycle` today). Everything else reads it or listens to its events (`OnNewDay`, `OnNewDayFinished`, `OnDayEndReached`). Nothing keeps its own clock.
+- Blueprints, and so mods, hear of a new day through `On New Day` (`OnNewDayBlueprint`), the extension point broadcast after `OnNewDay` and before the save ([Architecture.md, section 12](Architecture.md#extension-points-today)). A Blueprint finds the day cycle with **Get Day Cycle**.
 - Game time is separate from real time and from `UWorld::GetTimeSeconds`. Pausing and menus stop game time.
 - Daily changes happen in `OnNewDay` listeners that finish synchronously ([Architecture.md, section 15](Architecture.md#15-the-day-flow)).
 - Seasons are gameplay tags and change on a day event; weather is chosen once per day from data (per-season weights), so it's saved as a value, not re-rolled on load.

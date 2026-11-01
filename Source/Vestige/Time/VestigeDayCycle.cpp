@@ -9,6 +9,7 @@
 #include "Core/Vestige.h"
 #include "Core/VestigeActorLookup.h"
 #include "Engine/DirectionalLight.h"
+#include "Engine/Engine.h"
 #include "Engine/SkyLight.h"
 #include "Engine/World.h"
 #include "EngineUtils.h"
@@ -80,6 +81,12 @@ AVestigeDayCycle* AVestigeDayCycle::Find(const UWorld* World)
 	return Cast<AVestigeDayCycle>(VestigeActorLookup::FindSingle(World, StaticClass()));
 }
 
+AVestigeDayCycle* AVestigeDayCycle::GetDayCycle(const UObject* WorldContextObject)
+{
+	UWorld* World = GEngine ? GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull) : nullptr;
+	return Get(World);
+}
+
 void AVestigeDayCycle::BeginPlay()
 {
 	Super::BeginPlay();
@@ -99,6 +106,7 @@ void AVestigeDayCycle::StartNextDay()
 	SetActorTickEnabled(true);
 	UpdateLighting();
 	OnNewDay.Broadcast(CurrentDay);
+	OnNewDayBlueprint.Broadcast(CurrentDay);
 	OnNewDayFinished.Broadcast(CurrentDay);
 }
 

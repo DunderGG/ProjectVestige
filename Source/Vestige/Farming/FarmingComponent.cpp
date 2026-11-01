@@ -187,19 +187,29 @@ bool UFarmingComponent::UseToolOnTarget()
 		return false;
 	}
 
-	switch (Tool->GetAction())
+	if (!ApplyTool(*Tool, *Tile))
+	{
+		return false;
+	}
+	OnToolUsed.Broadcast(Tool, Tile);
+	return true;
+}
+
+bool UFarmingComponent::ApplyTool(const UVestigeToolData& Tool, AFarmTile& Tile)
+{
+	switch (Tool.GetAction())
 	{
 	case EFarmToolAction::Till:
-		return Till(*Tile);
+		return Till(Tile);
 
 	case EFarmToolAction::Plant:
-		return Plant(*Tile);
+		return Plant(Tile);
 
 	case EFarmToolAction::Water:
-		return Water(*Tile);
+		return Water(Tile);
 
 	case EFarmToolAction::Harvest:
-		return Harvest(*Tile);
+		return Harvest(Tile);
 	}
 	return false;
 }
@@ -258,6 +268,7 @@ bool UFarmingComponent::Harvest(AFarmTile& Tile)
 	}
 	Inventory->TryAddItem(Crop->GetHarvestItemId(), Crop->GetYield());
 	Notify(LOCTEXT("Harvested", "Harvested a crop!"));
+	OnCropHarvested.Broadcast(Crop, &Tile);
 	return true;
 }
 

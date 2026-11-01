@@ -149,6 +149,14 @@ The player now has stamina, through the Gameplay Ability System (Systems.md, sec
 - [x] **Tuning** (1bfe8f1): over a few in-game days, say whether 100 stamina and these costs feel right: running out should happen on a busy day, not every day. Tell the agent the numbers you settle on.
 - [x] **Solution** (1bfe8f1): after regenerating the project files, the solution shows the new `AbilitySystem` folder under `Source/Vestige`.
 
+### Blueprint extension points, 2026-11-01
+
+Blueprints, and later mods, can now hear of a new day, a harvest and a tool use ([Architecture.md, section 12](Architecture.md#extension-points-today)). The tests check that the events fire; these checks are for how they look in the editor. Don't save the Blueprints you try them in: close them with Don't Save.
+
+- [ ] **Events in the Details panel** (this commit): open `BP_PlayerCharacter` (`Content/Vestige/Blueprints`), select **FarmingComponent** in the Components panel, and scroll the Details panel to Events: **On Crop Harvested** and **On Tool Used** are listed with a + button. Pressing + on On Tool Used adds an event node with **Tool** and **Tile** pins.
+- [ ] **Content ID** (this commit): drag from the Tool pin and search "Get Content Id"; the node is there. Wire it into a Print String from the On Tool Used node, compile and play: tilling grass prints `Base.Hoe`, watering bare grass prints nothing. Harvesting a ripe crop with the hand also fires **On Crop Harvested**.
+- [ ] **New day** (this commit): in the same Event Graph, right-click and search "Get Day Cycle", drag from its return value and search "Assign On New Day" (or "Bind Event to On New Day"). Wire it from Event BeginPlay to a Print String of the Day, compile and play: sleeping (N) prints 2. Close the Blueprint with Don't Save afterwards.
+
 ### Editor chores
 
 Changes only the editor can make safely. The steps are in [Roadmap.md, Housekeeping](Roadmap.md#3-housekeeping): re-saving the template Blueprints and `L_Farm`, moving `BP_FarmTile` and the materials with redirectors fixed, and regenerating the Android File Server token if it was ever used. After each one, run the [smoke test](#3-smoke-test).

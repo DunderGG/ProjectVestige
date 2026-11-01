@@ -13,6 +13,7 @@ class UPostProcessComponent;
 struct FVestigeClockSaveData;
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnVestigeNewDay, int32 /* Day */);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnVestigeNewDayBlueprint, int32, Day);
 
 /**
  * Keeps the day counter and the clock, and moves the sun, sky light and exposure to match the time.
@@ -39,7 +40,14 @@ public:
 	 */
 	static AVestigeDayCycle* Find(const UWorld* World);
 
-	/** Ends the current day and sets the clock to the next morning, then broadcasts OnNewDay. */
+	/**
+	 * Extension point: the world's day cycle for Blueprints, from Get, so a level that has none still gets one. Bind to
+	 * its On New Day event to react to a new day.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Farming|Time", meta = (WorldContext = "WorldContextObject", DisplayName = "Get Day Cycle"))
+	static AVestigeDayCycle* GetDayCycle(const UObject* WorldContextObject);
+
+	/** Ends the current day and sets the clock to the next morning, then broadcasts OnNewDay and OnNewDayBlueprint. */
 	void StartNextDay();
 
 	/** The day and clock, for saving. */
@@ -67,7 +75,15 @@ public:
 	/** Broadcast with the new day's number every time a new day starts. The farm reacts here, e.g. crops grow. */
 	FOnVestigeNewDay OnNewDay;
 
-	/** Broadcast right after OnNewDay, once everything has reacted to the new day. Saving listens here. */
+	/**
+	 * Extension point: OnNewDay for Blueprints, with the new day's number. Broadcast after OnNewDay, so the farm has
+	 * reacted (crops have grown), and before OnNewDayFinished, so what a listener changes is saved. The same contract as
+	 * OnNewDay: finish every change to saved state in the handler (Architecture.md, section 15).
+	 */
+	UPROPERTY(BlueprintAssignable, Category = "Farming|Time", meta = (DisplayName = "On New Day"))
+	FOnVestigeNewDayBlueprint OnNewDayBlueprint;
+
+	/** Broadcast after OnNewDay and OnNewDayBlueprint, once everything has reacted to the new day. Saving listens here. */
 	FOnVestigeNewDay OnNewDayFinished;
 
 	/**

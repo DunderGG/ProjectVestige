@@ -47,7 +47,13 @@ public:
 	 */
 	static bool IsWellFormedContentId(FName Id);
 
+	/**
+	 * Extension point: the ID that saves and mods know this content by (Base.Turnip), so a Blueprint can tell which crop or
+	 * tool an event names.
+	 */
+	UFUNCTION(BlueprintPure, Category = "Farming")
 	FName GetContentId() const { return ContentId; }
+
 	const FText& GetDisplayName() const { return DisplayName; }
 
 #if WITH_DEV_AUTOMATION_TESTS

@@ -5,8 +5,10 @@
 
 #include "Components/ActorTestSpawner.h"
 #include "CQTest.h"
+#include "Tests/VestigeTestEventRecorder.h"
 #include "Time/VestigeClockSaveData.h"
 #include "Time/VestigeDayCycle.h"
+#include "UObject/StrongObjectPtr.h"
 
 // A namespace keeps the fixture's short name from hiding other declarations in unity builds.
 namespace VestigeDayCycleTests
@@ -57,6 +59,29 @@ namespace VestigeDayCycleTests
 			ASSERT_THAT(IsTrue(Broadcasts == 1));
 			ASSERT_THAT(IsTrue(NewDay == 2));
 			ASSERT_THAT(IsTrue(Cycle.GetTimeOfDay() == Cycle.GetDayStartHour()));
+		}
+
+		TEST_METHOD(BlueprintsHearOfTheNewDayAfterTheFarmAndBeforeTheSave)
+		{
+			AVestigeDayCycle& Cycle = Spawner.SpawnActor<AVestigeDayCycle>();
+			const TStrongObjectPtr<UVestigeTestEventRecorder> Recorder(NewObject<UVestigeTestEventRecorder>());
+			UVestigeTestEventRecorder* Listener = Recorder.Get();
+			Cycle.OnNewDay.AddLambda(
+				[Listener](int32 Day)
+				{
+					Listener->Record(TEXT("Farm"));
+				});
+			Cycle.OnNewDayBlueprint.AddDynamic(Listener, &UVestigeTestEventRecorder::RecordNewDay);
+			Cycle.OnNewDayFinished.AddLambda(
+				[Listener](int32 Day)
+				{
+					Listener->Record(TEXT("Save"));
+				});
+
+			Cycle.StartNextDay();
+
+			const TArray<FString> Expected = {TEXT("Farm"), TEXT("NewDay 2"), TEXT("Save")};
+			ASSERT_THAT(IsTrue(Recorder->GetEvents() == Expected));
 		}
 
 		TEST_METHOD(ClockStopsAtTheDayEnd)
