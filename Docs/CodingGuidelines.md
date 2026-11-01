@@ -504,7 +504,10 @@ Blender sources go in `Art/Blender/`, exported FBX files in `Art/Export/`, with 
 
 Existing code that doesn't yet match these guidelines. Fix them when touching the code nearby, each in a small commit. Don't do a sweeping cleanup in the middle of a feature. Design-level gaps are listed in [Architecture.md, Known gaps](Architecture.md#17-known-gaps).
 
-None at the moment. Add an entry here when code is committed that doesn't meet the guide, with what is missing.
+Add an entry here when code is committed that doesn't meet the guide, with what is missing, and a roadmap item to fix it.
+
+- `UFarmTargetHighlightComponent` loads our own `M_TileHighlight` with `ConstructorHelpers` ([section 12.4](#124-assets-and-loading)). [Roadmap.md, Housekeeping](Roadmap.md#3-housekeeping).
+- The general types' Details categories still start with `Farming` ([section 6](#6-uproperty-ufunction-and-blueprint-exposure) says so too, until the rule is decided). [Roadmap.md, Housekeeping](Roadmap.md#3-housekeeping).
 
 ## 17. Review checklist
 
