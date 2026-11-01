@@ -53,8 +53,8 @@ namespace VestigeContentTests
 		{
 			const FPrimaryAssetId Turnip(UFarmCropData::AssetType, TEXT("Base.Turnip"));
 			const FPrimaryAssetId Hoe(UVestigeToolData::AssetType, TEXT("Base.Hoe"));
-			const TPair<FPrimaryAssetId, FName> Assets[] = {{Turnip, TEXT("/Game/Farm/Crops/DA_Crop_Turnip")},
-				{Hoe, TEXT("/Game/Farm/Tools/DA_Tool_Hoe")}, {Turnip, TEXT("/Game/Farm/Crops/DA_Crop_TurnipCopy")}};
+			const TPair<FPrimaryAssetId, FName> Assets[] = {{Turnip, TEXT("/Game/Vestige/Crops/DA_Crop_Turnip")},
+				{Hoe, TEXT("/Game/Vestige/Tools/DA_Tool_Hoe")}, {Turnip, TEXT("/Game/Vestige/Crops/DA_Crop_TurnipCopy")}};
 
 			const TArray<FVestigeDuplicateContentId> Duplicates = UVestigeAssetManager::FindDuplicateContentIds(Assets);
 

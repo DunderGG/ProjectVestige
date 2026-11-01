@@ -27,9 +27,8 @@ Contents
 - **Done:** milestone 1, the playable prototype, plus the project's documents and rules.
 - **Now:** the code follows the guidelines and the architecture (both audits' code reviews are closed, 2026-10-29). Next: play-test that clean-up, the editor housekeeping steps in [section 3](#3-housekeeping), then the rest of the milestone 2 foundations.
 - **Next up**, in order:
-  1. Decide whether the data names change to `Vestige` too ([section 4.1, Player data](#41-foundations)). The C++ rename is done (2026-11-01).
-  2. The Gameplay Ability System and stamina ([section 4.3](#43-stamina-and-late-nights)).
-  3. The interaction interface (`IVestigeInteractable`) and the bed.
+  1. The Gameplay Ability System and stamina ([section 4.3](#43-stamina-and-late-nights)). The `Vestige` rename of the types and data names is done (2026-11-01).
+  2. The interaction interface (`IVestigeInteractable`) and the bed.
 
 ## 2. Milestone 1: playable prototype (done)
 
@@ -175,7 +174,8 @@ The code changes that the slice's content depends on. Doing them first means add
    - Done 2026-10-31 without money: `UVestigeInventoryComponent` on `AVestigePlayerState` ([Systems.md section 8](Systems.md#8-inventory-and-items)). Seeds and harvests are items, and old saves upgrade. Nothing earns or spends money yet, so it comes with the shipping bin ([section 4.5](#45-automation-and-selling))
 - [x] Rename the general `Farm` types to the `Vestige` prefix (decision log, 2026-10-31): the HUD and its widget, settings and messages, the save subsystem and save game, the feedback subsystem, the day cycle, the content base, asset manager, tool and item data and the item fragments, the rest and movement components, the farmer character, and their save structs and delegates. Farm types (tile, grid, crops, the farming component, targeting, the toolbar) keep `Farm`. In its own commits, with `[CoreRedirects]` for every class and struct that assets or save files name, a save test that loads a save naming the old classes, and the documents updated
    - Done 2026-11-01 (decision log). The test showed that a redirect doesn't load an old save's class, so the old save game name stays as an empty `UFarmSaveGame` subclass. The seed fragment, `EFarmToolAction` and the old `EFarmTool` keep `Farm` as farm types
-- [ ] *(decide)* Whether the data names change too, while no mods exist: the `FarmTool` and `FarmItem` asset types (which assets name inside their content references, though saves don't), the `Farm.` tag root (before the stamina tags in [Systems.md section 9](Systems.md#9-abilities-attributes-and-effects-gameplay-ability-system) are made) and `Content/Farm/`
+- [x] Whether the data names change too, while no mods exist: the `FarmTool` and `FarmItem` asset types, the `Farm.` tag root (before the stamina tags in [Systems.md section 9](Systems.md#9-abilities-attributes-and-effects-gameplay-ability-system) are made) and `Content/Farm/`
+   - Done 2026-11-01 (decision log): David chose to change all three. The asset types are `VestigeTool` and `VestigeItem` (`FarmCrop` stays), the tag root is `Vestige.`, and our content lives in `Content/Vestige/`, moved by a headless editor script with no redirectors left
 - [x] Seed and harvest counts become private, with a restore function for loading
 - [x] Tunable settings on the tile, grid and day cycle become protected or private
 

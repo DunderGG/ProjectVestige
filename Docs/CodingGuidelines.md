@@ -468,7 +468,7 @@ Source/Vestige/
 
 Follow Epic's **Recommended Asset Naming Conventions** (https://dev.epicgames.com/documentation/en-us/unreal-engine/recommended-asset-naming-conventions-in-unreal-engine-projects): `Prefix_BaseAssetName_Variant_Suffix`. The table below lists the prefixes we use most; for any other asset type, use the prefix from Epic's page.
 
-Our assets live under `Content/Farm/`, split by type. Leave the template's folders (`Characters`, `ThirdPerson`, `Input`) alone.
+Our assets live under `Content/Vestige/`, split by type. Leave the template's folders (`Characters`, `ThirdPerson`, `Input`) alone.
 
 | Prefix | Asset type | Example |
 |---|---|---|

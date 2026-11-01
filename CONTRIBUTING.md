@@ -98,7 +98,7 @@ Read these before making larger changes:
 
 ### Style
 
-Low-poly and stylized, with simple shapes and flat or lightly textured colors. Look at the existing crops and the watering can in `Content/Farm/Meshes` for reference. Readability from the game camera matters more than detail.
+Low-poly and stylized, with simple shapes and flat or lightly textured colors. Look at the existing crops and the watering can in `Content/Vestige/Meshes` for reference. Readability from the game camera matters more than detail.
 
 ### From Blender to Unreal
 
@@ -111,7 +111,7 @@ Low-poly and stylized, with simple shapes and flat or lightly textured colors. L
 4. **Apply transforms** (rotation and scale) before exporting.
 5. **Export FBX** to `Art/Export/` with the same name the asset will have in Unreal, using *Forward: X*, *Up: Z* and *Apply Scalings: FBX Units Scale*.
 6. **Save the `.blend` source** in `Art/Blender/`. Every imported mesh should have its source in the repo so others can change it.
-7. **Import** into `Content/Farm/` in the folder for its type (`Meshes`, `Materials`, `Textures`...).
+7. **Import** into `Content/Vestige/` in the folder for its type (`Meshes`, `Materials`, `Textures`...).
 
 `Art/Blender/make_farm_assets.py` generates the current crop and tool meshes from a script and is a working example of these settings.
 
@@ -126,7 +126,7 @@ Keep things light so big farms stay fast: a crop or small prop in the hundreds o
 ## 6. Contributing audio
 
 - Deliver **WAV**, 16-bit or 24-bit, 44.1 or 48 kHz. Mono for sounds placed in the world, stereo for music and ambience.
-- Name sound waves `S_<Name>` and sound cues `SC_<Name>`, and put them in `Content/Farm/Audio/`.
+- Name sound waves `S_<Name>` and sound cues `SC_<Name>`, and put them in `Content/Vestige/Audio/`.
 - Keep the source project files (DAW sessions, raw recordings) out of the repo unless they're needed to edit the sound later. Ask first if they are large.
 
 ## 7. Adding content the data-driven way
@@ -137,8 +137,8 @@ Each crop, tool and item is a **data asset**: an asset in the Content Browser wh
 
 ### Adding a crop
 
-1. **Make the meshes**, one per growth stage, from the day it's planted to ripe: a crop that takes 3 days has 4 meshes. Follow [Contributing art](#5-contributing-art), with the origin at the center of the base on the soil surface, and name them after the crop: `SM_Crop_Carrot_Stage0` ... `SM_Crop_Carrot_Ripe`. Import them into `Content/Farm/Meshes`.
-2. **Create the data asset.** In the Content Browser, open `Content/Farm/Crops`, right-click and choose *Miscellaneous > Data Asset*, pick **Farm Crop Data**, and name it `DA_Crop_Carrot`. It has to be in `Content/Farm/Crops` (or a folder inside it): that is the folder the Asset Manager scans for crops (`Config/DefaultGame.ini`).
+1. **Make the meshes**, one per growth stage, from the day it's planted to ripe: a crop that takes 3 days has 4 meshes. Follow [Contributing art](#5-contributing-art), with the origin at the center of the base on the soil surface, and name them after the crop: `SM_Crop_Carrot_Stage0` ... `SM_Crop_Carrot_Ripe`. Import them into `Content/Vestige/Meshes`.
+2. **Create the data asset.** In the Content Browser, open `Content/Vestige/Crops`, right-click and choose *Miscellaneous > Data Asset*, pick **Farm Crop Data**, and name it `DA_Crop_Carrot`. It has to be in `Content/Vestige/Crops` (or a folder inside it): that is the folder the Asset Manager scans for crops (`Config/DefaultGame.ini`).
 3. **Fill in its fields** (double-click the asset):
 
    | Field | What to enter |
@@ -151,17 +151,17 @@ Each crop, tool and item is a **data asset**: an asset in the Content Browser wh
    | Yield | How many of that item one harvest gives |
    | Seasons, Water Need, Contamination Tolerance | Fill in what you intend. The game doesn't use them yet; they are there so crops don't need changing when seasons and contamination arrive |
 
-4. **Save it and check it.** Right-click the `Content/Farm/Crops` folder and choose *Validate Assets*: a missing or badly formed Content Id, or a Harvest Item Id that names no item, shows as an error. Restart the editor and check the Output Log for an "is used by more than one asset" error, which means another asset already has your ID.
-5. **Try it in the game.** For now the Seeds tool plants one kind of seed, chosen on the farmer. Make a seed item for your crop first ([Adding an item](#adding-an-item)). Then open `Content/Farm/Blueprints/BP_Farmer`, select its **Farming** component and set **Seed Item Id** to your seeds. Open `Content/Farm/Blueprints/BP_PlayerState`, select its **Inventory** component and change the item under **Starting Items** to your seeds. Press F9 in the game to start a new game with them. Change both back before you commit, unless your pull request is meant to change the starting crop. Choosing between several seed kinds comes with the hotbar ([Roadmap.md](Docs/Roadmap.md)).
+4. **Save it and check it.** Right-click the `Content/Vestige/Crops` folder and choose *Validate Assets*: a missing or badly formed Content Id, or a Harvest Item Id that names no item, shows as an error. Restart the editor and check the Output Log for an "is used by more than one asset" error, which means another asset already has your ID.
+5. **Try it in the game.** For now the Seeds tool plants one kind of seed, chosen on the farmer. Make a seed item for your crop first ([Adding an item](#adding-an-item)). Then open `Content/Vestige/Blueprints/BP_Farmer`, select its **Farming** component and set **Seed Item Id** to your seeds. Open `Content/Vestige/Blueprints/BP_PlayerState`, select its **Inventory** component and change the item under **Starting Items** to your seeds. Press F9 in the game to start a new game with them. Change both back before you commit, unless your pull request is meant to change the starting crop. Choosing between several seed kinds comes with the hotbar ([Roadmap.md](Docs/Roadmap.md)).
 6. **Open a pull request** with the data asset, the meshes, their `.blend` source and a screenshot of each growth stage in the game.
 
 ### Adding a tool
 
-Tools work the same way: a **Farm Tool Data** asset named `DA_Tool_<Name>` in `Content/Farm/Tools`, with a Content Id such as `Base.Sickle`, a held mesh (origin where the hand grips), and an *Action* chosen from the existing ones (till, plant, water, harvest). It appears in the game once it's added to **Toolbar Ids** on the farmer's Farming component; the first nine slots get the keys 1 to 9. A tool that needs a new kind of action needs C++, so open an issue first.
+Tools work the same way: a **Vestige Tool Data** asset named `DA_Tool_<Name>` in `Content/Vestige/Tools`, with a Content Id such as `Base.Sickle`, a held mesh (origin where the hand grips), and an *Action* chosen from the existing ones (till, plant, water, harvest). It appears in the game once it's added to **Toolbar Ids** on the farmer's Farming component; the first nine slots get the keys 1 to 9. A tool that needs a new kind of action needs C++, so open an issue first.
 
 ### Adding an item
 
-Items are what the player carries: seeds, harvested crops, materials. Each is a **Farm Item Data** asset named `DA_Item_<Name>` in `Content/Farm/Items`, with a Content Id such as `Base.Carrot` (an item and a crop may share a name; they are different kinds of content), a display name, *Max Stack Size* (1 for items that don't stack) and *Sell Price*. What only some items have is a **fragment**: under *Fragments*, press + and pick a fragment class. A seed item has a **Farm Seed Fragment** whose *Crop Id* names the crop it plants (`FarmCrop:Base.Carrot`). So a new crop usually comes with two items, its seeds and its harvest. Validate the `Content/Farm/Items` folder afterwards as in step 4 above. The player carries items in the inventory on the player state; the starting items are set on `BP_PlayerState`. A kind of item that needs a new fragment needs C++, so open an issue first.
+Items are what the player carries: seeds, harvested crops, materials. Each is a **Vestige Item Data** asset named `DA_Item_<Name>` in `Content/Vestige/Items`, with a Content Id such as `Base.Carrot` (an item and a crop may share a name; they are different kinds of content), a display name, *Max Stack Size* (1 for items that don't stack) and *Sell Price*. What only some items have is a **fragment**: under *Fragments*, press + and pick a fragment class. A seed item has a **Farm Seed Fragment** whose *Crop Id* names the crop it plants (`FarmCrop:Base.Carrot`). So a new crop usually comes with two items, its seeds and its harvest. Validate the `Content/Vestige/Items` folder afterwards as in step 4 above. The player carries items in the inventory on the player state; the starting items are set on `BP_PlayerState`. A kind of item that needs a new fragment needs C++, so open an issue first.
 
 ### Mods
 

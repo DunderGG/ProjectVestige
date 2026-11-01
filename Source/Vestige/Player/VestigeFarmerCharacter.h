@@ -25,7 +25,7 @@ struct FVestigeKeyHint
 
 /**
  * The template's third person character plus farming.
- * BP_Farmer (Content/Farm/Blueprints) is the farmer in the game: the template's character Blueprint, reparented to this
+ * BP_Farmer (Content/Vestige/Blueprints) is the farmer in the game: the template's character Blueprint, reparented to this
  * class so it keeps its mesh, animation and movement input.
  * Owns the farming key bindings, and describes them for the HUD's key hints.
  */
