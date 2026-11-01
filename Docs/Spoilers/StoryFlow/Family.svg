@@ -1,0 +1,111 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="1280" viewBox="0 0 1500 1280" role="img" aria-labelledby="title description">
+	<title id="title">Parallel family story flow</title>
+	<desc id="description">Family artifacts and memories appear in flexible order. Hob's sealed message is a late, optional personal payoff when an open-ended farm-restoration threshold feels right. A sibling encounter is a separate optional path; it is not guaranteed by the letter or message.</desc>
+	<defs>
+		<marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="strokeWidth">
+			<path d="M 0 0 L 10 5 L 0 10 z" fill="#435466"/>
+		</marker>
+		<marker id="arrow-dashed" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="strokeWidth">
+			<path d="M 0 0 L 10 5 L 0 10 z" fill="#738397"/>
+		</marker>
+		<style>
+			.background { fill: #f7f8fa; }
+			.card { fill: #ffffff; stroke: #8998a8; stroke-width: 2; }
+			.optional { fill: #ffdf9e; stroke: #b28a38; stroke-width: 2; }
+			.open { fill: #dcc6ef; stroke: #8873a6; stroke-width: 2; }
+			.path { fill: none; stroke: #435466; stroke-width: 3; marker-end: url(#arrow); }
+			.branch { fill: none; stroke: #738397; stroke-width: 2.5; stroke-dasharray: 8 7; marker-end: url(#arrow-dashed); }
+			.title { fill: #203040; font: 700 16px "Segoe UI", Arial, sans-serif; letter-spacing: .5px; }
+			.copy { fill: #263746; font: 15px "Segoe UI", Arial, sans-serif; }
+			.small { fill: #526273; font: 14px "Segoe UI", Arial, sans-serif; }
+			.label-bg { fill: #f7f8fa; }
+			.label { fill: #526273; font: italic 13px "Segoe UI", Arial, sans-serif; }
+			.nav-link { fill: #165d9c; font: 14px "Segoe UI", Arial, sans-serif; text-decoration: underline; cursor: pointer; }
+		</style>
+	</defs>
+
+	<rect class="background" width="1500" height="1280"/>
+	<text class="small" x="45" y="35">Drafted scenes F-01 to F-03 · parallel to the central trials story; artifacts do not have a fixed order</text>
+
+	<path class="branch" d="M 750 175 V 245"/>
+	<path class="branch" d="M 750 390 V 455"/>
+	<path class="branch" d="M 750 600 V 665"/>
+	<path class="path" d="M 750 780 V 850"/>
+	<path class="branch" d="M 1080 317 H 1130 V 815 H 1280 V 850"/>
+
+	<rect class="card" x="420" y="70" width="660" height="105" rx="12"/>
+	<text text-anchor="middle" x="750" y="106">
+		<tspan class="title">FAMILY TRACES BEGIN WITH OPENING RESTORATION</tspan>
+		<tspan class="copy" x="750" dy="27">Letters, photographs, recordings and Hob's damaged memories</tspan>
+		<tspan class="copy" x="750" dy="21">Can be found in different orders; no single item solves the mystery</tspan>
+	</text>
+
+	<rect class="card" x="420" y="245" width="660" height="145" rx="12"/>
+	<text text-anchor="middle" x="750" y="281">
+		<tspan class="title">F-01 · THE FAMILY IN FRAGMENTS</tspan>
+		<tspan class="copy" x="750" dy="27">Parents stayed above ground and are gone; exactly how or when is unknown</tspan>
+		<tspan class="copy" x="750" dy="21">A recovered letter says the sibling was away when the war began</tspan>
+		<tspan class="copy" x="750" dy="21">The sibling may be alive; this lead is not a promise or location</tspan>
+	</text>
+
+	<rect class="open" x="420" y="455" width="660" height="145" rx="12"/>
+	<text text-anchor="middle" x="750" y="491">
+		<tspan class="title">OPEN QUESTION · WHAT MAKES THE FARM “WHOLE AGAIN”?</tspan>
+		<tspan class="copy" x="750" dy="27">Hob has the parents' sealed message and waits for a meaningful threshold</tspan>
+		<tspan class="copy" x="750" dy="21">Threshold and message content are not decided</tspan>
+		<tspan class="copy" x="750" dy="21">Do not turn this into a hidden completion percentage</tspan>
+	</text>
+
+	<rect class="optional" x="420" y="665" width="660" height="115" rx="12"/>
+	<text text-anchor="middle" x="750" y="702">
+		<tspan class="title">F-02 · HOB'S SEALED MESSAGE · LATE PAYOFF</tspan>
+		<tspan class="copy" x="750" dy="27">Player may read, wait, or ask Hob to read it aloud</tspan>
+		<tspan class="copy" x="750" dy="21">Can be stopped or deferred; no forced reveal</tspan>
+	</text>
+
+	<rect class="card" x="420" y="850" width="560" height="130" rx="12"/>
+	<text text-anchor="middle" x="700" y="887">
+		<tspan class="title">FAMILY THREAD PAYOFF</tspan>
+		<tspan class="copy" x="700" dy="27">Emotional context from what the parents could know</tspan>
+		<tspan class="copy" x="700" dy="21">Does not settle the parents' full fate, world population</tspan>
+		<tspan class="copy" x="700" dy="21">or the Continuance Trials</tspan>
+	</text>
+
+	<rect class="optional" x="1100" y="850" width="360" height="130" rx="12"/>
+	<text text-anchor="middle" x="1280" y="887">
+		<tspan class="title">F-03 · SIBLING MEETING</tspan>
+		<tspan class="copy" x="1280" dy="27">Only if this path is chosen</tspan>
+		<tspan class="copy" x="1280" dy="21">Survival route, identity and timing open</tspan>
+		<tspan class="copy" x="1280" dy="21">Kinship grants no automatic trust</tspan>
+	</text>
+
+	<rect class="open" x="1100" y="1015" width="360" height="100" rx="12"/>
+	<text text-anchor="middle" x="1280" y="1051">
+		<tspan class="title">SIBLING SETS THE PACE</tspan>
+		<tspan class="copy" x="1280" dy="27">Talk, wait or leave; their choice</tspan>
+	</text>
+
+	<line x1="500" y1="1080" x2="550" y2="1080" class="path"/>
+	<text class="small" x="565" y="1085">planned family progression</text>
+	<line x1="855" y1="1080" x2="905" y2="1080" class="branch"/>
+	<text class="small" x="920" y="1085">flexible, optional or unresolved</text>
+
+	<g>
+		<text class="small" x="45" y="1130" font-weight="700">Legend</text>
+		<rect x="300" y="1115" width="24" height="20" rx="4" class="card"/>
+		<text class="small" x="333" y="1130">Known trace / beat</text>
+		<rect x="630" y="1115" width="24" height="20" rx="4" class="optional"/>
+		<text class="small" x="663" y="1130">Optional path</text>
+		<rect x="920" y="1115" width="24" height="20" rx="4" class="open"/>
+		<text class="small" x="953" y="1130">Unresolved detail</text>
+		<line x1="560" y1="1170" x2="610" y2="1170" class="path"/>
+		<text class="small" x="625" y="1175">Planned progression</text>
+		<line x1="920" y1="1170" x2="970" y2="1170" class="branch"/>
+		<text class="small" x="985" y="1175">Flexible / optional connection</text>
+	</g>
+	<g text-anchor="middle">
+		<a href="Overview.svg"><text class="nav-link" x="450" y="1235">Overview</text></a>
+		<a href="Opening.svg"><text class="nav-link" x="750" y="1235">Opening</text></a>
+		<a href="Early.svg"><text class="nav-link" x="1050" y="1235">Early</text></a>
+	</g>
+</svg>

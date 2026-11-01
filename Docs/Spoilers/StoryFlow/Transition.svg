@@ -1,0 +1,177 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1740" viewBox="0 0 1800 1740" role="img" aria-labelledby="title description">
+	<title id="title">Transition: evidence paths and the decision to investigate</title>
+	<desc id="description">Two independent records are compared without assuming a connection. Optional local searches may add context. After at least two independent clues, Wellspring sets safety limits and the group chooses a careful search or a pause. The nomad route and possible survivor encounters are independent optional arcs.</desc>
+	<defs>
+		<marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="strokeWidth">
+			<path d="M 0 0 L 10 5 L 0 10 z" fill="#435466"/>
+		</marker>
+		<marker id="arrow-dashed" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="strokeWidth">
+			<path d="M 0 0 L 10 5 L 0 10 z" fill="#738397"/>
+		</marker>
+		<style>
+			.background { fill: #f7f8fa; }
+			.main { fill: #c7def2; stroke: #34495e; stroke-width: 2; }
+			.side { fill: #ffffff; stroke: #8998a8; stroke-width: 2; }
+			.optional { fill: #ffdf9e; stroke: #b28a38; stroke-width: 2; }
+			.uncertain { fill: #dcc6ef; stroke: #8873a6; stroke-width: 2; }
+			.path { fill: none; stroke: #435466; stroke-width: 3; marker-end: url(#arrow); }
+			.branch { fill: none; stroke: #738397; stroke-width: 2.5; stroke-dasharray: 8 7; marker-end: url(#arrow-dashed); }
+			.title { fill: #203040; font: 700 15px "Segoe UI", Arial, sans-serif; letter-spacing: .4px; }
+			.copy { fill: #263746; font: 14px "Segoe UI", Arial, sans-serif; }
+			.small { fill: #526273; font: 13px "Segoe UI", Arial, sans-serif; }
+			.label-bg { fill: #f7f8fa; }
+			.label { fill: #526273; font: italic 12px "Segoe UI", Arial, sans-serif; }
+			.nav-link { fill: #165d9c; font: 14px "Segoe UI", Arial, sans-serif; text-decoration: underline; cursor: pointer; }
+		</style>
+	</defs>
+
+	<rect class="background" width="1800" height="1740"/>
+	<text class="small" x="40" y="32">T-01 to T-06 · records can be found in different orders; the map separates the central evidence question from optional character arcs</text>
+
+	<path class="branch" d="M 450 175 C 540 175 570 220 640 250"/>
+	<path class="branch" d="M 1350 175 C 1260 175 1230 220 1160 250"/>
+	<path class="path" d="M 900 355 V 415"/>
+	<path class="branch" d="M 640 290 H 540 V 450 H 450 V 490"/>
+	<path class="branch" d="M 1160 290 H 1260 V 450 H 1350 V 490"/>
+	<path class="branch" d="M 450 565 C 520 565 560 520 640 520"/>
+	<path class="branch" d="M 1350 565 C 1280 565 1240 520 1160 520"/>
+	<path class="path" d="M 900 585 V 650"/>
+	<path class="path" d="M 900 790 V 850"/>
+	<path class="branch" d="M 640 720 C 555 740 515 795 450 825"/>
+	<path class="path" d="M 900 990 V 1055"/>
+	<path class="branch" d="M 640 915 H 565 V 1060 H 450"/>
+	<path class="path" d="M 900 1205 V 1280"/>
+
+	<rect class="side" x="40" y="75" width="410" height="150" rx="12"/>
+	<text text-anchor="middle" x="245" y="110">
+		<tspan class="title">RECORD 1 · CLINIC COPY</tspan>
+		<tspan class="copy" x="245" dy="25">A missing name; entry says “transferred”</tspan>
+		<tspan class="copy" x="245" dy="20">No destination; could be routine</tspan>
+		<tspan class="copy" x="245" dy="20">A damaged copy cannot explain the omission</tspan>
+	</text>
+	<rect class="side" x="1350" y="75" width="410" height="150" rx="12"/>
+	<text text-anchor="middle" x="1555" y="110">
+		<tspan class="title">RECORD 2 · CIVIC SHIPMENT LOG</tspan>
+		<tspan class="copy" x="1555" dy="25">Sealed medical crate sent to the institute</tspan>
+		<tspan class="copy" x="1555" dy="20">Different source; does not cite the clinic</tspan>
+		<tspan class="copy" x="1555" dy="20">A lead, not proof of what happened</tspan>
+	</text>
+
+	<rect class="uncertain" x="640" y="220" width="520" height="135" rx="12"/>
+	<text text-anchor="middle" x="900" y="257">
+		<tspan class="title">T-01 · COMPARE, DON'T CONNECT YET</tspan>
+		<tspan class="copy" x="900" dy="26">Keep records separate until another source supports a link</tspan>
+		<tspan class="copy" x="900" dy="21">Preserve original wording and mark unverified</tspan>
+		<tspan class="copy" x="900" dy="21">Player may stop investigating for now</tspan>
+	</text>
+
+	<rect class="optional" x="40" y="490" width="410" height="150" rx="12"/>
+	<text text-anchor="middle" x="245" y="525">
+		<tspan class="title">POSSIBLE CHECK · CLINIC OPERATOR</tspan>
+		<tspan class="copy" x="245" dy="25">Ask what they know about the record</tspan>
+		<tspan class="copy" x="245" dy="20">No answer is guaranteed</tspan>
+		<tspan class="copy" x="245" dy="20">Do not turn uncertainty into a conclusion</tspan>
+	</text>
+	<rect class="optional" x="1350" y="490" width="410" height="150" rx="12"/>
+	<text text-anchor="middle" x="1555" y="525">
+		<tspan class="title">POSSIBLE CHECK · INSTITUTE INDEX</tspan>
+		<tspan class="copy" x="1555" dy="25">Search for a separate corroborating entry</tspan>
+		<tspan class="copy" x="1555" dy="20">No answer is guaranteed</tspan>
+		<tspan class="copy" x="1555" dy="20">A missing file is not proof by itself</tspan>
+	</text>
+
+	<rect class="main" x="640" y="415" width="520" height="170" rx="12"/>
+	<text text-anchor="middle" x="900" y="451">
+		<tspan class="title">T-04 · TWO OR MORE INDEPENDENT CLUES</tspan>
+		<tspan class="copy" x="900" dy="26">The group reviews only sources actually found and shown</tspan>
+		<tspan class="copy" x="900" dy="21">Possible ordinary explanations remain</tspan>
+		<tspan class="copy" x="900" dy="21">The clues suggest study or movement of surviving humans</tspan>
+		<tspan class="copy" x="900" dy="21">They do not identify a procedure or responsible person</tspan>
+	</text>
+
+	<rect class="main" x="640" y="650" width="520" height="140" rx="12"/>
+	<text text-anchor="middle" x="900" y="687">
+		<tspan class="title">T-04 · WELLSPRING SETS SAFETY LIMITS</tspan>
+		<tspan class="copy" x="900" dy="26">No public route · no town names in reports</tspan>
+		<tspan class="copy" x="900" dy="21">Check the approach; turn back if risk changes</tspan>
+		<tspan class="copy" x="900" dy="21">Do not search private town records without permission</tspan>
+	</text>
+
+	<rect class="optional" x="40" y="745" width="410" height="160" rx="12"/>
+	<text text-anchor="middle" x="245" y="780">
+		<tspan class="title">T-05 · OPTIONAL SURVIVOR PATHS</tspan>
+		<tspan class="copy" x="245" dy="25">Shelter survivor: own experience only</tspan>
+		<tspan class="copy" x="245" dy="20">Second sleeper: distinct history and needs</tspan>
+		<tspan class="copy" x="245" dy="20">Disguised person: secret stays theirs</tspan>
+		<tspan class="copy" x="245" dy="20">Sibling: separate family lead</tspan>
+	</text>
+	<rect class="uncertain" x="40" y="960" width="410" height="150" rx="12"/>
+	<text text-anchor="middle" x="245" y="996">
+		<tspan class="title">NOT A CHECKLIST OR A KEY</tspan>
+		<tspan class="copy" x="245" dy="25">Each path may be omitted independently</tspan>
+		<tspan class="copy" x="245" dy="20">No survivor represents everyone</tspan>
+		<tspan class="copy" x="245" dy="20">Their testimony is not required for the reveal</tspan>
+	</text>
+
+	<rect class="main" x="640" y="850" width="520" height="140" rx="12"/>
+	<text text-anchor="middle" x="900" y="887">
+		<tspan class="title">PLAYER / TOWN DECISION</tspan>
+		<tspan class="copy" x="900" dy="26">Careful search, only if the assembly agrees to limits</tspan>
+		<tspan class="copy" x="900" dy="21">Pause until the risk is better understood</tspan>
+		<tspan class="copy" x="900" dy="21">Ask what conditions would make the resident safer</tspan>
+	</text>
+	<rect class="optional" x="1350" y="850" width="410" height="160" rx="12"/>
+	<text text-anchor="middle" x="1555" y="887">
+		<tspan class="title">T-02 · COPIED ROUTE NOTE</tspan>
+		<tspan class="copy" x="1555" dy="25">Replace signal; warn relevant stops</tspan>
+		<tspan class="copy" x="1555" dy="20">Close a leg if needed, not blindly the circuit</tspan>
+		<tspan class="copy" x="1555" dy="20">No names or contact locations disclosed</tspan>
+	</text>
+	<path class="branch" d="M 1555 1010 V 1060"/>
+	<rect class="optional" x="1350" y="1060" width="410" height="155" rx="12"/>
+	<text text-anchor="middle" x="1555" y="1096">
+		<tspan class="title">T-03 · FARM AS A LIMITED STOP</tspan>
+		<tspan class="copy" x="1555" dy="25">Rest, water and trade by agreement only</tspan>
+		<tspan class="copy" x="1555" dy="20">Farm residents and assembly decide separately</tspan>
+		<tspan class="copy" x="1555" dy="20">Declining or requiring a safety plan is valid</tspan>
+	</text>
+
+	<rect class="main" x="640" y="1055" width="520" height="150" rx="12"/>
+	<text text-anchor="middle" x="900" y="1093">
+		<tspan class="title">T-06 · THE CENTRAL QUESTION</tspan>
+		<tspan class="copy" x="900" dy="27">Were people able to give and withdraw consent?</tspan>
+		<tspan class="copy" x="900" dy="21">Inspect the institute; do not treat a roster as guilt</tspan>
+		<tspan class="copy" x="900" dy="21">Pause or turn back if safety requires it</tspan>
+	</text>
+
+	<rect class="uncertain" x="510" y="1280" width="780" height="155" rx="12"/>
+	<text text-anchor="middle" x="900" y="1317">
+		<tspan class="title">HANDOFF · A QUESTION, NOT A VERDICT</tspan>
+		<tspan class="copy" x="900" dy="27">The player may suspect humans were categorized, researched or moved</tspan>
+		<tspan class="copy" x="900" dy="21">Procedures, scope, individual knowledge and survivor wishes remain unknown</tspan>
+		<tspan class="copy" x="900" dy="21">The middle phase must establish the broad truth independently</tspan>
+	</text>
+
+	<line x1="600" y1="1530" x2="650" y2="1530" class="path"/>
+	<text class="small" x="665" y="1535">main evidence / decision flow</text>
+	<line x1="1010" y1="1530" x2="1060" y2="1530" class="branch"/>
+	<text class="small" x="1075" y="1535">optional, conditional or parallel</text>
+
+	<g>
+		<text class="small" x="50" y="1585" font-weight="700">Legend</text>
+		<rect x="230" y="1570" width="24" height="20" rx="4" class="main"/>
+		<text class="small" x="263" y="1585">Central path</text>
+		<rect x="480" y="1570" width="24" height="20" rx="4" class="side"/>
+		<text class="small" x="513" y="1585">Evidence source</text>
+		<rect x="760" y="1570" width="24" height="20" rx="4" class="optional"/>
+		<text class="small" x="793" y="1585">Optional path</text>
+		<rect x="1030" y="1570" width="24" height="20" rx="4" class="uncertain"/>
+		<text class="small" x="1063" y="1585">Unresolved / unverified</text>
+	</g>
+	<g text-anchor="middle">
+		<a href="Overview.svg"><text class="nav-link" x="500" y="1685">Overview</text></a>
+		<a href="Early.svg"><text class="nav-link" x="740" y="1685">Previous: Early</text></a>
+		<a href="Middle.svg"><text class="nav-link" x="980" y="1685">Next: Middle</text></a>
+		<a href="Family.svg"><text class="nav-link" x="1220" y="1685">Parallel: Family thread</text></a>
+	</g>
+</svg>

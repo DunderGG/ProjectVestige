@@ -1,0 +1,178 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1840" viewBox="0 0 1800 1840" role="img" aria-labelledby="title description">
+	<title id="title">Early story flow by independent downward story lane</title>
+	<desc id="description">Eleven drafted early scenes are grouped into six independent story lanes. Each lane reads from top to bottom. Gage's inspection, repair test and report form one arc, followed by optional Bastion readiness after route access. Cleo's records work and the nomad's route visits have their own downward progression. The first clinic irregularity is ambiguous.</desc>
+	<defs>
+		<marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="strokeWidth">
+			<path d="M 0 0 L 10 5 L 0 10 z" fill="#435466"/>
+		</marker>
+		<marker id="arrow-dashed" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="strokeWidth">
+			<path d="M 0 0 L 10 5 L 0 10 z" fill="#738397"/>
+		</marker>
+		<style>
+			.background { fill: #f7f8fa; }
+			.lane { fill: #d7e0e8; stroke: #d3dae2; stroke-width: 1.5; }
+			.card { fill: #ffffff; stroke: #8998a8; stroke-width: 2; }
+			.optional { fill: #ffdf9e; stroke: #b28a38; stroke-width: 2; }
+			.uncertain { fill: #dcc6ef; stroke: #8873a6; stroke-width: 2; }
+			.path { fill: none; stroke: #435466; stroke-width: 3; marker-end: url(#arrow); }
+			.branch { fill: none; stroke: #738397; stroke-width: 2.5; stroke-dasharray: 8 7; marker-end: url(#arrow-dashed); }
+			.lane-title { fill: #34495e; font: 700 17px "Segoe UI", Arial, sans-serif; }
+			.title { fill: #203040; font: 700 14px "Segoe UI", Arial, sans-serif; letter-spacing: .35px; }
+			.copy { fill: #263746; font: 13px "Segoe UI", Arial, sans-serif; }
+			.small { fill: #526273; font: 13px "Segoe UI", Arial, sans-serif; }
+			.nav-link { fill: #165d9c; font: 14px "Segoe UI", Arial, sans-serif; text-decoration: underline; cursor: pointer; }
+		</style>
+	</defs>
+
+	<rect class="background" width="1800" height="1800"/>
+	<text class="small" x="40" y="35">Drafted scenes E-01 to E-11 · read each lane from top to bottom; lanes are independent, not a single quest chain</text>
+
+	<rect class="lane" x="35" y="65" width="550" height="750" rx="14"/>
+	<text class="lane-title" x="55" y="98">Wellspring and town life</text>
+	<rect class="card" x="65" y="125" width="490" height="130" rx="10"/>
+	<text text-anchor="middle" x="310" y="159">
+		<tspan class="title">E-01 · REPAIR HUDDLE</tspan>
+		<tspan class="copy" x="310" dy="25">Operators' knowledge and old diagrams</tspan>
+		<tspan class="copy" x="310" dy="20">are brought together</tspan>
+		<tspan class="copy" x="310" dy="20">Shared log is a trial if the town agrees</tspan>
+	</text>
+	<rect class="optional" x="65" y="310" width="490" height="160" rx="10"/>
+	<text text-anchor="middle" x="310" y="345">
+		<tspan class="title">E-10 · TOWN LIFE · OPTIONAL</tspan>
+		<tspan class="copy" x="310" dy="25">Forecast, clinic encounter, festival</tspan>
+		<tspan class="copy" x="310" dy="20">and other everyday scenes</tspan>
+		<tspan class="copy" x="310" dy="20">Torn ledger / “transferred” is ambiguous</tspan>
+		<tspan class="copy" x="310" dy="20">No fixed order relative to E-01</tspan>
+	</text>
+
+	<rect class="lane" x="625" y="65" width="550" height="750" rx="14"/>
+	<text class="lane-title" x="645" y="98">Hob</text>
+	<rect class="card" x="655" y="125" width="490" height="150" rx="10"/>
+	<text text-anchor="middle" x="900" y="161">
+		<tspan class="title">E-02 · HOB'S NEXT PURPOSE</tspan>
+		<tspan class="copy" x="900" dy="27">Hob considers farm or town work</tspan>
+		<tspan class="copy" x="900" dy="21">The choice is theirs, not an extension</tspan>
+		<tspan class="copy" x="900" dy="21">of the old caretaker order</tspan>
+	</text>
+
+	<rect class="lane" x="1215" y="65" width="550" height="750" rx="14"/>
+	<text class="lane-title" x="1235" y="98">Gage and the Iron Creed</text>
+	<path class="path" d="M 1490 250 V 285"/>
+	<path class="path" d="M 1490 470 V 505"/>
+	<path class="branch" d="M 1490 645 V 680"/>
+	<rect class="card" x="1245" y="125" width="490" height="125" rx="10"/>
+	<text text-anchor="middle" x="1490" y="159">
+		<tspan class="title">E-03 · INSPECTION</tspan>
+		<tspan class="copy" x="1490" dy="25">Gage is cautious around the machinery</tspan>
+		<tspan class="copy" x="1490" dy="20">Player may observe or challenge his assumption</tspan>
+	</text>
+	<rect class="card" x="1245" y="285" width="490" height="185" rx="10"/>
+	<text text-anchor="middle" x="1490" y="319">
+		<tspan class="title">E-04 · COUPLING AND PRESSURE TEST</tspan>
+		<tspan class="copy" x="1490" dy="25">Operator verifies the farm fitting</tspan>
+		<tspan class="copy" x="1490" dy="20">Abort → cracked pin / silt</tspan>
+		<tspan class="copy" x="1490" dy="20">Push ahead → gasket failure</tspan>
+		<tspan class="copy" x="1490" dy="20">Stepped bleed-down → no new damage</tspan>
+		<tspan class="copy" x="1490" dy="20">Chosen consequence carries into the report</tspan>
+	</text>
+	<rect class="card" x="1245" y="505" width="490" height="140" rx="10"/>
+	<text text-anchor="middle" x="1490" y="540">
+		<tspan class="title">E-05 · GAGE'S REPORT</tspan>
+		<tspan class="copy" x="1490" dy="25">Gage owns his past failure</tspan>
+		<tspan class="copy" x="1490" dy="20">Report reflects the actual test outcome</tspan>
+		<tspan class="copy" x="1490" dy="20">He may request a route; Bastion decides</tspan>
+	</text>
+	<rect class="optional" x="1245" y="680" width="490" height="100" rx="10"/>
+	<text text-anchor="middle" x="1490" y="715">
+		<tspan class="title">E-06 · BASTION READINESS · OPTIONAL</tspan>
+		<tspan class="copy" x="1490" dy="25">Only after route access; threat and outcome open</tspan>
+	</text>
+	<text class="small" x="1490" y="666" text-anchor="middle">after route is granted</text>
+
+	<rect class="lane" x="35" y="850" width="550" height="750" rx="14"/>
+	<text class="lane-title" x="55" y="883">Cleo and the Index</text>
+	<path class="path" d="M 310 1055 V 1090"/>
+	<path class="path" d="M 310 1240 V 1275"/>
+	<path class="path" d="M 310 1415 V 1450"/>
+	<rect class="card" x="65" y="915" width="490" height="140" rx="10"/>
+	<text text-anchor="middle" x="310" y="949">
+		<tspan class="title">E-07 · RECORDS REQUEST</tspan>
+		<tspan class="copy" x="310" dy="25">Logs only · bounded interview · refuse</tspan>
+		<tspan class="copy" x="310" dy="20">All choices respected; access is not a gate</tspan>
+		<tspan class="copy" x="310" dy="20">to the relationship or Archive</tspan>
+	</text>
+	<rect class="card" x="65" y="1090" width="490" height="150" rx="10"/>
+	<text text-anchor="middle" x="310" y="1125">
+		<tspan class="title">PUBLIC RECORDS WORK</tspan>
+		<tspan class="copy" x="310" dy="25">Operator knowledge corrects old diagrams</tspan>
+		<tspan class="copy" x="310" dy="20">Wellspring sets limits on what leaves town</tspan>
+		<tspan class="copy" x="310" dy="20">Private details stay protected</tspan>
+	</text>
+	<rect class="card" x="65" y="1275" width="490" height="140" rx="10"/>
+	<text text-anchor="middle" x="310" y="1310">
+		<tspan class="title">ARCHIVE INVITATION</tspan>
+		<tspan class="copy" x="310" dy="25">Later, at higher trust and after</tspan>
+		<tspan class="copy" x="310" dy="20">Cleo honors Wellspring's limits</tspan>
+		<tspan class="copy" x="310" dy="20">Independent of pod-log permission</tspan>
+	</text>
+	<rect class="card" x="65" y="1450" width="490" height="120" rx="10"/>
+	<text text-anchor="middle" x="310" y="1485">
+		<tspan class="title">REVIEW COUNCIL</tspan>
+		<tspan class="copy" x="310" dy="25">Cleo defends community-approved</tspan>
+		<tspan class="copy" x="310" dy="20">redactions; disagreement remains</tspan>
+	</text>
+
+	<rect class="lane" x="625" y="850" width="550" height="750" rx="14"/>
+	<text class="lane-title" x="645" y="883">The nomad</text>
+	<path class="path" d="M 900 1095 V 1130"/>
+	<rect class="card" x="655" y="915" width="490" height="180" rx="10"/>
+	<text text-anchor="middle" x="900" y="949">
+		<tspan class="title">E-08 · FIRST AGREEMENT</tspan>
+		<tspan class="copy" x="900" dy="25">Keep the weather tube dry and sealed</tspan>
+		<tspan class="copy" x="900" dy="20">Player may accept or decline freely</tspan>
+		<tspan class="copy" x="900" dy="20">No names or destinations inside</tspan>
+		<tspan class="copy" x="900" dy="20">Trust is limited to this small agreement</tspan>
+	</text>
+	<rect class="card" x="655" y="1130" width="490" height="165" rx="10"/>
+	<text text-anchor="middle" x="900" y="1165">
+		<tspan class="title">E-09 · ROUTE MARKER</tspan>
+		<tspan class="copy" x="900" dy="25">Observe damage and report only what is known</tspan>
+		<tspan class="copy" x="900" dy="20">Keep the signal quiet and use safe channels</tspan>
+		<tspan class="copy" x="900" dy="20">Do not infer a contact's fate</tspan>
+	</text>
+
+	<rect class="lane" x="1215" y="850" width="550" height="750" rx="14"/>
+	<text class="lane-title" x="1235" y="883">Family thread</text>
+	<rect class="uncertain" x="1245" y="915" width="490" height="180" rx="10"/>
+	<text text-anchor="middle" x="1490" y="949">
+		<tspan class="title">E-11 · FAMILY TRACES CONTINUE</tspan>
+		<tspan class="copy" x="1490" dy="25">Mail carrier delivers a sealed letter</tspan>
+		<tspan class="copy" x="1490" dy="20">to the parents' address</tspan>
+		<tspan class="copy" x="1490" dy="20">Player and Hob can leave it unopened</tspan>
+		<tspan class="copy" x="1490" dy="20">Contents and family outcome remain open</tspan>
+	</text>
+
+	<line x1="370" y1="1680" x2="420" y2="1680" class="path"/>
+	<text class="small" x="435" y="1685">intended order within an arc (top to bottom)</text>
+	<line x1="930" y1="1680" x2="980" y2="1680" class="branch"/>
+	<text class="small" x="995" y="1685">optional or conditional</text>
+	<rect x="1270" y="1666" width="24" height="24" rx="4" class="uncertain"/>
+	<text class="small" x="1305" y="1685">ambiguous or unresolved</text>
+
+	<text class="small" x="55" y="1730" font-weight="700">Legend</text>
+	<rect x="135" y="1715" width="24" height="20" rx="4" class="lane"/>
+	<text class="small" x="168" y="1730">Lane grouping</text>
+	<rect x="390" y="1715" width="24" height="20" rx="4" class="card"/>
+	<text class="small" x="423" y="1730">Story beat</text>
+	<rect x="615" y="1715" width="24" height="20" rx="4" class="optional"/>
+	<text class="small" x="648" y="1730">Optional / conditional</text>
+	<rect x="945" y="1715" width="24" height="20" rx="4" class="uncertain"/>
+	<text class="small" x="978" y="1730">Ambiguous / unresolved</text>
+
+	<g text-anchor="middle">
+		<a href="Overview.svg"><text class="nav-link" x="420" y="1790">Overview</text></a>
+		<a href="Opening.svg"><text class="nav-link" x="650" y="1790">Previous: Opening</text></a>
+		<a href="Transition.svg"><text class="nav-link" x="900" y="1790">Next: Transition</text></a>
+		<a href="Family.svg"><text class="nav-link" x="1150" y="1790">Parallel: Family thread</text></a>
+	</g>
+</svg>

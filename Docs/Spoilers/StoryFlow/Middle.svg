@@ -1,0 +1,140 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1700" height="1540" viewBox="0 0 1700 1540" role="img" aria-labelledby="title description">
+	<title id="title">Middle: separate programs, central truth, and optional first contact</title>
+	<desc id="description">The institute's records establish two distinct programs and harm without collective guilt. The player can prioritize safe contact, clarify evidence, or pause. Optional program wings add detail but do not gate the central truth. A quiet character response and handoff to the survivor-led late response remain possible even if the player pauses or contact is declined.</desc>
+	<defs>
+		<marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="strokeWidth">
+			<path d="M 0 0 L 10 5 L 0 10 z" fill="#435466"/>
+		</marker>
+		<marker id="arrow-dashed" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="strokeWidth">
+			<path d="M 0 0 L 10 5 L 0 10 z" fill="#738397"/>
+		</marker>
+		<style>
+			.background { fill: #f7f8fa; }
+			.main { fill: #c7def2; stroke: #34495e; stroke-width: 2; }
+			.side { fill: #ffffff; stroke: #8998a8; stroke-width: 2; }
+			.optional { fill: #ffdf9e; stroke: #b28a38; stroke-width: 2; }
+			.open { fill: #dcc6ef; stroke: #8873a6; stroke-width: 2; }
+			.path { fill: none; stroke: #435466; stroke-width: 3; marker-end: url(#arrow); }
+			.branch { fill: none; stroke: #738397; stroke-width: 2.5; stroke-dasharray: 8 7; marker-end: url(#arrow-dashed); }
+			.title { fill: #203040; font: 700 15px "Segoe UI", Arial, sans-serif; letter-spacing: .4px; }
+			.copy { fill: #263746; font: 14px "Segoe UI", Arial, sans-serif; }
+			.small { fill: #526273; font: 13px "Segoe UI", Arial, sans-serif; }
+			.nav-link { fill: #165d9c; font: 14px "Segoe UI", Arial, sans-serif; text-decoration: underline; cursor: pointer; }
+		</style>
+	</defs>
+
+	<rect class="background" width="1700" height="1540"/>
+	<text class="small" x="40" y="32">M-01 to M-04 · main evidence establishes the broad truth; optional records and survivor contact do not gate belief or response</text>
+
+	<path class="path" d="M 850 175 V 225"/>
+	<path class="path" d="M 850 380 V 430"/>
+	<path class="path" d="M 850 620 V 680"/>
+	<path class="path" d="M 850 850 V 910"/>
+	<path class="path" d="M 850 1080 V 1140"/>
+	<path class="branch" d="M 590 120 C 500 140 460 200 420 250"/>
+	<path class="branch" d="M 1110 120 C 1200 140 1240 200 1280 250"/>
+	<path class="branch" d="M 1110 765 H 1150 V 695 H 1180"/>
+
+	<rect class="main" x="590" y="65" width="520" height="110" rx="12"/>
+	<text text-anchor="middle" x="850" y="101">
+		<tspan class="title">M-01 · REACH THE OLD RESEARCH INSTITUTE</tspan>
+		<tspan class="copy" x="850" dy="27">Compare intake forms, procedure logs and transfer records</tspan>
+		<tspan class="copy" x="850" dy="21">Do not treat one missing file as proof</tspan>
+	</text>
+
+	<rect class="optional" x="40" y="250" width="380" height="175" rx="12"/>
+	<text text-anchor="middle" x="230" y="287">
+		<tspan class="title">M-03 · COGNITIVE WING · OPTIONAL</tspan>
+		<tspan class="copy" x="230" dy="27">Procedure logs add detail to this program</tspan>
+		<tspan class="copy" x="230" dy="21">A log does not establish consent</tspan>
+		<tspan class="copy" x="230" dy="21">“Nonviable” does not explain an outcome</tspan>
+		<tspan class="copy" x="230" dy="21">Only found evidence can inform reactions</tspan>
+	</text>
+	<rect class="optional" x="1280" y="250" width="380" height="175" rx="12"/>
+	<text text-anchor="middle" x="1470" y="287">
+		<tspan class="title">M-03 · FRAME CONVERSION WING · OPTIONAL</tspan>
+		<tspan class="copy" x="1470" dy="27">Designs and signatures add separate detail</tspan>
+		<tspan class="copy" x="1470" dy="21">A signature does not establish all knowledge</tspan>
+		<tspan class="copy" x="1470" dy="21">“Readiness” does not identify a faction current</tspan>
+		<tspan class="copy" x="1470" dy="21">Not required for the central reveal</tspan>
+	</text>
+
+	<rect class="main" x="590" y="225" width="520" height="155" rx="12"/>
+	<text text-anchor="middle" x="850" y="263">
+		<tspan class="title">M-01 · THE CENTRAL TRUTH</tspan>
+		<tspan class="copy" x="850" dy="27">The Index and Iron Creed ran separate programs</tspan>
+		<tspan class="copy" x="850" dy="21">People were misled, pressured or not allowed to leave</tspan>
+		<tspan class="copy" x="850" dy="21">Both programs caused serious harm; failure was obscured</tspan>
+	</text>
+
+	<rect class="open" x="590" y="430" width="520" height="190" rx="12"/>
+	<text text-anchor="middle" x="850" y="468">
+		<tspan class="title">WHAT REMAINS UNPROVEN OR UNKNOWN</tspan>
+		<tspan class="copy" x="850" dy="27">One shared command, collective guilt or every member's knowledge</tspan>
+		<tspan class="copy" x="850" dy="21">What each named person did beyond specific evidence</tspan>
+		<tspan class="copy" x="850" dy="21">The affected person's identity, history, condition or wishes</tspan>
+		<tspan class="copy" x="850" dy="21">Optional records cannot become shared knowledge automatically</tspan>
+	</text>
+
+	<rect class="main" x="590" y="680" width="520" height="170" rx="12"/>
+	<text text-anchor="middle" x="850" y="718">
+		<tspan class="title">M-01 · PLAYER CHOOSES THE NEXT STEP</tspan>
+		<tspan class="copy" x="850" dy="27">Prioritize contact → check route and door first</tspan>
+		<tspan class="copy" x="850" dy="21">Clarify evidence → separate fact from inference</tspan>
+		<tspan class="copy" x="850" dy="21">Pause → take time; evidence remains</tspan>
+	</text>
+
+	<rect class="optional" x="1180" y="610" width="480" height="170" rx="12"/>
+	<text text-anchor="middle" x="1420" y="648">
+		<tspan class="title">M-02 · FIRST CONTACT · ONLY IF APPROACHED</tspan>
+		<tspan class="copy" x="1420" dy="27">Ask before staying close; the display is not voluntary</tspan>
+		<tspan class="copy" x="1420" dy="21">Offer water with no touching, or leave as requested</tspan>
+		<tspan class="copy" x="1420" dy="21">Ask what name to use; “not yet” is respected</tspan>
+	</text>
+	<path class="branch" d="M 1420 780 V 820"/>
+	<rect class="open" x="1180" y="820" width="480" height="150" rx="12"/>
+	<text text-anchor="middle" x="1420" y="858">
+		<tspan class="title">CONTACT DOES NOT GATE THE REVEAL</tspan>
+		<tspan class="copy" x="1420" dy="27">Identity, testimony and care are not demanded</tspan>
+		<tspan class="copy" x="1420" dy="21">Declining contact does not undo what records prove</tspan>
+		<tspan class="copy" x="1420" dy="21">No return arrow to the main story path</tspan>
+	</text>
+
+	<rect class="side" x="590" y="910" width="520" height="170" rx="12"/>
+	<text text-anchor="middle" x="850" y="948">
+		<tspan class="title">M-04 · AFTER THE DISCOVERY</tspan>
+		<tspan class="copy" x="850" dy="27">Cleo reflects on keeping records without asking the people in them</tspan>
+		<tspan class="copy" x="850" dy="21">Gage questions “readiness” used to control another body</tspan>
+		<tspan class="copy" x="850" dy="21">Only characters who know the evidence react to it</tspan>
+	</text>
+
+	<rect class="main" x="590" y="1140" width="520" height="125" rx="12"/>
+	<text text-anchor="middle" x="850" y="1178">
+		<tspan class="title">HANDOFF TO LATE RESPONSE</tspan>
+		<tspan class="copy" x="850" dy="27">Offer care and ask what affected people want next</tspan>
+		<tspan class="copy" x="850" dy="21">Belief and a response do not depend on testimony</tspan>
+	</text>
+
+	<line x1="615" y1="1340" x2="665" y2="1340" class="path"/>
+	<text class="small" x="680" y="1345">main story progression; contact may be declined</text>
+	<line x1="1115" y1="1340" x2="1165" y2="1340" class="branch"/>
+	<text class="small" x="1180" y="1345">optional evidence or contact path</text>
+
+	<g>
+		<text class="small" x="50" y="1395" font-weight="700">Legend</text>
+		<rect x="230" y="1380" width="24" height="20" rx="4" class="main"/>
+		<text class="small" x="263" y="1395">Central truth / progression</text>
+		<rect x="560" y="1380" width="24" height="20" rx="4" class="side"/>
+		<text class="small" x="593" y="1395">Context / response</text>
+		<rect x="830" y="1380" width="24" height="20" rx="4" class="optional"/>
+		<text class="small" x="863" y="1395">Optional investigation / contact</text>
+		<rect x="1270" y="1380" width="24" height="20" rx="4" class="open"/>
+		<text class="small" x="1303" y="1395">Unknown / not established</text>
+	</g>
+	<g text-anchor="middle">
+		<a href="Overview.svg"><text class="nav-link" x="500" y="1480">Overview</text></a>
+		<a href="Transition.svg"><text class="nav-link" x="740" y="1480">Previous: Transition</text></a>
+		<a href="LateResponse.svg"><text class="nav-link" x="980" y="1480">Next: Late response</text></a>
+		<a href="Family.svg"><text class="nav-link" x="1220" y="1480">Parallel: Family thread</text></a>
+	</g>
+</svg>

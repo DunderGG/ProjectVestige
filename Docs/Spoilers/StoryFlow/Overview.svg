@@ -1,0 +1,173 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="1310" viewBox="0 0 1500 1310" role="img" aria-labelledby="title description">
+	<title id="title">Story flow overview: main progression and parallel branches</title>
+	<desc id="description">A downward main story path from waking and making a home, through relationships, corroborated clues and the trials reveal, to survivor-led response and aftermath. Dashed side paths show the parallel family and personal arcs, optional investigations and possible survivor stories. See the Opening and Early diagrams for phase details.</desc>
+	<defs>
+		<marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="strokeWidth">
+			<path d="M 0 0 L 10 5 L 0 10 z" fill="#435466"/>
+		</marker>
+		<marker id="arrow-dashed" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="strokeWidth">
+			<path d="M 0 0 L 10 5 L 0 10 z" fill="#738397"/>
+		</marker>
+		<style>
+			.background { fill: #f7f8fa; }
+			.main { fill: #c7def2; stroke: #34495e; stroke-width: 2; }
+			.side { fill: #ffffff; stroke: #8998a8; stroke-width: 2; }
+			.response { fill: #eceff2; stroke: #8998a8; stroke-width: 2; }
+			.path { fill: none; stroke: #435466; stroke-width: 3; marker-end: url(#arrow); }
+			.branch { fill: none; stroke: #738397; stroke-width: 2.5; stroke-dasharray: 8 7; marker-end: url(#arrow-dashed); }
+			.trunk { fill: none; stroke: #435466; stroke-width: 3; }
+			.title { fill: #203040; font: 700 16px "Segoe UI", Arial, sans-serif; letter-spacing: 1px; }
+			.copy { fill: #263746; font: 16px "Segoe UI", Arial, sans-serif; }
+			.small { fill: #526273; font: 14px "Segoe UI", Arial, sans-serif; }
+			.label-bg { fill: #f7f8fa; }
+			.label { fill: #526273; font: italic 13px "Segoe UI", Arial, sans-serif; }
+			.nav-link { fill: #165d9c; font: 14px "Segoe UI", Arial, sans-serif; text-decoration: underline; cursor: pointer; }
+		</style>
+	</defs>
+
+	<rect class="background" width="1500" height="1310"/>
+
+	<path class="path" d="M 750 130 V 170"/>
+	<path class="path" d="M 750 260 V 300"/>
+	<path class="path" d="M 750 390 V 430"/>
+	<path class="path" d="M 750 520 V 560"/>
+	<path class="path" d="M 750 650 V 690"/>
+
+	<path class="branch" d="M 520 85 H 400"/>
+	<path class="branch" d="M 215 130 V 200"/>
+	<path class="branch" d="M 520 215 C 470 215 460 430 400 465"/>
+	<path class="branch" d="M 400 500 C 460 500 465 605 520 605"/>
+
+	<path class="branch" d="M 980 345 H 1090"/>
+	<path class="branch" d="M 1090 345 C 1040 345 1035 475 980 475"/>
+	<path class="branch" d="M 980 370 H 1040 V 560 H 1090"/>
+	<path class="branch" d="M 1090 605 C 1040 605 1035 615 980 615"/>
+
+	<path class="trunk" d="M 750 780 V 930"/>
+	<path class="path" d="M 750 930 H 205 V 965"/>
+	<path class="path" d="M 750 930 H 565 V 965"/>
+	<path class="path" d="M 750 930 H 925 V 965"/>
+	<path class="path" d="M 750 930 H 1285 V 965"/>
+
+	<rect class="main" x="520" y="40" width="460" height="90" rx="12"/>
+	<text text-anchor="middle" x="750" y="74">
+		<tspan class="title">OPENING</tspan>
+		<tspan class="copy" x="750" dy="27">Wake, restore the farm, meet Wellspring</tspan>
+	</text>
+
+	<rect class="main" x="520" y="170" width="460" height="90" rx="12"/>
+	<text text-anchor="middle" x="750" y="204">
+		<tspan class="title">EARLY</tspan>
+		<tspan class="copy" x="750" dy="27">Relationships, local repairs, first ambiguities</tspan>
+	</text>
+
+	<rect class="main" x="520" y="300" width="460" height="90" rx="12"/>
+	<text text-anchor="middle" x="750" y="334">
+		<tspan class="title">TRANSITION</tspan>
+		<tspan class="copy" x="750" dy="27">Independent clues begin to corroborate</tspan>
+	</text>
+
+	<rect class="main" x="520" y="430" width="460" height="90" rx="12"/>
+	<text text-anchor="middle" x="750" y="464">
+		<tspan class="title">MIDDLE</tspan>
+		<tspan class="copy" x="750" dy="27">The institute establishes separate abusive trials</tspan>
+	</text>
+
+	<rect class="main" x="520" y="560" width="460" height="90" rx="12"/>
+	<text text-anchor="middle" x="750" y="594">
+		<tspan class="title">LATE RESPONSE</tspan>
+		<tspan class="copy" x="750" dy="27">Survivors choose care, privacy and accountability</tspan>
+	</text>
+
+	<rect class="main" x="520" y="690" width="460" height="90" rx="12"/>
+	<text text-anchor="middle" x="750" y="724">
+		<tspan class="title">AFTERMATH</tspan>
+		<tspan class="copy" x="750" dy="27">Several outcomes can coexist; no single resolution</tspan>
+	</text>
+
+	<rect class="side" x="30" y="40" width="370" height="90" rx="12"/>
+	<text text-anchor="middle" x="215" y="74">
+		<tspan class="title">FAMILY THREAD</tspan>
+		<tspan class="copy" x="215" dy="27">Parents, sibling and Hob's memories</tspan>
+	</text>
+	<rect class="side" x="30" y="200" width="370" height="90" rx="12"/>
+	<text text-anchor="middle" x="215" y="234">
+		<tspan class="title">HOB'S MESSAGE</tspan>
+		<tspan class="copy" x="215" dy="27">Late personal payoff; details remain open</tspan>
+	</text>
+	<rect class="side" x="30" y="430" width="370" height="100" rx="12"/>
+	<text text-anchor="middle" x="215" y="466">
+		<tspan class="title">PERSONAL ARCS</tspan>
+		<tspan class="copy" x="215" dy="27">Wellspring, Hob, Gage, Cleo and the nomad</tspan>
+	</text>
+
+	<rect class="side" x="1090" y="300" width="380" height="90" rx="12"/>
+	<text text-anchor="middle" x="1280" y="334">
+		<tspan class="title">OPTIONAL INVESTIGATIONS</tspan>
+		<tspan class="copy" x="1280" dy="27">Cognitive and Frame Conversion Wings</tspan>
+	</text>
+	<rect class="side" x="1090" y="560" width="380" height="90" rx="12"/>
+	<text text-anchor="middle" x="1280" y="594">
+		<tspan class="title">POSSIBLE SURVIVOR STORIES</tspan>
+		<tspan class="copy" x="1280" dy="27">Shelter survivor, second sleeper, disguised human</tspan>
+	</text>
+
+	<rect class="response" x="30" y="965" width="350" height="105" rx="12"/>
+	<text text-anchor="middle" x="205" y="1003">
+		<tspan class="title">CARE AND SAFETY</tspan>
+		<tspan class="copy" x="205" dy="27">Support on the survivor's terms</tspan>
+	</text>
+	<rect class="response" x="390" y="965" width="350" height="105" rx="12"/>
+	<text text-anchor="middle" x="565" y="1003">
+		<tspan class="title">RECORDS AND TESTIMONY</tspan>
+		<tspan class="copy" x="565" dy="27">Preserve only what is authorized</tspan>
+	</text>
+	<rect class="response" x="750" y="965" width="350" height="105" rx="12"/>
+	<text text-anchor="middle" x="925" y="1003">
+		<tspan class="title">INVESTIGATION</tspan>
+		<tspan class="copy" x="925" dy="27">Corroborate individual responsibility</tspan>
+	</text>
+	<rect class="response" x="1110" y="965" width="350" height="105" rx="12"/>
+	<text text-anchor="middle" x="1285" y="1003">
+		<tspan class="title">INSTITUTIONAL RESPONSE</tspan>
+		<tspan class="copy" x="1285" dy="27">Contested, specific and ongoing</tspan>
+	</text>
+
+	<rect class="label-bg" x="100" y="147" width="230" height="24"/>
+	<text class="label" text-anchor="middle" x="215" y="164">parallel family thread</text>
+	<rect class="label-bg" x="428" y="324" width="130" height="24"/>
+	<text class="label" text-anchor="middle" x="493" y="341">parallel arcs</text>
+	<rect class="label-bg" x="991" y="276" width="106" height="24"/>
+	<text class="label" text-anchor="middle" x="1044" y="293">optional path</text>
+	<rect class="label-bg" x="988" y="532" width="100" height="24"/>
+	<text class="label" text-anchor="middle" x="1038" y="549">optional path</text>
+
+	<line x1="535" y1="1095" x2="585" y2="1095" class="path"/>
+	<text class="small" x="600" y="1100">main progression</text>
+	<line x1="805" y1="1095" x2="855" y2="1095" class="branch"/>
+	<text class="small" x="870" y="1100">parallel or optional branch</text>
+
+	<g>
+		<text class="small" x="45" y="1140" font-weight="700">Legend</text>
+		<rect x="95" y="1125" width="24" height="20" rx="4" class="main"/>
+		<text class="small" x="128" y="1140">Main progression</text>
+		<rect x="360" y="1125" width="24" height="20" rx="4" class="side"/>
+		<text class="small" x="393" y="1140">Supporting / parallel thread</text>
+		<rect x="760" y="1125" width="24" height="20" rx="4" class="response"/>
+		<text class="small" x="793" y="1140">Response / outcome summary</text>
+		<line x1="150" y1="1180" x2="200" y2="1180" class="path"/>
+		<text class="small" x="215" y="1185">Intended progression</text>
+		<line x1="620" y1="1180" x2="670" y2="1180" class="branch"/>
+		<text class="small" x="685" y="1185">Parallel or optional branch</text>
+		<line x1="940" y1="1180" x2="940" y2="1210" class="trunk"/>
+		<text class="small" x="960" y="1200">Shared branch stem (no direction)</text>
+	</g>
+	<g text-anchor="middle">
+		<a href="Opening.svg"><text class="nav-link" x="150" y="1285">Opening</text></a>
+		<a href="Early.svg"><text class="nav-link" x="350" y="1285">Early</text></a>
+		<a href="Transition.svg"><text class="nav-link" x="550" y="1285">Transition</text></a>
+		<a href="Middle.svg"><text class="nav-link" x="750" y="1285">Middle</text></a>
+		<a href="LateResponse.svg"><text class="nav-link" x="950" y="1285">Late response</text></a>
+		<a href="Family.svg"><text class="nav-link" x="1150" y="1285">Family thread</text></a>
+	</g>
+</svg>

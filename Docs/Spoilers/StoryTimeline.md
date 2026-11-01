@@ -18,6 +18,10 @@ Relationship arcs and hub visits may happen in different orders. The player shou
 
 The family mystery runs alongside the larger story. Its late message is an intimate thread, not a prerequisite for discovering the trials or responding to them.
 
+## Story flow
+
+See the [story flow diagrams](StoryFlow/README.md).
+
 ## Story phase overview
 
 | Phase | Emotional register | Main story movement |
