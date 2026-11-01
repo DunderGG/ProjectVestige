@@ -243,6 +243,7 @@ The code changes that the slice's content depends on. Doing them first means add
 - [ ] No forced sleep: remove the pass-out at 02:00
 - [ ] After midnight, stamina drains faster
 - [ ] Going to bed late makes the next day start "exhausted" with less stamina; one level only, cleared by one night in bed before midnight
+   - Until then, every night refills stamina fully, a late one and the 02:00 pass-out included (found in play by David, 2026-11-01). The refill becomes 75% while exhausted (Systems.md, section 9)
 - [ ] HUD warnings at 22:00 and 00:00
 - [ ] Tune the stamina numbers in play: 100 stamina, the tool costs and the 0.4 s use time ([PlayTest.md, Stamina](PlayTest.md#2-pending-checks))
 - [ ] Starting stamina from data instead of the constant in `UVestigeStaminaSet` (`VestigeStamina::StartingMaxStamina`), once a second kind of character (a robot) needs other numbers or tuning needs it without a build: for example a starting-values effect granted by the ability set, or Epic's attribute table (`UAttributeSet::InitFromMetaDataTable`)
