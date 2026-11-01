@@ -257,7 +257,7 @@ The code changes that the slice's content depends on. Doing them first means add
 - [ ] Show on the HUD that the player is out of stamina, for example the stamina line in red (David, 2026-11-01). The HUD follows the `Vestige.State.OutOfStamina` tag (`RegisterGameplayTagEvent` on the ability system) rather than comparing the number itself, so the rule stays in `UVestigeStaminaSet`, and it changes the line's colour only when the tag changes, never in a per-frame binding
 - [ ] Holding E repeats the tool use, so walking along a row while holding it works the row (David, 2026-11-01). E is bound to the press only today. Repeat only after a use that changed the farm, so a use that changes nothing (hoeing tilled soil) stops the repeat quietly instead of posting its message every frame; the next use still waits for `UseSeconds`
 - [x] A bed in the farmhouse to sleep in, instead of a key that works anywhere
-   - Done 2026-11-01 without the farmhouse: `AVestigeBed` (`BP_Bed`), a placeholder box beside the player start in `L_Farm`, used with F. N stays as a test key, "Skip day (test)", until the cheat manager (decided with David). The bed moves into the farmhouse when there is one, and gets its mesh with [4.6](#46-interface-and-input)
+   - Done 2026-11-01 without the farmhouse: `AVestigeBed` (`BP_Bed`), a placeholder box along the near edge of the field in `L_Farm`, used with F. N stays as a test key, "Skip day (test)", until the cheat manager (decided with David). The bed moves into the farmhouse when there is one, and gets its mesh with [4.6](#46-interface-and-input)
 - [ ] Hostile robots at night wait until combat exists ([milestone 3](#combat-and-the-wasteland))
 
 ### 4.4 The caretaker robot
