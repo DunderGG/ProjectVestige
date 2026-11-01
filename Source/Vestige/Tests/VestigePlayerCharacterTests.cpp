@@ -56,7 +56,8 @@ namespace VestigePlayerCharacterTests
 
 		TEST_METHOD(TheFarmerBlueprintTurnsWithTheVestigeMovementComponent)
 		{
-			const UClass* FarmerClass = LoadClass<AVestigePlayerCharacter>(nullptr, TEXT("/Game/Vestige/Blueprints/BP_Farmer.BP_Farmer_C"));
+			const UClass* FarmerClass =
+				LoadClass<AVestigePlayerCharacter>(nullptr, TEXT("/Game/Vestige/Blueprints/BP_PlayerCharacter.BP_PlayerCharacter_C"));
 			ASSERT_THAT(IsNotNull(FarmerClass));
 
 			// The Blueprint's rate is tuning, so any rate that turns at all passes.

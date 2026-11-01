@@ -43,7 +43,8 @@ namespace FarmingTests
 			Inventory = PlayerState.GetInventory();
 			ASSERT_THAT(IsNotNull(Inventory));
 
-			UClass* FarmerClass = LoadClass<AVestigePlayerCharacter>(nullptr, TEXT("/Game/Vestige/Blueprints/BP_Farmer.BP_Farmer_C"));
+			UClass* FarmerClass =
+				LoadClass<AVestigePlayerCharacter>(nullptr, TEXT("/Game/Vestige/Blueprints/BP_PlayerCharacter.BP_PlayerCharacter_C"));
 			ASSERT_THAT(IsNotNull(FarmerClass));
 			Farmer = &Spawner.SpawnActor<AVestigePlayerCharacter>(FActorSpawnParameters(), FarmerClass);
 			Farmer->DispatchBeginPlay();
