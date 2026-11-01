@@ -161,13 +161,13 @@ Blueprints, and later mods, can now hear of a new day, a harvest and a tool use 
 
 The player now sleeps in a bed, by walking up to it and pressing **F** ([Systems.md, section 7](Systems.md#7-interaction)). N stays as a test key that skips to the next day anywhere. The tests check the rules (focus, the first option, the bed sleeping the player, the ability); these checks are for how it looks and feels. The commit is the one titled "Add the interaction interface and a bed to sleep in".
 
-- [ ] **The bed**: a placeholder bed (a flat grey box, 2 m long) lies lengthwise along the near edge of the field, to the left of where the farmer starts, outside the tiles. The farmer can't walk through it.
-- [ ] **Prompt**: walking up to the bed shows a box reading "F Sleep" below the middle of the screen. It appears when the farmer is about a step from the bed, not from across the field, and disappears again when he walks away. Say if the reach feels too short or too long: it is Interaction Radius on the farmer's **Interaction** component (100 cm), and the bed's Interaction Volume box.
-- [ ] **Sleeping**: pressing F by the bed starts the next day at 06:00 with "You slept. Day 2 begins.", full stamina and "Game saved.", the same as N did. F away from the bed does nothing.
-- [ ] **Key hints**: the bottom line reads "... | E Use tool | F Interact | N Skip day (test) | F9 New game".
-- [ ] **Tool by the bed**: standing on the edge tile next to the bed, facing into the field, the prompt shows and E still uses the tool on the framed tile, not the bed. (Moved 2026-11-01: the bed first stood too far from the field to test this.)
-- [ ] **Assets**: `DA_AbilitySet_Player` lists `VestigeGameplayAbility_Interact` under Abilities, and `Content/Vestige/Blueprints/BP_Bed` opens with a cube **BedMesh** and an **InteractionVolume** box. Project Settings > Engine > Collision lists an Object Channel **Interactable** (default response Ignore) and a preset **VestigeInteractable**. None of them asks to be saved when you close it.
-- [ ] **Solution**: after regenerating the project files, the solution shows the new `Interaction` folder under `Source/Vestige`.
+- [x] **The bed**: a placeholder bed (a flat grey box, 2 m long) lies lengthwise along the near edge of the field, to the left of where the farmer starts, outside the tiles. The farmer can't walk through it.
+- [x] **Prompt**: walking up to the bed shows a box reading "F Sleep" below the middle of the screen. It appears when the farmer is about a step from the bed, not from across the field, and disappears again when he walks away. Say if the reach feels too short or too long: it is Interaction Radius on the farmer's **Interaction** component (100 cm), and the bed's Interaction Volume box.
+- [x] **Sleeping**: pressing F by the bed starts the next day at 06:00 with "You slept. Day 2 begins.", full stamina and "Game saved.", the same as N did. F away from the bed does nothing.
+- [x] **Key hints**: the bottom line reads "... | E Use tool | F Interact | N Skip day (test) | F9 New game".
+- [x] **Tool by the bed**: standing on the edge tile next to the bed, facing into the field, the prompt shows and E still uses the tool on the framed tile, not the bed. (Moved 2026-11-01: the bed first stood too far from the field to test this.)
+- [x] **Assets**: `DA_AbilitySet_Player` lists `VestigeGameplayAbility_Interact` under Abilities, and `Content/Vestige/Blueprints/BP_Bed` opens with a cube **BedMesh** and an **InteractionVolume** box. Project Settings > Engine > Collision lists an Object Channel **Interactable** (default response Ignore) and a preset **VestigeInteractable**. None of them asks to be saved when you close it.
+- [x] **Solution**: after regenerating the project files, the solution shows the new `Interaction` folder under `Source/Vestige`.
 
 ### Editor chores
 
