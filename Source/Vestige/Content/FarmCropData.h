@@ -26,7 +26,7 @@ public:
 	int32 GetDaysToMature() const { return DaysToMature; }
 	int32 GetYield() const { return Yield; }
 
-	/** The item a harvest gives (FarmItem:Base.Turnip). */
+	/** The item a harvest gives (VestigeItem:Base.Turnip). */
 	const FPrimaryAssetId& GetHarvestItemId() const { return HarvestItemId; }
 
 	/** The mesh for a crop that has grown for GrowthDays days, or nullptr if that stage has no mesh or it isn't loaded. */
@@ -47,7 +47,7 @@ protected:
 
 private:
 	/** Seasons the crop grows in. Not used yet: crops grow in any season until seasons exist. */
-	UPROPERTY(EditDefaultsOnly, Category = "Farming", meta = (AllowPrivateAccess = "true", Categories = "Farm.Season"))
+	UPROPERTY(EditDefaultsOnly, Category = "Farming", meta = (AllowPrivateAccess = "true", Categories = "Vestige.Season"))
 	FGameplayTagContainer Seasons;
 
 	/** Watered days the crop needs before it can be harvested. It grows one stage per watered day. */
@@ -70,7 +70,7 @@ private:
 	TArray<TSoftObjectPtr<UStaticMesh>> GrowthStageMeshes;
 
 	/** The item one harvest gives, Yield times. Prices belong to that item. */
-	UPROPERTY(EditDefaultsOnly, Category = "Farming|Harvest", meta = (AllowPrivateAccess = "true", AllowedTypes = "FarmItem"))
+	UPROPERTY(EditDefaultsOnly, Category = "Farming|Harvest", meta = (AllowPrivateAccess = "true", AllowedTypes = "VestigeItem"))
 	FPrimaryAssetId HarvestItemId;
 
 	/** How many of the harvest item one harvest gives. */

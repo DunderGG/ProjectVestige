@@ -22,8 +22,8 @@ struct FVestigeItemStack
 {
 	GENERATED_BODY()
 
-	/** The item (FarmItem:Base.TurnipSeeds). */
-	UPROPERTY(EditAnywhere, Category = "Inventory", meta = (AllowedTypes = "FarmItem"))
+	/** The item (VestigeItem:Base.TurnipSeeds). */
+	UPROPERTY(EditAnywhere, Category = "Inventory", meta = (AllowedTypes = "VestigeItem"))
 	FPrimaryAssetId ItemId;
 
 	UPROPERTY(EditAnywhere, Category = "Inventory", meta = (ClampMin = 1))

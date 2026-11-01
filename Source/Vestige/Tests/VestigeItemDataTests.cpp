@@ -18,13 +18,15 @@
 // A namespace keeps the fixture's short name from hiding other declarations in unity builds.
 namespace VestigeItemDataTests
 {
-	const FPrimaryAssetId TurnipCropId(UFarmCropData::AssetType, TEXT("Base.Turnip"));
-	const FPrimaryAssetId TurnipItemId(UVestigeItemData::AssetType, TEXT("Base.Turnip"));
-	const FPrimaryAssetId TurnipSeedsItemId(UVestigeItemData::AssetType, TEXT("Base.TurnipSeeds"));
-
 	TEST_CLASS(Item, "Vestige")
 	{
 		FActorTestSpawner Spawner;
+
+		// Members, not globals: the asset types are statics of other files, which may not be initialized yet when this file's
+		// globals are.
+		const FPrimaryAssetId TurnipCropId{UFarmCropData::AssetType, TEXT("Base.Turnip")};
+		const FPrimaryAssetId TurnipItemId{UVestigeItemData::AssetType, TEXT("Base.Turnip")};
+		const FPrimaryAssetId TurnipSeedsItemId{UVestigeItemData::AssetType, TEXT("Base.TurnipSeeds")};
 
 		UVestigeItemData& MakeItem()
 		{

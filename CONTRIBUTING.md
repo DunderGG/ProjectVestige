@@ -147,7 +147,7 @@ Each crop, tool and item is a **data asset**: an asset in the Content Browser wh
    | Display Name | The name the player sees, such as *Carrot* |
    | Days To Mature | Watered days until it can be harvested. It grows one stage per watered day |
    | Growth Stage Meshes | The meshes from step 1, in order, one more than *Days To Mature* |
-   | Harvest Item Id | The item a harvest gives, such as `FarmItem:Base.Carrot`. Make that item first, as in [Adding an item](#adding-an-item); prices belong to it |
+   | Harvest Item Id | The item a harvest gives, such as `VestigeItem:Base.Carrot`. Make that item first, as in [Adding an item](#adding-an-item); prices belong to it |
    | Yield | How many of that item one harvest gives |
    | Seasons, Water Need, Contamination Tolerance | Fill in what you intend. The game doesn't use them yet; they are there so crops don't need changing when seasons and contamination arrive |
 

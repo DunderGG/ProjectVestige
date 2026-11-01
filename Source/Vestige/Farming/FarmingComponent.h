@@ -41,7 +41,7 @@ public:
 	/** Uses the tool in hand on the target tile. Does nothing to the farm without a target or a tool. */
 	void UseTool();
 
-	/** The item the Seeds tool plants (FarmItem:Base.TurnipSeeds). */
+	/** The item the Seeds tool plants (VestigeItem:Base.TurnipSeeds). */
 	const FPrimaryAssetId& GetSeedItemId() const { return SeedItemId; }
 
 	/** The tool in hand, for saving. */
@@ -118,8 +118,8 @@ private:
 	/** The owner's tile when the target was last found, so moving within a tile does no work. */
 	FIntPoint OwnerCoordinates = FIntPoint::ZeroValue;
 
-	/** The seed item the Seeds tool plants, by its ID (FarmItem:Base.TurnipSeeds). Its seed fragment names the crop. */
-	UPROPERTY(EditDefaultsOnly, Category = "Farming", meta = (AllowPrivateAccess = "true", AllowedTypes = "FarmItem"))
+	/** The seed item the Seeds tool plants, by its ID (VestigeItem:Base.TurnipSeeds). Its seed fragment names the crop. */
+	UPROPERTY(EditDefaultsOnly, Category = "Farming", meta = (AllowPrivateAccess = "true", AllowedTypes = "VestigeItem"))
 	FPrimaryAssetId SeedItemId;
 
 	/** The crop the seed item grows, loaded with its meshes at BeginPlay. */
@@ -127,10 +127,10 @@ private:
 	TObjectPtr<const UFarmCropData> SeedCrop;
 
 	/**
-	 * Tool assets in the toolbar slots, in order (FarmTool:Base.Hoe).
+	 * Tool assets in the toolbar slots, in order (VestigeTool:Base.Hoe).
 	 * Keys 1 to 9 select the first nine; the first is in hand at the start.
 	 */
-	UPROPERTY(EditDefaultsOnly, Category = "Farming", meta = (AllowPrivateAccess = "true", AllowedTypes = "FarmTool"))
+	UPROPERTY(EditDefaultsOnly, Category = "Farming", meta = (AllowPrivateAccess = "true", AllowedTypes = "VestigeTool"))
 	TArray<FPrimaryAssetId> ToolbarIds;
 
 	/** The tools loaded from ToolbarIds at BeginPlay, and the one in hand. */

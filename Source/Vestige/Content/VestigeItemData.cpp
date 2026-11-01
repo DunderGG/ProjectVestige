@@ -9,7 +9,7 @@
 
 #define LOCTEXT_NAMESPACE "VestigeItemData"
 
-const FPrimaryAssetType UVestigeItemData::AssetType(TEXT("FarmItem"));
+const FPrimaryAssetType UVestigeItemData::AssetType(TEXT("VestigeItem"));
 
 const UVestigeItemFragment* UVestigeItemData::FindFragmentByClass(TSubclassOf<UVestigeItemFragment> FragmentClass) const
 {

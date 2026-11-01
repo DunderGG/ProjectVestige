@@ -5,7 +5,7 @@
 
 #include "Engine/StaticMesh.h"
 
-const FPrimaryAssetType UVestigeToolData::AssetType(TEXT("FarmTool"));
+const FPrimaryAssetType UVestigeToolData::AssetType(TEXT("VestigeTool"));
 
 UStaticMesh* UVestigeToolData::GetHeldMesh() const
 {

@@ -93,7 +93,7 @@ Items exist as data but nothing in play uses them yet, so the game itself should
 - [x] **Validation** (46bf244): right-click `Content/Farm` > Validate Assets reports no errors, and the Output Log at editor start has no "is used by more than one asset" error.
    - Checked in 5.8 on 2026-10-31 by the agent with the `DataValidation` commandlet: all 23 assets under `Content/Farm` are valid, and the editor logs have no duplicate content ID error.
 - [ ] **Item assets** (46bf244): `Content/Farm/Items` has `DA_Item_Turnip` and `DA_Item_TurnipSeeds`. Opening the seeds shows one **Farm Seed Fragment** under Fragments, with Crop Id `FarmCrop:Base.Turnip`; its Crop Id picker lists only crops. Pressing + on Fragments offers the fragment classes to pick from.
-- [ ] **Turnip crop** (46bf244): `DA_Crop_Turnip` shows Harvest Item Id `FarmItem:Base.Turnip` and Yield under Farming > Harvest, and no Seed Price or Sell Price.
+- [ ] **Turnip crop** (46bf244): `DA_Crop_Turnip` shows Harvest Item Id `VestigeItem:Base.Turnip` and Yield under Farming > Harvest, and no Seed Price or Sell Price.
 - [ ] **No change in play** (46bf244): planting, growing and harvesting a turnip work as in the [smoke test](#3-smoke-test).
 
 ### Source folders, 2026-10-30
@@ -127,6 +127,8 @@ The general C++ types lost their `Farm` prefix (`AFarmHUD` is now `AVestigeHUD`,
 - [ ] **Old save** (74bff97): pressing Play loads your farm as you left it: the day, the clock, the bag and the tiles. Sleep once; stopping and playing again brings the same farm back.
 - [ ] **Assets** (74bff97): `BP_Farmer` opens and compiles without errors, and its Class Settings show Parent Class `Vestige Farmer Character`; its components include **Rest** (`Vestige Rest Component`) and **Character Movement** (`Vestige Character Movement Component`). In `L_Farm`, the day cycle actor shows class `VestigeDayCycle` with its settings as before. `DA_Tool_Hoe` and `DA_Item_TurnipSeeds` open with their values. The Output Log has no "Failed to load" or "can't find class" lines after opening them and playing. If the editor asks to save any of them, saving is fine: they then store the new names.
 - [ ] **Settings** (74bff97): Edit > Project Settings > Game lists **Vestige HUD** (no more Farm HUD) with the same values.
+- [ ] **Asset types** (this commit): the tool, item and crop assets, `BP_Farmer` and `BP_PlayerState` were re-saved by script with the new types. `BP_Farmer`'s **Farming** component shows Toolbar Ids `VestigeTool:Base.Hoe` to `VestigeTool:Base.Hand` and Seed Item Id `VestigeItem:Base.TurnipSeeds`; `BP_PlayerState`'s **Inventory** shows Starting Items `VestigeItem:Base.TurnipSeeds` × 10; `DA_Crop_Turnip` shows Harvest Item Id `VestigeItem:Base.Turnip`. Each picker still lists only its own kind of asset, and none of them asks to be saved when you close it.
+- [ ] **Season tags** (this commit): `DA_Crop_Turnip`'s Seasons picker offers `Vestige.Season.Spring` to `Vestige.Season.Winter`.
 - [ ] The [smoke test](#3-smoke-test).
 
 ### Editor chores
