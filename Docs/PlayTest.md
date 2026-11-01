@@ -137,10 +137,11 @@ The general C++ types lost their `Farm` prefix (`AFarmHUD` is now `AVestigeHUD`,
 
 The player now has stamina, through the Gameplay Ability System (Systems.md, section 9). Using a tool is an ability: a use that changes the farm costs the tool's Stamina Cost (hoe and watering can 2, seeds and hand 1, out of 100), and every use takes the tool's Use Seconds (0.4 s) before the next one can start, twice as long at zero stamina. Sleeping refills stamina, and the save stores it. `DA_AbilitySet_Player` was made and `BP_PlayerState` and the four tool assets changed by a headless editor script, so the editor hasn't shown them yet. Back up `Saved/SaveGames/` first: your save is upgraded to version 3 on the first new day.
 
-- [ ] **Editor start** (1bfe8f1): the editor opens without asking to enable a plugin or rebuild, and the Output Log at start has no errors from `LogAbilitySystem` or `LogVestige`. Edit > Plugins shows **Gameplay Abilities** enabled.
-- [ ] **HUD** (1bfe8f1): under the status line, the HUD reads "Stamina 100 / 100". Tilling a tile drops it to 98 at once.
-- [ ] **No cost for nothing** (1bfe8f1): watering bare grass or using the hand on an unripe crop shows its message and leaves stamina where it was.
-- [ ] **Use time** (1bfe8f1): holding E or pressing it quickly uses the tool about twice a second, no faster, and walking isn't slowed while a use is under way. Say if 0.4 s feels sluggish or too quick: it is Use Seconds on each tool asset in `Content/Vestige/Tools` (Details panel, Farming).
+- [x] **Editor start** (1bfe8f1): the editor opens without asking to enable a plugin or rebuild, and the Output Log at start has no errors from `LogAbilitySystem` or `LogVestige`. Edit > Plugins shows **Gameplay Abilities** enabled.
+- [x] **HUD** (1bfe8f1): under the status line, the HUD reads "Stamina 100 / 100". Tilling a tile drops it to 98 at once.
+- [x] **No cost for nothing** (1bfe8f1): watering bare grass or using the hand on an unripe crop shows its message and leaves stamina where it was.
+- [ ] **Use time** (1bfe8f1): E uses the tool once per press (holding it does nothing more). Pressing it quickly uses the tool about twice a second, no faster: presses that come too soon are ignored. Walking isn't slowed while a use is under way. Say if 0.4 s feels sluggish or too quick: it is Use Seconds on each tool asset in `Content/Vestige/Tools` (Details panel, Farming).
+   - Corrected 2026-11-01: this check first said holding E repeats the use. It doesn't: E is bound to the press only, and the agent wrote the check wrong.
 - [ ] **Out of stamina** (1bfe8f1): keep tilling and watering until the HUD reads "Stamina 0 / 100". The message "You're out of stamina. Everything takes longer until you sleep." appears once, the tools still work, each use now takes about twice as long, and stamina stays at 0.
 - [ ] **Sleep** (1bfe8f1): sleeping (N) brings the HUD back to "Stamina 100 / 100", and so does passing out at 02:00.
 - [ ] **Saving** (1bfe8f1): spend some stamina, then stop and play again: stamina is full, because the game saves at the start of each day, after sleeping. Your old save loads with full stamina.
