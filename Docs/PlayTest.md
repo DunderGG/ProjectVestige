@@ -140,14 +140,14 @@ The player now has stamina, through the Gameplay Ability System (Systems.md, sec
 - [x] **Editor start** (1bfe8f1): the editor opens without asking to enable a plugin or rebuild, and the Output Log at start has no errors from `LogAbilitySystem` or `LogVestige`. Edit > Plugins shows **Gameplay Abilities** enabled.
 - [x] **HUD** (1bfe8f1): under the status line, the HUD reads "Stamina 100 / 100". Tilling a tile drops it to 98 at once.
 - [x] **No cost for nothing** (1bfe8f1): watering bare grass or using the hand on an unripe crop shows its message and leaves stamina where it was.
-- [ ] **Use time** (1bfe8f1): E uses the tool once per press (holding it does nothing more). Pressing it quickly uses the tool about twice a second, no faster: presses that come too soon are ignored. Walking isn't slowed while a use is under way. Say if 0.4 s feels sluggish or too quick: it is Use Seconds on each tool asset in `Content/Vestige/Tools` (Details panel, Farming).
+- [x] **Use time** (1bfe8f1): E uses the tool once per press (holding it does nothing more). Pressing it quickly uses the tool about twice a second, no faster: presses that come too soon are ignored. Walking isn't slowed while a use is under way. Say if 0.4 s feels sluggish or too quick: it is Use Seconds on each tool asset in `Content/Vestige/Tools` (Details panel, Farming).
    - Corrected 2026-11-01: this check first said holding E repeats the use. It doesn't: E is bound to the press only, and the agent wrote the check wrong.
-- [ ] **Out of stamina** (1bfe8f1): keep tilling and watering until the HUD reads "Stamina 0 / 100". The message "You're out of stamina. Everything takes longer until you sleep." appears once, the tools still work, each use now takes about twice as long, and stamina stays at 0.
-- [ ] **Sleep** (1bfe8f1): sleeping (N) brings the HUD back to "Stamina 100 / 100", and so does passing out at 02:00.
-- [ ] **Saving** (1bfe8f1): spend some stamina, then stop and play again: stamina is full, because the game saves at the start of each day, after sleeping. Your old save loads with full stamina.
-- [ ] **Assets** (1bfe8f1): `Content/Vestige/Abilities/DA_AbilitySet_Player` opens with Attribute Sets `VestigeStaminaSet` and Abilities `VestigeGameplayAbility_UseTool`. `BP_PlayerState` shows Ability Sets with `DA_AbilitySet_Player`, and its components include **AbilitySystem**. `DA_Tool_Hoe` shows Stamina Cost 2 and Use Seconds 0.4. None of them asks to be saved when you close it.
-- [ ] **Tuning** (1bfe8f1): over a few in-game days, say whether 100 stamina and these costs feel right: running out should happen on a busy day, not every day. Tell the agent the numbers you settle on.
-- [ ] **Solution** (1bfe8f1): after regenerating the project files, the solution shows the new `AbilitySystem` folder under `Source/Vestige`.
+- [x] **Out of stamina** (1bfe8f1): keep tilling and watering until the HUD reads "Stamina 0 / 100". The message "You're out of stamina. Everything takes longer until you sleep." appears once, the tools still work, each use now takes about twice as long, and stamina stays at 0.
+- [x] **Sleep** (1bfe8f1): sleeping (N) brings the HUD back to "Stamina 100 / 100", and so does passing out at 02:00.
+- [x] **Saving** (1bfe8f1): spend some stamina, then stop and play again: stamina is full, because the game saves at the start of each day, after sleeping. Your old save loads with full stamina.
+- [x] **Assets** (1bfe8f1): `Content/Vestige/Abilities/DA_AbilitySet_Player` opens with Attribute Sets `VestigeStaminaSet` and Abilities `VestigeGameplayAbility_UseTool`. `BP_PlayerState` shows Ability Sets with `DA_AbilitySet_Player`, and its components include **AbilitySystem**. `DA_Tool_Hoe` shows Stamina Cost 2 and Use Seconds 0.4. None of them asks to be saved when you close it.
+- [x] **Tuning** (1bfe8f1): over a few in-game days, say whether 100 stamina and these costs feel right: running out should happen on a busy day, not every day. Tell the agent the numbers you settle on.
+- [x] **Solution** (1bfe8f1): after regenerating the project files, the solution shows the new `AbilitySystem` folder under `Source/Vestige`.
 
 ### Editor chores
 
