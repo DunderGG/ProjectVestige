@@ -3,9 +3,15 @@
 
 #if WITH_DEV_AUTOMATION_TESTS
 
+#include "AbilitySystem/VestigeGameplayTags.h"
+#include "AbilitySystem/VestigeStaminaCostEffect.h"
+#include "AbilitySystem/VestigeStaminaSet.h"
+#include "AbilitySystemComponent.h"
 #include "Components/ActorTestSpawner.h"
 #include "CQTest.h"
 #include "Farming/VestigeRestComponent.h"
+#include "Player/VestigePlayerCharacter.h"
+#include "Player/VestigePlayerState.h"
 #include "Time/VestigeClockSaveData.h"
 #include "Time/VestigeDayCycle.h"
 
@@ -41,6 +47,37 @@ namespace VestigeRestTests
 			Setup.RestComponent->Sleep();
 
 			ASSERT_THAT(IsTrue(Setup.Cycle->GetCurrentDay() == 2));
+		}
+
+		TEST_METHOD(SleepingRefillsStamina)
+		{
+			Spawner.SpawnActor<AVestigeDayCycle>();
+			UClass* PlayerStateClass =
+				LoadClass<AVestigePlayerState>(nullptr, TEXT("/Game/Vestige/Blueprints/BP_PlayerState.BP_PlayerState_C"));
+			UClass* CharacterClass =
+				LoadClass<AVestigePlayerCharacter>(nullptr, TEXT("/Game/Vestige/Blueprints/BP_PlayerCharacter.BP_PlayerCharacter_C"));
+			ASSERT_THAT(IsNotNull(PlayerStateClass));
+			ASSERT_THAT(IsNotNull(CharacterClass));
+			AVestigePlayerState& PlayerState = Spawner.SpawnActor<AVestigePlayerState>(FActorSpawnParameters(), PlayerStateClass);
+			AVestigePlayerCharacter& Character = Spawner.SpawnActor<AVestigePlayerCharacter>(FActorSpawnParameters(), CharacterClass);
+			Character.SetPlayerState(&PlayerState);
+			Character.DispatchBeginPlay();
+			UAbilitySystemComponent* AbilitySystem = PlayerState.GetAbilitySystemComponent();
+			UVestigeRestComponent* RestComponent = Character.FindComponentByClass<UVestigeRestComponent>();
+			ASSERT_THAT(IsNotNull(AbilitySystem));
+			ASSERT_THAT(IsNotNull(RestComponent));
+
+			const FGameplayAttribute Stamina = UVestigeStaminaSet::GetStaminaAttribute();
+			const float MaxStamina = AbilitySystem->GetNumericAttribute(UVestigeStaminaSet::GetMaxStaminaAttribute());
+			const FGameplayEffectSpecHandle Cost =
+				AbilitySystem->MakeOutgoingSpec(UVestigeStaminaCostEffect::StaticClass(), 1.f, AbilitySystem->MakeEffectContext());
+			Cost.Data->SetSetByCallerMagnitude(VestigeGameplayTags::Data_StaminaCost, -MaxStamina);
+			AbilitySystem->ApplyGameplayEffectSpecToSelf(*Cost.Data);
+			ASSERT_THAT(IsTrue(AbilitySystem->GetNumericAttribute(Stamina) == 0.f));
+
+			RestComponent->Sleep();
+
+			ASSERT_THAT(IsTrue(AbilitySystem->GetNumericAttribute(Stamina) == MaxStamina));
 		}
 
 		TEST_METHOD(ReachingTheDayEndPassesOutIntoTheNextDay)

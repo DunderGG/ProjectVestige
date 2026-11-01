@@ -31,6 +31,7 @@ public:
 
 private:
 	FText GetStatusText() const;
+	FText GetStaminaText() const;
 	FText GetInventoryText() const;
 	FText GetControlsText() const;
 

@@ -10,8 +10,9 @@
 class AVestigeDayCycle;
 
 /**
- * Owns the end of the player's day: going to sleep, and passing out when the clock reaches the end of the day.
- * Lives on the farmer. The late-night rules and exhaustion join it with stamina (Systems.md, section 9).
+ * Owns the end of the player's day: going to sleep, and passing out when the clock reaches the end of the day, each of
+ * which refills the player's stamina. Lives on the player's pawn. The late-night rules and exhaustion join it next
+ * (Systems.md, section 9).
  */
 UCLASS(ClassGroup = (Farming), meta = (BlueprintSpawnableComponent))
 class UVestigeRestComponent : public UActorComponent
@@ -32,8 +33,11 @@ private:
 	/** Starts the next day when the clock reaches the end of the day. Bound to AVestigeDayCycle::OnDayEndReached. */
 	void PassOut(int32 EndedDay);
 
-	/** Starts the next day and tells the player, with MessageFormat's {Day} set to the new day. */
+	/** Refills stamina and starts the next day, and tells the player, with MessageFormat's {Day} set to the new day. */
 	void StartNextDay(const FText& MessageFormat);
+
+	/** Fills the owner's stamina back up through UVestigeStaminaRefillEffect. Does nothing without an ability system. */
+	void RefillStamina() const;
 
 	UPROPERTY()
 	TObjectPtr<AVestigeDayCycle> DayCycle;

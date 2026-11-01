@@ -22,6 +22,8 @@ public class Vestige : ModuleRules
 			"AssetRegistry",
 			"Slate",
 			"DeveloperSettings",
+			"GameplayAbilities",
+			"GameplayTasks",
 			"SlateCore",
 			"UMG"
 		});

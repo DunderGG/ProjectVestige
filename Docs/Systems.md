@@ -82,7 +82,7 @@ Contents
 
 ## 3. Gameplay tags
 
-**Status:** in use for seasons (`Vestige.Season.*` in `Config/DefaultGameplayTags.ini`).
+**Status:** in use for seasons (`Vestige.Season.*` in `Config/DefaultGameplayTags.ini`) and, as native tags in `AbilitySystem/VestigeGameplayTags.h`, for the stamina system ([section 9](#9-abilities-attributes-and-effects-gameplay-ability-system)).
 
 **References:** Epic's "Gameplay Tags" page; Lyra's native tags (`LyraGameplayTags.h/.cpp`, declared with `UE_DECLARE_GAMEPLAY_TAG_EXTERN` and defined with `UE_DEFINE_GAMEPLAY_TAG_COMMENT`).
 
@@ -230,7 +230,7 @@ Contents
 
 ## 9. Abilities, attributes and effects (Gameplay Ability System)
 
-**Status:** adopted 2026-10-29, starting with stamina (milestone 2, [Roadmap 4.3](Roadmap.md#43-stamina-and-late-nights)); not built yet. `UVestigeRestComponent` exists and owns sleep and passing out, without ability system parts so far. Health and combat (milestone 3) build on the same setup. David approved the stamina design below on 2026-10-29.
+**Status:** adopted 2026-10-29, starting with stamina (milestone 2, [Roadmap 4.3](Roadmap.md#43-stamina-and-late-nights)). David approved the stamina design below on 2026-10-29. Partly built (2026-11-01): the setup, the stamina set, tool use as an ability with its cost and the slower uses at zero, the refill on sleep, the HUD line and saving. Not built yet: the late-night drain, exhaustion and the end of the pass-out at 02:00, which the table below marks. Health and combat (milestone 3) build on the same setup.
 
 **References:** Epic's "Gameplay Ability System" pages (ability system component, attribute sets, gameplay effects, gameplay abilities, ability tasks, gameplay cues); Lyra's setup: `ULyraAbilitySystemComponent` on the player state, `ULyraAbilitySet` data assets that grant abilities, effects and attribute sets together, attribute sets such as `ULyraHealthSet`, abilities with an activation policy, and gameplay cues for cosmetics.
 
@@ -245,25 +245,34 @@ Contents
 - Single-player: no prediction keys or replication modes beyond the defaults; the ability system component uses minimal replication settings.
 - Saving: save attribute base values and active long-lived effects by ID; restore them through effects or the set's restore function, not by writing attributes directly.
 
-**Setup:** enable the Gameplay Abilities plugin in `Vestige.uproject`, and add `GameplayAbilities` and `GameplayTasks` to `Vestige.Build.cs` (`GameplayTags` is already there). Lyra calls `UAbilitySystemGlobals::Get().InitGlobalData()` once at startup, from its asset manager's `StartInitialLoading`; check during setup whether Unreal Engine 5.8 still needs that call, and record the answer here.
+**Setup:** the Gameplay Abilities plugin is enabled in `Vestige.uproject`, and `GameplayAbilities` and `GameplayTasks` are private dependencies in `Vestige.Build.cs` (`GameplayTags` was already there). Our ability system code lives in its own layer, `Source/Vestige/AbilitySystem/`, right above `Core/`, so content (an item that grants abilities) can include it later; the folder isn't called `Abilities/` because the plugin's own headers are included as `Abilities/...`. Lyra calls `UAbilitySystemGlobals::Get().InitGlobalData()` from its asset manager; in Unreal Engine 5.8 that isn't needed, because the plugin calls it itself the first time the globals are asked for (`GameplayAbilitiesModule.cpp`). `DefaultGame.ini` names `/Game/Vestige/Abilities` as the folder for gameplay cue notifies, so the engine doesn't scan all of `/Game` for them.
+
+**Native tags** are declared in `AbilitySystem/VestigeGameplayTags.h` (`VestigeGameplayTags::Ability_UseTool`, `Data_StaminaCost`, `State_OutOfStamina`), so code never builds a tag from a string. Tags only content uses stay in `DefaultGameplayTags.ini` ([section 3](#3-gameplay-tags)).
 
 **First use: stamina.** The rules in [GameDesign.md, section 5](GameDesign.md#5-time-days-and-seasons) mapped onto the system:
 
 | Rule | Built as |
 |---|---|
-| The player has stamina, shown on the HUD | `UVestigeStaminaSet` with `Stamina` and `MaxStamina`, on the ability system component of a new `AVestigePlayerState`. The HUD listens to the attribute's change delegate |
-| Tool actions cost stamina | Using a tool becomes a gameplay ability (`UVestigeGameplayAbility_UseTool`). Its cost is a gameplay effect whose magnitude is the tool's `StaminaCost`, passed as a set-by-caller value tagged `Vestige.Data.StaminaCost` |
-| Stamina never goes below zero; at zero, actions still work but take twice as long | The set clamps `Stamina` to 0..`MaxStamina`. While it is 0, an infinite effect grants `Vestige.State.OutOfStamina`, and tool abilities read that tag to double their duration. Costs are still applied, and clamp at 0 |
-| Stamina drains faster after midnight | An infinite periodic effect (`GE_LateNightDrain`) applied at midnight and removed on the new day, by the owner of the late-night rules |
-| Going to bed late makes the player exhausted: next day at 75%, one level, cleared by a night in bed before midnight | An `Exhausted` effect granting `Vestige.State.Exhausted`, which never stacks. The new-day refill applies 75% instead of 100% while it is active, and an early night removes it |
-| Sleep refills stamina | An instant effect applied in the new-day flow, so it is saved state changed synchronously ([Architecture.md, section 15](Architecture.md#15-the-day-flow)) |
+| The player has stamina, shown on the HUD | Built. `UVestigeStaminaSet` with `Stamina` and `MaxStamina` (100 at the start, a named constant until characters get starting stats from data), on the ability system component of `AVestigePlayerState`. The HUD listens to both attributes' change delegates and shows "Stamina 85 / 100" |
+| Tool actions cost stamina | Built. Using a tool is a gameplay ability (`UVestigeGameplayAbility_UseTool`). Its cost is `UVestigeStaminaCostEffect`, whose magnitude is the tool's `StaminaCost`, passed as a set-by-caller value tagged `Vestige.Data.StaminaCost`. A use that changes nothing on the farm (no target, nothing to water) costs nothing |
+| Stamina never goes below zero; at zero, actions still work but take twice as long | Built. The set clamps `Stamina` to 0..`MaxStamina`. While it is 0, the set holds `Vestige.State.OutOfStamina` on the ability system as a loose tag, and tells the player once when it runs out. Each use takes the tool's `UseSeconds`, `OutOfStaminaTimeScale` (2) times as long while the tag is held; the ability stays active that long, so the next use can't start. Costs are still applied, and clamp at 0. The ability's `CheckCost` always passes, so a cost never blocks an action |
+| Stamina drains faster after midnight | Not built. An infinite periodic effect applied at midnight and removed on the new day, by the owner of the late-night rules |
+| Going to bed late makes the player exhausted: next day at 75%, one level, cleared by a night in bed before midnight | Not built. An `Exhausted` effect granting `Vestige.State.Exhausted`, which never stacks. The new-day refill applies 75% instead of 100% while it is active, and an early night removes it |
+| Sleep refills stamina | Built. `UVestigeStaminaRefillEffect`, an instant effect that sets `Stamina` to `MaxStamina`, applied by the rest component just before it starts the next day, so it is saved state changed synchronously ([Architecture.md, section 15](Architecture.md#15-the-day-flow)) |
 
-Who owns what: `AVestigePlayerState` owns the ability system component; `UVestigeStaminaSet` owns the numbers and their limits; the farming component keeps choosing the tile and the tool and activates the tool ability; a small `UVestigeRestComponent` on the farmer owns sleep, the late-night rules and exhaustion (moving those out of `UFarmingComponent`, [ArchitectureAudit A-13](ArchitectureAudit.md)). Abilities and the stamina set are granted from a `UFarmAbilitySet` data asset. Effects are Blueprint assets (`GE_`) under `Content/Vestige/Abilities/`, with every magnitude in data. Saving stores `Stamina` and whether `Exhausted` is active, and restores them without replaying effects. Tests cover the clamp, the cost, the zero-stamina tag and the exhausted refill.
+Who owns what: `AVestigePlayerState` owns the ability system component and grants its ability sets in `PostInitializeComponents`, so the stamina set exists before any actor's `BeginPlay`; it makes the pawn the avatar when `OnPawnSet` fires, and cancels running abilities when the pawn changes. The pawn (`AVestigePlayerCharacter`) implements `IAbilitySystemInterface` and returns the player state's component, so lower layers find it with `UAbilitySystemGlobals::GetAbilitySystemComponentFromActor` without knowing the player state class. `UVestigeStaminaSet` owns the numbers, their limits and the out-of-stamina tag. The farming component keeps choosing the tile and the tool and applying the tool's rules (`UseToolOnTarget`, which returns whether the farm changed); its `UseTool` only activates the abilities tagged `Vestige.Ability.UseTool`. The use-tool ability owns the cost and how long a use takes, and calls `UseToolOnTarget`. `UVestigeRestComponent` on the pawn owns sleep and the refill, later the late-night rules and exhaustion. Abilities and the stamina set are granted from a `UVestigeAbilitySet` data asset (`Content/Vestige/Abilities/DA_AbilitySet_Player`, named on `BP_PlayerState`): a plain list of attribute set classes and ability classes, without Lyra's grant handles until something needs to take a set away. Saving stores the base value of `Stamina` (`FVestigeStaminaSaveData`, save version 3; older saves start full) and restores it through the set's restore function, which sets the base value without replaying effects; later also whether `Exhausted` is active. Tests cover the clamp, the cost, a use that costs nothing, one use at a time, the zero-stamina tag and slowdown, the refill on sleep and the save; the exhausted refill comes with exhaustion.
+
+Built differently from the approved design, decided on 2026-11-01 (decision log):
+
+- **Effects are C++ classes, not `GE_` Blueprint assets.** Their shape is fixed (which attribute, which operation) and every magnitude comes from data: the cost from the tool's `StaminaCost`, the refill from `MaxStamina`. In C++ they show in code review and tests, and the agents that build this project can't author gameplay effect modifiers with editor scripting. An effect with a number of its own to tune (the late-night drain rate, the 75% exhausted refill) gets that number from data too: a set-by-caller value from a settings or data asset, or a Blueprint subclass of a C++ effect.
+- **The out-of-stamina tag is a loose tag the set keeps in step with `Stamina`, not an infinite effect.** It is derived from the number, so it can't drift from it, needs nothing in the save and no effect asset.
+- **A tool use takes time.** "Twice as long" needs a duration, and there are no animations yet, so the tool's `UseSeconds` is how long the ability stays active. The ability is instanced per actor, so a use creates no objects, and its wait is a timer on that instance rather than an ability task, which would be a new object per use. With animations, the duration becomes the montage's length and the play rate halves at zero stamina.
 
 **Pitfalls:**
 
 - Building more of the system than stamina needs. Start with the stamina set, the use-tool ability, the effects above and one ability set; add Lyra's extras (custom ability system component subclasses, activation groups, ability cost classes) only when a second use needs them.
-- Abilities that tick or poll. Use ability tasks and attribute change delegates.
+- Abilities that tick or poll. Use ability tasks, timers and attribute change delegates.
+- Setting an attribute from outside its set. The set exposes only getters; its `Init` helpers are private and only its constructor uses them. Loading goes through the set's restore function.
 - Instancing policy: use instanced-per-actor abilities (non-instanced abilities are deprecated in recent engine versions); avoid instanced-per-execution, which creates an object on every use.
 
 ## 10. Robots: AI, routines and crowds

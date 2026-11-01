@@ -133,6 +133,21 @@ The general C++ types lost their `Farm` prefix (`AFarmHUD` is now `AVestigeHUD`,
 - [x] **Player Blueprint** (c101b8f): `BP_Farmer` is now `Content/Vestige/Blueprints/BP_PlayerCharacter` (renamed by script, no redirector left), with Parent Class `Vestige Player Character`. `BP_ThirdPersonGameMode` shows Default Pawn Class `BP_PlayerCharacter`, and pressing Play spawns the player as before.
 - [x] The [smoke test](#3-smoke-test).
 
+### Stamina, 2026-11-01
+
+The player now has stamina, through the Gameplay Ability System (Systems.md, section 9). Using a tool is an ability: a use that changes the farm costs the tool's Stamina Cost (hoe and watering can 2, seeds and hand 1, out of 100), and every use takes the tool's Use Seconds (0.4 s) before the next one can start, twice as long at zero stamina. Sleeping refills stamina, and the save stores it. `DA_AbilitySet_Player` was made and `BP_PlayerState` and the four tool assets changed by a headless editor script, so the editor hasn't shown them yet. Back up `Saved/SaveGames/` first: your save is upgraded to version 3 on the first new day.
+
+- [ ] **Editor start** (stamina commit): the editor opens without asking to enable a plugin or rebuild, and the Output Log at start has no errors from `LogAbilitySystem` or `LogVestige`. Edit > Plugins shows **Gameplay Abilities** enabled.
+- [ ] **HUD** (stamina commit): under the status line, the HUD reads "Stamina 100 / 100". Tilling a tile drops it to 98 at once.
+- [ ] **No cost for nothing** (stamina commit): watering bare grass or using the hand on an unripe crop shows its message and leaves stamina where it was.
+- [ ] **Use time** (stamina commit): holding E or pressing it quickly uses the tool about twice a second, no faster, and walking isn't slowed while a use is under way. Say if 0.4 s feels sluggish or too quick: it is Use Seconds on each tool asset in `Content/Vestige/Tools` (Details panel, Farming).
+- [ ] **Out of stamina** (stamina commit): keep tilling and watering until the HUD reads "Stamina 0 / 100". The message "You're out of stamina. Everything takes longer until you sleep." appears once, the tools still work, each use now takes about twice as long, and stamina stays at 0.
+- [ ] **Sleep** (stamina commit): sleeping (N) brings the HUD back to "Stamina 100 / 100", and so does passing out at 02:00.
+- [ ] **Saving** (stamina commit): spend some stamina, then stop and play again: stamina is full, because the game saves at the start of each day, after sleeping. Your old save loads with full stamina.
+- [ ] **Assets** (stamina commit): `Content/Vestige/Abilities/DA_AbilitySet_Player` opens with Attribute Sets `VestigeStaminaSet` and Abilities `VestigeGameplayAbility_UseTool`. `BP_PlayerState` shows Ability Sets with `DA_AbilitySet_Player`, and its components include **AbilitySystem**. `DA_Tool_Hoe` shows Stamina Cost 2 and Use Seconds 0.4. None of them asks to be saved when you close it.
+- [ ] **Tuning** (stamina commit): over a few in-game days, say whether 100 stamina and these costs feel right: running out should happen on a busy day, not every day. Tell the agent the numbers you settle on.
+- [ ] **Solution** (stamina commit): after regenerating the project files, the solution shows the new `AbilitySystem` folder under `Source/Vestige`.
+
 ### Editor chores
 
 Changes only the editor can make safely. The steps are in [Roadmap.md, Housekeeping](Roadmap.md#3-housekeeping): re-saving the template Blueprints and `L_Farm`, moving `BP_FarmTile` and the materials with redirectors fixed, and regenerating the Android File Server token if it was ever used. After each one, run the [smoke test](#3-smoke-test).
@@ -141,9 +156,9 @@ Changes only the editor can make safely. The steps are in [Roadmap.md, Housekeep
 
 About five minutes in `L_Farm`, in Play in Editor at High. Run it before pushing and at the end of each milestone, and after any editor chore. Back up `Saved/SaveGames/` first.
 
-1. **Start:** a new game (F9) starts on day 1 at 06:00. The HUD shows the day, the clock, the tool, the bag ("Bag: Turnip Seeds 10") and the key hints; the Output Log has no `LogVestige` errors.
-2. **Tools:** with each tool on the tile in front of you: the hoe (1) tills grass, the seeds (2) plant in tilled soil and use a seed, the watering can (3) darkens the soil, and the hand (4) does nothing on an unripe crop. The tool in hand changes with each key. Each action shows a short message; facing away from the field says "Stand facing a farm tile."
-3. **Growing:** water a planted tile and sleep (N), a few times. The crop grows one stage per watered night, and a tile left dry doesn't grow. Harvest the ripe crop with the hand; a Turnip stack appears in the bag or grows.
+1. **Start:** a new game (F9) starts on day 1 at 06:00. The HUD shows the day, the clock, the tool, the stamina ("Stamina 100 / 100"), the bag ("Bag: Turnip Seeds 10") and the key hints; the Output Log has no `LogVestige` errors.
+2. **Tools:** with each tool on the tile in front of you: the hoe (1) tills grass, the seeds (2) plant in tilled soil and use a seed, the watering can (3) darkens the soil, and the hand (4) does nothing on an unripe crop. The tool in hand changes with each key. Each action shows a short message, and each one that changes the farm lowers the stamina; facing away from the field says "Stand facing a farm tile." and costs nothing.
+3. **Growing:** water a planted tile and sleep (N), a few times. The crop grows one stage per watered night, and a tile left dry doesn't grow. Harvest the ripe crop with the hand; a Turnip stack appears in the bag or grows. Each night in bed refills the stamina.
 4. **Day and night:** let the clock run through an evening (it moves about one hour every 40 seconds unless the level's day cycle is set faster). The sun sets with warm light, the night is properly dark with faint moonlight, and at 02:00 the farmer passes out into the next day.
 5. **Saving:** sleep ("Game saved."), stop the game and play again. The day, the bag, the tool in hand and every tile, crops included, come back.
 6. **Highlight:** walk along the field edge and turn. The frame is bright yellow, by day and at night, follows the tile in front of you and disappears off the field.
@@ -153,6 +168,6 @@ Put the save folder back afterwards if you want your farm as it was.
 
 ## 4. What isn't manual
 
-- **Game rules are tested automatically**, by the `Vestige` automation tests: tile states and growth, tools and seeds, the inventory's stacking and saving, the clock, sleeping and passing out, the save rules and upgrades, content IDs, the include direction between source folders and the rendering settings. A rule is never covered by a manual check alone. If a check here ever finds a rule broken, the fix comes with a test that would have caught it.
+- **Game rules are tested automatically**, by the `Vestige` automation tests: tile states and growth, tools and seeds, stamina (costs, the zero floor, the slower uses and the refill), the inventory's stacking and saving, the clock, sleeping and passing out, the save rules and upgrades, content IDs, the include direction between source folders and the rendering settings. A rule is never covered by a manual check alone. If a check here ever finds a rule broken, the fix comes with a test that would have caught it.
 - **This document is for what tests can't judge:** how the game looks and feels, lighting, the HUD as you see it, input, saves on real files across sessions, performance, and steps that need the editor.
 - **When a change needs a manual check**, the commit that makes it adds a line to [Pending checks](#2-pending-checks) under a dated heading, with the commit and what to look for. A system that gains lasting behavior also gets a line in the [smoke test](#3-smoke-test).

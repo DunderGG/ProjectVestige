@@ -16,8 +16,8 @@ namespace VestigeArchitectureTests
 	 * headers from its own folder and from folders earlier in this list, never from a later one. A new folder must be
 	 * added here, in its layer, before files go in it.
 	 */
-	const TCHAR* const LayerOrder[] = {
-		TEXT("Core"), TEXT("Content"), TEXT("Time"), TEXT("Inventory"), TEXT("Farming"), TEXT("Save"), TEXT("Player"), TEXT("UI")};
+	const TCHAR* const LayerOrder[] = {TEXT("Core"), TEXT("AbilitySystem"), TEXT("Content"), TEXT("Time"), TEXT("Inventory"),
+		TEXT("Farming"), TEXT("Save"), TEXT("Player"), TEXT("UI")};
 
 	/** Tests may include anything, and nothing may include a test. Their files aren't checked. */
 	const TCHAR* const TestsFolder = TEXT("Tests");

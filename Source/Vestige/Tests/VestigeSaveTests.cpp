@@ -183,6 +183,17 @@ namespace VestigeSaveTests
 			ASSERT_THAT(IsTrue(SaveGame.Tiles[0].CropId.IsNone()));
 		}
 
+		TEST_METHOD(Version2UpgradesWithoutStamina)
+		{
+			UVestigeSaveGame& SaveGame = Spawner.SpawnObject<UVestigeSaveGame>();
+			SaveGame.SaveVersion = 2;
+
+			ASSERT_THAT(IsTrue(UVestigeSaveSubsystem::UpgradeToCurrentVersion(SaveGame, 8)));
+
+			ASSERT_THAT(IsTrue(SaveGame.SaveVersion == UVestigeSaveGame::CurrentVersion));
+			ASSERT_THAT(IsFalse(SaveGame.Stamina.bHasStamina));
+		}
+
 		TEST_METHOD(Version0ToolEnumMapsToTheBaseToolIds)
 		{
 			const TPair<EFarmTool, FName> Expected[] = {{EFarmTool::Hoe, TEXT("Base.Hoe")}, {EFarmTool::Seeds, TEXT("Base.Seeds")},

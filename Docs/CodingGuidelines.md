@@ -445,15 +445,17 @@ The game is one module, `Vestige`, split into folders. **The folders are the arc
 ```
 Source/Vestige/
     Vestige.Build.cs
-    Core/       Shared services that know no game rules: VestigeActorLookup, UVestigeFeedbackSubsystem, the module and log category
-    Content/    Content definitions: UVestigeContentData and its subclasses, UVestigeAssetManager
-    Time/       The day cycle and its save struct
-    Farming/    Tiles and tile state, the grid, the farming, rest and highlight components, the toolbar, their save structs
-    Save/       UVestigeSaveGame and UVestigeSaveSubsystem
-    Player/     The farmer character
-    UI/         The HUD and its widgets
-    Template/   Epic's template classes (character, game mode, player controller); not maintained to this guide
-    Tests/      CQTest tests
+    Core/           Shared services that know no game rules: VestigeActorLookup, UVestigeFeedbackSubsystem, the module and log category
+    AbilitySystem/  Gameplay Ability System parts that know no farm: the stamina set and effects, ability sets, native tags
+    Content/        Content definitions: UVestigeContentData and its subclasses, UVestigeAssetManager
+    Time/           The day cycle and its save struct
+    Inventory/      The inventory component, its slot rules and save struct
+    Farming/        Tiles and tile state, the grid, the farming, rest and highlight components, the use-tool ability, the toolbar, their save structs
+    Save/           UVestigeSaveGame and UVestigeSaveSubsystem
+    Player/         The player character, its movement component and the player state
+    UI/             The HUD and its widgets
+    Template/       Epic's template classes (character, game mode, player controller); not maintained to this guide
+    Tests/          CQTest tests
 ```
 
 - **A folder includes only from its own layer and the layers below it.** `Farming/` may include `Time/`, `Content/` and `Core/`, never `Save/`, `Player/` or `UI/`. When a lower layer needs to tell a higher one something, it broadcasts an event and the higher one listens ([Architecture.md, section 4](Architecture.md#4-how-systems-talk-to-each-other)). `Tests/` may include anything, and nothing includes `Tests/`. `Template/` isn't maintained to this guide, but its includes are checked: it is app-level wiring that may include any layer (the game mode names the HUD class), so only `Player/` and `UI/` may include it.

@@ -4,9 +4,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "AbilitySystemInterface.h"
 #include "Template/VestigeCharacter.h"
 #include "VestigePlayerCharacter.generated.h"
 
+class UAbilitySystemComponent;
 class UEnhancedInputLocalPlayerSubsystem;
 class UFarmingComponent;
 class UVestigeRestComponent;
@@ -27,15 +29,19 @@ struct FVestigeKeyHint
  * The template's third person character plus farming.
  * BP_PlayerCharacter (Content/Vestige/Blueprints) is the player in the game: the template's character Blueprint, reparented to this
  * class so it keeps its mesh, animation and movement input.
- * Owns the farming key bindings, and describes them for the HUD's key hints.
+ * Owns the farming key bindings, and describes them for the HUD's key hints. Its abilities live on the player state, which
+ * outlives it; it only hands out that ability system, so code that has the pawn finds it the engine's usual way.
  */
 UCLASS()
-class AVestigePlayerCharacter : public AVestigeCharacter
+class AVestigePlayerCharacter : public AVestigeCharacter, public IAbilitySystemInterface
 {
 	GENERATED_BODY()
 
 public:
 	AVestigePlayerCharacter(const FObjectInitializer& ObjectInitializer);
+
+	/** The ability system on the player state, or nullptr while no player state is set. */
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
 	/** The toolbar keys in slot order, each named after the tool in its slot. Empty slots are left out. */
 	TArray<FVestigeKeyHint> GetToolbarKeyHints() const;

@@ -3,6 +3,9 @@
 
 #include "Farming/FarmingComponent.h"
 
+#include "AbilitySystem/VestigeGameplayTags.h"
+#include "AbilitySystemComponent.h"
+#include "AbilitySystemGlobals.h"
 #include "Components/SceneComponent.h"
 #include "Content/FarmCropData.h"
 #include "Content/FarmSeedFragment.h"
@@ -161,64 +164,85 @@ bool UFarmingComponent::RestoreFromSaveData(const FFarmFarmingSaveData& Data)
 
 void UFarmingComponent::UseTool()
 {
+	// Through the ability system's activation, so its rules apply: one use at a time, and the cost.
+	if (UAbilitySystemComponent* AbilitySystem = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(GetOwner()))
+	{
+		AbilitySystem->TryActivateAbilitiesByTag(FGameplayTagContainer(VestigeGameplayTags::Ability_UseTool));
+	}
+}
+
+bool UFarmingComponent::UseToolOnTarget()
+{
 	AFarmTile* Tile = FindTargetTile();
 	if (!Tile)
 	{
 		Notify(LOCTEXT("NoTile", "Stand facing a farm tile."));
-		return;
+		return false;
 	}
 
 	const UVestigeToolData* Tool = GetCurrentTool();
 	if (!Tool)
 	{
 		Notify(LOCTEXT("NoTool", "No tool in this slot."));
-		return;
+		return false;
 	}
 
 	switch (Tool->GetAction())
 	{
 	case EFarmToolAction::Till:
-		Notify(Tile->Till() ? LOCTEXT("Tilled", "Tilled the soil.") : LOCTEXT("CantTill", "Only grass can be tilled."));
-		break;
+		return Till(*Tile);
 
 	case EFarmToolAction::Plant:
-		Plant(*Tile);
-		break;
+		return Plant(*Tile);
 
 	case EFarmToolAction::Water:
-		Notify(Tile->Water() ? LOCTEXT("Watered", "Watered.") : LOCTEXT("CantWater", "Nothing to water here."));
-		break;
+		return Water(*Tile);
 
 	case EFarmToolAction::Harvest:
-		Harvest(*Tile);
-		break;
+		return Harvest(*Tile);
 	}
+	return false;
 }
 
-void UFarmingComponent::Plant(AFarmTile& Tile)
+bool UFarmingComponent::Till(AFarmTile& Tile) const
+{
+	const bool bTilled = Tile.Till();
+	Notify(bTilled ? LOCTEXT("Tilled", "Tilled the soil.") : LOCTEXT("CantTill", "Only grass can be tilled."));
+	return bTilled;
+}
+
+bool UFarmingComponent::Plant(AFarmTile& Tile)
 {
 	UVestigeInventoryComponent* Inventory = GetInventory();
 	if (!Inventory || !SeedCrop || Inventory->GetItemCount(SeedItemId) <= 0)
 	{
 		Notify(LOCTEXT("OutOfSeeds", "Out of seeds."));
-		return;
+		return false;
 	}
 	if (!Tile.Plant(SeedCrop))
 	{
 		Notify(LOCTEXT("CantPlant", "Seeds need empty tilled soil."));
-		return;
+		return false;
 	}
 	Inventory->TryRemoveItem(SeedItemId, 1);
 	Notify(LOCTEXT("Planted", "Planted a seed."));
+	return true;
 }
 
-void UFarmingComponent::Harvest(AFarmTile& Tile)
+bool UFarmingComponent::Water(AFarmTile& Tile) const
+{
+	const bool bWatered = Tile.Water();
+	Notify(bWatered ? LOCTEXT("Watered", "Watered.") : LOCTEXT("CantWater", "Nothing to water here."));
+	return bWatered;
+}
+
+bool UFarmingComponent::Harvest(AFarmTile& Tile)
 {
 	const UFarmCropData* Crop = Tile.GetCrop();
 	if (!Crop || !Tile.IsRipe())
 	{
 		Notify(LOCTEXT("NothingRipe", "Nothing ripe here."));
-		return;
+		return false;
 	}
 
 	// Asked before harvesting, so a full bag leaves the crop in the ground instead of destroying it.
@@ -226,13 +250,15 @@ void UFarmingComponent::Harvest(AFarmTile& Tile)
 	if (!Inventory || !Inventory->CanAddItem(Crop->GetHarvestItemId(), Crop->GetYield()))
 	{
 		Notify(LOCTEXT("BagFull", "No room in your bag."));
-		return;
+		return false;
 	}
-	if (Tile.Harvest())
+	if (!Tile.Harvest())
 	{
-		Inventory->TryAddItem(Crop->GetHarvestItemId(), Crop->GetYield());
-		Notify(LOCTEXT("Harvested", "Harvested a crop!"));
+		return false;
 	}
+	Inventory->TryAddItem(Crop->GetHarvestItemId(), Crop->GetYield());
+	Notify(LOCTEXT("Harvested", "Harvested a crop!"));
+	return true;
 }
 
 UVestigeInventoryComponent* UFarmingComponent::GetInventory() const

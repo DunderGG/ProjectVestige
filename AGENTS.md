@@ -29,13 +29,16 @@ Follow the two Docs files for every change. The rules below are the ones most of
    - `AFarmTile` and its `FFarmTileState`: one tile's state and rules (including the crop planted in it), and its visuals.
    - `AFarmGrid`: spawns tiles, finds a tile by location, advances tiles on a new day. No clock, no lighting.
    - `AVestigeDayCycle`: day number, clock, sun, sky light, night exposure. Broadcasts `OnNewDay`, then `OnNewDayFinished`, and `OnDayEndReached` when the clock reaches the end of the day.
-   - `UFarmingComponent`: the toolbar and the tool in hand, which seed item the Seeds tool plants and its crop, tile targeting, using tools (taking seeds from and putting harvests into the inventory).
-   - `AVestigePlayerState`: the player's data that outlives the pawn; holds the inventory (later the ability system).
+   - `UFarmingComponent`: the toolbar and the tool in hand, which seed item the Seeds tool plants and its crop, tile targeting, the tools' rules (taking seeds from and putting harvests into the inventory). Using a tool goes through the use-tool ability.
+   - `AVestigePlayerState`: the player's data that outlives the pawn; holds the inventory and the ability system component, and grants the ability sets.
    - `UVestigeInventoryComponent` and its `FVestigeInventory`: the items the player carries, in slots with stacks, by item ID, and the starting items. No money yet.
-   - `UVestigeRestComponent`: the end of the player's day: sleeping and passing out (later the late-night rules and exhaustion).
+   - `UVestigeRestComponent`: the end of the player's day: sleeping and passing out, each refilling stamina (later the late-night rules and exhaustion).
+   - `UVestigeGameplayAbility_UseTool`: what a tool use costs and how long it takes (twice as long at zero stamina); one use at a time.
+   - `UVestigeStaminaSet`: the stamina numbers and their limits (0 to the maximum), and the out-of-stamina tag. Changed only through gameplay effects.
+   - `UVestigeAbilitySet`: a data asset of attribute sets and abilities granted together.
    - `UVestigeCharacterMovementComponent`: how the farmer walks and turns; without input it turns toward the aimed tile.
    - `UFarmTargetHighlightComponent`: the frame around the targeted tile (presentation only).
-   - `AVestigePlayerCharacter`: input bindings (and the key hints that describe them), turning movement into the tile aim (the walk eases in, so a tap barely steps), and showing the current tool's held mesh only.
+   - `AVestigePlayerCharacter`: input bindings (and the key hints that describe them), turning movement into the tile aim (the walk eases in, so a tap barely steps), showing the current tool's held mesh, and handing out the player state's ability system; nothing else.
    - `AVestigeHUD` / `SVestigeHudWidget`: display only.
    - `UVestigeHudSettings`: how the HUD shows feedback messages (how many at once, for how long), in Project Settings.
    - `UVestigeFeedbackSubsystem`: carries messages for the player from game code to the HUD. Game code calls `Notify`; it never calls the HUD.
@@ -43,7 +46,7 @@ Follow the two Docs files for every change. The rules below are the ones most of
    - `UVestigeContentData`: base of every content data asset. Owns the `ContentId`, display name and loading through the Asset Manager.
    - `UVestigeAssetManager`: the project's Asset Manager; startup checks of all content (duplicate content IDs).
    - `UFarmCropData`: one crop's definition (growth, meshes, the item it yields and how many). No runtime state.
-   - `UVestigeToolData`: one tool's definition (action, held mesh, stamina cost). No runtime state.
+   - `UVestigeToolData`: one tool's definition (action, held mesh, stamina cost, how long a use takes). No runtime state.
    - `UVestigeItemData`: one item's definition (stack size, sell price) and its fragments (`UVestigeItemFragment` subclasses such as `UFarmSeedFragment`) for what only some items have. No runtime state.
 2. **Epic naming.** `A`/`U`/`S`/`F`/`E`/`I`/`T` type prefixes, `b` for booleans, PascalCase everywhere, and the `Vestige` project prefix on every new type (`AVestigePlayerState`, `FOnVestigeInventoryChanged`). Types about the farm itself (tiles, grid, crops, farming actions) use `Farm` instead (`AFarmTile`, `EFarmTileState`). The general types were renamed from `Farm` on 2026-11-01; a rename of a type that assets or saves name needs `[CoreRedirects]` and a test (guidelines section 2.2).
 3. **No shadowing.** The build treats MSVC C4458 as an error. Never give a local or parameter the name of a member of the class or any engine base class (`Mesh` in a character, `Owner`, `Controller`, `Tags`...).
@@ -52,7 +55,7 @@ Follow the two Docs files for every change. The rules below are the ones most of
 6. **Encapsulation.** Runtime state is private with getters. Don't add public mutable data members. Expose to Blueprints only when a Blueprint needs it or as a deliberate, commented modding extension point.
 7. **Communicate through delegates and small functions**, not by reaching into another class's state.
 8. **Keep it simple.** Small functions, early returns, named constants instead of magic numbers, no duplicated logic, no commented-out code, no new debug-only on-screen messages. Don't add Lyra machinery (Experiences, Game Features, Common UI) or replication unless asked. The Gameplay Ability System is adopted, starting with stamina, and is built only as `Docs/Systems.md` section 9 describes.
-9. **Dependencies point one way.** Game rules never call UI, audio or effects; presentation reads state and listens to events. No circular dependencies between classes. The source folders are layers (`Core`, `Content`, `Time`, `Farming`, `Save`, `Player`, `UI`, lowest first): a lower folder never includes a higher one, new files go in the folder of their layer, and the test `Vestige.Architecture.IncludeDirection` enforces it (guidelines section 14.1).
+9. **Dependencies point one way.** Game rules never call UI, audio or effects; presentation reads state and listens to events. No circular dependencies between classes. The source folders are layers (`Core`, `AbilitySystem`, `Content`, `Time`, `Inventory`, `Farming`, `Save`, `Player`, `UI`, lowest first): a lower folder never includes a higher one, new files go in the folder of their layer, and the test `Vestige.Architecture.IncludeDirection` enforces it (guidelines section 14.1).
 10. **Record design decisions.** A change that adds a system, moves a responsibility or makes a design choice updates `Docs/Architecture.md` (Part B and the decision log) in the same commit.
 11. **Design for mods.** Content (crops, tools, items) is data assets found through the Asset Manager, never hard-coded lists or enums. Content has namespaced IDs (`Base.Parsnip`). Saves store IDs and skip unknown content. See `Docs/Architecture.md`, section 12.
 12. **Performance is a requirement.** Ticking off by default; use events and timers instead of per-frame polling. Nothing in `Tick`, timers or UI bindings searches the world, loads assets, spawns, creates `UObject`s or rebuilds unchanged strings. Content is soft-referenced and never loaded synchronously during play. No debug drawing as a feature. Expensive loops and new-day work get a `TRACE_CPUPROFILER_EVENT_SCOPE`. Optimizations that cost readability need a measurement. Rules in `Docs/CodingGuidelines.md` section 12, budget in `Docs/Architecture.md` section 10.

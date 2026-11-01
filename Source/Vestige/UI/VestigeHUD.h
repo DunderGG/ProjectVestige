@@ -12,13 +12,14 @@ class AVestigeDayCycle;
 class AVestigePlayerCharacter;
 class APawn;
 class SVestigeHudWidget;
+class UAbilitySystemComponent;
 class UFarmingComponent;
 class UVestigeToolData;
 class UVestigeInventoryComponent;
 
 /**
  * Shows the farming HUD for its player: the day and time from the world's AVestigeDayCycle, the tool from the pawn's
- * UFarmingComponent, the items from the inventory on the player state, the farmer's key hints and the feedback messages UVestigeFeedbackSubsystem carries.
+ * UFarmingComponent, the items from the inventory and the stamina from the ability system on the player state, the farmer's key hints and the feedback messages UVestigeFeedbackSubsystem carries.
  * It only displays. It builds each text when an event says what it shows has changed, so the widget's per-frame
  * bindings only read finished text; the messages are the one thing it keeps, and only until they fade.
  */
@@ -33,6 +34,9 @@ public:
 	 * the tool changes.
 	 */
 	FText GetStatusText() const;
+
+	/** "Stamina 85 / 100". Rebuilt when the stamina or its maximum changes. */
+	const FText& GetStaminaText() const { return StaminaText; }
 
 	/** "Bag: Turnip Seeds 9   Turnip 2", the non-empty slots in order. Rebuilt when the inventory changes. */
 	const FText& GetInventoryText() const { return InventoryText; }
@@ -69,6 +73,12 @@ private:
 	/** Bound to the inventory's OnInventoryChanged. */
 	void RefreshInventoryText();
 
+	/** Follows the stamina on the player state's ability system, which outlives the pawn, so this happens once, at BeginPlay. */
+	void FollowAbilitySystem();
+
+	/** Bound to the change delegates of Stamina and MaxStamina. */
+	void RefreshStaminaText();
+
 	void RefreshControlsText();
 
 	/** Shows Message in a box of its own, under the ones already showing, for MessageSeconds. Bound to UVestigeFeedbackSubsystem. */
@@ -87,9 +97,11 @@ private:
 	TWeakObjectPtr<const AVestigeDayCycle> DayCycle;
 	TWeakObjectPtr<UFarmingComponent> Farming;
 	TWeakObjectPtr<UVestigeInventoryComponent> Inventory;
+	TWeakObjectPtr<UAbilitySystemComponent> AbilitySystem;
 	TWeakObjectPtr<const AVestigePlayerCharacter> Farmer;
 
 	FText ToolText;
+	FText StaminaText;
 	FText InventoryText;
 	FText ControlsText;
 

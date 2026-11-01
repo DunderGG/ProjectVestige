@@ -9,6 +9,7 @@
 
 class AVestigeDayCycle;
 class AFarmGrid;
+class UAbilitySystemComponent;
 class UFarmingComponent;
 class UVestigeSaveGame;
 class UVestigeInventoryComponent;
@@ -112,6 +113,9 @@ private:
 
 	UFarmingComponent* GetPlayerFarming() const;
 	UVestigeInventoryComponent* GetPlayerInventory() const;
+
+	/** The ability system on the player's player state, which holds the stamina. nullptr if there is none. */
+	UAbilitySystemComponent* GetPlayerAbilitySystem() const;
 
 	UPROPERTY()
 	TObjectPtr<AVestigeDayCycle> DayCycle;

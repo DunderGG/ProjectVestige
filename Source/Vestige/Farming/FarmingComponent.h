@@ -38,8 +38,19 @@ public:
 	const UVestigeToolData* GetCurrentTool() const { return Toolbar.GetCurrentTool(); }
 	const FFarmToolbar& GetToolbar() const { return Toolbar; }
 
-	/** Uses the tool in hand on the target tile. Does nothing to the farm without a target or a tool. */
+	/**
+	 * Uses the tool in hand on the target tile, through the use-tool ability on the owner's ability system: the ability
+	 * decides whether a use can start now and what it costs, and calls UseToolOnTarget. Does nothing while the last use
+	 * is still under way, or without an ability system.
+	 */
 	void UseTool();
+
+	/**
+	 * Applies the tool in hand to the target tile, and tells the player what happened. Returns false when nothing on the
+	 * farm changed (no target, no tool, out of seeds, nothing to water...), so the use costs nothing. Called by the
+	 * use-tool ability; everything else calls UseTool.
+	 */
+	bool UseToolOnTarget();
 
 	/** The item the Seeds tool plants (VestigeItem:Base.TurnipSeeds). */
 	const FPrimaryAssetId& GetSeedItemId() const { return SeedItemId; }
@@ -101,8 +112,11 @@ private:
 	 */
 	UVestigeInventoryComponent* GetInventory() const;
 
-	void Plant(AFarmTile& Tile);
-	void Harvest(AFarmTile& Tile);
+	/** Each returns whether the tile changed. */
+	bool Till(AFarmTile& Tile) const;
+	bool Plant(AFarmTile& Tile);
+	bool Water(AFarmTile& Tile) const;
+	bool Harvest(AFarmTile& Tile);
 
 	/** Tells the player what happened, through UVestigeFeedbackSubsystem. */
 	void Notify(const FText& Message) const;

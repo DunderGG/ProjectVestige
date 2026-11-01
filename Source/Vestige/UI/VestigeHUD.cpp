@@ -3,6 +3,9 @@
 
 #include "UI/VestigeHUD.h"
 
+#include "AbilitySystem/VestigeStaminaSet.h"
+#include "AbilitySystemComponent.h"
+#include "AbilitySystemGlobals.h"
 #include "Content/VestigeItemData.h"
 #include "Content/VestigeToolData.h"
 #include "Core/VestigeFeedbackSubsystem.h"
@@ -72,6 +75,7 @@ void AVestigeHUD::BeginPlay()
 	PlayerOwner->OnPossessedPawnChanged.AddDynamic(this, &AVestigeHUD::FollowPawn);
 	FollowPawn(nullptr, PlayerOwner->GetPawn());
 	FollowInventory();
+	FollowAbilitySystem();
 	if (UVestigeFeedbackSubsystem* Feedback = GetWorld()->GetSubsystem<UVestigeFeedbackSubsystem>())
 	{
 		Feedback->OnFeedback.AddUObject(this, &AVestigeHUD::ShowMessage);
@@ -91,6 +95,11 @@ void AVestigeHUD::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	if (UVestigeInventoryComponent* CurrentInventory = Inventory.Get())
 	{
 		CurrentInventory->OnInventoryChanged.RemoveAll(this);
+	}
+	if (UAbilitySystemComponent* CurrentAbilitySystem = AbilitySystem.Get())
+	{
+		CurrentAbilitySystem->GetGameplayAttributeValueChangeDelegate(UVestigeStaminaSet::GetStaminaAttribute()).RemoveAll(this);
+		CurrentAbilitySystem->GetGameplayAttributeValueChangeDelegate(UVestigeStaminaSet::GetMaxStaminaAttribute()).RemoveAll(this);
 	}
 	if (UVestigeFeedbackSubsystem* Feedback = UWorld::GetSubsystem<UVestigeFeedbackSubsystem>(GetWorld()))
 	{
@@ -158,6 +167,41 @@ void AVestigeHUD::FollowInventory()
 		CurrentInventory->OnInventoryChanged.AddUObject(this, &AVestigeHUD::RefreshInventoryText);
 	}
 	RefreshInventoryText();
+}
+
+void AVestigeHUD::FollowAbilitySystem()
+{
+	const APlayerState* PlayerState = PlayerOwner ? PlayerOwner->PlayerState.Get() : nullptr;
+	AbilitySystem = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(PlayerState);
+	if (UAbilitySystemComponent* CurrentAbilitySystem = AbilitySystem.Get())
+	{
+		for (const FGameplayAttribute& Attribute :
+			{UVestigeStaminaSet::GetStaminaAttribute(), UVestigeStaminaSet::GetMaxStaminaAttribute()})
+		{
+			CurrentAbilitySystem->GetGameplayAttributeValueChangeDelegate(Attribute).AddWeakLambda(this,
+				[this](const FOnAttributeChangeData&)
+				{
+					RefreshStaminaText();
+				});
+		}
+	}
+	RefreshStaminaText();
+}
+
+void AVestigeHUD::RefreshStaminaText()
+{
+	const UAbilitySystemComponent* CurrentAbilitySystem = AbilitySystem.Get();
+	if (!CurrentAbilitySystem || !CurrentAbilitySystem->HasAttributeSetForAttribute(UVestigeStaminaSet::GetStaminaAttribute()))
+	{
+		StaminaText = FText::GetEmpty();
+		return;
+	}
+
+	// Rounded up, so the HUD only shows 0 when the player is really out of stamina.
+	const int32 Stamina = FMath::CeilToInt(CurrentAbilitySystem->GetNumericAttribute(UVestigeStaminaSet::GetStaminaAttribute()));
+	const int32 MaxStamina = FMath::RoundToInt(CurrentAbilitySystem->GetNumericAttribute(UVestigeStaminaSet::GetMaxStaminaAttribute()));
+	StaminaText = FText::FormatNamed(
+		LOCTEXT("Stamina", "Stamina {Stamina} / {MaxStamina}"), TEXT("Stamina"), Stamina, TEXT("MaxStamina"), MaxStamina);
 }
 
 void AVestigeHUD::RefreshToolTexts(const UVestigeToolData* Tool)

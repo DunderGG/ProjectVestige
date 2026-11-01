@@ -3,6 +3,9 @@
 
 #include "Save/VestigeSaveSubsystem.h"
 
+#include "AbilitySystem/VestigeStaminaSet.h"
+#include "AbilitySystemComponent.h"
+#include "AbilitySystemGlobals.h"
 #include "Content/FarmCropData.h"
 #include "Content/VestigeContentData.h"
 #include "Core/Vestige.h"
@@ -89,6 +92,12 @@ namespace VestigeSaveUpgrade
 			}
 		}
 		Save.SaveVersion = 2;
+	}
+
+	/** Version 2 had no stamina. Its Stamina part reads as unsaved, so the player starts with full stamina. */
+	void UpgradeFromVersion2(UVestigeSaveGame& Save)
+	{
+		Save.SaveVersion = 3;
 	}
 }
 
@@ -178,6 +187,10 @@ bool UVestigeSaveSubsystem::UpgradeToCurrentVersion(UVestigeSaveGame& Save, int3
 	{
 		VestigeSaveUpgrade::UpgradeFromVersion1(Save);
 	}
+	if (Save.SaveVersion == 2)
+	{
+		VestigeSaveUpgrade::UpgradeFromVersion2(Save);
+	}
 	return Save.SaveVersion == UVestigeSaveGame::CurrentVersion;
 }
 
@@ -255,6 +268,10 @@ void UVestigeSaveSubsystem::SaveFarm(int32 NewDay)
 	Save->Clock = DayCycle->GetSaveData();
 	Save->Farming = Farming->GetSaveData();
 	Save->Inventory = Inventory->GetSaveData();
+	if (const UAbilitySystemComponent* AbilitySystem = GetPlayerAbilitySystem())
+	{
+		Save->Stamina = UVestigeStaminaSet::GetSaveData(*AbilitySystem);
+	}
 	Save->Tiles = Grid->GetTilesSaveData();
 
 	const int32 Slot = GetSlotToWrite(NewestSlot);
@@ -357,6 +374,10 @@ int32 UVestigeSaveSubsystem::ApplySave(const UVestigeSaveGame& Save, UFarmingCom
 		++SkippedCount;
 	}
 	SkippedCount += Inventory.RestoreFromSaveData(Save.Inventory);
+	if (UAbilitySystemComponent* AbilitySystem = GetPlayerAbilitySystem())
+	{
+		UVestigeStaminaSet::RestoreFromSaveData(*AbilitySystem, Save.Stamina);
+	}
 	SkippedCount += Grid->RestoreTilesFromSaveData(Save.Tiles, VestigeSaveSlots::LoadSavedCrops(Save.Tiles));
 	return SkippedCount;
 }
@@ -397,6 +418,11 @@ UVestigeInventoryComponent* UVestigeSaveSubsystem::GetPlayerInventory() const
 {
 	const APlayerState* PlayerState = UGameplayStatics::GetPlayerState(GetWorld(), 0);
 	return PlayerState ? PlayerState->FindComponentByClass<UVestigeInventoryComponent>() : nullptr;
+}
+
+UAbilitySystemComponent* UVestigeSaveSubsystem::GetPlayerAbilitySystem() const
+{
+	return UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(UGameplayStatics::GetPlayerState(GetWorld(), 0));
 }
 
 #undef LOCTEXT_NAMESPACE

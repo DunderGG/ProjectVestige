@@ -76,6 +76,16 @@ void SVestigeHudWidget::Construct(const FArguments& InArgs)
 					.Font(FCoreStyle::GetDefaultFontStyle(VestigeHudStyle::RegularFont, VestigeHudStyle::InventoryFontSize))
 					.ColorAndOpacity(VestigeHudStyle::Text)
 					.ShadowOffset(VestigeHudStyle::ShadowOffset)
+					.Text(this, &SVestigeHudWidget::GetStaminaText)
+				]
+				+ SVerticalBox::Slot()
+				.AutoHeight()
+				.Padding(0.f, VestigeHudStyle::LineSpacing, 0.f, 0.f)
+				[
+					SNew(STextBlock)
+					.Font(FCoreStyle::GetDefaultFontStyle(VestigeHudStyle::RegularFont, VestigeHudStyle::InventoryFontSize))
+					.ColorAndOpacity(VestigeHudStyle::Text)
+					.ShadowOffset(VestigeHudStyle::ShadowOffset)
 					.Text(this, &SVestigeHudWidget::GetInventoryText)
 				]
 			]
@@ -115,6 +125,12 @@ FText SVestigeHudWidget::GetStatusText() const
 {
 	const AVestigeHUD* OwningHud = Hud.Get();
 	return OwningHud ? OwningHud->GetStatusText() : FText::GetEmpty();
+}
+
+FText SVestigeHudWidget::GetStaminaText() const
+{
+	const AVestigeHUD* OwningHud = Hud.Get();
+	return OwningHud ? OwningHud->GetStaminaText() : FText::GetEmpty();
 }
 
 FText SVestigeHudWidget::GetInventoryText() const

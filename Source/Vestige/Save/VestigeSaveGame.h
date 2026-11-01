@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "AbilitySystem/VestigeStaminaSaveData.h"
 #include "Farming/FarmFarmingSaveData.h"
 #include "Farming/FarmTileState.h"
 #include "GameFramework/SaveGame.h"
@@ -27,8 +28,8 @@ enum class EFarmTool : uint8
 /**
  * The saved data layout: everything needed to pick the farm back up, as plain values and content IDs.
  * A data container with no logic, so its members are public like a struct's. Each owner writes and restores its own
- * part: the clock (AVestigeDayCycle), the tool in hand (UFarmingComponent), the inventory (UVestigeInventoryComponent) and
- * the tiles (AFarmGrid, AFarmTile).
+ * part: the clock (AVestigeDayCycle), the tool in hand (UFarmingComponent), the inventory (UVestigeInventoryComponent), the
+ * stamina (UVestigeStaminaSet) and the tiles (AFarmGrid, AFarmTile).
  * Raise CurrentVersion with every layout change and add an upgrade step to UVestigeSaveSubsystem::UpgradeToCurrentVersion.
  */
 UCLASS()
@@ -42,8 +43,9 @@ public:
 	 * 0: before save versions. Flat fields, tiles in grid order without coordinates or crops, one slot.
 	 * 1: each owner's part in its own struct, tiles by coordinates with their crop's ContentId, two alternating slots.
 	 * 2: the inventory's slots, holding the seeds and harvest that version 1 kept as two counts in Farming.
+	 * 3: the player's stamina.
 	 */
-	static constexpr int32 CurrentVersion = 2;
+	static constexpr int32 CurrentVersion = 3;
 
 	/**
 	 * The two slots saves alternate between, so writing a save never touches the newest good one.
@@ -69,6 +71,10 @@ public:
 	/** Empty in saves before version 2. */
 	UPROPERTY()
 	FVestigeInventorySaveData Inventory;
+
+	/** Unsaved (bHasStamina false) in saves before version 3. */
+	UPROPERTY()
+	FVestigeStaminaSaveData Stamina;
 
 	/** Every tile, found again by its coordinates. In version 0 saves, in grid order without coordinates or crops. */
 	UPROPERTY()

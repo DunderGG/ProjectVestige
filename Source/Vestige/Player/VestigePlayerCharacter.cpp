@@ -20,6 +20,7 @@
 #include "InputAction.h"
 #include "InputMappingContext.h"
 #include "Player/VestigeCharacterMovementComponent.h"
+#include "Player/VestigePlayerState.h"
 #include "Save/VestigeSaveSubsystem.h"
 
 #define LOCTEXT_NAMESPACE "VestigePlayerCharacter"
@@ -52,6 +53,12 @@ AVestigePlayerCharacter::AVestigePlayerCharacter(const FObjectInitializer& Objec
 	HeldTool->SetMobility(EComponentMobility::Movable);
 	HeldTool->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	HeldTool->SetGenerateOverlapEvents(false);
+}
+
+UAbilitySystemComponent* AVestigePlayerCharacter::GetAbilitySystemComponent() const
+{
+	const AVestigePlayerState* VestigePlayerState = GetPlayerState<AVestigePlayerState>();
+	return VestigePlayerState ? VestigePlayerState->GetAbilitySystemComponent() : nullptr;
 }
 
 void AVestigePlayerCharacter::PostInitializeComponents()
