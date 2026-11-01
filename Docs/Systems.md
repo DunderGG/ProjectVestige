@@ -160,21 +160,40 @@ Contents
 
 ## 7. Interaction
 
-**Status:** planned (`IVestigeInteractable`, milestone 2 foundations).
+**Status:** built (2026-11-01, milestone 2 foundations, [Roadmap 4.1](Roadmap.md#41-foundations)) as designed below, approved by David on 2026-11-01 with the option list and N kept as a test key: `IVestigeInteractable`, `UVestigeInteractionComponent` on the player's pawn, the interact ability, the F key and the HUD prompt. The first interactable is the bed ([Roadmap 4.3](Roadmap.md#43-stamina-and-late-nights)), one placed in `L_Farm`.
 
-**References:** Epic's "Interfaces" page; Lyra's interaction: `IInteractableTarget` returns `FInteractionOption`s, an ability task (`UAbilityTask_GrantNearbyInteraction`) scans nearby targets, and `ULyraGameplayAbility_Interact` runs the chosen option.
+**References:** Epic's "Interfaces" page (`UINTERFACE`, `BlueprintNativeEvent` functions called through `Execute_`, `Implements<U...>()`), "Collision Overview" and "Collision Response Reference" (custom object channels and collision profiles in Project Settings > Collision), and `UWorld::OverlapMultiByObjectType`. Lyra's interaction (`Source/LyraGame/Interaction`): `IInteractableTarget` fills an `FInteractionOption` list (text, sub-text, the ability to run and the target's own ability system), `UAbilityTask_GrantNearbyInteraction` runs an overlap query around the player on a timer (every 0.1 s) on Lyra's interaction channel, `UAbilityTask_WaitForInteractableTargets_SingleLineTrace` picks the one the camera looks at, and `ULyraGameplayAbility_Interact` shows the prompt and activates the option's ability, which receives the target in its event data.
+
+**What we take from Lyra and what we skip:**
+
+- **Take:** one interface every usable thing implements; the option list, so an object can offer several actions without the interface (a mod API) changing when the first one does; a cheap overlap query around the player on a timer, on a dedicated collision channel; using it as a gameplay ability, so tags can block it later (in a menu, in dialogue).
+- **Skip:** granting each target's ability to the player and running the option's ability (Lyra's `InteractionAbilityToGrant`): the interactable does the action itself. That machinery exists for networked play, where the server must run the ability.
+- **Until there is a way to choose** (a menu, or a key per option), the interact key uses the first option (decided with David, 2026-11-01). An interactable lists its options with the one the player most likely wants first.
+- **Skip:** the camera line trace. Our camera is a third-person follow camera over a farm; the nearest interactable is what the player means. A facing rule comes if two interactables stand close enough to confuse it in play.
 
 **Rules:**
 
-- Anything the player can use (bed, shipping bin, water source, chest, robot) implements one interface, `IVestigeInteractable`, with functions such as `GetInteractionOptions` (what can be done, with display text) and `Interact`.
-- The farmer finds candidates from a **cheap query on a timer or on movement**, not every frame, and only among nearby actors (an overlap sphere on a dedicated collision channel). The best candidate is shown by a presentation component, not by debug drawing ([ArchitectureAudit A-10](ArchitectureAudit.md)).
-- Farm tiles stay targeted through the grid lookup; they don't need to be interactable actors.
-- The interacted object owns what happens; the farmer only asks.
-- When the Gameplay Ability System arrives, interaction becomes an ability as in Lyra, so it can be blocked by tags (stunned, in a menu).
+- **One interface, `IVestigeInteractable`** (`UINTERFACE(Blueprintable)`), so C++ actors and Blueprint actors (and so mods) can both be interactable. Two `BlueprintNativeEvent` functions, called through `IVestigeInteractable::Execute_...`:
+   - `GetInteractionOptions(Interactor, OutOptions)`: fills `OutOptions` with what can be done with it now, each an `FVestigeInteractionOption` (`BlueprintType` struct): `Text`, the prompt's verb (`Sleep`), and `Action`, an `FName` the interactable chooses to tell its own options apart (`Sleep`). No options means there is nothing to do right now, and the actor isn't offered. It must be cheap and change nothing: it is asked on every scan. Later fields (a second line, an icon) are added to the struct without changing the function.
+   - `Interact(Interactor, Option)`: does the chosen option. The interactable owns what happens and asks the interactor's own components for anything about the player (the bed asks the interactor's `UVestigeRestComponent` to `Sleep`). The interactor never knows the interactable's class: no `if` per class.
+   - Both are extension points ([Architecture.md, section 12](Architecture.md#extension-points-today)) and listed in `Vestige.ExtensionPoints.*`.
+- **Interactables are found by collision, not by class.** A new object channel, `Interactable` (default response Ignore, so nothing else notices it), and a collision profile `VestigeInteractable` (object type `Interactable`, queries only, ignoring every channel: a query by object type finds it without a response) for the shape that marks where an actor can be used from: a box component a little bigger than the bed. The actor's own blocking collision stays as it is.
+- **`UVestigeInteractionComponent` on the player's pawn owns finding and using interactables.** Every `ScanSeconds` (0.2 s) a timer runs one `OverlapMultiByObjectType` for `Interactable` in a sphere of `InteractionRadius` (100 cm, one tile) around the pawn, keeps the overlapping actors that implement the interface and offer at least one option, and focuses the nearest. It gathers the options into one array it reuses, so a scan allocates nothing once warmed up. It keeps the focus as a weak pointer with its first option, and broadcasts `OnFocusChanged` only when the focused actor or that option changes. No tick; the timer stops at `EndPlay`.
+- **Interacting is a gameplay ability**, `UVestigeGameplayAbility_Interact`, granted by `DA_AbilitySet_Player` and activated by its asset tag `Vestige.Ability.Interact` (a native tag), as using a tool is. The interaction component's `Interact` activates it; the ability asks the component to rescan once (so the focus is current, not up to 0.2 s old) and calls `Interact` on the focus with its first option, then ends. It is instanced per actor, has no cost and takes no time today; an interaction that takes time later (filling the watering can) holds it active as the use-tool ability does.
+- **Input: F interacts** (`Interact`, an input action the character maps and binds to the interaction component, shown in the key hints like the others). E stays the tool, so a tile next to the bed can still be hoed. **The bed is how the player sleeps.** Sleeping is instant: it starts the next day at 06:00, so there is no sleeping state and nothing to wake from. **N stays as a test key** that skips to the next day anywhere (decided with David, 2026-11-01), with the key hint "Skip day (test)", and moves into the cheat manager with F9 before a public build ([section 19](#19-debugging-and-cheats)). The 02:00 pass-out stays until its own roadmap item removes it.
+- **The prompt on the HUD** is presentation: `AVestigeHUD` listens to `OnFocusChanged` on the possessed pawn's interaction component and shows "F Sleep" (the interact key, read from the mapping context like the other key hints, and the first option's text) while something is focused. Nothing is drawn in the world yet; an outline or a marker over the focused actor is a later presentation component.
+- **The bed, `AVestigeBed`** (in `Farming/`, next to the rest component it asks): a static mesh with blocking collision (an engine cube set in C++ as a placeholder until the bed mesh in [Roadmap 4.6](Roadmap.md#46-interface-and-input)) and the interaction box. It offers one option, `Sleep`, whenever the interactor has a rest component, and interacting with it calls that component's `Sleep`, so the rules of sleeping (the refill, later bedtime and exhaustion) stay with the rest component. `BP_Bed` in `Content/Vestige/Blueprints` is the bed levels place and will hold the real mesh; one stands in `L_Farm` beside the player start, outside the field, until there is a farmhouse.
+- **Layers:** the interface, the interaction component and the ability need nothing above `AbilitySystem/`, and everything usable (the bed in `Farming/`, the shipping bin, robots) sits above them, so they get a layer folder of their own, `Interaction/`, right above `AbilitySystem/`. The tag joins `AbilitySystem/VestigeGameplayTags`.
+- **Saving:** nothing. The focus is recomputed, and an interactable that has state (a chest) saves it as its own owner ([section 1](#1-saving-and-loading)).
+- **Performance:** one overlap query on a channel only interactables use, five times a second, and a loop over the few actors it returns; no world search, no allocation once the options array has grown, no strings rebuilt unless the focused option changed, no tick. The query's cost goes in the first performance baseline.
+- **Tests** (`Vestige.Interaction.*`): the nearest interactable with options is focused, one without options is skipped, one out of range isn't found, the focus event fires only on a change, interacting calls the focused actor with its first option and does nothing without one, and the ability is activated by its tag. The bed (`Vestige.Interaction.TheBed...`) sleeps the interactor (the day advances; the refill is the rest component's, tested in `Vestige.Rest`) and offers nothing to an actor without a rest component. The ability test uses `BP_PlayerState`, so it also fails if `DA_AbilitySet_Player` doesn't grant the interact ability, and a test checks the channel and profile in `DefaultEngine.ini`. The interface functions are listed in `Vestige.ExtensionPoints`.
 
 **Pitfalls:**
 
 - One `if` per interactable class in the farmer's code: the reason the interface exists.
+- Calling an interface function directly (`Cast<IVestigeInteractable>(Actor)->Interact(...)`): a Blueprint that implements the interface has no C++ interface behind it, so the cast returns null and the Blueprint is never asked. Always call `IVestigeInteractable::Execute_Interact(Actor, ...)` and test with `Actor->Implements<UVestigeInteractable>()`.
+- Interactables on the `Visibility` or `Pawn` channels, or a scan with `OverlapMultiByChannel` on a shared channel: every query would also return the farm tiles and other actors. Keep the dedicated object channel.
+- An options function with side effects or a load: it runs five times a second while the player is near.
 
 ## 8. Inventory and items
 
@@ -440,7 +459,7 @@ Built differently from the approved design, decided on 2026-11-01 (decision log)
 
 ## 19. Debugging and cheats
 
-**Status:** F9 starts a new game; no cheat system. The target tile highlight is a shipping component, not debug drawing.
+**Status:** F9 starts a new game and N skips to the next day (test keys); no cheat system. The target tile highlight is a shipping component, not debug drawing.
 
 **References:** Epic's `UCheatManager` (console commands in development builds), console variables (`TAutoConsoleVariable`), the Gameplay Debugger and Visual Logger; Lyra's `ULyraCheatManager`.
 
@@ -448,7 +467,7 @@ Built differently from the approved design, decided on 2026-11-01 (decision log)
 
 - Developer commands (add seeds, skip to a day, grow every crop) live in a `UVestigeCheatManager` (set as the player controller's cheat manager class) as `UFUNCTION(Exec)` functions. Cheat managers aren't created in shipping builds.
 - Debug visuals sit behind console variables (`farm.Debug.Targeting 1`) and `#if ENABLE_DRAW_DEBUG`, never always on.
-- Debug keys like F9 move into cheats or menus before a public build.
+- Debug keys like F9 and N move into cheats or menus before a public build.
 - Robots get Gameplay Debugger categories and Visual Logger output when their AI is built.
 
 **Pitfalls:**

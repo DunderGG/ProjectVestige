@@ -8,6 +8,9 @@
 /** The gameplay tags C++ code uses, registered by the engine at startup. Tags only content uses live in DefaultGameplayTags.ini. */
 namespace VestigeGameplayTags
 {
+	/** Asset tag of the ability that uses the focused interactable. Interacting activates the abilities that have it. */
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Ability_Interact);
+
 	/** Asset tag of the ability that uses the tool in hand. Using a tool activates the abilities that have it. */
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Ability_UseTool);
 

@@ -447,10 +447,11 @@ Source/Vestige/
     Vestige.Build.cs
     Core/           Shared services that know no game rules: VestigeActorLookup, UVestigeFeedbackSubsystem, the module and log category
     AbilitySystem/  Gameplay Ability System parts that know no farm: the stamina set and effects, ability sets, native tags
+    Interaction/    The interactable interface, the interaction component and the interact ability
     Content/        Content definitions: UVestigeContentData and its subclasses, UVestigeAssetManager
     Time/           The day cycle and its save struct
     Inventory/      The inventory component, its slot rules and save struct
-    Farming/        Tiles and tile state, the grid, the farming, rest and highlight components, the use-tool ability, the toolbar, their save structs
+    Farming/        Tiles and tile state, the grid, the farming, rest and highlight components, the bed, the use-tool ability, the toolbar, their save structs
     Save/           UVestigeSaveGame and UVestigeSaveSubsystem
     Player/         The player character, its movement component and the player state
     UI/             The HUD and its widgets

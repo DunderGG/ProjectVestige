@@ -17,6 +17,7 @@
 #include "Farming/VestigeRestComponent.h"
 #include "GameFramework/Controller.h"
 #include "GameFramework/PlayerController.h"
+#include "Interaction/VestigeInteractionComponent.h"
 #include "InputAction.h"
 #include "InputMappingContext.h"
 #include "Player/VestigeCharacterMovementComponent.h"
@@ -45,6 +46,7 @@ AVestigePlayerCharacter::AVestigePlayerCharacter(const FObjectInitializer& Objec
 
 	Farming = CreateDefaultSubobject<UFarmingComponent>(TEXT("Farming"));
 	Rest = CreateDefaultSubobject<UVestigeRestComponent>(TEXT("Rest"));
+	Interaction = CreateDefaultSubobject<UVestigeInteractionComponent>(TEXT("Interaction"));
 	TargetHighlight = CreateDefaultSubobject<UFarmTargetHighlightComponent>(TEXT("TargetHighlight"));
 	TargetHighlight->SetupAttachment(GetRootComponent());
 
@@ -88,7 +90,8 @@ void AVestigePlayerCharacter::CreateInput()
 	FarmingMappingContext = NewObject<UInputMappingContext>(this, NAME_None, RF_Transient);
 
 	UseToolAction = AddInputAction(EKeys::E, LOCTEXT("UseTool", "Use tool"));
-	SleepAction = AddInputAction(EKeys::N, LOCTEXT("Sleep", "Sleep"));
+	InteractAction = AddInputAction(EKeys::F, LOCTEXT("Interact", "Interact"));
+	SkipDayAction = AddInputAction(EKeys::N, LOCTEXT("SkipDay", "Skip day (test)"));
 	NewGameAction = AddInputAction(EKeys::F9, LOCTEXT("NewGame", "New game"));
 
 	// The number keys pick toolbar slots. Their hints name the tool in the slot, so the actions have no description.
@@ -119,7 +122,8 @@ void AVestigePlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerI
 	}
 
 	EnhancedInput->BindAction(UseToolAction, ETriggerEvent::Started, Farming.Get(), &UFarmingComponent::UseTool);
-	EnhancedInput->BindAction(SleepAction, ETriggerEvent::Started, Rest.Get(), &UVestigeRestComponent::Sleep);
+	EnhancedInput->BindAction(InteractAction, ETriggerEvent::Started, Interaction.Get(), &UVestigeInteractionComponent::Interact);
+	EnhancedInput->BindAction(SkipDayAction, ETriggerEvent::Started, Rest.Get(), &UVestigeRestComponent::Sleep);
 	EnhancedInput->BindAction(NewGameAction, ETriggerEvent::Started, this, &AVestigePlayerCharacter::StartNewGame);
 	for (int32 Slot = 0; Slot < ToolbarSlotActions.Num(); ++Slot)
 	{
@@ -222,6 +226,12 @@ TArray<FVestigeKeyHint> AVestigePlayerCharacter::GetActionKeyHints() const
 		}
 	}
 	return Hints;
+}
+
+FText AVestigePlayerCharacter::GetInteractKey() const
+{
+	const FKey Key = GetMappedKey(InteractAction);
+	return Key.IsValid() ? Key.GetDisplayName(false) : FText::GetEmpty();
 }
 
 FKey AVestigePlayerCharacter::GetMappedKey(const UInputAction* Action) const

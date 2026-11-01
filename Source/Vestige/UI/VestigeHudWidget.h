@@ -34,6 +34,10 @@ private:
 	FText GetStaminaText() const;
 	FText GetInventoryText() const;
 	FText GetControlsText() const;
+	FText GetInteractionText() const;
+
+	/** Hides the prompt box while nothing is focused. */
+	EVisibility GetInteractionVisibility() const;
 
 	/** The backdrop color of the message box at Index, faded to that message's opacity. */
 	FSlateColor GetMessageBackdropColor(int32 Index) const;

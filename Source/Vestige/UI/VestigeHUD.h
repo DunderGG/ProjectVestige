@@ -15,11 +15,14 @@ class SVestigeHudWidget;
 class UAbilitySystemComponent;
 class UFarmingComponent;
 class UVestigeToolData;
+class UVestigeInteractionComponent;
 class UVestigeInventoryComponent;
 
 /**
  * Shows the farming HUD for its player: the day and time from the world's AVestigeDayCycle, the tool from the pawn's
- * UFarmingComponent, the items from the inventory and the stamina from the ability system on the player state, the farmer's key hints and the feedback messages UVestigeFeedbackSubsystem carries.
+ * UFarmingComponent, the items from the inventory and the stamina from the ability system on the player state, the
+ * farmer's key hints, the prompt for the interactable the pawn's UVestigeInteractionComponent focuses, and the feedback
+ * messages UVestigeFeedbackSubsystem carries.
  * It only displays. It builds each text when an event says what it shows has changed, so the widget's per-frame
  * bindings only read finished text; the messages are the one thing it keeps, and only until they fade.
  */
@@ -41,6 +44,9 @@ public:
 	/** "Bag: Turnip Seeds 9   Turnip 2", the non-empty slots in order. Rebuilt when the inventory changes. */
 	const FText& GetInventoryText() const { return InventoryText; }
 
+	/** "F Sleep": the interact key and what it would do while an interactable is focused, else empty. Rebuilt when the focus changes. */
+	const FText& GetInteractionText() const { return InteractionText; }
+
 	/** The key hints, built from the farmer's input mappings. Rebuilt when the toolbar or the pawn changes. */
 	const FText& GetControlsText() const { return ControlsText; }
 
@@ -58,14 +64,17 @@ protected:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 private:
-	/** Follows the new pawn's farming component and key hints. Bound to the controller's OnPossessedPawnChanged. */
+	/** Follows the new pawn's farming and interaction components and key hints. Bound to the controller's OnPossessedPawnChanged. */
 	UFUNCTION()
 	void FollowPawn(APawn* OldPawn, APawn* NewPawn);
 
-	void StopFollowingFarming();
+	void StopFollowingPawn();
 
 	/** Rebuilds the tool's name and the key hints, which name the toolbar's tools. Bound to OnToolChanged. */
 	void RefreshToolTexts(const UVestigeToolData* Tool);
+
+	/** Bound to the interaction component's OnFocusChanged. */
+	void RefreshInteractionText();
 
 	/** Follows the inventory on the player state, which outlives the pawn, so this happens once, at BeginPlay. */
 	void FollowInventory();
@@ -96,6 +105,7 @@ private:
 
 	TWeakObjectPtr<const AVestigeDayCycle> DayCycle;
 	TWeakObjectPtr<UFarmingComponent> Farming;
+	TWeakObjectPtr<UVestigeInteractionComponent> Interaction;
 	TWeakObjectPtr<UVestigeInventoryComponent> Inventory;
 	TWeakObjectPtr<UAbilitySystemComponent> AbilitySystem;
 	TWeakObjectPtr<const AVestigePlayerCharacter> Farmer;
@@ -104,6 +114,7 @@ private:
 	FText StaminaText;
 	FText InventoryText;
 	FText ControlsText;
+	FText InteractionText;
 
 	// The status line as last built, and the day and minute it shows. GetStatusText is a const per-frame getter that
 	// rebuilds them only when they change.

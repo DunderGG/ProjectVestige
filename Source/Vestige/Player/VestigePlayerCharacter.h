@@ -11,6 +11,7 @@
 class UAbilitySystemComponent;
 class UEnhancedInputLocalPlayerSubsystem;
 class UFarmingComponent;
+class UVestigeInteractionComponent;
 class UVestigeRestComponent;
 class UFarmTargetHighlightComponent;
 class UVestigeToolData;
@@ -47,10 +48,13 @@ public:
 	TArray<FVestigeKeyHint> GetToolbarKeyHints() const;
 
 	/**
-	 * The other farming keys and what they do (use tool, sleep, new game), in the order they are mapped.
+	 * The other farming keys and what they do (use tool, interact, skip day, new game), in the order they are mapped.
 	 * Read from the mapping context, so the hints always name the keys that are really bound.
 	 */
 	TArray<FVestigeKeyHint> GetActionKeyHints() const;
+
+	/** The key that interacts, for the prompt shown next to an interactable. Empty before the input is created. */
+	FText GetInteractKey() const;
 
 	/**
 	 * Walks as the template does, and aims the farming component at the neighbouring tile in the movement direction. The
@@ -104,6 +108,9 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Farming")
 	TObjectPtr<UVestigeRestComponent> Rest;
 
+	UPROPERTY(VisibleAnywhere, Category = "Interaction")
+	TObjectPtr<UVestigeInteractionComponent> Interaction;
+
 	/** Frames the tile the farming component targets. */
 	UPROPERTY(VisibleAnywhere, Category = "Farming")
 	TObjectPtr<UFarmTargetHighlightComponent> TargetHighlight;
@@ -120,7 +127,11 @@ private:
 	TObjectPtr<UInputAction> UseToolAction;
 
 	UPROPERTY(Transient)
-	TObjectPtr<UInputAction> SleepAction;
+	TObjectPtr<UInputAction> InteractAction;
+
+	/** A test key: sleeps wherever the player is, to skip to the next day. Moves to the cheat manager with F9. */
+	UPROPERTY(Transient)
+	TObjectPtr<UInputAction> SkipDayAction;
 
 	UPROPERTY(Transient)
 	TObjectPtr<UInputAction> NewGameAction;

@@ -6,6 +6,7 @@
 #include "Content/VestigeContentData.h"
 #include "CQTest.h"
 #include "Farming/FarmingComponent.h"
+#include "Interaction/VestigeInteractable.h"
 #include "Time/VestigeDayCycle.h"
 #include "UObject/Class.h"
 #include "UObject/UnrealType.h"
@@ -40,6 +41,23 @@ namespace VestigeExtensionPointTests
 				{
 					AddError(FString::Printf(
 						TEXT("%s.%s is no longer an event Blueprints can bind to."), *Event.Class->GetName(), *Event.Name.ToString()));
+				}
+			}
+		}
+
+		TEST_METHOD(InterfaceFunctionsStayImplementableInBlueprints)
+		{
+			const FExtensionPoint Functions[] = {
+				{UVestigeInteractable::StaticClass(), GET_FUNCTION_NAME_CHECKED(IVestigeInteractable, GetInteractionOptions)},
+				{UVestigeInteractable::StaticClass(), GET_FUNCTION_NAME_CHECKED(IVestigeInteractable, Interact)},
+			};
+			for (const FExtensionPoint& Function : Functions)
+			{
+				const UFunction* Found = Function.Class->FindFunctionByName(Function.Name);
+				if (!Found || !Found->HasAnyFunctionFlags(FUNC_BlueprintEvent))
+				{
+					AddError(FString::Printf(TEXT("%s.%s is no longer a function Blueprints can implement."), *Function.Class->GetName(),
+						*Function.Name.ToString()));
 				}
 			}
 		}

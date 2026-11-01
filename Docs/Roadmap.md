@@ -27,8 +27,8 @@ Contents
 - **Done:** milestone 1, the playable prototype, plus the project's documents and rules.
 - **Now:** the code follows the guidelines and the architecture (both audits' code reviews are closed, 2026-10-29). Next: play-test that clean-up, the editor housekeeping steps in [section 3](#3-housekeeping), then the rest of the milestone 2 foundations.
 - **Next up**, in order:
-  1. Blueprint events for key moments ([section 4.1](#41-foundations)). The Gameplay Ability System and stamina's cost, slowdown and refill are done (2026-11-01); the late-night rules in [section 4.3](#43-stamina-and-late-nights) build on them.
-  2. The interaction interface (`IVestigeInteractable`) and the bed.
+  1. Logging ([section 4.1](#41-foundations)), starting with its guide for David to approve. Blueprint events, the interaction interface and the bed are done (2026-11-01).
+  2. The late-night rules in [section 4.3](#43-stamina-and-late-nights), which build on stamina and the bed.
 
 ## 2. Milestone 1: playable prototype (done)
 
@@ -172,7 +172,10 @@ The code changes that the slice's content depends on. Doing them first means add
    - Done 2026-11-01 ([Architecture.md, section 12](Architecture.md#extension-points-today), decision log): `On New Day` on the day cycle (found with Get Day Cycle), `On Crop Harvested` and `On Tool Used` on the farming component, and Get Content Id on all content. A test lists them, since mods use them by name
 - [ ] Harvests by anything but the player's tools (robots, automation) reach `On Crop Harvested` too: when the first other harvester is built, move the event to the owner that sees every harvest (a change mod Blueprints would have to follow, so cheapest before mods exist)
 - [ ] Blueprint-callable main actions and Blueprint-readable state (a tile's state, the clock, inventory counts), as extension points, once a mod or content Blueprint first needs them ([Architecture.md, section 12](Architecture.md#12-designing-for-mods), rule 4)
-- [ ] An interaction interface (`IVestigeInteractable`) for anything the player can use: bed, shipping bin, water source, robots
+- [x] An interaction interface (`IVestigeInteractable`) for anything the player can use: bed, shipping bin, water source, robots
+   - Done 2026-11-01 ([Systems.md, section 7](Systems.md#7-interaction), decision log): a list of options per interactable, the first used until there is a way to choose; a `UVestigeInteractionComponent` on the pawn that finds the nearest interactable on its own collision channel; interacting as an ability on F, with a prompt on the HUD. The first interactable is the bed ([section 4.3](#43-stamina-and-late-nights))
+- [ ] A way to choose between an interactable's options (a menu, or a key per option), when the first object offers two actions at once; until then the interact key uses the first ([Systems.md, section 7](Systems.md#7-interaction))
+- [ ] A marker or outline on the focused interactable in the world, as a presentation component, if the HUD prompt alone doesn't make clear what F will use
 
 **Player data**
 
@@ -253,7 +256,8 @@ The code changes that the slice's content depends on. Doing them first means add
 - [ ] When tools get animations, a use's time comes from its montage, played at half speed at zero stamina, instead of `UseSeconds` alone (Systems.md, section 9)
 - [ ] Show on the HUD that the player is out of stamina, for example the stamina line in red (David, 2026-11-01). The HUD follows the `Vestige.State.OutOfStamina` tag (`RegisterGameplayTagEvent` on the ability system) rather than comparing the number itself, so the rule stays in `UVestigeStaminaSet`, and it changes the line's colour only when the tag changes, never in a per-frame binding
 - [ ] Holding E repeats the tool use, so walking along a row while holding it works the row (David, 2026-11-01). E is bound to the press only today. Repeat only after a use that changed the farm, so a use that changes nothing (hoeing tilled soil) stops the repeat quietly instead of posting its message every frame; the next use still waits for `UseSeconds`
-- [ ] A bed in the farmhouse to sleep in, instead of a key that works anywhere
+- [x] A bed in the farmhouse to sleep in, instead of a key that works anywhere
+   - Done 2026-11-01 without the farmhouse: `AVestigeBed` (`BP_Bed`), a placeholder box beside the player start in `L_Farm`, used with F. N stays as a test key, "Skip day (test)", until the cheat manager (decided with David). The bed moves into the farmhouse when there is one, and gets its mesh with [4.6](#46-interface-and-input)
 - [ ] Hostile robots at night wait until combat exists ([milestone 3](#combat-and-the-wasteland))
 
 ### 4.4 The caretaker robot
@@ -369,6 +373,7 @@ Roughly in the order from [GameDesign.md section 13](GameDesign.md#13-scope-and-
 - [ ] Realistic art direction: Lumen, Nanite and Megascans for the world, custom Blender work for robots, machines and crops. Replace the low-poly placeholders
 - [ ] Replace the Epic template code and content (character, animations, input) with our own
 - [ ] Main menu, settings and save slots
+- [ ] Move the test keys, F9 (new game) and N (skip day), into a `UVestigeCheatManager` or the menus ([Systems.md, section 19](Systems.md#19-debugging-and-cheats))
 - [ ] Music and sound effects
 - [ ] Settle how many feedback messages the HUD shows at once (Project Settings > Game > Vestige HUD; five while the game is being built, 2026-10-30)
 - [ ] Final names for the game, the world, the town, the coin, the caretaker and the robot makers

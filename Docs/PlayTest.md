@@ -157,6 +157,18 @@ Blueprints, and later mods, can now hear of a new day, a harvest and a tool use 
 - [ ] **Content ID** (7e84ca8): drag from the Tool pin and search "Get Content Id"; the node is there. Wire it into a Print String from the On Tool Used node, compile and play: tilling grass prints `Base.Hoe`, watering bare grass prints nothing. Harvesting a ripe crop with the hand also fires **On Crop Harvested**.
 - [ ] **New day** (7e84ca8): in the same Event Graph, right-click and search "Get Day Cycle", drag from its return value and search "Assign On New Day" (or "Bind Event to On New Day"). Wire it from Event BeginPlay to a Print String of the Day, compile and play: sleeping (N) prints 2. Close the Blueprint with Don't Save afterwards.
 
+### Interaction and the bed, 2026-11-01
+
+The player now sleeps in a bed, by walking up to it and pressing **F** ([Systems.md, section 7](Systems.md#7-interaction)). N stays as a test key that skips to the next day anywhere. The tests check the rules (focus, the first option, the bed sleeping the player, the ability); these checks are for how it looks and feels. The commit is the one titled "Add the interaction interface and a bed to sleep in".
+
+- [ ] **The bed**: a placeholder bed (a flat grey box, 2 m long) stands about 2.5 m to the left of where the farmer starts, outside the field. The farmer can't walk through it.
+- [ ] **Prompt**: walking up to the bed shows a box reading "F Sleep" below the middle of the screen. It appears when the farmer is about a step from the bed, not from across the field, and disappears again when he walks away. Say if the reach feels too short or too long: it is Interaction Radius on the farmer's **Interaction** component (100 cm), and the bed's Interaction Volume box.
+- [ ] **Sleeping**: pressing F by the bed starts the next day at 06:00 with "You slept. Day 2 begins.", full stamina and "Game saved.", the same as N did. F away from the bed does nothing.
+- [ ] **Key hints**: the bottom line reads "... | E Use tool | F Interact | N Skip day (test) | F9 New game".
+- [ ] **Tool by the bed**: standing beside the bed facing a tile, E still uses the tool on the tile.
+- [ ] **Assets**: `DA_AbilitySet_Player` lists `VestigeGameplayAbility_Interact` under Abilities, and `Content/Vestige/Blueprints/BP_Bed` opens with a cube **BedMesh** and an **InteractionVolume** box. Project Settings > Engine > Collision lists an Object Channel **Interactable** (default response Ignore) and a preset **VestigeInteractable**. None of them asks to be saved when you close it.
+- [ ] **Solution**: after regenerating the project files, the solution shows the new `Interaction` folder under `Source/Vestige`.
+
 ### Editor chores
 
 Changes only the editor can make safely. The steps are in [Roadmap.md, Housekeeping](Roadmap.md#3-housekeeping): re-saving the template Blueprints and `L_Farm`, moving `BP_FarmTile` and the materials with redirectors fixed, and regenerating the Android File Server token if it was ever used. After each one, run the [smoke test](#3-smoke-test).
@@ -167,9 +179,9 @@ About five minutes in `L_Farm`, in Play in Editor at High. Run it before pushing
 
 1. **Start:** a new game (F9) starts on day 1 at 06:00. The HUD shows the day, the clock, the tool, the stamina ("Stamina 100 / 100"), the bag ("Bag: Turnip Seeds 10") and the key hints; the Output Log has no `LogVestige` errors.
 2. **Tools:** with each tool on the tile in front of you: the hoe (1) tills grass, the seeds (2) plant in tilled soil and use a seed, the watering can (3) darkens the soil, and the hand (4) does nothing on an unripe crop. The tool in hand changes with each key. Each action shows a short message, and each one that changes the farm lowers the stamina; facing away from the field says "Stand facing a farm tile." and costs nothing.
-3. **Growing:** water a planted tile and sleep (N), a few times. The crop grows one stage per watered night, and a tile left dry doesn't grow. Harvest the ripe crop with the hand; a Turnip stack appears in the bag or grows. Each night in bed refills the stamina.
+3. **Growing:** water a planted tile and sleep in the bed (walk up to it, F), a few times; N, the test key, skips a day the same way. The crop grows one stage per watered night, and a tile left dry doesn't grow. Harvest the ripe crop with the hand; a Turnip stack appears in the bag or grows. Each night in bed refills the stamina.
 4. **Day and night:** let the clock run through an evening (it moves about one hour every 40 seconds unless the level's day cycle is set faster). The sun sets with warm light, the night is properly dark with faint moonlight, and at 02:00 the farmer passes out into the next day.
-5. **Saving:** sleep ("Game saved."), stop the game and play again. The day, the bag, the tool in hand and every tile, crops included, come back.
+5. **Saving:** sleep in the bed ("Game saved."), stop the game and play again. The day, the bag, the tool in hand and every tile, crops included, come back.
 6. **Highlight:** walk along the field edge and turn. The frame is bright yellow, by day and at night, follows the tile in front of you and disappears off the field.
 7. **Performance:** in the console, `stat fps` and `stat unit`. In a busy part of the farm, by day and by night, the frame stays under 16.6 ms (60 fps), and sleeping shows no visible hitch ([Architecture.md, section 10](Architecture.md#10-performance-by-design)). Play in Editor adds its own cost, so check a doubtful number in Standalone Game. For a hitch on the new day, start the game with `-trace=default` and open the trace in Unreal Insights (`Engine\Binaries\Win64\UnrealInsights.exe`): `AVestigeDayCycle::StartNextDay` shows the whole new day, with the tiles, the save and the load inside it.
 

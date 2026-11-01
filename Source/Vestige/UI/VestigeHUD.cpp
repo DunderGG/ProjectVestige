@@ -15,6 +15,7 @@
 #include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/PlayerState.h"
+#include "Interaction/VestigeInteractionComponent.h"
 #include "Inventory/VestigeInventoryComponent.h"
 #include "Player/VestigePlayerCharacter.h"
 #include "Time/VestigeDayCycle.h"
@@ -91,7 +92,7 @@ void AVestigeHUD::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	{
 		PlayerOwner->OnPossessedPawnChanged.RemoveDynamic(this, &AVestigeHUD::FollowPawn);
 	}
-	StopFollowingFarming();
+	StopFollowingPawn();
 	if (UVestigeInventoryComponent* CurrentInventory = Inventory.Get())
 	{
 		CurrentInventory->OnInventoryChanged.RemoveAll(this);
@@ -138,7 +139,7 @@ FText AVestigeHUD::GetStatusText() const
 
 void AVestigeHUD::FollowPawn(APawn* OldPawn, APawn* NewPawn)
 {
-	StopFollowingFarming();
+	StopFollowingPawn();
 	Farmer = Cast<AVestigePlayerCharacter>(NewPawn);
 	Farming = NewPawn ? NewPawn->FindComponentByClass<UFarmingComponent>() : nullptr;
 
@@ -148,14 +149,37 @@ void AVestigeHUD::FollowPawn(APawn* OldPawn, APawn* NewPawn)
 		NewFarming->OnToolChanged.AddUObject(this, &AVestigeHUD::RefreshToolTexts);
 	}
 	RefreshToolTexts(NewFarming ? NewFarming->GetCurrentTool() : nullptr);
+
+	Interaction = NewPawn ? NewPawn->FindComponentByClass<UVestigeInteractionComponent>() : nullptr;
+	if (UVestigeInteractionComponent* NewInteraction = Interaction.Get())
+	{
+		NewInteraction->OnFocusChanged.AddUObject(this, &AVestigeHUD::RefreshInteractionText);
+	}
+	RefreshInteractionText();
 }
 
-void AVestigeHUD::StopFollowingFarming()
+void AVestigeHUD::StopFollowingPawn()
 {
 	if (UFarmingComponent* OldFarming = Farming.Get())
 	{
 		OldFarming->OnToolChanged.RemoveAll(this);
 	}
+	if (UVestigeInteractionComponent* OldInteraction = Interaction.Get())
+	{
+		OldInteraction->OnFocusChanged.RemoveAll(this);
+	}
+}
+
+void AVestigeHUD::RefreshInteractionText()
+{
+	const UVestigeInteractionComponent* CurrentInteraction = Interaction.Get();
+	const AVestigePlayerCharacter* CurrentFarmer = Farmer.Get();
+	if (!CurrentInteraction || !CurrentFarmer || !CurrentInteraction->GetFocusedActor())
+	{
+		InteractionText = FText::GetEmpty();
+		return;
+	}
+	InteractionText = VestigeHudHints::Format({CurrentFarmer->GetInteractKey(), CurrentInteraction->GetFocusedOption().Text});
 }
 
 void AVestigeHUD::FollowInventory()

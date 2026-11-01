@@ -24,6 +24,7 @@ namespace VestigeHudStyle
 	constexpr int32 StatusFontSize = 20;
 	constexpr int32 InventoryFontSize = 16;
 	constexpr int32 MessageFontSize = 18;
+	constexpr int32 PromptFontSize = 18;
 	constexpr int32 HintFontSize = 13;
 
 	// Spacing in Slate units, which scale with the screen's DPI.
@@ -31,6 +32,9 @@ namespace VestigeHudStyle
 	constexpr float LineSpacing = 4.f;
 	constexpr float MessageBottomMargin = 80.f;
 	constexpr float MessageSpacing = 6.f;
+
+	/** How far below the middle of the screen the prompt sits, so it shows near the farmer's feet and not over him. */
+	constexpr float PromptBelowCenter = 160.f;
 	const FMargin PanelPadding(16.f, 10.f);
 	const FMargin MessagePadding(16.f, 8.f);
 }
@@ -91,6 +95,26 @@ void SVestigeHudWidget::Construct(const FArguments& InArgs)
 			]
 		]
 
+		// Prompt for the focused interactable, below the farmer.
+		+ SOverlay::Slot()
+		.HAlign(HAlign_Center)
+		.VAlign(VAlign_Center)
+		.Padding(FMargin(0.f, VestigeHudStyle::PromptBelowCenter, 0.f, 0.f))
+		[
+			SNew(SBorder)
+			.Visibility(this, &SVestigeHudWidget::GetInteractionVisibility)
+			.BorderImage(Backdrop)
+			.BorderBackgroundColor(VestigeHudStyle::Backdrop)
+			.Padding(VestigeHudStyle::MessagePadding)
+			[
+				SNew(STextBlock)
+				.Font(FCoreStyle::GetDefaultFontStyle(VestigeHudStyle::BoldFont, VestigeHudStyle::PromptFontSize))
+				.ColorAndOpacity(VestigeHudStyle::Text)
+				.ShadowOffset(VestigeHudStyle::ShadowOffset)
+				.Text(this, &SVestigeHudWidget::GetInteractionText)
+			]
+		]
+
 		// Feedback messages, each in its own box, above the controls hint. AddMessageBoxes fills the list.
 		+ SOverlay::Slot()
 		.HAlign(HAlign_Center)
@@ -143,6 +167,18 @@ FText SVestigeHudWidget::GetControlsText() const
 {
 	const AVestigeHUD* OwningHud = Hud.Get();
 	return OwningHud ? OwningHud->GetControlsText() : FText::GetEmpty();
+}
+
+FText SVestigeHudWidget::GetInteractionText() const
+{
+	const AVestigeHUD* OwningHud = Hud.Get();
+	return OwningHud ? OwningHud->GetInteractionText() : FText::GetEmpty();
+}
+
+EVisibility SVestigeHudWidget::GetInteractionVisibility() const
+{
+	const AVestigeHUD* OwningHud = Hud.Get();
+	return OwningHud && !OwningHud->GetInteractionText().IsEmpty() ? EVisibility::HitTestInvisible : EVisibility::Collapsed;
 }
 
 void SVestigeHudWidget::AddMessageBoxes(int32 Count)
