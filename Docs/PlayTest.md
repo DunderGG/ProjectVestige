@@ -153,9 +153,9 @@ The player now has stamina, through the Gameplay Ability System (Systems.md, sec
 
 Blueprints, and later mods, can now hear of a new day, a harvest and a tool use ([Architecture.md, section 12](Architecture.md#extension-points-today)). The tests check that the events fire; these checks are for how they look in the editor. Don't save the Blueprints you try them in: close them with Don't Save.
 
-- [ ] **Events in the Details panel** (7e84ca8): open `BP_PlayerCharacter` (`Content/Vestige/Blueprints`), select **FarmingComponent** in the Components panel, and scroll the Details panel to Events: **On Crop Harvested** and **On Tool Used** are listed with a + button. Pressing + on On Tool Used adds an event node with **Tool** and **Tile** pins.
-- [ ] **Content ID** (7e84ca8): drag from the Tool pin and search "Get Content Id"; the node is there. Wire it into a Print String from the On Tool Used node, compile and play: tilling grass prints `Base.Hoe`, watering bare grass prints nothing. Harvesting a ripe crop with the hand also fires **On Crop Harvested**.
-- [ ] **New day** (7e84ca8): in the same Event Graph, right-click and search "Get Day Cycle", drag from its return value and search "Assign On New Day" (or "Bind Event to On New Day"). Wire it from Event BeginPlay to a Print String of the Day, compile and play: sleeping (N) prints 2. Close the Blueprint with Don't Save afterwards.
+- [x] **Events in the Details panel** (7e84ca8): open `BP_PlayerCharacter` (`Content/Vestige/Blueprints`), select **FarmingComponent** in the Components panel, and scroll the Details panel to Events: **On Crop Harvested** and **On Tool Used** are listed with a + button. Pressing + on On Tool Used adds an event node with **Tool** and **Tile** pins.
+- [x] **Content ID** (7e84ca8): drag from the Tool pin and search "Get Content Id"; the node is there. Wire it into a Print String from the On Tool Used node, compile and play: tilling grass prints `Base.Hoe`, watering bare grass prints nothing. Harvesting a ripe crop with the hand also fires **On Crop Harvested**.
+- [x] **New day** (7e84ca8): in the same Event Graph, right-click and search "Get Day Cycle", drag from its return value and search "Assign On New Day" (or "Bind Event to On New Day"). Wire it from Event BeginPlay to a Print String of the Day, compile and play: sleeping (N) prints 2. Close the Blueprint with Don't Save afterwards.
 
 ### Interaction and the bed, 2026-11-01
 
