@@ -4,13 +4,13 @@
 #include "Farming/FarmingComponent.h"
 
 #include "Components/SceneComponent.h"
-#include "Content/FarmContentData.h"
 #include "Content/FarmCropData.h"
-#include "Content/FarmItemData.h"
 #include "Content/FarmSeedFragment.h"
-#include "Content/FarmToolData.h"
-#include "Core/FarmFeedbackSubsystem.h"
+#include "Content/VestigeContentData.h"
+#include "Content/VestigeItemData.h"
+#include "Content/VestigeToolData.h"
 #include "Core/Vestige.h"
+#include "Core/VestigeFeedbackSubsystem.h"
 #include "Engine/World.h"
 #include "Farming/FarmFarmingSaveData.h"
 #include "Farming/FarmGrid.h"
@@ -89,7 +89,7 @@ void UFarmingComponent::LoadSeedCrop()
 	TRACE_CPUPROFILER_EVENT_SCOPE(UFarmingComponent::LoadSeedCrop);
 
 	// Waiting is fine at play start, and with the meshes loaded now, planting never stalls on a load.
-	const UFarmItemData* SeedItem = Cast<UFarmItemData>(UFarmContentData::LoadWithVisuals(SeedItemId));
+	const UVestigeItemData* SeedItem = Cast<UVestigeItemData>(UVestigeContentData::LoadWithVisuals(SeedItemId));
 	const UFarmSeedFragment* Seed = SeedItem ? SeedItem->FindFragment<UFarmSeedFragment>() : nullptr;
 	if (!Seed)
 	{
@@ -97,7 +97,7 @@ void UFarmingComponent::LoadSeedCrop()
 			*GetPathName(), *SeedItemId.ToString());
 		return;
 	}
-	SeedCrop = Cast<UFarmCropData>(UFarmContentData::LoadWithVisuals(Seed->GetCropId()));
+	SeedCrop = Cast<UFarmCropData>(UVestigeContentData::LoadWithVisuals(Seed->GetCropId()));
 }
 
 void UFarmingComponent::LoadToolbar()
@@ -110,10 +110,10 @@ void UFarmingComponent::LoadToolbar()
 	}
 
 	// A missing tool leaves its slot empty, so the other tools keep their keys.
-	TArray<TObjectPtr<const UFarmToolData>> Tools;
+	TArray<TObjectPtr<const UVestigeToolData>> Tools;
 	for (const FPrimaryAssetId& ToolId : ToolbarIds)
 	{
-		const UFarmToolData* Tool = Cast<UFarmToolData>(UFarmContentData::LoadWithVisuals(ToolId));
+		const UVestigeToolData* Tool = Cast<UVestigeToolData>(UVestigeContentData::LoadWithVisuals(ToolId));
 		if (!Tool)
 		{
 			UE_LOG(LogVestige, Warning, TEXT("Toolbar slot %d of %s (%s) names no tool asset, so the slot is empty."), Tools.Num() + 1,
@@ -149,7 +149,7 @@ bool UFarmingComponent::RestoreCurrentTool(FName ToolContentId)
 FFarmFarmingSaveData UFarmingComponent::GetSaveData() const
 {
 	FFarmFarmingSaveData Data;
-	const UFarmToolData* Tool = GetCurrentTool();
+	const UVestigeToolData* Tool = GetCurrentTool();
 	Data.CurrentToolId = Tool ? Tool->GetContentId() : NAME_None;
 	return Data;
 }
@@ -168,7 +168,7 @@ void UFarmingComponent::UseTool()
 		return;
 	}
 
-	const UFarmToolData* Tool = GetCurrentTool();
+	const UVestigeToolData* Tool = GetCurrentTool();
 	if (!Tool)
 	{
 		Notify(LOCTEXT("NoTool", "No tool in this slot."));
@@ -301,7 +301,7 @@ void UFarmingComponent::FollowOwnerTransform(
 
 void UFarmingComponent::Notify(const FText& Message) const
 {
-	UFarmFeedbackSubsystem::Notify(GetWorld(), Message);
+	UVestigeFeedbackSubsystem::Notify(GetWorld(), Message);
 }
 
 #undef LOCTEXT_NAMESPACE

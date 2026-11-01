@@ -39,7 +39,7 @@ Contents
 
 ## 1. Saving and loading
 
-**Status:** built (`UFarmSaveSubsystem`, `UFarmSaveGame`, and each owner's save struct next to the owner), with the safety rules in [Architecture.md, section 6](Architecture.md#6-saving): save version 2 with upgrades from versions 0 and 1, owners saving their own parts, tiles by coordinates with crop IDs, two alternating slots, and a save that can't be read left untouched with saving off. The decision of what to load (`UFarmSaveSubsystem::DecideLoad`) is a static function, so its rules are tested without touching the player's save files.
+**Status:** built (`UVestigeSaveSubsystem`, `UVestigeSaveGame`, and each owner's save struct next to the owner), with the safety rules in [Architecture.md, section 6](Architecture.md#6-saving): save version 2 with upgrades from versions 0 and 1, owners saving their own parts, tiles by coordinates with crop IDs, two alternating slots, and a save that can't be read left untouched with saving off. The decision of what to load (`UVestigeSaveSubsystem::DecideLoad`) is a static function, so its rules are tested without touching the player's save files.
 
 **References:** Epic's "Saving and Loading Your Game" (`USaveGame`, `UGameplayStatics::SaveGameToSlot` and `AsyncSaveGameToSlot`); `UPROPERTY(SaveGame)` with `FObjectAndNameAsStringProxyArchive` (`ArIsSaveGame = true`) for serializing marked properties; `FCustomVersion` for versioned binary data. Lyra only saves settings (`ULyraSettingsShared`, a `USaveGame` written with `AsyncSaveGameToSlot`), not the world, so this guide relies on Epic's documentation more than on Lyra.
 
@@ -47,7 +47,7 @@ Contents
 
 - **Each owner saves itself.** An owner returns a plain `USTRUCT` of its saved state (`FFarmTileSaveData`) and restores from one. The save subsystem only collects, versions and writes ([Architecture.md, section 6](Architecture.md#6-saving)).
 - **Save data is values and IDs:** numbers, enums, `FName` content IDs, grid coordinates. Never object pointers, asset paths, array positions or display text.
-- **A save version** (`int32 SaveVersion` on `UFarmSaveGame`, raised with every layout change) and one migration function per old version, each tested.
+- **A save version** (`int32 SaveVersion` on `UVestigeSaveGame`, raised with every layout change) and one migration function per old version, each tested.
 - **Write safely.** Write the new save to a second slot, check the write succeeded, then make it the current slot (two alternating slots, each with a sequence number, and load the newest one that reads cleanly). A failed write never touches the last good save.
 - **Save at quiet moments** (the new day) and synchronously while it fits the new-day budget ([Architecture.md, section 10](Architecture.md#10-performance-by-design)); switch to `AsyncSaveGameToSlot` when it doesn't, and never start a map change while a write is in flight.
 - **Restore without side effects:** restoring sets state; it never replays actions or broadcasts gameplay events like `OnNewDay`.
@@ -63,17 +63,17 @@ Contents
 
 ## 2. Content and the Asset Manager
 
-**Status:** built for crops, tools and items (`UFarmContentData`, `UFarmCropData`, `UFarmToolData`, `UFarmItemData`). `UFarmContentData::IsDataValid` checks the ID format, and `UFarmAssetManager` reports duplicate IDs after the initial asset scan. The ID redirect list is deferred until an ID has to change.
+**Status:** built for crops, tools and items (`UVestigeContentData`, `UFarmCropData`, `UVestigeToolData`, `UVestigeItemData`). `UVestigeContentData::IsDataValid` checks the ID format, and `UVestigeAssetManager` reports duplicate IDs after the initial asset scan. The ID redirect list is deferred until an ID has to change.
 
 **References:** Epic's "Asset Management" and "Data Assets" pages (`UPrimaryDataAsset`, primary asset types in Project Settings > Asset Manager, asset bundles, `UAssetManager::LoadPrimaryAsset`); Lyra's `ULyraAssetManager` (a project subclass that loads global game data at startup) and its data assets (`ULyraPawnData`, `ULyraExperienceDefinition`, `ULyraInventoryItemDefinition`).
 
 **Rules:**
 
-- One `UFarmContentData` subclass per kind of content, one asset per piece of content, registered as a primary asset type in `Config/DefaultGame.ini` and found through the Asset Manager ([Architecture.md, sections 5 and 12](Architecture.md#5-data-and-content)).
+- One `UVestigeContentData` subclass per kind of content, one asset per piece of content, registered as a primary asset type in `Config/DefaultGame.ini` and found through the Asset Manager ([Architecture.md, sections 5 and 12](Architecture.md#5-data-and-content)).
 - Definitions hold no runtime state. Per-instance state (a crop's growth, an item's durability) lives on the owner of the instance.
 - Meshes, materials, sounds and effects in a content asset are soft references in an asset bundle (`Visuals`, later `Audio`), loaded with the asset when it's needed.
 - **Data validation:** each content class overrides `IsDataValid` to check its ID format and required fields, so mistakes show up in the editor (right-click > Asset Actions > Validate Assets) instead of at play time.
-- When the game needs global data at startup (lists of starting items, default settings), `UFarmAssetManager` loads it once, as `ULyraAssetManager` does, rather than having each system load its own.
+- When the game needs global data at startup (lists of starting items, default settings), `UVestigeAssetManager` loads it once, as `ULyraAssetManager` does, rather than having each system load its own.
 
 **Pitfalls:**
 
@@ -90,7 +90,7 @@ Contents
 
 - Tags are for open-ended categories and states (seasons, item categories, input actions, ability states), not for individual pieces of content, which have `ContentId`s ([Architecture.md, section 5](Architecture.md#5-data-and-content)).
 - Our tags live under `Farm.`; mods add their own root.
-- Tags that C++ refers to are **native tags**, declared in one `FarmGameplayTags.h/.cpp` with `UE_DEFINE_GAMEPLAY_TAG_COMMENT`, so a typo is a compile error and every tag has a comment. Tags only content refers to stay in the `.ini`.
+- Tags that C++ refers to are **native tags**, declared in one `VestigeGameplayTags.h/.cpp` with `UE_DEFINE_GAMEPLAY_TAG_COMMENT`, so a typo is a compile error and every tag has a comment. Tags only content refers to stay in the `.ini`.
 - Use `FGameplayTagContainer` and `HasTag` / `HasAny` queries; restrict editor pickers with `meta = (Categories = "Farm.Season")`.
 
 **Pitfalls:**
@@ -100,13 +100,13 @@ Contents
 
 ## 4. Time, days and seasons
 
-**Status:** day and clock built (`AFarmDayCycle`). Seasons and weather are milestone 2 and 3.
+**Status:** day and clock built (`AVestigeDayCycle`). Seasons and weather are milestone 2 and 3.
 
 **References:** no single Epic system; the rules here follow [Architecture.md, sections 15 and 18](Architecture.md#15-the-day-flow). Lighting follows Epic's "Sky Atmosphere", "Exponential Height Fog" and "Lumen" pages.
 
 **Rules:**
 
-- One owner of game time (`AFarmDayCycle` today). Everything else reads it or listens to its events (`OnNewDay`, `OnNewDayFinished`, `OnDayEndReached`). Nothing keeps its own clock.
+- One owner of game time (`AVestigeDayCycle` today). Everything else reads it or listens to its events (`OnNewDay`, `OnNewDayFinished`, `OnDayEndReached`). Nothing keeps its own clock.
 - Game time is separate from real time and from `UWorld::GetTimeSeconds`. Pausing and menus stop game time.
 - Daily changes happen in `OnNewDay` listeners that finish synchronously ([Architecture.md, section 15](Architecture.md#15-the-day-flow)).
 - Seasons are gameplay tags and change on a day event; weather is chosen once per day from data (per-season weights), so it's saved as a value, not re-rolled on load.
@@ -119,15 +119,15 @@ Contents
 
 ## 5. Input
 
-**Status:** Enhanced Input, with farming actions and their mapping context created once in code (`AFarmerCharacter`). The HUD's key hints are read from that mapping context. Moving to assets is a milestone 2 decision.
+**Status:** Enhanced Input, with farming actions and their mapping context created once in code (`AVestigeFarmerCharacter`). The HUD's key hints are read from that mapping context. Moving to assets is a milestone 2 decision.
 
 **References:** Epic's "Enhanced Input" pages (input actions, mapping contexts, triggers, modifiers, player-mappable key settings); Lyra's `ULyraInputConfig` (a data asset mapping input actions to input tags), `ULyraInputComponent` and `ULyraHeroComponent`, which bind actions by tag to abilities.
 
 **Rules:**
 
 - Input actions (`IA_`) and mapping contexts (`IMC_`) become assets once there are more than a handful of keys or once players can rebind keys. Mapping contexts are added and removed by context (on foot, in a menu, driving a machine) with explicit priorities.
-- The character binds input to calls on the components that own the action (`UFarmingComponent::UseTool`); input code holds no game rules. Movement input also aims the farming component at a neighbouring tile (`AimAt`), and the walk eases in from the press, read from the move action's elapsed time (`FInputActionInstance::GetElapsedTime`), so the template's `IA_Move` needs no extra trigger or modifier. Turning belongs to the farmer's movement component, `UFarmCharacterMovementComponent`, which turns toward the aimed tile when there is no input.
-- When the Gameplay Ability System arrives, follow Lyra: a `UFarmInputConfig` data asset maps each action to an input tag, and abilities activate by input tag, so new abilities don't need new binding code.
+- The character binds input to calls on the components that own the action (`UFarmingComponent::UseTool`); input code holds no game rules. Movement input also aims the farming component at a neighbouring tile (`AimAt`), and the walk eases in from the press, read from the move action's elapsed time (`FInputActionInstance::GetElapsedTime`), so the template's `IA_Move` needs no extra trigger or modifier. Turning belongs to the farmer's movement component, `UVestigeCharacterMovementComponent`, which turns toward the aimed tile when there is no input.
+- When the Gameplay Ability System arrives, follow Lyra: a `UVestigeInputConfig` data asset maps each action to an input tag, and abilities activate by input tag, so new abilities don't need new binding code.
 - Key hints on screen come from the mappings, never hard-coded text ([ArchitectureAudit A-14](ArchitectureAudit.md)).
 - Player rebinding uses Enhanced Input's player-mappable key settings, saved with the settings ([section 17](#17-settings)).
 - Gamepad support is designed in from the first asset-based mapping: every action has a gamepad key.
@@ -139,7 +139,7 @@ Contents
 
 ## 6. User interface
 
-**Status:** a C++ Slate HUD (`AFarmHUD`, `SFarmHudWidget`). Menus and an inventory in UMG are milestone 2.
+**Status:** a C++ Slate HUD (`AVestigeHUD`, `SVestigeHudWidget`). Menus and an inventory in UMG are milestone 2.
 
 **References:** Epic's "UMG UI Designer", "Common UI" and "UMG Viewmodel" (MVVM plugin) pages; Lyra's UI: `UGameUIManagerSubsystem` and `UGameUIPolicy` (CommonGame plugin), a `UPrimaryGameLayout` with layers (game, game menu, menu, modal) that widgets are pushed onto, and the UIExtension plugin (`UUIExtensionSubsystem`), which lets features add widgets to named HUD slots without the HUD knowing them.
 
@@ -159,13 +159,13 @@ Contents
 
 ## 7. Interaction
 
-**Status:** planned (`IFarmInteractable`, milestone 2 foundations).
+**Status:** planned (`IVestigeInteractable`, milestone 2 foundations).
 
 **References:** Epic's "Interfaces" page; Lyra's interaction: `IInteractableTarget` returns `FInteractionOption`s, an ability task (`UAbilityTask_GrantNearbyInteraction`) scans nearby targets, and `ULyraGameplayAbility_Interact` runs the chosen option.
 
 **Rules:**
 
-- Anything the player can use (bed, shipping bin, water source, chest, robot) implements one interface, `IFarmInteractable`, with functions such as `GetInteractionOptions` (what can be done, with display text) and `Interact`.
+- Anything the player can use (bed, shipping bin, water source, chest, robot) implements one interface, `IVestigeInteractable`, with functions such as `GetInteractionOptions` (what can be done, with display text) and `Interact`.
 - The farmer finds candidates from a **cheap query on a timer or on movement**, not every frame, and only among nearby actors (an overlap sphere on a dedicated collision channel). The best candidate is shown by a presentation component, not by debug drawing ([ArchitectureAudit A-10](ArchitectureAudit.md)).
 - Farm tiles stay targeted through the grid lookup; they don't need to be interactable actors.
 - The interacted object owns what happens; the farmer only asks.
@@ -177,7 +177,7 @@ Contents
 
 ## 8. Inventory and items
 
-**Status:** milestone 2, in two steps. **Item definitions** (`UFarmItemData` and its fragments) are built as designed below, approved by David on 2026-10-30, with two items so far: `Base.TurnipSeeds` and `Base.Turnip`. **The inventory** (`UVestigeInventoryComponent` on `AVestigePlayerState`) is built as designed below, approved by David on 2026-10-31: seeds and harvests are items in it, and the player starts with 10 `Base.TurnipSeeds`. Money waits for the shipping bin.
+**Status:** milestone 2, in two steps. **Item definitions** (`UVestigeItemData` and its fragments) are built as designed below, approved by David on 2026-10-30, with two items so far: `Base.TurnipSeeds` and `Base.Turnip`. **The inventory** (`UVestigeInventoryComponent` on `AVestigePlayerState`) is built as designed below, approved by David on 2026-10-31: seeds and harvests are items in it, and the player starts with 10 `Base.TurnipSeeds`. Money waits for the shipping bin.
 
 **References:** Epic's "Data Assets" and "Asset Management" pages, and `UAssetManager::InitializeAssetBundlesFromMetadata`, which also follows instanced subobjects, so a soft reference inside a fragment joins its item's asset bundles. Lyra's inventory (`Source/LyraGame/Inventory`): `ULyraInventoryItemDefinition` (an item made of **fragments**, small `DefaultToInstanced, EditInlineNew` objects each adding one aspect such as a pickup icon, a quick bar icon, stats or equipment, found with `FindFragmentByClass`), `ULyraInventoryItemInstance` (one item the player has, with stats), `ULyraInventoryManagerComponent` (the list) and a separate equipment manager.
 
@@ -189,9 +189,9 @@ Contents
 
 **Rules for item definitions:**
 
-- **One asset per item:** `UFarmItemData`, a `UFarmContentData` subclass of primary asset type `FarmItem`, named `DA_Item_<Name>` in `Content/Farm/Items`, always cooked. Seeds, harvested crops, materials and later tools and food are items.
-- **What every item has** sits on `UFarmItemData`: the ID and display name from the base class, `MaxStackSize` (how many fit in one inventory slot; 1 for items that don't stack) and `SellPrice` (what selling one pays; unused until there is currency). Nothing else goes on the base class.
-- **What only some items have is a fragment:** a subclass of the abstract `UFarmItemFragment` (`DefaultToInstanced, EditInlineNew`), in the item's `Fragments` list (`UPROPERTY(EditDefaultsOnly, Instanced)`). Code asks with `FindFragment<T>()`, a linear search over the few fragments an item has. A new kind of item is a new fragment, never a subclass of `UFarmItemData` and never a `switch` over item types.
+- **One asset per item:** `UVestigeItemData`, a `UVestigeContentData` subclass of primary asset type `FarmItem`, named `DA_Item_<Name>` in `Content/Farm/Items`, always cooked. Seeds, harvested crops, materials and later tools and food are items.
+- **What every item has** sits on `UVestigeItemData`: the ID and display name from the base class, `MaxStackSize` (how many fit in one inventory slot; 1 for items that don't stack) and `SellPrice` (what selling one pays; unused until there is currency). Nothing else goes on the base class.
+- **What only some items have is a fragment:** a subclass of the abstract `UVestigeItemFragment` (`DefaultToInstanced, EditInlineNew`), in the item's `Fragments` list (`UPROPERTY(EditDefaultsOnly, Instanced)`). Code asks with `FindFragment<T>()`, a linear search over the few fragments an item has. A new kind of item is a new fragment, never a subclass of `UVestigeItemData` and never a `switch` over item types.
 - **The first fragment is `UFarmSeedFragment`:** its `CropId` (`FPrimaryAssetId`, limited to `FarmCrop`) is the crop that planting the item grows.
 - **Crops name the item they yield:** `UFarmCropData::HarvestItemId` (`FPrimaryAssetId`, limited to `FarmItem`). `Yield` stays on the crop, because how many grow is the crop's rule.
 - **Prices belong to items, not crops.** `SeedPrice` and `SellPrice` leave `UFarmCropData` (both unused and zero on the turnip): the sell price is on the harvested item and on the seed item. What a shop charges is the shop's stock data, decided when shops are built, so two shops can price the same item differently.
@@ -214,14 +214,14 @@ Contents
 - **The toolbar stays on the farming component** (decision log, 2026-10-29). Tools become items, with a tool fragment, when the hotbar joins the inventory.
 - **Money is not built yet.** Nothing earns or spends it until the shipping bin and shops. It arrives with the first of them, as its own decision (a count on the inventory component or a small wallet component on the player state), rather than as an unused field now.
 - **Saving:** the component returns an `FVestigeInventorySaveData` (in `Inventory/`) holding one entry per non-empty slot: the slot index, the item's `ContentId` and the count. Restoring clears the slots and puts each entry back in its slot. An entry naming an unknown item is skipped with a warning and counted as missing content. A count above the item's stack size (its `MaxStackSize` was lowered, or a mod changed it) fills its slot and the rest goes in as a normal add; what doesn't fit is dropped with a warning and counted as missing. A bad slot index goes in as a normal add.
-- **Save version 2** adds the inventory to `UFarmSaveGame`. The upgrade from version 1 turns `Farming.Seeds` into `Base.TurnipSeeds` in slot 0 and `Farming.HarvestedCrops` into `Base.Turnip` in slot 1 (the turnip was the only crop and seed until now), as the version 0 upgrade names `Base.Turnip`. `FFarmFarmingSaveData` keeps the two counts, marked as read only by the upgrade, so version 1 saves still read into them. A version 0 save goes through both steps.
+- **Save version 2** adds the inventory to `UVestigeSaveGame`. The upgrade from version 1 turns `Farming.Seeds` into `Base.TurnipSeeds` in slot 0 and `Farming.HarvestedCrops` into `Base.Turnip` in slot 1 (the turnip was the only crop and seed until now), as the version 0 upgrade names `Base.Turnip`. `FFarmFarmingSaveData` keeps the two counts, marked as read only by the upgrade, so version 1 saves still read into them. A version 0 save goes through both steps.
 - **The HUD** shows the non-empty slots as "Bag: Turnip Seeds 9   Turnip 2", by display name, rebuilt on `OnInventoryChanged`, until the UMG inventory screen replaces the line.
 - **Performance:** no tick. Adding, removing and counting walk the 24 slots, only on a player action. Loading the definitions has a `TRACE_CPUPROFILER_EVENT_SCOPE`.
 - **Tests** (`Vestige.Inventory.*`): stacking into existing stacks before empty slots, the stack size limit, all-or-nothing adds and removes, counts across stacks, unknown IDs, the change event, the save round trip with unknown items, lowered stack sizes, bad slot indexes and no room left, and `ThePlayerStartsWithTurnipSeeds`, which checks that the game mode's player state class has an inventory with the starting seeds, so a missing editor step fails a test. The version 1 upgrade is in `Vestige.Save`; the farming tests (`Vestige.Farming`) plant from a seed item, plant nothing without seeds or a player state, harvest the crop's item, and leave the crop when the bag is full.
 
 **Pitfalls:**
 
-- A field on `UFarmItemData` that only some items use (a crop ID, a stamina value). It belongs in a fragment.
+- A field on `UVestigeItemData` that only some items use (a crop ID, a stamina value). It belongs in a fragment.
 - Two fragments of the same class on one item: `FindFragment` would only ever see the first. Validation rejects it.
 - One `UObject` per item in the inventory when a stack (ID and count) would do; instances only for items with their own state.
 - Skip Lyra's replicated `FFastArraySerializer` list until multiplayer is real.
@@ -230,14 +230,14 @@ Contents
 
 ## 9. Abilities, attributes and effects (Gameplay Ability System)
 
-**Status:** adopted 2026-10-29, starting with stamina (milestone 2, [Roadmap 4.3](Roadmap.md#43-stamina-and-late-nights)); not built yet. `UFarmRestComponent` exists and owns sleep and passing out, without ability system parts so far. Health and combat (milestone 3) build on the same setup. David approved the stamina design below on 2026-10-29.
+**Status:** adopted 2026-10-29, starting with stamina (milestone 2, [Roadmap 4.3](Roadmap.md#43-stamina-and-late-nights)); not built yet. `UVestigeRestComponent` exists and owns sleep and passing out, without ability system parts so far. Health and combat (milestone 3) build on the same setup. David approved the stamina design below on 2026-10-29.
 
 **References:** Epic's "Gameplay Ability System" pages (ability system component, attribute sets, gameplay effects, gameplay abilities, ability tasks, gameplay cues); Lyra's setup: `ULyraAbilitySystemComponent` on the player state, `ULyraAbilitySet` data assets that grant abilities, effects and attribute sets together, attribute sets such as `ULyraHealthSet`, abilities with an activation policy, and gameplay cues for cosmetics.
 
 **Rules:**
 
 - **The ability system component lives on the player state** for the player (so attributes survive the pawn), and on the pawn for robots and creatures that don't have a player state. The pawn's avatar is set when it's possessed.
-- **Attributes in attribute sets** (`UFarmStaminaSet`, later `UFarmHealthSet`), with clamping in `PreAttributeChange` and reactions in `PostGameplayEffectExecute`. Attributes change **only through gameplay effects**, never by setting the value from outside.
+- **Attributes in attribute sets** (`UVestigeStaminaSet`, later `UVestigeHealthSet`), with clamping in `PreAttributeChange` and reactions in `PostGameplayEffectExecute`. Attributes change **only through gameplay effects**, never by setting the value from outside.
 - **Gameplay effects as data**: costs (a tool's stamina cost becomes a cost effect), buffs, over-time drains (late-night drain), with magnitudes from data, not code.
 - **Abilities granted from ability set data assets**, as Lyra does, so a tool, item or robot type grants its abilities by data.
 - **Gameplay tags drive state**: blocking (`Farm.State.Exhausted` blocks sprinting), cooldowns and activation rules, with native tags ([section 3](#3-gameplay-tags)).
@@ -251,14 +251,14 @@ Contents
 
 | Rule | Built as |
 |---|---|
-| The player has stamina, shown on the HUD | `UFarmStaminaSet` with `Stamina` and `MaxStamina`, on the ability system component of a new `AVestigePlayerState`. The HUD listens to the attribute's change delegate |
-| Tool actions cost stamina | Using a tool becomes a gameplay ability (`UFarmGameplayAbility_UseTool`). Its cost is a gameplay effect whose magnitude is the tool's `StaminaCost`, passed as a set-by-caller value tagged `Farm.Data.StaminaCost` |
+| The player has stamina, shown on the HUD | `UVestigeStaminaSet` with `Stamina` and `MaxStamina`, on the ability system component of a new `AVestigePlayerState`. The HUD listens to the attribute's change delegate |
+| Tool actions cost stamina | Using a tool becomes a gameplay ability (`UVestigeGameplayAbility_UseTool`). Its cost is a gameplay effect whose magnitude is the tool's `StaminaCost`, passed as a set-by-caller value tagged `Farm.Data.StaminaCost` |
 | Stamina never goes below zero; at zero, actions still work but take twice as long | The set clamps `Stamina` to 0..`MaxStamina`. While it is 0, an infinite effect grants `Farm.State.OutOfStamina`, and tool abilities read that tag to double their duration. Costs are still applied, and clamp at 0 |
 | Stamina drains faster after midnight | An infinite periodic effect (`GE_LateNightDrain`) applied at midnight and removed on the new day, by the owner of the late-night rules |
 | Going to bed late makes the player exhausted: next day at 75%, one level, cleared by a night in bed before midnight | An `Exhausted` effect granting `Farm.State.Exhausted`, which never stacks. The new-day refill applies 75% instead of 100% while it is active, and an early night removes it |
 | Sleep refills stamina | An instant effect applied in the new-day flow, so it is saved state changed synchronously ([Architecture.md, section 15](Architecture.md#15-the-day-flow)) |
 
-Who owns what: `AVestigePlayerState` owns the ability system component; `UFarmStaminaSet` owns the numbers and their limits; the farming component keeps choosing the tile and the tool and activates the tool ability; a small `UFarmRestComponent` on the farmer owns sleep, the late-night rules and exhaustion (moving those out of `UFarmingComponent`, [ArchitectureAudit A-13](ArchitectureAudit.md)). Abilities and the stamina set are granted from a `UFarmAbilitySet` data asset. Effects are Blueprint assets (`GE_`) under `Content/Farm/Abilities/`, with every magnitude in data. Saving stores `Stamina` and whether `Exhausted` is active, and restores them without replaying effects. Tests cover the clamp, the cost, the zero-stamina tag and the exhausted refill.
+Who owns what: `AVestigePlayerState` owns the ability system component; `UVestigeStaminaSet` owns the numbers and their limits; the farming component keeps choosing the tile and the tool and activates the tool ability; a small `UVestigeRestComponent` on the farmer owns sleep, the late-night rules and exhaustion (moving those out of `UFarmingComponent`, [ArchitectureAudit A-13](ArchitectureAudit.md)). Abilities and the stamina set are granted from a `UFarmAbilitySet` data asset. Effects are Blueprint assets (`GE_`) under `Content/Farm/Abilities/`, with every magnitude in data. Saving stores `Stamina` and whether `Exhausted` is active, and restores them without replaying effects. Tests cover the clamp, the cost, the zero-stamina tag and the exhausted refill.
 
 **Pitfalls:**
 
@@ -277,7 +277,7 @@ Who owns what: `AVestigePlayerState` owns the ability system component; `UFarmSt
 - **AI controller plus StateTree** for robot behavior. The robot pawn is a body with components; the controller and its StateTree decide what to do. Log the choice of StateTree over behavior trees when the first robot is built.
 - **Daily routines are data.** A robot's schedule (where it is at what hour, by season and weather) lives in a data asset, not in the tree. The tree runs "go to the next activity" generically.
 - **Smart Objects for places robots use** (a bench, a pump to repair, a shop counter): the place says what can be done there, and robots claim slots. This suits robots repeating pre-war routines and lets mods add places without touching AI code.
-- **Robot definitions are content** (`UFarmCharacterData`, a `UFarmContentData` subclass) with the ID, name, schedule, dialogue and relationship data.
+- **Robot definitions are content** (`UVestigeCharacterData`, a `UVestigeContentData` subclass) with the ID, name, schedule, dialogue and relationship data.
 - **Scale by significance.** Robots far away or out of sight update less often (tick interval, perception off, animation update rate optimization). When the town has many simple background robots, consider Mass for them and keep full actors for the named characters.
 - Perception (sight, hearing) only for robots that need it, and not every frame.
 
@@ -370,7 +370,7 @@ Who owns what: `AVestigePlayerState` owns the ability system component; `UFarmSt
 - **Niagara systems use effect types** with scalability settings and culling distances, so effects shrink or disappear at lower scalability and distance.
 - Short, frequent effects are pooled (Niagara's pooling method on the spawn call).
 - Effects are soft references in content data and load with the content that uses them.
-- Player feedback messages go through a presentation-neutral feedback event, `UFarmFeedbackSubsystem` ([Architecture.md, section 13](Architecture.md#13-systems-and-ownership)).
+- Player feedback messages go through a presentation-neutral feedback event, `UVestigeFeedbackSubsystem` ([Architecture.md, section 13](Architecture.md#13-systems-and-ownership)).
 
 **Pitfalls:**
 
@@ -401,7 +401,7 @@ Who owns what: `AVestigePlayerState` owns the ability system component; `UFarmSt
 
 **Rules:**
 
-- Follow Lyra's split: `UFarmSettingsLocal` (a `UGameUserSettings` subclass, set in `DefaultEngine.ini` as the game user settings class) for graphics, scalability, resolution and audio device; `UFarmSettingsShared` (a `USaveGame`) for preferences like subtitles, survival needs on or off ([GameDesign.md](GameDesign.md)), key bindings and volume.
+- Follow Lyra's split: `UVestigeSettingsLocal` (a `UGameUserSettings` subclass, set in `DefaultEngine.ini` as the game user settings class) for graphics, scalability, resolution and audio device; `UVestigeSettingsShared` (a `USaveGame`) for preferences like subtitles, survival needs on or off ([GameDesign.md](GameDesign.md)), key bindings and volume.
 - Settings apply through the owner of each system (audio volumes through control buses, scalability through `UGameUserSettings`), not by each system reading the settings file.
 - Settings are saved separately from the farm save, so a new game keeps them.
 - The first run picks scalability with `RunHardwareBenchmark`, and the player can change it.
@@ -436,7 +436,7 @@ Who owns what: `AVestigePlayerState` owns the ability system component; `UFarmSt
 
 **Rules:**
 
-- Developer commands (add seeds, skip to a day, grow every crop) live in a `UFarmCheatManager` (set as the player controller's cheat manager class) as `UFUNCTION(Exec)` functions. Cheat managers aren't created in shipping builds.
+- Developer commands (add seeds, skip to a day, grow every crop) live in a `UVestigeCheatManager` (set as the player controller's cheat manager class) as `UFUNCTION(Exec)` functions. Cheat managers aren't created in shipping builds.
 - Debug visuals sit behind console variables (`farm.Debug.Targeting 1`) and `#if ENABLE_DRAW_DEBUG`, never always on.
 - Debug keys like F9 move into cheats or menus before a public build.
 - Robots get Gameplay Debugger categories and Visual Logger output when their AI is built.

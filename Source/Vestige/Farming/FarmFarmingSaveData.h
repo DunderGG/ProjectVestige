@@ -7,7 +7,7 @@
 #include "FarmFarmingSaveData.generated.h"
 
 /**
- * UFarmingComponent's part of a save: plain values and content IDs only. UFarmSaveGame holds it; the farming component
+ * UFarmingComponent's part of a save: plain values and content IDs only. UVestigeSaveGame holds it; the farming component
  * fills it and restores from it.
  */
 USTRUCT()

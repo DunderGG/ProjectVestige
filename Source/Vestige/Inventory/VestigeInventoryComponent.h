@@ -8,7 +8,7 @@
 #include "Inventory/VestigeInventory.h"
 #include "VestigeInventoryComponent.generated.h"
 
-class UFarmItemData;
+class UVestigeItemData;
 struct FVestigeInventorySaveData;
 
 DECLARE_MULTICAST_DELEGATE(FOnVestigeInventoryChanged);
@@ -72,7 +72,7 @@ public:
 
 #if WITH_DEV_AUTOMATION_TESTS
 	/** For tests only: empties the inventory to this many slots and makes these item definitions known, without loading. */
-	void ResetForTests(int32 InSlotCount, TConstArrayView<const UFarmItemData*> InItems);
+	void ResetForTests(int32 InSlotCount, TConstArrayView<const UVestigeItemData*> InItems);
 #endif
 
 protected:
@@ -85,7 +85,7 @@ private:
 	void AddStartingItems();
 
 	/** The loaded definition of the item with this ID, or nullptr, with a warning, if there is none. */
-	const UFarmItemData* FindItem(const FPrimaryAssetId& ItemId) const;
+	const UVestigeItemData* FindItem(const FPrimaryAssetId& ItemId) const;
 
 	/** How many slots the inventory has. */
 	UPROPERTY(EditDefaultsOnly, Category = "Inventory", meta = (AllowPrivateAccess = "true", ClampMin = 1))
@@ -97,7 +97,7 @@ private:
 
 	/** Every item definition, by its primary asset ID, loaded at BeginPlay. */
 	UPROPERTY()
-	TMap<FPrimaryAssetId, TObjectPtr<const UFarmItemData>> Items;
+	TMap<FPrimaryAssetId, TObjectPtr<const UVestigeItemData>> Items;
 
 	UPROPERTY()
 	FVestigeInventory Inventory;

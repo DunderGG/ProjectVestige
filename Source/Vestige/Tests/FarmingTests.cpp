@@ -5,7 +5,7 @@
 
 #include "Components/ActorTestSpawner.h"
 #include "Content/FarmCropData.h"
-#include "Content/FarmItemData.h"
+#include "Content/VestigeItemData.h"
 #include "CQTest.h"
 #include "Engine/AssetManager.h"
 #include "Farming/FarmFarmingSaveData.h"
@@ -14,7 +14,7 @@
 #include "Farming/FarmTile.h"
 #include "Inventory/VestigeInventoryComponent.h"
 #include "Inventory/VestigeInventorySaveData.h"
-#include "Player/FarmerCharacter.h"
+#include "Player/VestigeFarmerCharacter.h"
 #include "Player/VestigePlayerState.h"
 
 // A namespace keeps the fixture's short name from hiding other declarations in unity builds.
@@ -24,7 +24,7 @@ namespace FarmingTests
 	{
 		FActorTestSpawner Spawner;
 		AFarmGrid* Grid = nullptr;
-		AFarmerCharacter* Farmer = nullptr;
+		AVestigeFarmerCharacter* Farmer = nullptr;
 		UFarmingComponent* FarmingComponent = nullptr;
 		UVestigeInventoryComponent* Inventory = nullptr;
 
@@ -43,9 +43,9 @@ namespace FarmingTests
 			Inventory = PlayerState.GetInventory();
 			ASSERT_THAT(IsNotNull(Inventory));
 
-			UClass* FarmerClass = LoadClass<AFarmerCharacter>(nullptr, TEXT("/Game/Farm/Blueprints/BP_Farmer.BP_Farmer_C"));
+			UClass* FarmerClass = LoadClass<AVestigeFarmerCharacter>(nullptr, TEXT("/Game/Farm/Blueprints/BP_Farmer.BP_Farmer_C"));
 			ASSERT_THAT(IsNotNull(FarmerClass));
-			Farmer = &Spawner.SpawnActor<AFarmerCharacter>(FActorSpawnParameters(), FarmerClass);
+			Farmer = &Spawner.SpawnActor<AVestigeFarmerCharacter>(FActorSpawnParameters(), FarmerClass);
 			Farmer->DispatchBeginPlay();
 			Farmer->SetActorLocationAndRotation(FVector(250.f, 50.f, 0.f), FRotator::ZeroRotator);
 			Farmer->SetPlayerState(&PlayerState);
@@ -159,7 +159,7 @@ namespace FarmingTests
 			Hold(TEXT("Base.Hand"), 0);
 
 			// Every slot holds a full stack of seeds, so the harvest has nowhere to go.
-			const UFarmItemData* Seed = UAssetManager::Get().GetPrimaryAssetObject<UFarmItemData>(FarmingComponent->GetSeedItemId());
+			const UVestigeItemData* Seed = UAssetManager::Get().GetPrimaryAssetObject<UVestigeItemData>(FarmingComponent->GetSeedItemId());
 			ASSERT_THAT(IsNotNull(Seed));
 			FVestigeInventorySaveData FullBag;
 			for (int32 Slot = 0; Slot < Inventory->GetSlots().Num(); ++Slot)

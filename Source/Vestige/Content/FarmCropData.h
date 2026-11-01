@@ -4,7 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Content/FarmContentData.h"
+#include "Content/VestigeContentData.h"
 #include "GameplayTagContainer.h"
 #include "FarmCropData.generated.h"
 
@@ -15,7 +15,7 @@ class UStaticMesh;
  * One asset per crop, found through the Asset Manager by its ContentId. Holds no runtime state; tiles do.
  */
 UCLASS()
-class UFarmCropData : public UFarmContentData
+class UFarmCropData : public UVestigeContentData
 {
 	GENERATED_BODY()
 

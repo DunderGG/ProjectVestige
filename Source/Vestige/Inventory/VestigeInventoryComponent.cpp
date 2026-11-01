@@ -3,7 +3,7 @@
 
 #include "Inventory/VestigeInventoryComponent.h"
 
-#include "Content/FarmItemData.h"
+#include "Content/VestigeItemData.h"
 #include "Core/Vestige.h"
 #include "Engine/AssetManager.h"
 #include "Inventory/VestigeInventorySaveData.h"
@@ -35,7 +35,7 @@ void UVestigeInventoryComponent::LoadItems()
 	}
 
 	TArray<FPrimaryAssetId> ItemIds;
-	AssetManager->GetPrimaryAssetIdList(UFarmItemData::AssetType, ItemIds);
+	AssetManager->GetPrimaryAssetIdList(UVestigeItemData::AssetType, ItemIds);
 
 	// Definitions have no meshes or textures, so all of them load quickly, and waiting is fine at play start.
 	if (const TSharedPtr<FStreamableHandle> Handle = AssetManager->LoadPrimaryAssets(ItemIds))
@@ -44,7 +44,7 @@ void UVestigeInventoryComponent::LoadItems()
 	}
 	for (const FPrimaryAssetId& ItemId : ItemIds)
 	{
-		if (const UFarmItemData* Item = AssetManager->GetPrimaryAssetObject<UFarmItemData>(ItemId))
+		if (const UVestigeItemData* Item = AssetManager->GetPrimaryAssetObject<UVestigeItemData>(ItemId))
 		{
 			Items.Add(ItemId, Item);
 		}
@@ -56,7 +56,7 @@ void UVestigeInventoryComponent::AddStartingItems()
 {
 	for (const FVestigeItemStack& Stack : StartingItems)
 	{
-		const UFarmItemData* Item = FindItem(Stack.ItemId);
+		const UVestigeItemData* Item = FindItem(Stack.ItemId);
 		if (Item && !Inventory.TryAdd(*Item, Stack.Count))
 		{
 			UE_LOG(
@@ -65,9 +65,9 @@ void UVestigeInventoryComponent::AddStartingItems()
 	}
 }
 
-const UFarmItemData* UVestigeInventoryComponent::FindItem(const FPrimaryAssetId& ItemId) const
+const UVestigeItemData* UVestigeInventoryComponent::FindItem(const FPrimaryAssetId& ItemId) const
 {
-	const TObjectPtr<const UFarmItemData>* Item = Items.Find(ItemId);
+	const TObjectPtr<const UVestigeItemData>* Item = Items.Find(ItemId);
 	if (!Item)
 	{
 		UE_LOG(LogVestige, Warning, TEXT("No item has the ID %s."), *ItemId.ToString());
@@ -78,13 +78,13 @@ const UFarmItemData* UVestigeInventoryComponent::FindItem(const FPrimaryAssetId&
 
 bool UVestigeInventoryComponent::CanAddItem(const FPrimaryAssetId& ItemId, int32 Count) const
 {
-	const UFarmItemData* Item = FindItem(ItemId);
+	const UVestigeItemData* Item = FindItem(ItemId);
 	return Item && Inventory.CanAdd(*Item, Count);
 }
 
 bool UVestigeInventoryComponent::TryAddItem(const FPrimaryAssetId& ItemId, int32 Count)
 {
-	const UFarmItemData* Item = FindItem(ItemId);
+	const UVestigeItemData* Item = FindItem(ItemId);
 	if (!Item || !Inventory.TryAdd(*Item, Count))
 	{
 		return false;
@@ -95,7 +95,7 @@ bool UVestigeInventoryComponent::TryAddItem(const FPrimaryAssetId& ItemId, int32
 
 bool UVestigeInventoryComponent::TryRemoveItem(const FPrimaryAssetId& ItemId, int32 Count)
 {
-	const UFarmItemData* Item = FindItem(ItemId);
+	const UVestigeItemData* Item = FindItem(ItemId);
 	if (!Item || !Inventory.TryRemove(*Item, Count))
 	{
 		return false;
@@ -106,7 +106,7 @@ bool UVestigeInventoryComponent::TryRemoveItem(const FPrimaryAssetId& ItemId, in
 
 int32 UVestigeInventoryComponent::GetItemCount(const FPrimaryAssetId& ItemId) const
 {
-	const UFarmItemData* Item = FindItem(ItemId);
+	const UVestigeItemData* Item = FindItem(ItemId);
 	return Item ? Inventory.GetCount(*Item) : 0;
 }
 
@@ -130,10 +130,10 @@ int32 UVestigeInventoryComponent::RestoreFromSaveData(const FVestigeInventorySav
 	int32 SkippedCount = 0;
 
 	// Every stack goes back in its own slot first, so the leftovers can't take a slot another stack was saved in.
-	TArray<TPair<const UFarmItemData*, int32>> Leftovers;
+	TArray<TPair<const UVestigeItemData*, int32>> Leftovers;
 	for (const FVestigeInventorySlotSaveData& Saved : Data.Slots)
 	{
-		const UFarmItemData* Item = FindItem(FPrimaryAssetId(UFarmItemData::AssetType, Saved.ItemId));
+		const UVestigeItemData* Item = FindItem(FPrimaryAssetId(UVestigeItemData::AssetType, Saved.ItemId));
 		if (!Item)
 		{
 			++SkippedCount;
@@ -146,7 +146,7 @@ int32 UVestigeInventoryComponent::RestoreFromSaveData(const FVestigeInventorySav
 		}
 	}
 
-	for (const TPair<const UFarmItemData*, int32>& Leftover : Leftovers)
+	for (const TPair<const UVestigeItemData*, int32>& Leftover : Leftovers)
 	{
 		const int32 Added = FMath::Min(Leftover.Value, Inventory.GetRoomFor(*Leftover.Key));
 		if (Added > 0)
@@ -166,12 +166,12 @@ int32 UVestigeInventoryComponent::RestoreFromSaveData(const FVestigeInventorySav
 }
 
 #if WITH_DEV_AUTOMATION_TESTS
-void UVestigeInventoryComponent::ResetForTests(int32 InSlotCount, TConstArrayView<const UFarmItemData*> InItems)
+void UVestigeInventoryComponent::ResetForTests(int32 InSlotCount, TConstArrayView<const UVestigeItemData*> InItems)
 {
 	SlotCount = InSlotCount;
 	Inventory.Reset(SlotCount);
 	Items.Reset();
-	for (const UFarmItemData* Item : InItems)
+	for (const UVestigeItemData* Item : InItems)
 	{
 		Items.Add(Item->GetPrimaryAssetId(), Item);
 	}

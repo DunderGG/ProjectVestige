@@ -4,7 +4,7 @@
 #if WITH_DEV_AUTOMATION_TESTS
 
 #include "Components/ActorTestSpawner.h"
-#include "Content/FarmItemData.h"
+#include "Content/VestigeItemData.h"
 #include "CQTest.h"
 #include "GameFramework/GameModeBase.h"
 #include "GameFramework/PlayerState.h"
@@ -20,16 +20,16 @@ namespace VestigeInventoryTests
 		FActorTestSpawner Spawner;
 
 		/** An item asset with this ContentId and stack size. */
-		const UFarmItemData& MakeItem(FName ContentId, int32 StackSize)
+		const UVestigeItemData& MakeItem(FName ContentId, int32 StackSize)
 		{
-			UFarmItemData& Item = Spawner.SpawnObject<UFarmItemData>();
+			UVestigeItemData& Item = Spawner.SpawnObject<UVestigeItemData>();
 			Item.SetContentIdForTests(ContentId);
 			Item.SetMaxStackSizeForTests(StackSize);
 			return Item;
 		}
 
 		/** An inventory component with SlotCount slots that knows these items, without loading any. */
-		UVestigeInventoryComponent& MakeComponent(int32 SlotCount, TConstArrayView<const UFarmItemData*> Items)
+		UVestigeInventoryComponent& MakeComponent(int32 SlotCount, TConstArrayView<const UVestigeItemData*> Items)
 		{
 			AActor& Owner = Spawner.SpawnActor<AActor>();
 			UVestigeInventoryComponent* Component = NewObject<UVestigeInventoryComponent>(&Owner);
@@ -46,8 +46,8 @@ namespace VestigeInventoryTests
 
 		TEST_METHOD(AddingTopsUpStacksBeforeFillingEmptySlots)
 		{
-			const UFarmItemData& Seeds = MakeItem(TEXT("Base.Seeds"), 10);
-			const UFarmItemData& Stone = MakeItem(TEXT("Base.Stone"), 10);
+			const UVestigeItemData& Seeds = MakeItem(TEXT("Base.Seeds"), 10);
+			const UVestigeItemData& Stone = MakeItem(TEXT("Base.Stone"), 10);
 			FVestigeInventory Bag;
 			Bag.Reset(3);
 			ASSERT_THAT(IsTrue(Bag.TryAdd(Seeds, 4)));
@@ -64,7 +64,7 @@ namespace VestigeInventoryTests
 
 		TEST_METHOD(ItemsThatDontStackTakeASlotEach)
 		{
-			const UFarmItemData& Can = MakeItem(TEXT("Base.Can"), 1);
+			const UVestigeItemData& Can = MakeItem(TEXT("Base.Can"), 1);
 			FVestigeInventory Bag;
 			Bag.Reset(3);
 
@@ -77,7 +77,7 @@ namespace VestigeInventoryTests
 
 		TEST_METHOD(AnAddThatDoesntFitChangesNothing)
 		{
-			const UFarmItemData& Seeds = MakeItem(TEXT("Base.Seeds"), 10);
+			const UVestigeItemData& Seeds = MakeItem(TEXT("Base.Seeds"), 10);
 			FVestigeInventory Bag;
 			Bag.Reset(2);
 			ASSERT_THAT(IsTrue(Bag.TryAdd(Seeds, 15)));
@@ -90,7 +90,7 @@ namespace VestigeInventoryTests
 
 		TEST_METHOD(RemovingTakesFromTheLastStacksFirst)
 		{
-			const UFarmItemData& Seeds = MakeItem(TEXT("Base.Seeds"), 10);
+			const UVestigeItemData& Seeds = MakeItem(TEXT("Base.Seeds"), 10);
 			FVestigeInventory Bag;
 			Bag.Reset(3);
 			ASSERT_THAT(IsTrue(Bag.TryAdd(Seeds, 14)));
@@ -104,7 +104,7 @@ namespace VestigeInventoryTests
 
 		TEST_METHOD(RemovingMoreThanThereIsChangesNothing)
 		{
-			const UFarmItemData& Seeds = MakeItem(TEXT("Base.Seeds"), 10);
+			const UVestigeItemData& Seeds = MakeItem(TEXT("Base.Seeds"), 10);
 			FVestigeInventory Bag;
 			Bag.Reset(2);
 			ASSERT_THAT(IsTrue(Bag.TryAdd(Seeds, 3)));
@@ -115,7 +115,7 @@ namespace VestigeInventoryTests
 
 		TEST_METHOD(CountsBelowOneAreRefused)
 		{
-			const UFarmItemData& Seeds = MakeItem(TEXT("Base.Seeds"), 10);
+			const UVestigeItemData& Seeds = MakeItem(TEXT("Base.Seeds"), 10);
 			FVestigeInventory Bag;
 			Bag.Reset(2);
 
@@ -128,7 +128,7 @@ namespace VestigeInventoryTests
 		TEST_METHOD(AnUnknownItemIdIsRefused)
 		{
 			UVestigeInventoryComponent& Component = MakeComponent(4, {});
-			const FPrimaryAssetId Unknown(UFarmItemData::AssetType, TEXT("SomeMod.Pumpkin"));
+			const FPrimaryAssetId Unknown(UVestigeItemData::AssetType, TEXT("SomeMod.Pumpkin"));
 
 			ASSERT_THAT(IsFalse(Component.CanAddItem(Unknown, 1)));
 			ASSERT_THAT(IsFalse(Component.TryAddItem(Unknown, 1)));
@@ -137,7 +137,7 @@ namespace VestigeInventoryTests
 
 		TEST_METHOD(EveryChangeIsBroadcast)
 		{
-			const UFarmItemData& Seeds = MakeItem(TEXT("Base.Seeds"), 10);
+			const UVestigeItemData& Seeds = MakeItem(TEXT("Base.Seeds"), 10);
 			UVestigeInventoryComponent& Component = MakeComponent(4, {&Seeds});
 			int32 Broadcasts = 0;
 			Component.OnInventoryChanged.AddLambda(
@@ -156,8 +156,8 @@ namespace VestigeInventoryTests
 
 		TEST_METHOD(StacksRoundTripInTheirSlots)
 		{
-			const UFarmItemData& Seeds = MakeItem(TEXT("Base.Seeds"), 10);
-			const UFarmItemData& Stone = MakeItem(TEXT("Base.Stone"), 10);
+			const UVestigeItemData& Seeds = MakeItem(TEXT("Base.Seeds"), 10);
+			const UVestigeItemData& Stone = MakeItem(TEXT("Base.Stone"), 10);
 			UVestigeInventoryComponent& Saved = MakeComponent(4, {&Seeds, &Stone});
 			Saved.RestoreFromSaveData(MakeSave({{3, TEXT("Base.Seeds"), 7}, {1, TEXT("Base.Stone"), 2}}));
 			UVestigeInventoryComponent& Restored = MakeComponent(4, {&Seeds, &Stone});
@@ -174,7 +174,7 @@ namespace VestigeInventoryTests
 
 		TEST_METHOD(UnknownSavedItemsAreSkipped)
 		{
-			const UFarmItemData& Seeds = MakeItem(TEXT("Base.Seeds"), 10);
+			const UVestigeItemData& Seeds = MakeItem(TEXT("Base.Seeds"), 10);
 			UVestigeInventoryComponent& Component = MakeComponent(4, {&Seeds});
 
 			const int32 Skipped = Component.RestoreFromSaveData(MakeSave({{0, TEXT("SomeMod.Pumpkin"), 3}, {1, TEXT("Base.Seeds"), 2}}));
@@ -186,8 +186,8 @@ namespace VestigeInventoryTests
 
 		TEST_METHOD(AStackAboveTheStackSizeSpillsIntoFreeSlots)
 		{
-			const UFarmItemData& Seeds = MakeItem(TEXT("Base.Seeds"), 10);
-			const UFarmItemData& Stone = MakeItem(TEXT("Base.Stone"), 10);
+			const UVestigeItemData& Seeds = MakeItem(TEXT("Base.Seeds"), 10);
+			const UVestigeItemData& Stone = MakeItem(TEXT("Base.Stone"), 10);
 			UVestigeInventoryComponent& Component = MakeComponent(3, {&Seeds, &Stone});
 
 			// Slot 1 is saved with a stone, so the spilled seeds must skip it.
@@ -202,7 +202,7 @@ namespace VestigeInventoryTests
 
 		TEST_METHOD(ABadSavedSlotGoesInAsANormalAdd)
 		{
-			const UFarmItemData& Seeds = MakeItem(TEXT("Base.Seeds"), 10);
+			const UVestigeItemData& Seeds = MakeItem(TEXT("Base.Seeds"), 10);
 			UVestigeInventoryComponent& Component = MakeComponent(2, {&Seeds});
 
 			const int32 Skipped = Component.RestoreFromSaveData(MakeSave({{7, TEXT("Base.Seeds"), 4}}));
@@ -213,7 +213,7 @@ namespace VestigeInventoryTests
 
 		TEST_METHOD(SavedItemsWithNoRoomLeftAreSkipped)
 		{
-			const UFarmItemData& Seeds = MakeItem(TEXT("Base.Seeds"), 10);
+			const UVestigeItemData& Seeds = MakeItem(TEXT("Base.Seeds"), 10);
 			UVestigeInventoryComponent& Component = MakeComponent(1, {&Seeds});
 
 			const int32 Skipped = Component.RestoreFromSaveData(MakeSave({{0, TEXT("Base.Seeds"), 12}}));
@@ -236,7 +236,7 @@ namespace VestigeInventoryTests
 			const UVestigeInventoryComponent* Component = PlayerState.FindComponentByClass<UVestigeInventoryComponent>();
 
 			ASSERT_THAT(IsNotNull(Component));
-			ASSERT_THAT(IsTrue(Component->GetItemCount(FPrimaryAssetId(UFarmItemData::AssetType, TEXT("Base.TurnipSeeds"))) > 0));
+			ASSERT_THAT(IsTrue(Component->GetItemCount(FPrimaryAssetId(UVestigeItemData::AssetType, TEXT("Base.TurnipSeeds"))) > 0));
 		}
 	};
 }

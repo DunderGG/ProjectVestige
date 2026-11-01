@@ -28,24 +28,24 @@ Follow the two Docs files for every change. The rules below are the ones most of
 1. **Ownership.** Every actor, component and subsystem has one job. Put new logic, components and settings on the class that owns that responsibility, never on whichever class is convenient. If no class fits, create a new actor, component or subsystem and say so. Current owners (the full table is in `Docs/Architecture.md`, section 13; keep both in sync):
    - `AFarmTile` and its `FFarmTileState`: one tile's state and rules (including the crop planted in it), and its visuals.
    - `AFarmGrid`: spawns tiles, finds a tile by location, advances tiles on a new day. No clock, no lighting.
-   - `AFarmDayCycle`: day number, clock, sun, sky light, night exposure. Broadcasts `OnNewDay`, then `OnNewDayFinished`, and `OnDayEndReached` when the clock reaches the end of the day.
+   - `AVestigeDayCycle`: day number, clock, sun, sky light, night exposure. Broadcasts `OnNewDay`, then `OnNewDayFinished`, and `OnDayEndReached` when the clock reaches the end of the day.
    - `UFarmingComponent`: the toolbar and the tool in hand, which seed item the Seeds tool plants and its crop, tile targeting, using tools (taking seeds from and putting harvests into the inventory).
    - `AVestigePlayerState`: the player's data that outlives the pawn; holds the inventory (later the ability system).
    - `UVestigeInventoryComponent` and its `FVestigeInventory`: the items the player carries, in slots with stacks, by item ID, and the starting items. No money yet.
-   - `UFarmRestComponent`: the end of the player's day: sleeping and passing out (later the late-night rules and exhaustion).
-   - `UFarmCharacterMovementComponent`: how the farmer walks and turns; without input it turns toward the aimed tile.
+   - `UVestigeRestComponent`: the end of the player's day: sleeping and passing out (later the late-night rules and exhaustion).
+   - `UVestigeCharacterMovementComponent`: how the farmer walks and turns; without input it turns toward the aimed tile.
    - `UFarmTargetHighlightComponent`: the frame around the targeted tile (presentation only).
-   - `AFarmerCharacter`: input bindings (and the key hints that describe them), turning movement into the tile aim (the walk eases in, so a tap barely steps), and showing the current tool's held mesh only.
-   - `AFarmHUD` / `SFarmHudWidget`: display only.
-   - `UFarmHudSettings`: how the HUD shows feedback messages (how many at once, for how long), in Project Settings.
-   - `UFarmFeedbackSubsystem`: carries messages for the player from game code to the HUD. Game code calls `Notify`; it never calls the HUD.
-   - `UFarmSaveSubsystem` / `UFarmSaveGame`: saving and loading.
-   - `UFarmContentData`: base of every content data asset. Owns the `ContentId`, display name and loading through the Asset Manager.
-   - `UFarmAssetManager`: the project's Asset Manager; startup checks of all content (duplicate content IDs).
+   - `AVestigeFarmerCharacter`: input bindings (and the key hints that describe them), turning movement into the tile aim (the walk eases in, so a tap barely steps), and showing the current tool's held mesh only.
+   - `AVestigeHUD` / `SVestigeHudWidget`: display only.
+   - `UVestigeHudSettings`: how the HUD shows feedback messages (how many at once, for how long), in Project Settings.
+   - `UVestigeFeedbackSubsystem`: carries messages for the player from game code to the HUD. Game code calls `Notify`; it never calls the HUD.
+   - `UVestigeSaveSubsystem` / `UVestigeSaveGame`: saving and loading.
+   - `UVestigeContentData`: base of every content data asset. Owns the `ContentId`, display name and loading through the Asset Manager.
+   - `UVestigeAssetManager`: the project's Asset Manager; startup checks of all content (duplicate content IDs).
    - `UFarmCropData`: one crop's definition (growth, meshes, the item it yields and how many). No runtime state.
-   - `UFarmToolData`: one tool's definition (action, held mesh, stamina cost). No runtime state.
-   - `UFarmItemData`: one item's definition (stack size, sell price) and its fragments (`UFarmItemFragment` subclasses such as `UFarmSeedFragment`) for what only some items have. No runtime state.
-2. **Epic naming.** `A`/`U`/`S`/`F`/`E`/`I`/`T` type prefixes, `b` for booleans, PascalCase everywhere, and the `Vestige` project prefix on every new type (`AVestigePlayerState`, `FOnVestigeInventoryChanged`). Types about the farm itself (tiles, grid, crops, farming actions) use `Farm` instead (`AFarmTile`, `EFarmTileState`). Older general types still say `Farm` until their rename (`Docs/Roadmap.md`, section 4.1); don't rename them in passing.
+   - `UVestigeToolData`: one tool's definition (action, held mesh, stamina cost). No runtime state.
+   - `UVestigeItemData`: one item's definition (stack size, sell price) and its fragments (`UVestigeItemFragment` subclasses such as `UFarmSeedFragment`) for what only some items have. No runtime state.
+2. **Epic naming.** `A`/`U`/`S`/`F`/`E`/`I`/`T` type prefixes, `b` for booleans, PascalCase everywhere, and the `Vestige` project prefix on every new type (`AVestigePlayerState`, `FOnVestigeInventoryChanged`). Types about the farm itself (tiles, grid, crops, farming actions) use `Farm` instead (`AFarmTile`, `EFarmTileState`). The general types were renamed from `Farm` on 2026-11-01; a rename of a type that assets or saves name needs `[CoreRedirects]` and a test (guidelines section 2.2).
 3. **No shadowing.** The build treats MSVC C4458 as an error. Never give a local or parameter the name of a member of the class or any engine base class (`Mesh` in a character, `Owner`, `Controller`, `Tags`...).
 4. **Formatting.** Tabs, braces on their own lines, braces on every block. Format changed files with the repo's `.clang-format`; don't reformat untouched files.
 5. **UObject pointers.** Strong references are `UPROPERTY() TObjectPtr<T>`; non-owning references are `TWeakObjectPtr<T>`, assets loaded on demand are `TSoftObjectPtr<T>` (guidelines section 7). Check pointers that can be null. No `new`/`delete` on UObjects.

@@ -3,10 +3,10 @@
 #include "Template/VestigeGameMode.h"
 
 #include "Player/VestigePlayerState.h"
-#include "UI/FarmHUD.h"
+#include "UI/VestigeHUD.h"
 
 AVestigeGameMode::AVestigeGameMode()
 {
-	HUDClass = AFarmHUD::StaticClass();
+	HUDClass = AVestigeHUD::StaticClass();
 	PlayerStateClass = AVestigePlayerState::StaticClass();
 }

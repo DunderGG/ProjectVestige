@@ -3,12 +3,12 @@
 
 #include "Inventory/VestigeInventory.h"
 
-#include "Content/FarmItemData.h"
+#include "Content/VestigeItemData.h"
 
 namespace VestigeInventoryRules
 {
 	/** The item's stack size, never below 1, so a bad asset can't make room for nothing or divide anything by zero. */
-	int32 GetStackSize(const UFarmItemData& Item)
+	int32 GetStackSize(const UVestigeItemData& Item)
 	{
 		return FMath::Max(1, Item.GetMaxStackSize());
 	}
@@ -20,12 +20,12 @@ void FVestigeInventory::Reset(int32 SlotCount)
 	Slots.SetNum(FMath::Max(0, SlotCount));
 }
 
-bool FVestigeInventory::CanAdd(const UFarmItemData& Item, int32 Count) const
+bool FVestigeInventory::CanAdd(const UVestigeItemData& Item, int32 Count) const
 {
 	return Count > 0 && GetRoomFor(Item) >= Count;
 }
 
-bool FVestigeInventory::TryAdd(const UFarmItemData& Item, int32 Count)
+bool FVestigeInventory::TryAdd(const UVestigeItemData& Item, int32 Count)
 {
 	if (!CanAdd(Item, Count))
 	{
@@ -55,7 +55,7 @@ bool FVestigeInventory::TryAdd(const UFarmItemData& Item, int32 Count)
 	return true;
 }
 
-bool FVestigeInventory::TryRemove(const UFarmItemData& Item, int32 Count)
+bool FVestigeInventory::TryRemove(const UVestigeItemData& Item, int32 Count)
 {
 	if (Count <= 0 || GetCount(Item) < Count)
 	{
@@ -81,7 +81,7 @@ bool FVestigeInventory::TryRemove(const UFarmItemData& Item, int32 Count)
 	return true;
 }
 
-int32 FVestigeInventory::PlaceInSlot(int32 SlotIndex, const UFarmItemData& Item, int32 Count)
+int32 FVestigeInventory::PlaceInSlot(int32 SlotIndex, const UVestigeItemData& Item, int32 Count)
 {
 	if (!Slots.IsValidIndex(SlotIndex) || !Slots[SlotIndex].IsEmpty() || Count <= 0)
 	{
@@ -93,7 +93,7 @@ int32 FVestigeInventory::PlaceInSlot(int32 SlotIndex, const UFarmItemData& Item,
 	return Slot.Count;
 }
 
-int32 FVestigeInventory::GetRoomFor(const UFarmItemData& Item) const
+int32 FVestigeInventory::GetRoomFor(const UVestigeItemData& Item) const
 {
 	const int32 StackSize = VestigeInventoryRules::GetStackSize(Item);
 	int32 Room = 0;
@@ -111,7 +111,7 @@ int32 FVestigeInventory::GetRoomFor(const UFarmItemData& Item) const
 	return Room;
 }
 
-int32 FVestigeInventory::GetCount(const UFarmItemData& Item) const
+int32 FVestigeInventory::GetCount(const UVestigeItemData& Item) const
 {
 	int32 Count = 0;
 	for (const FVestigeInventorySlot& Slot : Slots)

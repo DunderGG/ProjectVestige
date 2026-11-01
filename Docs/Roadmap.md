@@ -27,9 +27,9 @@ Contents
 - **Done:** milestone 1, the playable prototype, plus the project's documents and rules.
 - **Now:** the code follows the guidelines and the architecture (both audits' code reviews are closed, 2026-10-29). Next: play-test that clean-up, the editor housekeeping steps in [section 3](#3-housekeeping), then the rest of the milestone 2 foundations.
 - **Next up**, in order:
-  1. Rename the general `Farm` types to the `Vestige` prefix ([section 4.1, Player data](#41-foundations)). The inventory on the player state is done (2026-10-31).
+  1. Decide whether the data names change to `Vestige` too ([section 4.1, Player data](#41-foundations)). The C++ rename is done (2026-11-01).
   2. The Gameplay Ability System and stamina ([section 4.3](#43-stamina-and-late-nights)).
-  3. The interaction interface (`IFarmInteractable`) and the bed.
+  3. The interaction interface (`IVestigeInteractable`) and the bed.
 
 ## 2. Milestone 1: playable prototype (done)
 
@@ -108,9 +108,9 @@ Small things to finish before milestone 2 starts.
 - [x] If the Android File Server was ever used with this project, regenerate its security token (Project Settings > Platforms > Android File Server). The old token was removed from `DefaultEngine.ini` but stays in the Git history
    - Not needed: the Android File Server is a tool for copying builds to an Android device over USB, and David never used it.
 - [x] Rename the farmer Blueprint `BP_ThirdPersonCharacter` to `BP_Farmer` and move it from `Content/ThirdPerson/Blueprints/` to `Content/Farm/Blueprints/`, so our own content lives under `Content/Farm/`. In the editor with the project built: right-click the Blueprint in the Content Browser > Rename, then drag it into `Content/Farm/Blueprints/` (Move Here), then right-click `Content/ThirdPerson` > Fix Up Redirectors. Check the Reference Viewer (right-click > Reference Viewer) before and after: the editor updates the assets that point to it, such as the default pawn class in `BP_ThirdPersonGameMode`, and saves them, so they go in the same commit. In the same commit, change the paths and names the editor can't update:
-   - `Source/Vestige/Tests/FarmingTests.cpp` and `Source/Vestige/Tests/FarmerTests.cpp`, which load `/Game/ThirdPerson/Blueprints/BP_ThirdPersonCharacter.BP_ThirdPersonCharacter_C` by path (their tests fail without it)
-   - the class comment in `Source/Vestige/Player/FarmerCharacter.h`
-   - `CONTRIBUTING.md` (trying a crop on the farmer), the `AFarmerCharacter` row in `Docs/Architecture.md` section 13, and the tuning check in `Docs/PlayTest.md` (Smooth turning)
+   - `Source/Vestige/Tests/FarmingTests.cpp` and `Source/Vestige/Tests/VestigeFarmerTests.cpp`, which load `/Game/ThirdPerson/Blueprints/BP_ThirdPersonCharacter.BP_ThirdPersonCharacter_C` by path (their tests fail without it)
+   - the class comment in `Source/Vestige/Player/VestigeFarmerCharacter.h`
+   - `CONTRIBUTING.md` (trying a crop on the farmer), the `AVestigeFarmerCharacter` row in `Docs/Architecture.md` section 13, and the tuning check in `Docs/PlayTest.md` (Smooth turning)
    - Nothing in `Config/` names the character; `DefaultEngine.ini` only names the game mode, which stays where it is
    - Done 2026-10-30: David renamed and moved it in the editor (the game mode's default pawn was updated with it, and no redirector is left), and the agent changed the paths above. `LICENSING.md` lists `BP_Farmer` as template material although it now lives under `Content/Farm/`
 
@@ -141,8 +141,8 @@ The code changes that the slice's content depends on. Doing them first means add
 
 - [x] Crop data assets (`UFarmCropData`) found through the Asset Manager: ID, name, seasons, growth stage meshes, days to mature (one stage per watered day), water need, contamination tolerance, yield, seed price and sell price
 - [x] The current turnip becomes the first crop asset, `Base.Turnip`, and its settings move off the tile Blueprint
-- [x] Tool data assets (`UFarmToolData`), replacing the hard-coded tool list (`EFarmTool`)
-- [x] Item data assets (`UFarmItemData`) for seeds, harvested crops and other things the player can carry, built from fragments ([Systems.md section 8](Systems.md#8-inventory-and-items)): `Base.TurnipSeeds` and `Base.Turnip`, and the turnip crop names its harvest item
+- [x] Tool data assets (`UVestigeToolData`), replacing the hard-coded tool list (`EFarmTool`)
+- [x] Item data assets (`UVestigeItemData`) for seeds, harvested crops and other things the player can carry, built from fragments ([Systems.md section 8](Systems.md#8-inventory-and-items)): `Base.TurnipSeeds` and `Base.Turnip`, and the turnip crop names its harvest item
    - The crop's seed and sell prices moved to items on 2026-10-30 (decision log)
 - [x] All content uses namespaced IDs (`Base.<Name>`) in a `ContentId` property that also builds the asset's primary asset ID, with data validation of the format and a startup check for duplicate IDs ([Architecture.md section 5](Architecture.md#5-data-and-content))
 - [ ] An ID redirect list, once an ID first has to change (deferred, see the decision log)
@@ -152,7 +152,7 @@ The code changes that the slice's content depends on. Doing them first means add
 - [x] Tile rules in a plain state struct, separate from the tile actor that shows them
 - [x] A shared way to find the grid (`AFarmGrid::Find`), replacing the repeated searches
 - [x] The grid announces when its tiles are ready, so loading no longer waits a frame (loading waits for the world's begin-play broadcast, which also covers the farmer's toolbar)
-- [x] `AFarmDayCycle::Get` follows the find-or-spawn rules: spawns only in a running game world and logs a warning when it spawns or finds more than one ([Architecture.md section 2](Architecture.md#2-unreals-gameplay-framework-where-things-go))
+- [x] `AVestigeDayCycle::Get` follows the find-or-spawn rules: spawns only in a running game world and logs a warning when it spawns or finds more than one ([Architecture.md section 2](Architecture.md#2-unreals-gameplay-framework-where-things-go))
 
 **Saving**
 
@@ -167,20 +167,22 @@ The code changes that the slice's content depends on. Doing them first means add
 
 - [x] A feedback event for player messages, so gameplay code stops calling the HUD directly
 - [ ] Blueprint events for key moments (new day, crop harvested, tool used), marked as extension points
-- [ ] An interaction interface (`IFarmInteractable`) for anything the player can use: bed, shipping bin, water source, robots
+- [ ] An interaction interface (`IVestigeInteractable`) for anything the player can use: bed, shipping bin, water source, robots
 
 **Player data**
 
 - [x] Inventory and money move into an inventory component on the player state, so they outlive the character
    - Done 2026-10-31 without money: `UVestigeInventoryComponent` on `AVestigePlayerState` ([Systems.md section 8](Systems.md#8-inventory-and-items)). Seeds and harvests are items, and old saves upgrade. Nothing earns or spends money yet, so it comes with the shipping bin ([section 4.5](#45-automation-and-selling))
-- [ ] Rename the general `Farm` types to the `Vestige` prefix (decision log, 2026-10-31): the HUD and its widget, settings and messages, the save subsystem and save game, the feedback subsystem, the day cycle, the content base, asset manager, tool and item data and the item fragments, the rest and movement components, the farmer character, and their save structs and delegates. Farm types (tile, grid, crops, the farming component, targeting, the toolbar) keep `Farm`. In its own commits, with `[CoreRedirects]` for every class and struct that assets or save files name, a save test that loads a save naming the old classes, and the documents updated. Decide there whether the asset types, the `Farm.` tag root and `Content/Farm/` change too, while no mods exist
+- [x] Rename the general `Farm` types to the `Vestige` prefix (decision log, 2026-10-31): the HUD and its widget, settings and messages, the save subsystem and save game, the feedback subsystem, the day cycle, the content base, asset manager, tool and item data and the item fragments, the rest and movement components, the farmer character, and their save structs and delegates. Farm types (tile, grid, crops, the farming component, targeting, the toolbar) keep `Farm`. In its own commits, with `[CoreRedirects]` for every class and struct that assets or save files name, a save test that loads a save naming the old classes, and the documents updated
+   - Done 2026-11-01 (decision log). The test showed that a redirect doesn't load an old save's class, so the old save game name stays as an empty `UFarmSaveGame` subclass. The seed fragment, `EFarmToolAction` and the old `EFarmTool` keep `Farm` as farm types
+- [ ] *(decide)* Whether the data names change too, while no mods exist: the `FarmTool` and `FarmItem` asset types (which assets name inside their content references, though saves don't), the `Farm.` tag root (before the stamina tags in [Systems.md section 9](Systems.md#9-abilities-attributes-and-effects-gameplay-ability-system) are made) and `Content/Farm/`
 - [x] Seed and harvest counts become private, with a restore function for loading
 - [x] Tunable settings on the tile, grid and day cycle become protected or private
 
 **Logging** (chosen 2026-10-30: build on Unreal's logging instead of a logging tool of our own, which would rebuild what the engine has and lose the Output Log's filters and colours, the log files, crash reports and the `log` console command)
 
 - [ ] A logging guide in [Systems.md](Systems.md), written from Epic's logging documentation and Lyra's source, approved by David before any code (AGENTS rule 13). It covers:
-   - categories per system, named `LogFarm<System>` (`LogFarmSave`, `LogFarmHud`), each declared in its layer's folder
+   - categories per system, named `LogVestige<System>` (`LogVestigeSave`, `LogVestigeHud`), or `LogFarm<System>` for farm systems, each declared in its layer's folder
    - which verbosity to use when (Error, Warning, Display, Log, Verbose, VeryVerbose)
    - a small macro on top of `UE_LOGFMT` that adds the sending object's name and function to every line
    - log volume: nothing logged every frame, `Verbose` for tracing
@@ -228,8 +230,8 @@ The code changes that the slice's content depends on. Doing them first means add
 ### 4.3 Stamina and late nights
 
 - [x] Approve the stamina design in [Systems.md section 9](Systems.md#9-abilities-attributes-and-effects-gameplay-ability-system)
-- [ ] Gameplay Ability System set up: plugin and modules, the ability system component on `AVestigePlayerState` (which exists since the inventory), `UFarmStaminaSet`, an ability set data asset
-- [x] Sleep and the late-night rules move from the farming component to a `UFarmRestComponent` (sleep and passing out moved; the late-night drain and exhaustion are built there with stamina)
+- [ ] Gameplay Ability System set up: plugin and modules, the ability system component on `AVestigePlayerState` (which exists since the inventory), `UVestigeStaminaSet`, an ability set data asset
+- [x] Sleep and the late-night rules move from the farming component to a `UVestigeRestComponent` (sleep and passing out moved; the late-night drain and exhaustion are built there with stamina)
 - [ ] Stamina: tool actions cost stamina, shown on the HUD
 - [ ] At zero stamina every action still works but takes twice as long; stamina never goes below zero
 - [ ] No forced sleep: remove the pass-out at 02:00
@@ -353,7 +355,7 @@ Roughly in the order from [GameDesign.md section 13](GameDesign.md#13-scope-and-
 - [ ] Replace the Epic template code and content (character, animations, input) with our own
 - [ ] Main menu, settings and save slots
 - [ ] Music and sound effects
-- [ ] Settle how many feedback messages the HUD shows at once (Project Settings > Game > Farm HUD; five while the game is being built, 2026-10-30)
+- [ ] Settle how many feedback messages the HUD shows at once (Project Settings > Game > Vestige HUD; five while the game is being built, 2026-10-30)
 - [ ] Final names for the game, the world, the town, the coin, the caretaker and the robot makers
 - [x] License headers (an SPDX line) in our own source files
 - [ ] A lawyer's check of the licensing setup

@@ -3,7 +3,7 @@
 
 #include "Content/FarmCropData.h"
 
-#include "Content/FarmItemData.h"
+#include "Content/VestigeItemData.h"
 #include "Engine/StaticMesh.h"
 
 #if WITH_EDITOR
@@ -27,7 +27,7 @@ UStaticMesh* UFarmCropData::GetGrowthStageMesh(int32 GrowthDays) const
 EDataValidationResult UFarmCropData::IsDataValid(FDataValidationContext& Context) const
 {
 	EDataValidationResult Result = Super::IsDataValid(Context);
-	if (const TOptional<FText> Error = FindContentReferenceError(HarvestItemId, UFarmItemData::AssetType))
+	if (const TOptional<FText> Error = FindContentReferenceError(HarvestItemId, UVestigeItemData::AssetType))
 	{
 		Context.AddError(FText::Format(LOCTEXT("BadHarvestItemId", "Harvest Item Id {0}"), *Error));
 		Result = EDataValidationResult::Invalid;

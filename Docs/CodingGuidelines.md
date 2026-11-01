@@ -46,7 +46,7 @@ Before adding a component, property, timer or `Tick` logic to an existing class,
 - If yes, add it there.
 - If no, put it on the class that does own it, or create a new actor, component or subsystem for it. Say so explicitly in the commit message and add it to the ownership table.
 
-A real example from this project: night post-processing and sun control were first put on `AFarmGrid` because the grid was already in the level. They were moved to a dedicated `AFarmDayCycle`, which is auto-spawned if the level doesn't have one. That is the pattern to follow.
+A real example from this project: night post-processing and sun control were first put on `AFarmGrid` because the grid was already in the level. They were moved to a dedicated `AVestigeDayCycle`, which is auto-spawned if the level doesn't have one. That is the pattern to follow.
 
 The current ownership table is in [Architecture.md, section 13](Architecture.md#13-systems-and-ownership). How to choose the right kind of owner (actor, component, subsystem, data asset) is in [section 2](Architecture.md#2-unreals-gameplay-framework-where-things-go) and how owners communicate is in [section 4](Architecture.md#4-how-systems-talk-to-each-other).
 
@@ -60,11 +60,11 @@ Follow Epic's naming rules. The `.editorconfig` in the repo enforces the prefixe
 |---|---|---|
 | `A` | Classes deriving from `AActor` | `AFarmTile` |
 | `U` | Classes deriving from `UObject` (components, subsystems, data assets) | `UFarmingComponent` |
-| `S` | Slate widgets | `SFarmHudWidget` |
+| `S` | Slate widgets | `SVestigeHudWidget` |
 | `F` | Structs and most other classes | `FFarmTileSaveData` |
 | `E` | Enums | `EFarmToolAction` |
-| `I` | Interfaces | `IFarmInteractable` |
-| `T` | Templates | `TFarmPool` |
+| `I` | Interfaces | `IVestigeInteractable` |
+| `T` | Templates | `TVestigePool` |
 | `b` | Booleans (variables, members, parameters) | `bWatered`, `bHasCrop` |
 
 ### 2.2 The `Vestige` and `Farm` project prefixes
@@ -73,7 +73,8 @@ Like Lyra prefixes its classes with `Lyra` (`ALyraCharacter`, `ULyraHealthCompon
 
 - **`Vestige`** is the project prefix: `AVestigePlayerState`, `UVestigeInventoryComponent`, `FOnVestigeInventoryChanged`. It matches the module, `LogVestige` and the template classes.
 - **`Farm`** is for types about the farm itself: its tiles, grid, crops and the farming actions (`AFarmTile`, `AFarmGrid`, `UFarmCropData`, `UFarmingComponent`, `EFarmTileState`). The game is more than farming, so player, inventory, time, saving, UI and other general types never use it.
-- Types made before 2026-10-31 used `Farm` for everything. The general ones (`AFarmHUD`, `UFarmSaveSubsystem`, `AFarmDayCycle`...) keep it until their rename, which is its own roadmap item; don't rename them in passing.
+- Types made before 2026-10-31 used `Farm` for everything. The general ones were renamed to `Vestige` on 2026-11-01 (`AFarmHUD` became `AVestigeHUD`, `AFarmerCharacter` became `AVestigeFarmerCharacter`), with `[CoreRedirects]` in `Config/DefaultEngine.ini` so assets and saves that name the old types keep loading.
+- **Renaming a reflected type** that an asset, a level, a config file or a save names needs a redirect in `[CoreRedirects]` (`ClassRedirects`, `StructRedirects`, `EnumRedirects`) and a test that loads the old name. Redirects work for asset references and saved struct and enum names, but not for a save file's own class: loading a save finds its class by the name in the file's header without applying redirects, so a renamed save game class keeps its old name as an empty subclass (`UFarmSaveGame` in `Save/VestigeSaveGame.h`).
 
 The template classes (`AVestigeCharacter`, `AVestigeGameMode`, `AVestigePlayerController`) keep the template's naming: the module name plus the class role. They live in `Template/`; our own `Vestige` types live in their layer's folder.
 
@@ -86,8 +87,8 @@ The template classes (`AVestigeCharacter`, `AVestigeGameMode`, `AVestigePlayerCo
 - Functions that do something are **verbs**: `Till()`, `StartNextDay()`, `RefreshVisuals()`.
 - Functions that only **query state** and return a `bool` ask a **question**: `IsRipe()`, `AreTilesReady()`, `HasMessages()`.
 - Functions that **do something that can fail** keep their verb name and return `bool` for success: `AFarmTile::Till()` returns `false` when the tile isn't grass. Say in the `/** */` comment what `false` means. Don't rename them as questions (`DidTillSucceed()`) or add a `Try` prefix.
-- Getters use `Get`: `GetCurrentDay()`. `Find` returns `nullptr` when nothing exists; `Get` may create it (see `AFarmDayCycle::Find` vs `AFarmDayCycle::Get`).
-- Delegates: the type is `FOnFarm<Event>`, the member is `On<Event>`: `FOnFarmNewDay OnNewDay`.
+- Getters use `Get`: `GetCurrentDay()`. `Find` returns `nullptr` when nothing exists; `Get` may create it (see `AVestigeDayCycle::Find` vs `AVestigeDayCycle::Get`).
+- Delegates: the type is `FOn<Prefix><Event>` with the type's project prefix, the member is `On<Event>`: `FOnVestigeNewDay OnNewDay`.
 - Event handlers are named for what they do, not when they run: `AdvanceTiles(int32 NewDay)`, `SaveFarm(int32 NewDay)`, not `HandleOnNewDay`.
 - Units go in the name or the comment when not obvious: `RealSecondsPerGameHour`, `TileSize` with `/** ...in cm */`.
 - Out parameters start with `Out`: `void GetBounds(FVector& OutOrigin, FVector& OutExtent)`.
@@ -162,16 +163,16 @@ Each class lives in `ClassName.h` and `ClassName.cpp`, named without the type pr
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "FarmDayCycle.generated.h"   // Always the last include
+#include "VestigeDayCycle.generated.h"   // Always the last include
 
 class ADirectionalLight;              // Forward declarations instead of includes
 class UPostProcessComponent;
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnFarmNewDay, int32 /* Day */);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnVestigeNewDay, int32 /* Day */);
 
 /** What this class is for, in one or two sentences. */
 UCLASS()
-class AFarmDayCycle : public AActor
+class AVestigeDayCycle : public AActor
 {
 	GENERATED_BODY()
 
@@ -198,13 +199,13 @@ private:
 - In a `.cpp`, include its own header first, then a blank line, then the rest in **alphabetical order** of their paths. Our headers are included by their folder path ([section 14.1](#141-source)):
 
 ```cpp
-#include "UI/FarmHUD.h"
+#include "UI/VestigeHUD.h"
 
-#include "Core/FarmFeedbackSubsystem.h"
+#include "Core/VestigeFeedbackSubsystem.h"
 #include "Engine/GameViewportClient.h"
 #include "Engine/World.h"
-#include "Time/FarmDayCycle.h"
-#include "UI/FarmHudWidget.h"
+#include "Time/VestigeDayCycle.h"
+#include "UI/VestigeHudWidget.h"
 ```
 
 - Never include `Engine.h` or `EngineMinimal.h`.
@@ -263,7 +264,7 @@ Choose a member's pointer type by what the reference **means**, not by habit:
 | points at something we don't own and must not keep alive (another actor that may be destroyed, the HUD from a Slate widget) | `TWeakObjectPtr<T>` | Weak: becomes null when the target is destroyed. Check with `IsValid()` or `Get()` before use. Add `UPROPERTY()` when the editor or serialization needs to see it |
 | names an asset that shouldn't load with the class (crop meshes, data assets for content not in use) | `UPROPERTY() TSoftObjectPtr<T>` / `TSoftClassPtr<T>` | Soft: stores the asset's path; load it when needed |
 
-`SFarmHudWidget` holding its HUD in a `TWeakObjectPtr` is an example of the second row.
+`SVestigeHudWidget` holding its HUD in a `TWeakObjectPtr` is an example of the second row.
 
 - Non-`UObject` heap data: `TUniquePtr`, `TSharedPtr`, `TSharedRef` (Slate widgets use `TSharedPtr`).
 - Raw pointers are fine for locals and parameters that don't outlive the call.
@@ -277,7 +278,7 @@ Choose a member's pointer type by what the reference **means**, not by habit:
 - **Return early** to keep the happy path unindented:
 
 ```cpp
-void UFarmSaveSubsystem::SaveFarm(int32 NewDay)
+void UVestigeSaveSubsystem::SaveFarm(int32 NewDay)
 {
 	const UFarmingComponent* Farming = GetPlayerFarming();
 	if (!Farming || !bSavingAllowed)
@@ -305,9 +306,9 @@ void UFarmSaveSubsystem::SaveFarm(int32 NewDay)
 - `nullptr`, never `NULL` or `0`.
 - `enum class` for every new enum. `UENUM(BlueprintType)` with `uint8` underlying type when it is used in properties.
 - Range-based `for` over containers. Use an index loop only when you need the index.
-- `auto`: only where the type is obvious from the right-hand side (`auto* Hud = Cast<AFarmHUD>(...)`), for iterators and for lambdas. Spell out the type otherwise. Write `auto*` and `const auto&` so pointers and references stay visible.
+- `auto`: only where the type is obvious from the right-hand side (`auto* Hud = Cast<AVestigeHUD>(...)`), for iterators and for lambdas. Spell out the type otherwise. Write `auto*` and `const auto&` so pointers and references stay visible.
 - Lambdas: capture explicitly (`[this]`, `[Tile]`). Never capture `this` in a lambda that can outlive the object; bind delegates with `AddUObject` / `AddWeakLambda` instead.
-- `constexpr` for compile-time constants. `static constexpr` for class constants (`UFarmSaveGame::CurrentVersion`).
+- `constexpr` for compile-time constants. `static constexpr` for class constants (`UVestigeSaveGame::CurrentVersion`).
 - `FMath` is the normal choice for math, especially on engine types (`FVector`, `FRotator`) and for helpers like `FMath::Clamp` and `FMath::Lerp`. Use `<cmath>` only for something `FMath` lacks.
 - No exceptions and no RTTI; the engine builds without them.
 
@@ -326,7 +327,7 @@ UE_LOG(LogVestige, Warning, TEXT("No FarmGrid in %s; farming is disabled."), *Ge
   - `ensure(Condition)` / `ensureMsgf`: something is wrong but the game can carry on. Logs a callstack once.
   - Plain `if` with a graceful fallback for things that can legitimately happen at runtime or through level setup (a missing grid, a missing save).
 - Content mistakes a designer can make (a missing mesh, no grid in the level) must not crash. Fall back to a placeholder and warn, as `AFarmTile` does with its placeholder shapes.
-- Failures the player should know about (a save that couldn't be written) must reach the player, but game code never calls the HUD to do it. The code that failed logs the failure, returns or broadcasts it, and raises a presentation-neutral feedback event; the HUD listens and displays it (see [Architecture.md, section 7](Architecture.md#7-presentation-ui-audio-and-effects)). The event is `UFarmFeedbackSubsystem::Notify(World, Text)`, with the message written as `LOCTEXT`.
+- Failures the player should know about (a save that couldn't be written) must reach the player, but game code never calls the HUD to do it. The code that failed logs the failure, returns or broadcasts it, and raises a presentation-neutral feedback event; the HUD listens and displays it (see [Architecture.md, section 7](Architecture.md#7-presentation-ui-audio-and-effects)). The event is `UVestigeFeedbackSubsystem::Notify(World, Text)`, with the message written as `LOCTEXT`.
 
 ## 11. Comments and documentation
 
@@ -357,7 +358,7 @@ There are two kinds of performance rule:
 ### 12.1 Ticking
 
 - Ticking is **off by default**: `PrimaryActorTick.bCanEverTick = false` in actors, `PrimaryComponentTick.bCanEverTick = false` in components.
-- A class that ticks says why in a comment next to `bCanEverTick = true` (`AFarmDayCycle` moves the sun). If it doesn't need every frame, it sets `TickInterval`, and it turns its tick off while it has nothing to do (`SetActorTickEnabled(false)`, `SetComponentTickEnabled(false)`).
+- A class that ticks says why in a comment next to `bCanEverTick = true` (`AVestigeDayCycle` moves the sun). If it doesn't need every frame, it sets `TickInterval`, and it turns its tick off while it has nothing to do (`SetActorTickEnabled(false)`, `SetComponentTickEnabled(false)`).
 - **Never poll another object's state in `Tick`.** Ask its owner for an event and bind to it (rule 12 in `AGENTS.md`).
 - **No Event Tick in Blueprints.** Per-frame Blueprint logic is slow and invisible in code review; if something really needs it, it moves to C++.
 - Work that has to happen often but not every frame uses a timer (`FTimerManager`) at the rate it needs.
@@ -381,7 +382,7 @@ Not in `Tick`, not in a timer that runs every frame, and not in a Slate or UMG b
 ### 12.4 Assets and loading
 
 - **A hard reference loads everything it points to, and everything those assets point to in turn.** Use `TObjectPtr` / `TSubclassOf` for assets only when the class always needs them. Content uses soft references and asset bundles ([section 7](#7-memory-pointers-and-object-lifetime), [Architecture.md, section 5](Architecture.md#5-data-and-content)).
-- **No synchronous loads during interactive play.** `LoadSynchronous`, `TryLoad`, `WaitUntilComplete` and `UFarmContentData::LoadWithVisuals` are only for play start and loading screens, where the cost is known. Everything else loads asynchronously (`FStreamableManager`, the Asset Manager) before it is needed.
+- **No synchronous loads during interactive play.** `LoadSynchronous`, `TryLoad`, `WaitUntilComplete` and `UVestigeContentData::LoadWithVisuals` are only for play start and loading screens, where the cost is known. Everything else loads asynchronously (`FStreamableManager`, the Asset Manager) before it is needed.
 - In Blueprints, a **Cast To** node or a variable of another Blueprint's type is a hard reference that loads that Blueprint and everything it references. Cast to C++ base classes or use interfaces instead.
 - Check the **Size Map** and **Reference Viewer** (right-click the asset in the Content Browser) for every new or changed Blueprint and data asset, and make sure it doesn't drag in unrelated content.
 - `ConstructorHelpers` only in constructors, and only for engine placeholder assets.
@@ -396,7 +397,7 @@ Not in `Tick`, not in a timer that runs every frame, and not in a Slate or UMG b
 
 ### 12.6 User interface
 
-- Slate attribute bindings (`.Text(this, &SFarmHudWidget::GetStatusText)`) and UMG property bindings run every frame. Bind only values that change every frame (the clock). Everything else is set when an event says it changed.
+- Slate attribute bindings (`.Text(this, &SVestigeHudWidget::GetStatusText)`) and UMG property bindings run every frame. Bind only values that change every frame (the clock). Everything else is set when an event says it changed.
 - A bound getter only reads values the widget or HUD already holds. It never searches, loads or calls into game code that does.
 
 ### 12.7 Bulk and once-a-day work
@@ -444,11 +445,11 @@ The game is one module, `Vestige`, split into folders. **The folders are the arc
 ```
 Source/Vestige/
     Vestige.Build.cs
-    Core/       Shared services that know no game rules: FarmActorLookup, UFarmFeedbackSubsystem, the module and log category
-    Content/    Content definitions: UFarmContentData and its subclasses, UFarmAssetManager
+    Core/       Shared services that know no game rules: VestigeActorLookup, UVestigeFeedbackSubsystem, the module and log category
+    Content/    Content definitions: UVestigeContentData and its subclasses, UVestigeAssetManager
     Time/       The day cycle and its save struct
     Farming/    Tiles and tile state, the grid, the farming, rest and highlight components, the toolbar, their save structs
-    Save/       UFarmSaveGame and UFarmSaveSubsystem
+    Save/       UVestigeSaveGame and UVestigeSaveSubsystem
     Player/     The farmer character
     UI/         The HUD and its widgets
     Template/   Epic's template classes (character, game mode, player controller); not maintained to this guide
@@ -458,7 +459,7 @@ Source/Vestige/
 - **A folder includes only from its own layer and the layers below it.** `Farming/` may include `Time/`, `Content/` and `Core/`, never `Save/`, `Player/` or `UI/`. When a lower layer needs to tell a higher one something, it broadcasts an event and the higher one listens ([Architecture.md, section 4](Architecture.md#4-how-systems-talk-to-each-other)). `Tests/` may include anything, and nothing includes `Tests/`. `Template/` isn't maintained to this guide, but its includes are checked: it is app-level wiring that may include any layer (the game mode names the HUD class), so only `Player/` and `UI/` may include it.
 - **The test `Vestige.Architecture.IncludeDirection` enforces this.** It fails on a wrong-way include, on one of our headers included without its folder, and on a file in a folder that isn't a layer yet.
 - **A new file goes in the folder of its layer.** Decide the owner first ([section 1](#1-ownership-and-separation-of-concerns)), then the layer. If a class doesn't fit any folder, or would have to include upward, that's a design question: raise it rather than bending the rule. A new folder is added to the layer table in the test and in Architecture.md section 14 in the same commit.
-- **A save struct lives with its owner** (`FFarmClockSaveData` in `Time/`), and `Save/` only gathers them, so saving never pulls a lower layer upward.
+- **A save struct lives with its owner** (`FVestigeClockSaveData` in `Time/`), and `Save/` only gathers them, so saving never pulls a lower layer upward.
 - **Include our headers by their path from the module root**, own header included: `#include "Farming/FarmTile.h"`. The `"Vestige"` entry in `PublicIncludePaths` is what puts that root on the include path (a build without it fails), so keep it. Don't add the feature folders to the include path: bare includes like `"FarmTile.h"` hide where a file lives.
 - **Folders, not modules.** Splitting the game into several modules is a separate decision ([Architecture.md, section 9](Architecture.md#9-modules-and-plugins) and the decision log). If another module ever needs our headers, give the module a `Public/` and `Private/` split and move only the headers meant for it into `Public/`.
 - Move files between folders in a commit of its own, with no other change. Unreal names classes by module and name, not by folder, so moving a file never affects Blueprints, levels or saves. Regenerate the Visual Studio project files afterwards (right-click `Vestige.uproject` > Generate Visual Studio project files).
@@ -491,7 +492,7 @@ Blender sources go in `Art/Blender/`, exported FBX files in `Art/Export/`, with 
 ## 15. Git workflow
 
 - **Small, focused commits.** One logical change per commit. Refactors and moves go in their own commits, separate from behavior changes.
-- **Commit messages**: an imperative subject line under about 70 characters (`Move lighting from FarmGrid to FarmDayCycle`), a blank line, then a short body saying *what* changed and *why*.
+- **Commit messages**: an imperative subject line under about 70 characters (`Move lighting from FarmGrid to VestigeDayCycle`), a blank line, then a short body saying *what* changed and *why*.
 - **Author and committer**: `David Bennehag <david.bennehag@gmail.com>`.
 - **No `Co-Authored-By:` or `Claude-Session:` trailers** or any other tool attribution in commit messages.
 - **No pull requests.** Commits are made locally on `main` on David's machine. David reviews and pushes. Nobody else pushes.

@@ -3,9 +3,9 @@
 
 #include "Farming/FarmToolbar.h"
 
-#include "Content/FarmToolData.h"
+#include "Content/VestigeToolData.h"
 
-void FFarmToolbar::SetTools(TArray<TObjectPtr<const UFarmToolData>> InTools)
+void FFarmToolbar::SetTools(TArray<TObjectPtr<const UVestigeToolData>> InTools)
 {
 	Tools = MoveTemp(InTools);
 	CurrentSlot = 0;
@@ -24,14 +24,14 @@ bool FFarmToolbar::SelectSlot(int32 Slot)
 bool FFarmToolbar::SelectTool(FName ToolContentId)
 {
 	const int32 Slot = Tools.IndexOfByPredicate(
-		[ToolContentId](const UFarmToolData* Tool)
+		[ToolContentId](const UVestigeToolData* Tool)
 		{
 			return Tool && Tool->GetContentId() == ToolContentId;
 		});
 	return !ToolContentId.IsNone() && SelectSlot(Slot);
 }
 
-const UFarmToolData* FFarmToolbar::GetCurrentTool() const
+const UVestigeToolData* FFarmToolbar::GetCurrentTool() const
 {
 	return Tools.IsValidIndex(CurrentSlot) ? Tools[CurrentSlot].Get() : nullptr;
 }

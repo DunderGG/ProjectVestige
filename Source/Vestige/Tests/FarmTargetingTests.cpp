@@ -11,7 +11,7 @@
 #include "Farming/FarmTile.h"
 #include "Materials/Material.h"
 #include "Materials/MaterialInterface.h"
-#include "Player/FarmerCharacter.h"
+#include "Player/VestigeFarmerCharacter.h"
 
 // A namespace keeps the fixture's short name from hiding other declarations in unity builds.
 namespace FarmTargetingTests
@@ -20,7 +20,7 @@ namespace FarmTargetingTests
 	{
 		FActorTestSpawner Spawner;
 		AFarmGrid* Grid = nullptr;
-		AFarmerCharacter* Farmer = nullptr;
+		AVestigeFarmerCharacter* Farmer = nullptr;
 		UFarmingComponent* Farming = nullptr;
 
 		/** A default 8 x 8 grid of 1 m tiles with a corner at the origin, and a farmer, both playing. */
@@ -28,7 +28,7 @@ namespace FarmTargetingTests
 		{
 			Grid = &Spawner.SpawnActor<AFarmGrid>();
 			Grid->DispatchBeginPlay();
-			Farmer = &Spawner.SpawnActor<AFarmerCharacter>();
+			Farmer = &Spawner.SpawnActor<AVestigeFarmerCharacter>();
 			Farmer->DispatchBeginPlay();
 			Farming = Farmer->FindComponentByClass<UFarmingComponent>();
 		}

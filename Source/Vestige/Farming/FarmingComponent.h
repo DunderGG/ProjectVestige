@@ -11,17 +11,17 @@
 class AFarmGrid;
 class AFarmTile;
 class UFarmCropData;
-class UFarmToolData;
+class UVestigeToolData;
 class UVestigeInventoryComponent;
 struct FFarmFarmingSaveData;
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnFarmToolChanged, const UFarmToolData* /* Tool */);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnFarmToolChanged, const UVestigeToolData* /* Tool */);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnFarmTargetTileChanged, const AFarmTile* /* Tile */);
 
 /**
  * Gives its owner, a pawn, farming tools. Works on the tile next to the owner's in the direction the owner aims, takes
  * seeds from and puts harvests into the inventory on the owner's player state, and tells the player what happened
- * through UFarmFeedbackSubsystem.
+ * through UVestigeFeedbackSubsystem.
  */
 UCLASS(ClassGroup = (Farming), meta = (BlueprintSpawnableComponent))
 class UFarmingComponent : public UActorComponent
@@ -35,7 +35,7 @@ public:
 	void SelectToolbarSlot(int32 Slot);
 
 	/** The tool in hand, or nullptr if its slot is empty. */
-	const UFarmToolData* GetCurrentTool() const { return Toolbar.GetCurrentTool(); }
+	const UVestigeToolData* GetCurrentTool() const { return Toolbar.GetCurrentTool(); }
 	const FFarmToolbar& GetToolbar() const { return Toolbar; }
 
 	/** Uses the tool in hand on the target tile. Does nothing to the farm without a target or a tool. */
@@ -104,7 +104,7 @@ private:
 	void Plant(AFarmTile& Tile);
 	void Harvest(AFarmTile& Tile);
 
-	/** Tells the player what happened, through UFarmFeedbackSubsystem. */
+	/** Tells the player what happened, through UVestigeFeedbackSubsystem. */
 	void Notify(const FText& Message) const;
 
 	UPROPERTY()

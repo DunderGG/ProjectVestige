@@ -4,12 +4,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Content/FarmItemData.h"
+#include "Content/VestigeItemData.h"
 #include "FarmSeedFragment.generated.h"
 
 /** Makes an item a seed: planting it grows the crop CropId names. */
 UCLASS()
-class UFarmSeedFragment : public UFarmItemFragment
+class UFarmSeedFragment : public UVestigeItemFragment
 {
 	GENERATED_BODY()
 

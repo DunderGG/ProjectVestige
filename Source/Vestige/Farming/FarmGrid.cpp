@@ -4,12 +4,12 @@
 #include "Farming/FarmGrid.h"
 
 #include "Components/BoxComponent.h"
-#include "Core/FarmActorLookup.h"
 #include "Core/Vestige.h"
+#include "Core/VestigeActorLookup.h"
 #include "Engine/World.h"
 #include "Farming/FarmTile.h"
 #include "ProfilingDebugging/CpuProfilerTrace.h"
-#include "Time/FarmDayCycle.h"
+#include "Time/VestigeDayCycle.h"
 
 namespace FarmGridEditor
 {
@@ -45,8 +45,8 @@ void AFarmGrid::BeginPlay()
 {
 	Super::BeginPlay();
 
-	DayCycle = AFarmDayCycle::Get(GetWorld());
-	if (AFarmDayCycle* Cycle = DayCycle.Get())
+	DayCycle = AVestigeDayCycle::Get(GetWorld());
+	if (AVestigeDayCycle* Cycle = DayCycle.Get())
 	{
 		Cycle->OnNewDay.AddUObject(this, &AFarmGrid::AdvanceTiles);
 	}
@@ -58,7 +58,7 @@ void AFarmGrid::BeginPlay()
 
 void AFarmGrid::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	if (AFarmDayCycle* Cycle = DayCycle.Get())
+	if (AVestigeDayCycle* Cycle = DayCycle.Get())
 	{
 		Cycle->OnNewDay.RemoveAll(this);
 	}
@@ -82,7 +82,7 @@ void AFarmGrid::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 AFarmGrid* AFarmGrid::Find(const UWorld* World)
 {
-	return Cast<AFarmGrid>(FarmActorLookup::FindSingle(World, StaticClass()));
+	return Cast<AFarmGrid>(VestigeActorLookup::FindSingle(World, StaticClass()));
 }
 
 void AFarmGrid::SpawnTiles()

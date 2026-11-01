@@ -75,7 +75,7 @@ private:
 
 /**
  * One tile's part of a save: plain values and content IDs only. AFarmTile fills the state and crop, AFarmGrid adds where
- * the tile is, and UFarmSaveGame holds the list.
+ * the tile is, and UVestigeSaveGame holds the list.
  */
 USTRUCT()
 struct FFarmTileSaveData

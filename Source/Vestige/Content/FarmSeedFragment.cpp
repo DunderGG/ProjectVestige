@@ -15,7 +15,7 @@
 EDataValidationResult UFarmSeedFragment::IsDataValid(FDataValidationContext& Context) const
 {
 	EDataValidationResult Result = Super::IsDataValid(Context);
-	if (const TOptional<FText> Error = UFarmContentData::FindContentReferenceError(CropId, UFarmCropData::AssetType))
+	if (const TOptional<FText> Error = UVestigeContentData::FindContentReferenceError(CropId, UFarmCropData::AssetType))
 	{
 		Context.AddError(FText::Format(LOCTEXT("BadCropId", "The seed fragment's Crop Id {0}"), *Error));
 		Result = EDataValidationResult::Invalid;

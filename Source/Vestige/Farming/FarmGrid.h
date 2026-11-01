@@ -7,7 +7,7 @@
 #include "GameFramework/Actor.h"
 #include "FarmGrid.generated.h"
 
-class AFarmDayCycle;
+class AVestigeDayCycle;
 class AFarmTile;
 class UFarmCropData;
 class UBoxComponent;
@@ -17,7 +17,7 @@ DECLARE_MULTICAST_DELEGATE(FOnFarmTilesReady);
 
 /**
  * A rectangle of farm tiles, spawned at BeginPlay with the actor's location as one corner.
- * Advances every tile when the world's AFarmDayCycle starts a new day.
+ * Advances every tile when the world's AVestigeDayCycle starts a new day.
  */
 UCLASS()
 class AFarmGrid : public AActor
@@ -106,7 +106,7 @@ private:
 	TArray<TObjectPtr<AFarmTile>> Tiles;
 
 	/** The day cycle this grid listens to, so EndPlay can stop listening. */
-	TWeakObjectPtr<AFarmDayCycle> DayCycle;
+	TWeakObjectPtr<AVestigeDayCycle> DayCycle;
 
 	bool bTilesReady = false;
 };

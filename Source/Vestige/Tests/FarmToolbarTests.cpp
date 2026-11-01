@@ -4,7 +4,7 @@
 #if WITH_DEV_AUTOMATION_TESTS
 
 #include "Components/ActorTestSpawner.h"
-#include "Content/FarmToolData.h"
+#include "Content/VestigeToolData.h"
 #include "CQTest.h"
 #include "Farming/FarmToolbar.h"
 
@@ -16,9 +16,9 @@ namespace FarmToolbarTests
 		FActorTestSpawner Spawner;
 
 		/** A tool asset with this ContentId. */
-		const UFarmToolData* MakeTool(FName ContentId)
+		const UVestigeToolData* MakeTool(FName ContentId)
 		{
-			UFarmToolData& Tool = Spawner.SpawnObject<UFarmToolData>();
+			UVestigeToolData& Tool = Spawner.SpawnObject<UVestigeToolData>();
 			Tool.SetContentIdForTests(ContentId);
 			return &Tool;
 		}

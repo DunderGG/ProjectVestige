@@ -74,7 +74,7 @@ Replaces the earlier messages check (c87081e), after David's note that messages 
 Raises the cap from the message boxes checks above.
 
 - [ ] **At most five** (77a2218): with five boxes showing, a sixth message pushes out the oldest. Tilling and planting quickly along a row is the easiest way to get there. The boxes stay clear of the key hints and the status line.
-- [ ] **Settings** (77a2218): Edit > Project Settings > Game > Farm HUD shows Max Messages (5) and Message Seconds (3). Changing them takes effect the next time you press Play, and is saved to `Config/DefaultGame.ini`; tell the agent the values you settle on.
+- [ ] **Settings** (77a2218): Edit > Project Settings > Game > Vestige HUD shows Max Messages (5) and Message Seconds (3). Changing them takes effect the next time you press Play, and is saved to `Config/DefaultGame.ini`; tell the agent the values you settle on.
 - [ ] **Log** (77a2218): every message also appears in the Output Log (Window > Output Log, filter on `LogVestige`) as `Feedback: ...`, so you can read messages that have already faded.
 
 ### Unreal Engine 5.8.4 build, 2026-10-30
@@ -83,7 +83,7 @@ The project now builds only with 5.8. The rest of the upgrade (assets, rendering
 
 - [x] **Editor start** (674adff): double-clicking `Vestige.uproject` opens the 5.8 editor straight away, with no "Target Upgrade Required" or "missing modules" prompt, and the Output Log at start has no `LogVestige` errors.
 - [x] **Walking** (de2e2c2): a tap of W, A, S or D still turns the farmer with barely a step, and holding a key walks as before.
-- [x] **Visual Studio plugin** (ae539f7): with the Development Editor configuration, open `Source/Vestige/Player/FarmerCharacter.h` and, if needed, Project > Rescan UE Blueprints. After a minute, grey hints such as "1 derived Blueprint" appear above `UCLASS`, `UPROPERTY` and `UFUNCTION` lines, and `Vestige.uproject` still has `"Optional": true` on the plugin.
+- [x] **Visual Studio plugin** (ae539f7): with the Development Editor configuration, open `Source/Vestige/Player/VestigeFarmerCharacter.h` and, if needed, Project > Rescan UE Blueprints. After a minute, grey hints such as "1 derived Blueprint" appear above `UCLASS`, `UPROPERTY` and `UFUNCTION` lines, and `Vestige.uproject` still has `"Optional": true` on the plugin.
    - Works once Tools > Options > Text Editor > CodeLens > Show Unreal Engine Blueprints References (C++) is ticked; it was off. Visual Studio's own asset reader logs "Unexpected EOF" for some assets during the rescan, which doesn't affect the hints.
 
 ### Item data assets, 2026-10-30
@@ -119,6 +119,16 @@ Seeds and harvests are now items in an inventory on the player state. `BP_Player
 - [x] **Assets** (a3ace26): `Content/Farm/Blueprints/BP_PlayerState` opens; its **Inventory** component shows Slot Count 24 and Starting Items with `FarmItem:Base.TurnipSeeds` × 10. `BP_ThirdPersonGameMode` shows Player State Class `BP_PlayerState`. `BP_Farmer`'s **Farming** component shows Seed Item Id `FarmItem:Base.TurnipSeeds`, and its picker lists only items. None of them asks to be saved when you close it.
 - [x] **Solution** (a3ace26): after regenerating the project files, the solution shows the new `Inventory` folder under `Source/Vestige`.
 
+### Vestige rename, 2026-11-01
+
+The general C++ types lost their `Farm` prefix (`AFarmHUD` is now `AVestigeHUD`, `AFarmerCharacter` is `AVestigeFarmerCharacter`, the full list is in the Architecture decision log). The level, `BP_Farmer` and the tool and item assets still name the old classes until they are saved, and `[CoreRedirects]` in `Config/DefaultEngine.ini` map them. A headless check loaded them all without warnings, and the tests load a save that names the old classes, but the editor hasn't shown them yet. Back up `Saved/SaveGames/` first.
+
+- [ ] **Solution** (this commit): regenerate the project files (right-click `Vestige.uproject` > Generate Visual Studio project files). The solution lists the renamed files (`Player/VestigeFarmerCharacter.h`, `UI/VestigeHUD.h`...) and no `FarmHUD` or `FarmDayCycle` files.
+- [ ] **Old save** (this commit): pressing Play loads your farm as you left it: the day, the clock, the bag and the tiles. Sleep once; stopping and playing again brings the same farm back.
+- [ ] **Assets** (this commit): `BP_Farmer` opens and compiles without errors, and its Class Settings show Parent Class `Vestige Farmer Character`; its components include **Rest** (`Vestige Rest Component`) and **Character Movement** (`Vestige Character Movement Component`). In `L_Farm`, the day cycle actor shows class `VestigeDayCycle` with its settings as before. `DA_Tool_Hoe` and `DA_Item_TurnipSeeds` open with their values. The Output Log has no "Failed to load" or "can't find class" lines after opening them and playing. If the editor asks to save any of them, saving is fine: they then store the new names.
+- [ ] **Settings** (this commit): Edit > Project Settings > Game lists **Vestige HUD** (no more Farm HUD) with the same values.
+- [ ] The [smoke test](#3-smoke-test).
+
 ### Editor chores
 
 Changes only the editor can make safely. The steps are in [Roadmap.md, Housekeeping](Roadmap.md#3-housekeeping): re-saving the template Blueprints and `L_Farm`, moving `BP_FarmTile` and the materials with redirectors fixed, and regenerating the Android File Server token if it was ever used. After each one, run the [smoke test](#3-smoke-test).
@@ -133,7 +143,7 @@ About five minutes in `L_Farm`, in Play in Editor at High. Run it before pushing
 4. **Day and night:** let the clock run through an evening (it moves about one hour every 40 seconds unless the level's day cycle is set faster). The sun sets with warm light, the night is properly dark with faint moonlight, and at 02:00 the farmer passes out into the next day.
 5. **Saving:** sleep ("Game saved."), stop the game and play again. The day, the bag, the tool in hand and every tile, crops included, come back.
 6. **Highlight:** walk along the field edge and turn. The frame is bright yellow, by day and at night, follows the tile in front of you and disappears off the field.
-7. **Performance:** in the console, `stat fps` and `stat unit`. In a busy part of the farm, by day and by night, the frame stays under 16.6 ms (60 fps), and sleeping shows no visible hitch ([Architecture.md, section 10](Architecture.md#10-performance-by-design)). Play in Editor adds its own cost, so check a doubtful number in Standalone Game. For a hitch on the new day, start the game with `-trace=default` and open the trace in Unreal Insights (`Engine\Binaries\Win64\UnrealInsights.exe`): `AFarmDayCycle::StartNextDay` shows the whole new day, with the tiles, the save and the load inside it.
+7. **Performance:** in the console, `stat fps` and `stat unit`. In a busy part of the farm, by day and by night, the frame stays under 16.6 ms (60 fps), and sleeping shows no visible hitch ([Architecture.md, section 10](Architecture.md#10-performance-by-design)). Play in Editor adds its own cost, so check a doubtful number in Standalone Game. For a hitch on the new day, start the game with `-trace=default` and open the trace in Unreal Insights (`Engine\Binaries\Win64\UnrealInsights.exe`): `AVestigeDayCycle::StartNextDay` shows the whole new day, with the tiles, the save and the load inside it.
 
 Put the save folder back afterwards if you want your farm as it was.
 

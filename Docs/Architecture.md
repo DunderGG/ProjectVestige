@@ -83,7 +83,7 @@ A useful test for player data: **does it need to exist when the player's body do
 
 Placed actors versus subsystems: use an actor when something needs a place in the level or per-level settings a designer tweaks in the Details panel. Use a subsystem when it's a service that should always exist and needs no settings.
 
-A placed actor that the game can't run without may **find-or-spawn** itself through a static `Get(UWorld*)` (`AFarmDayCycle::Get`), so a level that's missing it still runs. This is a convenience with side effects, so it follows these rules:
+A placed actor that the game can't run without may **find-or-spawn** itself through a static `Get(UWorld*)` (`AVestigeDayCycle::Get`), so a level that's missing it still runs. This is a convenience with side effects, so it follows these rules:
 
 - **World-scoped and game-thread only.** `Get` takes the world it works in and never caches an instance across worlds.
 - **Only in a running game world.** It spawns only in game and Play in Editor worlds whose actors are initialized for play and that aren't being torn down. (The engine marks a world as begun only after every actor's `BeginPlay` has run, so `HasBegunPlay` can't be the test: `Get` is mostly called from `BeginPlay`.) Anywhere else (editor and preview worlds, teardown) it returns what `Find` returns, possibly null, and callers handle null.
@@ -105,7 +105,7 @@ Most hard-to-find Unreal bugs are about things running in a different order than
 
 To deal with unknown order, in order of preference:
 
-1. **Find-or-spawn on demand.** A static `Get(World)` that returns the existing instance or creates it (`AFarmDayCycle::Get`), under the rules in [section 2](#2-unreals-gameplay-framework-where-things-go). Only for required placed actors.
+1. **Find-or-spawn on demand.** A static `Get(World)` that returns the existing instance or creates it (`AVestigeDayCycle::Get`), under the rules in [section 2](#2-unreals-gameplay-framework-where-things-go). Only for required placed actors.
 2. **Register with a known owner.** Things announce themselves to a subsystem in their `BeginPlay`, and the subsystem broadcasts once everything it needs has arrived.
 3. **Wait for a signal.** Bind to a "ready" event rather than guessing.
 4. **Wait a tick** (`SetTimerForNextTick`). This works but hides the dependency. Use it only when the above don't fit, and comment why.
@@ -117,16 +117,16 @@ Pick the loosest connection that does the job.
 | Mechanism | Use when | Example |
 |---|---|---|
 | Direct function call | A class tells something it owns or clearly depends on to do something | `UFarmingComponent` calls `AFarmTile::Till` |
-| Multicast delegate | Something happened and any number of others may care. The sender must not know who listens | `AFarmDayCycle::OnNewDay` |
-| Interface (`UINTERFACE`) | Many unrelated classes respond to the same request | A future `IFarmInteractable` for tiles, chests and NPCs |
-| Subsystem lookup | Reaching a global service | `GetWorld()->GetSubsystem<UFarmSaveSubsystem>()` |
+| Multicast delegate | Something happened and any number of others may care. The sender must not know who listens | `AVestigeDayCycle::OnNewDay` |
+| Interface (`UINTERFACE`) | Many unrelated classes respond to the same request | A future `IVestigeInteractable` for tiles, chests and NPCs |
+| Subsystem lookup | Reaching a global service | `GetWorld()->GetSubsystem<UVestigeSaveSubsystem>()` |
 | Message bus (Lyra's Gameplay Message Router) | Many senders and many listeners that shouldn't know each other at all | Not needed yet |
 
 Rules:
 
 - **No circular dependencies.** If A calls B, B doesn't call A. B broadcasts an event that A listens to.
 - **Ask, don't reach in.** Never change another class's state directly. Call a function that says what you want; the owner keeps itself consistent.
-- **Find things in one place.** Each well-known object has one static `Find` / `Get` function (`AFarmGrid::Find`, `AFarmDayCycle::Find`), built on `FarmActorLookup::FindSingle`, which logs an error when a level has more than one. Don't scatter `TActorIterator` searches through the code, and call `Find` once and keep the result rather than every frame.
+- **Find things in one place.** Each well-known object has one static `Find` / `Get` function (`AFarmGrid::Find`, `AVestigeDayCycle::Find`), built on `VestigeActorLookup::FindSingle`, which logs an error when a level has more than one. Don't scatter `TActorIterator` searches through the code, and call `Find` once and keep the result rather than every frame.
 - **Bind with object-safe helpers** (`AddUObject`, `AddWeakLambda`) so a destroyed listener is never called, and unbind in `EndPlay` / `Deinitialize`.
 - **C++-only events use non-dynamic delegates.** Use dynamic delegates only when Blueprints need to bind.
 
@@ -171,7 +171,7 @@ Rules:
 - **A failed write keeps the last good save.** Write the new save beside the old one and replace the old one only when the write succeeded; tell the player if it failed. The game carries on and tries again at the next save point. Built as two alternating slots (`Farm` and `Farm2`), each save numbered by a `SaveSequence`: a save always goes to the slot that doesn't hold the newest good save, and loading picks the readable save with the highest number. Before an upgraded save can be replaced, its file is copied to a backup slot named after its version (`Farm_Version0`, `Farm_Version1`).
 - **Save at clear points.** We save when a new day starts. That keeps saves consistent: nothing is half-done mid-action. The accepted cost: quitting mid-day loses everything since that morning. Saving is synchronous (`SaveGameToSlot`), which is fine while saves are small; move to `AsyncSaveGameToSlot` if writing a save causes a visible hitch.
 - **One world, one save.** Today the save subsystem lives in the world ([section 2](#2-unreals-gameplay-framework-where-things-go)) and keeps one save, in its two alternating slots. Before adding save slots, a main menu or map travel, split it: choosing and remembering the active slot moves to a `UGameInstanceSubsystem` (it must survive the world being replaced), and collecting and applying the world's snapshot stays in the world subsystem. Never open another map while a save is being written; with synchronous saves this can't happen yet.
-- **Restore without side effects.** Restoring sets state directly; it doesn't replay game actions or broadcast "new day" again (`AFarmDayCycle::RestoreFromSaveData`).
+- **Restore without side effects.** Restoring sets state directly; it doesn't replay game actions or broadcast "new day" again (`AVestigeDayCycle::RestoreFromSaveData`).
 - **Test the save rules.** Save tests cover a save and load round trip through each owner's own save and restore functions, migration from every older version, a corrupt and a newer-version file being left untouched, and unknown content being skipped.
 
 ## 7. Presentation: UI, audio and effects
@@ -233,7 +233,7 @@ A change that breaks the budget is a bug and is fixed before more features go in
 
 ### Design rules
 
-- **Ticking is opt-in.** Most things react to events or timers. Only things that genuinely change every frame tick (`AFarmDayCycle` moves the sun). Owners broadcast state changes so nobody has to poll them.
+- **Ticking is opt-in.** Most things react to events or timers. Only things that genuinely change every frame tick (`AVestigeDayCycle` moves the sun). Owners broadcast state changes so nobody has to poll them.
 - **Event-driven daily updates.** Farm logic mostly happens once a day, on `OnNewDay`, while the sleep transition hides the work. Nothing checks crops every frame.
 - **Find once, keep the reference.** Well-known objects are found through one `Find` / `Get` or registration ([section 4](#4-how-systems-talk-to-each-other)), never searched for every frame.
 - **Load ahead, load softly.** Content is soft-referenced and loaded with its bundle before it's needed ([section 5](#5-data-and-content)). Nothing loads synchronously while the player is playing.
@@ -266,10 +266,10 @@ Lyra is Epic's reference for a well-structured UE5 game. It is built for a large
 
 | Lyra pattern | Status in Project Vestige |
 |---|---|
-| Thin actors, behavior in components (`ULyraHealthComponent`, `ULyraHeroComponent`) | **Adopted.** `AFarmerCharacter` is a template character plus `UFarmingComponent`. New behaviors (fishing, resting) become new components; stamina is an attribute on the ability system ([Systems.md, section 9](Systems.md#9-abilities-attributes-and-effects-gameplay-ability-system)). |
-| Subsystems instead of singletons and managers | **Adopted.** `UFarmSaveSubsystem`. |
+| Thin actors, behavior in components (`ULyraHealthComponent`, `ULyraHeroComponent`) | **Adopted.** `AVestigeFarmerCharacter` is a template character plus `UFarmingComponent`. New behaviors (fishing, resting) become new components; stamina is an attribute on the ability system ([Systems.md, section 9](Systems.md#9-abilities-attributes-and-effects-gameplay-ability-system)). |
+| Subsystems instead of singletons and managers | **Adopted.** `UVestigeSaveSubsystem`. |
 | A project prefix on every class (`Lyra...`) | **Adopted.** `Vestige...`, and `Farm...` for types about the farm itself ([CodingGuidelines.md, section 2.2](CodingGuidelines.md#22-the-vestige-and-farm-project-prefixes)). |
-| Data assets describing content (`ULyraPawnData`) | **Adopted** for crops (`UFarmCropData`), tools (`UFarmToolData`) and items (`UFarmItemData`). |
+| Data assets describing content (`ULyraPawnData`) | **Adopted** for crops (`UFarmCropData`), tools (`UVestigeToolData`) and items (`UVestigeItemData`). |
 | Item definitions built from fragments (`ULyraInventoryItemDefinition`, `ULyraInventoryItemFragment`) | **Adopted** for items, as data assets rather than Lyra's Blueprint classes ([Systems.md, section 8](Systems.md#8-inventory-and-items)). Lyra's inventory component comes with our inventory. |
 | Gameplay tags for identifiers | **Later**, for open-ended categories. Closed sets stay enums. |
 | Input actions mapped to tags through data assets | **Later.** Input actions are created in code today. Move to `IA_` / `IMC_` assets when input grows. |
@@ -332,27 +332,27 @@ All of these have to exist and be tested in a packaged build first:
 | `AFarmTile` | Actor | One tile in the world: owns its `FFarmTileState`, applies the farming actions to it and shows the result (meshes, placeholder colors). Writing and restoring its own save data | Crop definitions, time, input, where saves are written |
 | `FFarmTileState` | Struct inside `AFarmTile` (`FarmTileState.h`) | One tile's state (grass, tilled, planted, watered, growth, the crop planted in it) and the rules that change it | Visuals, the tile's place in the grid |
 | `AFarmGrid` | Actor, placed in the level, found with `Find` | Spawning tiles (then broadcasting `OnTilesReady`), finding a tile by location or coordinates, converting between world and grid space, advancing tiles on a new day, saving and restoring its tiles by coordinates. Destroys its tiles when it alone ends | The clock, lighting, the day number, loading crops |
-| `AFarmDayCycle` | Actor, placed or found-or-spawned by `Get` ([section 2](#2-unreals-gameplay-framework-where-things-go)) | Day number, clock, sun and sky light, night exposure. Broadcasts `OnNewDay`, then `OnNewDayFinished`; broadcasts `OnDayEndReached` once when the clock reaches `DayEndHour`, then stops the clock and its tick until the next day. Saving and restoring its day and clock | Tiles, saving, HUD |
+| `AVestigeDayCycle` | Actor, placed or found-or-spawned by `Get` ([section 2](#2-unreals-gameplay-framework-where-things-go)) | Day number, clock, sun and sky light, night exposure. Broadcasts `OnNewDay`, then `OnNewDayFinished`; broadcasts `OnDayEndReached` once when the clock reaches `DayEndHour`, then stops the clock and its tick until the next day. Saving and restoring its day and clock | Tiles, saving, HUD |
 | `UFarmingComponent` | Component on the farmer | The toolbar (`ToolbarIds`, loaded into an `FFarmToolbar` at `BeginPlay`) and the tool in hand, which seed item the Seeds tool plants and its crop (`SeedItemId`, the crop loaded at `BeginPlay`), tile targeting: the neighbour of the owner's tile in the aimed direction, snapped to eight directions by `FarmTileTargeting`, recomputed only when the aim or the owner's tile changes, and broadcast as `OnTargetTileChanged` (no tick) and using a tool, which takes seeds from and puts harvests into the inventory on the pawn's player state (asked for on each action). Saving and restoring its tool in hand | UI, input bindings, meshes, sleeping, how many items the player has |
-| `UFarmCharacterMovementComponent` | Character movement component (the farmer's, set in its constructor) | How the farmer walks and turns. Every turn goes through `RotationRate` (`FarmMovement::TurnDegreesPerSecond`); without movement input it turns toward the idle facing the farmer sets (the aimed tile) | Input, targeting, which tile is aimed |
+| `UVestigeCharacterMovementComponent` | Character movement component (the farmer's, set in its constructor) | How the farmer walks and turns. Every turn goes through `RotationRate` (`VestigeMovement::TurnDegreesPerSecond`); without movement input it turns toward the idle facing the farmer sets (the aimed tile) | Input, targeting, which tile is aimed |
 | `UFarmTargetHighlightComponent` | Instanced static mesh component on the farmer | Showing a frame around the target tile, moved only on `OnTargetTileChanged`. Presentation only, and ships (no debug drawing) | Which tile is targeted |
-| `UFarmRestComponent` | Component on the farmer | The end of the player's day: sleeping (N), and passing out when the day cycle broadcasts `OnDayEndReached`. Later the late-night rules and exhaustion ([Systems.md, section 9](Systems.md#9-abilities-attributes-and-effects-gameplay-ability-system)) | The clock, what happens on a new day |
+| `UVestigeRestComponent` | Component on the farmer | The end of the player's day: sleeping (N), and passing out when the day cycle broadcasts `OnDayEndReached`. Later the late-night rules and exhaustion ([Systems.md, section 9](Systems.md#9-abilities-attributes-and-effects-gameplay-ability-system)) | The clock, what happens on a new day |
 | `FFarmToolbar` | Struct inside `UFarmingComponent` | The toolbar's slots and which slot is in hand, with the rules for selecting one | Loading or using tools |
-| `AFarmerCharacter` | Character (parent of `BP_Farmer`) | Input bindings: input actions and the mapping context, created once in `PostInitializeComponents` and removed from the player on `UnPossessed` (keys 1 to 9 pick toolbar slots, N goes to the rest component). Describing those bindings as key hints, read from the mapping context. Turning movement input into the farming component's aim and the movement component's idle facing, and easing the walk in from a press (`MoveRampSeconds`). Showing the current tool's held mesh | Farming rules, which tools exist |
-| `AFarmHUD` + `SFarmHudWidget` | HUD + Slate widget | Display only. Keeps weak references to the day cycle (from `Get` at `BeginPlay`), to the possessed farmer and its farming component (updated on `OnPossessedPawnChanged`) and to the inventory on its player's player state (found once at `BeginPlay`). Builds its texts when an event says they changed (`OnToolChanged`, the inventory's `OnInventoryChanged`, `OnFeedback`); only the clock is read every frame, and its line is rebuilt only when the shown minute changes. Shows each feedback message in a box of its own that fades out on its own timer (`FFarmHudMessages`, up to the cap in `UFarmHudSettings`, read at `BeginPlay`); boxes are created once and only their opacity is read every frame | Any game state |
-| `UFarmSaveSubsystem` | World subsystem | The current world's snapshot: collecting each owner's part and writing it on `OnNewDayFinished`, loading it once every actor has begun play, the save version and its upgrades, the two alternating slots, refusing to load or overwrite a save it can't read, and loading the crops saved tiles name. Finds the farming component on the player's pawn and the inventory on the player's player state. Starting a new game (deletes both slots, then reopens the map) | Game rules; what each owner saves; save slot or profile choice that must survive a map change ([section 6](#6-saving)) |
-| `UFarmSaveGame` | Save game | The saved data layout and its version (2), holding each owner's save struct, which lives with its owner: `FFarmClockSaveData` (`FarmClockSaveData.h`), `FFarmFarmingSaveData` (`FarmFarmingSaveData.h`), `FVestigeInventorySaveData` (`VestigeInventorySaveData.h`, by slot with the item's `ContentId`) and `FFarmTileSaveData` (`FarmTileState.h`, by grid coordinates with the crop's `ContentId`). Plus the version 0 fields, `EFarmTool` and the version 1 seed and harvest counts the upgrades read | Logic |
+| `AVestigeFarmerCharacter` | Character (parent of `BP_Farmer`) | Input bindings: input actions and the mapping context, created once in `PostInitializeComponents` and removed from the player on `UnPossessed` (keys 1 to 9 pick toolbar slots, N goes to the rest component). Describing those bindings as key hints, read from the mapping context. Turning movement input into the farming component's aim and the movement component's idle facing, and easing the walk in from a press (`MoveRampSeconds`). Showing the current tool's held mesh | Farming rules, which tools exist |
+| `AVestigeHUD` + `SVestigeHudWidget` | HUD + Slate widget | Display only. Keeps weak references to the day cycle (from `Get` at `BeginPlay`), to the possessed farmer and its farming component (updated on `OnPossessedPawnChanged`) and to the inventory on its player's player state (found once at `BeginPlay`). Builds its texts when an event says they changed (`OnToolChanged`, the inventory's `OnInventoryChanged`, `OnFeedback`); only the clock is read every frame, and its line is rebuilt only when the shown minute changes. Shows each feedback message in a box of its own that fades out on its own timer (`FVestigeHudMessages`, up to the cap in `UVestigeHudSettings`, read at `BeginPlay`); boxes are created once and only their opacity is read every frame | Any game state |
+| `UVestigeSaveSubsystem` | World subsystem | The current world's snapshot: collecting each owner's part and writing it on `OnNewDayFinished`, loading it once every actor has begun play, the save version and its upgrades, the two alternating slots, refusing to load or overwrite a save it can't read, and loading the crops saved tiles name. Finds the farming component on the player's pawn and the inventory on the player's player state. Starting a new game (deletes both slots, then reopens the map) | Game rules; what each owner saves; save slot or profile choice that must survive a map change ([section 6](#6-saving)) |
+| `UVestigeSaveGame` | Save game | The saved data layout and its version (2), holding each owner's save struct, which lives with its owner: `FVestigeClockSaveData` (`VestigeClockSaveData.h`), `FFarmFarmingSaveData` (`FarmFarmingSaveData.h`), `FVestigeInventorySaveData` (`VestigeInventorySaveData.h`, by slot with the item's `ContentId`) and `FFarmTileSaveData` (`FarmTileState.h`, by grid coordinates with the crop's `ContentId`). Plus the version 0 fields, `EFarmTool` and the version 1 seed and harvest counts the upgrades read. `UFarmSaveGame`, an empty subclass under the class's name before 2026-11-01, is what older saves load as (decision log) | Logic |
 | `AVestigePlayerState` | Player state (parent of `BP_PlayerState`, set on the game mode) | The player's data that outlives the pawn: holds the inventory component (later the ability system component). Nothing below `Player/` knows the class; it finds the components with `FindComponentByClass` | Rules of its own; anything that needs the body |
 | `UVestigeInventoryComponent` | Component on the player state | The items the player carries: `SlotCount` slots, the starting items (`StartingItems`, set on `BP_PlayerState`), adding and removing items by ID (`TryAddItem`, `TryRemoveItem`, `CanAddItem`, `GetItemCount`), loading every item definition at `BeginPlay` so play never waits on one, broadcasting `OnInventoryChanged` after every change, and saving and restoring its slots | What items do (planting, eating); money; the toolbar; showing the bag |
 | `FVestigeInventory` | Struct inside `UVestigeInventoryComponent` (`VestigeInventory.h`) | The slot rules: stacks up to each item's `MaxStackSize`, topping up stacks before filling empty slots, and adding or removing all or nothing | Finding or loading items, events, saving |
-| `UFarmHudSettings` | Developer settings (Project Settings > Game > Farm HUD, `DefaultGame.ini`) | How the HUD shows feedback messages: how many at once (1 to 10) and how long each stays | Game state, the messages themselves |
-| `UFarmFeedbackSubsystem` | World subsystem | Carrying short messages for the player (`FText`) from game code to presentation: game code calls `Notify`, the HUD listens to `OnFeedback`. Every message is also written to the log (`LogVestige`), so the full history survives the HUD's fading | Showing messages, or knowing who listens |
-| `UFarmContentData` | Abstract base of every content data asset | What all content shares: the `ContentId`, the primary asset ID built from it, the display name, the `Visuals` bundle name, and loading content with its visuals at play start, and checking the ID's format in data validation (`IsDataValid`) | Anything specific to one kind of content |
-| `UFarmAssetManager` | The project's Asset Manager (`AssetManagerClassName` in `DefaultEngine.ini`) | Startup checks of all content: after the initial scan it reports every content ID that more than one asset uses. Later, global game data loaded once at startup (`Systems.md` section 2) | Loading content for gameplay systems |
-| `UFarmToolData` | Primary data asset (type `FarmTool`), one per tool in `Content/Farm/Tools` | One tool's definition: its action (`EFarmToolAction`), held mesh (in the `Visuals` bundle) and stamina cost | Which tools the player has, the grip offset in the hand |
+| `UVestigeHudSettings` | Developer settings (Project Settings > Game > Vestige HUD, `DefaultGame.ini`) | How the HUD shows feedback messages: how many at once (1 to 10) and how long each stays | Game state, the messages themselves |
+| `UVestigeFeedbackSubsystem` | World subsystem | Carrying short messages for the player (`FText`) from game code to presentation: game code calls `Notify`, the HUD listens to `OnFeedback`. Every message is also written to the log (`LogVestige`), so the full history survives the HUD's fading | Showing messages, or knowing who listens |
+| `UVestigeContentData` | Abstract base of every content data asset | What all content shares: the `ContentId`, the primary asset ID built from it, the display name, the `Visuals` bundle name, and loading content with its visuals at play start, and checking the ID's format in data validation (`IsDataValid`) | Anything specific to one kind of content |
+| `UVestigeAssetManager` | The project's Asset Manager (`AssetManagerClassName` in `DefaultEngine.ini`) | Startup checks of all content: after the initial scan it reports every content ID that more than one asset uses. Later, global game data loaded once at startup (`Systems.md` section 2) | Loading content for gameplay systems |
+| `UVestigeToolData` | Primary data asset (type `FarmTool`), one per tool in `Content/Farm/Tools` | One tool's definition: its action (`EFarmToolAction`), held mesh (in the `Visuals` bundle) and stamina cost | Which tools the player has, the grip offset in the hand |
 | `UFarmCropData` | Primary data asset (type `FarmCrop`), one per crop in `Content/Farm/Crops` | One crop's definition: seasons, days to mature, water need, contamination tolerance, growth stage meshes (in the `Visuals` bundle), the item a harvest gives (`HarvestItemId`) and how many (`Yield`) | Runtime state such as growth or which tiles grow it; prices, which belong to items |
-| `UFarmItemData` | Primary data asset (type `FarmItem`), one per item in `Content/Farm/Items` | One item's definition: what every item has (`MaxStackSize`, `SellPrice`) and its fragments, found with `FindFragment` ([Systems.md, section 8](Systems.md#8-inventory-and-items)) | Runtime state such as how many the player has; what only some items have, which is a fragment |
-| `UFarmItemFragment` and subclasses | Instanced objects inside an item asset (`FarmItemData.h`, `FarmSeedFragment.h`) | One aspect that only some items have. `UFarmSeedFragment`: the crop a seed plants (`CropId`) | Runtime state, the item's other aspects |
+| `UVestigeItemData` | Primary data asset (type `FarmItem`), one per item in `Content/Farm/Items` | One item's definition: what every item has (`MaxStackSize`, `SellPrice`) and its fragments, found with `FindFragment` ([Systems.md, section 8](Systems.md#8-inventory-and-items)) | Runtime state such as how many the player has; what only some items have, which is a fragment |
+| `UVestigeItemFragment` and subclasses | Instanced objects inside an item asset (`VestigeItemData.h`, `FarmSeedFragment.h`) | One aspect that only some items have. `UFarmSeedFragment`: the crop a seed plants (`CropId`) | Runtime state, the item's other aspects |
 
 When a new responsibility appears, decide its owner using [section 2](#2-unreals-gameplay-framework-where-things-go), add a row here, and say so in the commit message.
 
@@ -362,25 +362,25 @@ Arrows point from a class to what it knows about. Nothing points back up.
 
 ```mermaid
 flowchart TD
-    Input[AFarmerCharacter<br/>input, key hints, held tool] --> Farming[UFarmingComponent<br/>tools, targeting]
-    Input --> Rest[UFarmRestComponent<br/>sleep, passing out]
+    Input[AVestigeFarmerCharacter<br/>input, key hints, held tool] --> Farming[UFarmingComponent<br/>tools, targeting]
+    Input --> Rest[UVestigeRestComponent<br/>sleep, passing out]
     Input --> Save
-    HUD[AFarmHUD / SFarmHudWidget<br/>display] -.reads.-> Farming
+    HUD[AVestigeHUD / SVestigeHudWidget<br/>display] -.reads.-> Farming
     HUD -.reads.-> DayCycle
     HUD -.key hints.-> Input
     HUD -.reads.-> Inventory
     Highlight[UFarmTargetHighlightComponent<br/>target frame] -.reads.-> Farming
-    Save[UFarmSaveSubsystem<br/>save / load] --> Farming
+    Save[UVestigeSaveSubsystem<br/>save / load] --> Farming
     Save --> Inventory
     Save --> Grid
     PlayerState[AVestigePlayerState<br/>player data] --> Inventory[UVestigeInventoryComponent<br/>items]
     Farming --> Inventory
     Save --> DayCycle
     Farming --> Grid[AFarmGrid<br/>tile layout]
-    Rest --> DayCycle[AFarmDayCycle<br/>clock, lighting]
+    Rest --> DayCycle[AVestigeDayCycle<br/>clock, lighting]
     Grid --> Tile[AFarmTile<br/>tile, visuals]
     Tile --> TileState[FFarmTileState<br/>tile rules]
-    Farming --> Feedback[UFarmFeedbackSubsystem<br/>player messages]
+    Farming --> Feedback[UVestigeFeedbackSubsystem<br/>player messages]
     Rest --> Feedback
     Save --> Feedback
     DayCycle -. OnDayEndReached .-> Rest
@@ -399,14 +399,14 @@ The layers are the source folders ([CodingGuidelines.md, section 14.1](CodingGui
 
 | Layer (folder) | Holds | May include |
 |---|---|---|
-| `Core/` | Shared services that know no game rules: `UFarmFeedbackSubsystem` (player messages), `FarmActorLookup`, the module and log category | Engine only |
-| `Content/` | Content definitions: `UFarmContentData`, `UFarmCropData`, `UFarmToolData`, `UFarmItemData` and its fragments, and `UFarmAssetManager` (content checks at startup) | `Core/` |
-| `Time/` | `AFarmDayCycle` and `FFarmClockSaveData` | `Core/`, `Content/` |
+| `Core/` | Shared services that know no game rules: `UVestigeFeedbackSubsystem` (player messages), `VestigeActorLookup`, the module and log category | Engine only |
+| `Content/` | Content definitions: `UVestigeContentData`, `UFarmCropData`, `UVestigeToolData`, `UVestigeItemData` and its fragments, and `UVestigeAssetManager` (content checks at startup) | `Core/` |
+| `Time/` | `AVestigeDayCycle` and `FVestigeClockSaveData` | `Core/`, `Content/` |
 | `Inventory/` | `UVestigeInventoryComponent`, `FVestigeInventory` and `FVestigeInventorySaveData` | `Core/` to `Time/` |
-| `Farming/` | `AFarmTile` and `FFarmTileState`, `AFarmGrid`, `UFarmingComponent` and `FFarmToolbar`, `UFarmRestComponent`, `UFarmTargetHighlightComponent`, and their save structs | `Core/` to `Inventory/` |
-| `Save/` | `UFarmSaveGame` and `UFarmSaveSubsystem` | `Core/` to `Farming/` |
-| `Player/` | `AFarmerCharacter`, `UFarmCharacterMovementComponent`, `AVestigePlayerState` | `Core/` to `Save/` |
-| `UI/` | `AFarmHUD`, `SFarmHudWidget` and `UFarmHudSettings` | `Core/` to `Player/` |
+| `Farming/` | `AFarmTile` and `FFarmTileState`, `AFarmGrid`, `UFarmingComponent` and `FFarmToolbar`, `UVestigeRestComponent`, `UFarmTargetHighlightComponent`, and their save structs | `Core/` to `Inventory/` |
+| `Save/` | `UVestigeSaveGame` and `UVestigeSaveSubsystem` | `Core/` to `Farming/` |
+| `Player/` | `AVestigeFarmerCharacter`, `UVestigeCharacterMovementComponent`, `AVestigePlayerState` | `Core/` to `Save/` |
+| `UI/` | `AVestigeHUD`, `SVestigeHudWidget` and `UVestigeHudSettings` | `Core/` to `Player/` |
 
 `Tests/` may include any layer, and no layer includes `Tests/`. `Template/` holds Epic's template classes, which aren't maintained to our guide but are checked like the rest. It is app-level wiring outside the layers: its files may include any layer (the template game mode names the HUD class), so only `Player/`, which derives the farmer from the template character, and `UI/` may include it. Otherwise a low layer could reach a high one through it.
 
@@ -420,12 +420,12 @@ What happens when the player sleeps (N), or when the clock reaches 02:00 and the
 
 ```mermaid
 sequenceDiagram
-    participant Rest as UFarmRestComponent
-    participant DayCycle as AFarmDayCycle
+    participant Rest as UVestigeRestComponent
+    participant DayCycle as AVestigeDayCycle
     participant Grid as AFarmGrid
-    participant Save as UFarmSaveSubsystem
-    participant Feedback as UFarmFeedbackSubsystem
-    participant HUD as AFarmHUD
+    participant Save as UVestigeSaveSubsystem
+    participant Feedback as UVestigeFeedbackSubsystem
+    participant HUD as AVestigeHUD
     Rest->>Feedback: Notify("You slept. Day 2 begins.")
     Rest->>DayCycle: StartNextDay()
     DayCycle->>DayCycle: day + 1, clock to 06:00, update lighting
@@ -443,7 +443,7 @@ sequenceDiagram
 - **Presentation may run later.** A crop-growth animation or a sound can play over the next seconds, because nothing about it is saved.
 - **If a system ever needs asynchronous day work,** `OnNewDayFinished` stops being enough. Replace it with an explicit barrier first: each system reports pending work to the day cycle, and the day cycle signals that the day has finished only when every report is done. Save tests check the snapshot against whichever contract is in force.
 
-At play start, `UFarmSaveSubsystem` binds to the world's `OnWorldBeginPlay`, which the engine broadcasts once every actor's `BeginPlay` has run, so the grid has spawned its tiles and the farmer has loaded its toolbar. It then binds to the day cycle and loads the save if there is one.
+At play start, `UVestigeSaveSubsystem` binds to the world's `OnWorldBeginPlay`, which the engine broadcasts once every actor's `BeginPlay` has run, so the grid has spawned its tiles and the farmer has loaded its toolbar. It then binds to the day cycle and loads the save if there is one.
 
 ---
 
@@ -455,6 +455,7 @@ Newest first. Add an entry whenever we make a choice that someone could reasonab
 
 | Date | Decision | Why |
 |---|---|---|
+| 2026-11-01 | The general types are renamed from `Farm` to `Vestige`, as the 2026-10-31 entry planned: the HUD, its widget, settings and messages (`AVestigeHUD`, `SVestigeHudWidget`, `UVestigeHudSettings`, `FVestigeHudMessages`), saving (`UVestigeSaveSubsystem`, `UVestigeSaveGame`), `UVestigeFeedbackSubsystem` and `VestigeActorLookup`, the day cycle and its clock save struct and delegates (`AVestigeDayCycle`, `FVestigeClockSaveData`, `FOnVestigeNewDay`), the content base, asset manager, tool and item data and the item fragment base (`UVestigeContentData`, `UVestigeAssetManager`, `UVestigeToolData`, `UVestigeItemData`, `UVestigeItemFragment`), the rest and movement components, and the farmer (`AVestigeFarmerCharacter`), with their files and tests. Farm types keep `Farm`: the tile, grid and crops, the farming component and its save struct, targeting, the toolbar, `UFarmSeedFragment` (it names the crop a seed plants), `EFarmToolAction` (the farming actions) and the version 0 `EFarmTool`. `[CoreRedirects]` map each class that `L_Farm`, `BP_Farmer` and the tool and item assets name, and the clock struct that saves name. A save's own class can't be redirected, so `UFarmSaveGame` stays as an empty subclass of `UVestigeSaveGame` that only older saves load as. Tests write a save, swap in the old names and load it, also for the `FarmSim` module name. The save slots (`Farm`, `Farm2`) keep their names. Types the documents plan follow the same rule (`IVestigeInteractable`, `UVestigeStaminaSet`). Whether the data names change too (the `FarmTool` and `FarmItem` asset types, the `Farm.` tag root, `Content/Farm/`) is decided separately | Renaming before the ability system, interaction and mods build on these names is the cheapest it will get. Redirects keep the level and assets loading without re-saving binary assets in the same change; each asset takes the new names the next time it is saved. Loading a save looks up the class named in the file's header with `LoadObject`, which applies no class redirect to a C++ class (Unreal Engine 5.8, `UGameplayStatics::LoadGameFromMemory`); the test caught this, where a play-test with a fresh save would not have. Keeping the slot names keeps existing saves where the game looks for them. The farmer is `AVestigeFarmerCharacter` rather than `AVestigePlayerCharacter` because the game design and the Blueprint call the player the farmer, and `AVestigeCharacter` is the template's class |
 | 2026-10-31 | The inventory is `UVestigeInventoryComponent` on a new `AVestigePlayerState` (set on `AVestigeGameMode`; `BP_PlayerState` holds the starting items and `BP_ThirdPersonGameMode` names it), designed in `Systems.md` section 8 and approved by David. Its rules are a plain `FVestigeInventory` struct in a new `Inventory/` layer between `Time/` and `Farming/`: 24 slots, stacks up to each item's `MaxStackSize`, adds and removes all or nothing, by item ID. It loads every item definition at `BeginPlay`. Seeds and the harvest are items: the farming component's counts, `StartingSeeds` and `OnInventoryChanged` go, its `SeedCropId` becomes `SeedItemId` (the crop comes from the seed fragment), and a harvest that doesn't fit leaves the crop in the ground. Save version 2 stores slots by index with item IDs; version 1 counts upgrade to `Base.TurnipSeeds` and `Base.Turnip`. Money is left out until the shipping bin. This replaces the 2026-10-29 entry that kept the counts on the farming component | The player state outlives the pawn, as inventory must. A struct keeps the rules testable without a world, as for tiles and the toolbar. All-or-nothing adds let a caller check first, so a full bag never destroys a harvest. Loading every definition (no meshes, a few hundred bytes each) is the simplest way to never load during play; revisit with a measurement if items get heavy or very many. Nothing earns or spends money yet, so a money field would be unused code with a guessed design. Lower code finds the inventory by component class, so only the game mode knows the player state class |
 | 2026-10-31 | The project prefix for new types is `Vestige` (`AVestigePlayerState`); `Farm` stays only for types about the farm itself (tiles, grid, crops, the farming actions). The existing general `Farm` types (HUD, saving, feedback, time, content, the farmer) are renamed in their own refactor after the inventory, with `[CoreRedirects]` so Blueprints, levels and save files keep loading. Whether the data names content and modders see change too (the `FarmCrop`, `FarmTool` and `FarmItem` asset types, the `Farm.` tag root, `Content/Farm/`) is decided in that item. This replaces the 2026-10-28 entry's reason for keeping `Farm` | David's call: the game is more than farming now, so `FarmPlayerState` or `FarmInventory` would misdescribe them. Dropping the prefix isn't possible: `APlayerState` is the engine's own class, and short names like `UInventoryComponent` collide with plugins. `Vestige` already names the module, the log category and the template classes. Renaming first would hold the inventory up; renaming after it only adds the inventory's few types, which are born with the new prefix |
 | 2026-10-31 | The project is on Unreal Engine 5.8 (5.8.4 on the maintainer's PC), replacing the 5.7 of the 2026-10-25 entry. Contributors need 5.8: assets saved in it don't open in 5.7. With Visual Studio 2026 the toolchain is MSVC 14.50 and the Windows 11 SDK 10.0.22621, as `.vsconfig` lists. The build changes are in the 2026-10-30 entry on target settings, and the one regression found in play, the tile highlight, in the next entry | Upgrading before the inventory and the Gameplay Ability System means those are built on the current engine APIs instead of being ported later. The upgrade was verified with a build with no warnings (deprecations included), all `Vestige` tests and play-testing in the editor |
@@ -526,9 +527,9 @@ None at the moment. Deliberate deferrals, such as Blueprint extension points and
 
 Likely next steps as the game grows, with the design we intend. These aren't commitments; record the real decision in the log when we get there.
 
-- **Stamina and the ability system** put the ability system component on `AVestigePlayerState`, next to the inventory; `UFarmRestComponent`, which already owns sleep and passing out, gains the late-night rules and exhaustion ([Systems.md, section 9](Systems.md#9-abilities-attributes-and-effects-gameplay-ability-system)).
+- **Stamina and the ability system** put the ability system component on `AVestigePlayerState`, next to the inventory; `UVestigeRestComponent`, which already owns sleep and passing out, gains the late-night rules and exhaustion ([Systems.md, section 9](Systems.md#9-abilities-attributes-and-effects-gameplay-ability-system)).
 - **Money** arrives with the shipping bin, the first thing that pays, on the player state: a count on the inventory component or a small wallet component, decided then ([Systems.md, section 8](Systems.md#8-inventory-and-items)).
 - **Save slots, a main menu or map travel** split the save subsystem: the active slot moves to a `UGameInstanceSubsystem`, and the world subsystem keeps collecting and applying the world's snapshot ([section 6](#6-saving)).
-- **Interaction** (doors, chests, NPCs, shipping bin) goes through an `IFarmInteractable` interface, so the farmer's interact key doesn't need to know every type.
+- **Interaction** (doors, chests, NPCs, shipping bin) goes through an `IVestigeInteractable` interface, so the farmer's interact key doesn't need to know every type.
 - **Seasons and weather** belong to the game state, or to the day cycle if they stay small. They broadcast changes like `OnNewDay`.
 - **Menus and inventory UI** move to UMG Widget Blueprints with C++ base classes.

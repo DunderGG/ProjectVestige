@@ -25,7 +25,7 @@ struct FVestigeInventorySlotSaveData
 };
 
 /**
- * UVestigeInventoryComponent's part of a save: plain values and content IDs only. UFarmSaveGame holds it; the inventory
+ * UVestigeInventoryComponent's part of a save: plain values and content IDs only. UVestigeSaveGame holds it; the inventory
  * fills it and restores from it.
  */
 USTRUCT()
