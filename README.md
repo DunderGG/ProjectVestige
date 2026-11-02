@@ -1,4 +1,4 @@
-<p align="center"><img src="Images/Vestige-Social-Preview-CGPT.png" alt="Hob, a weathered Hearthwell farm robot, tends the garden beneath a rising Pinion gear sun" width="100%"></p>
+<p align="center"><img src="Images/Promotional/Vestige-Social-Preview-CGPT.png" alt="Hob and the sleeper, tending the garden, while the sun rises over the robot cities" width="100%"></p>
 
 # Project Vestige
 
@@ -17,25 +17,27 @@ git lfs install
 git clone https://github.com/DunderGG/ProjectVestige.git
 ```
 
-Then double-click `Vestige.uproject`, let Unreal build the C++ modules, open `Content/Maps/L_Farm` and press **Play**. **[Docs/Setup.md](Docs/Setup.md)** walks through every step on a fresh PC, with troubleshooting; the controls are in [CONTRIBUTING.md](CONTRIBUTING.md#controls).
+Then double-click `Vestige.uproject`, let Unreal build the C++ modules, open `Content/Maps/L_Farm` in the editor and press **Play**. **[Docs/Setup.md](Docs/Setup.md)** walks through every step on a fresh PC, with troubleshooting; the controls are in [CONTRIBUTING.md](CONTRIBUTING.md#controls).
 
 ## Documentation
 
 | Document | What's in it |
 |---|---|
 | [Docs/Setup.md](Docs/Setup.md) | Setting up a new Windows PC to build and run the project, step by step |
-| [CONTRIBUTING.md](CONTRIBUTING.md) | Project layout, and how to contribute code, art, audio and ideas |
+| [Docs/Architecture.md](Docs/Architecture.md) | How the code fits together, who owns what, and the decision log |
 | [Docs/GameDesign.md](Docs/GameDesign.md) | What the game is, how it plays and why |
+| [Docs/Systems.md](Docs/Systems.md) | How the game systems work, and how to add new ones |
+| [Docs/CodingGuidelines.md](Docs/CodingGuidelines.md) | How the code looks |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | Project layout, and how to contribute code, art, audio and ideas |
 | [Docs/Spoilers/Lore.md](Docs/Spoilers/Lore.md) | The story, the world and its characters (spoilers) |
 | [Docs/Roadmap.md](Docs/Roadmap.md) | What's done and what comes next |
-| [Docs/Architecture.md](Docs/Architecture.md) | How the code fits together, who owns what, and the decision log |
-| [Docs/CodingGuidelines.md](Docs/CodingGuidelines.md) | How the code looks |
 
 ## Contributing
 
 Contributions are welcome: gameplay code, 3D art, audio, testing, documentation and mods. Start with [CONTRIBUTING.md](CONTRIBUTING.md), and open an issue to say what you'd like to work on.
 
 ## License
+> Still under investigation
 
 - **Code** (`Source/`, `Config/`, scripts): [GPL-3.0-or-later](LICENSE), with an [additional permission](LICENSE-EXCEPTION.txt) to link with Unreal Engine and platform SDKs. Anyone may share and sell it, as long as they pass on the source under the same license.
 - **Assets and documentation**: [CC BY-NC-SA 4.0](LICENSE-ASSETS.txt). Free for non-commercial use; commercial use is reserved to the maintainer, who sells official builds.
