@@ -560,6 +560,21 @@ Built differently from the approved design, decided on 2026-11-01 (decision log)
    - For good: a line under `[Core.Log]` in an `Engine.ini`, such as `LogFarm=Verbose`. Personal settings go in `Saved/Config/WindowsEditor/Engine.ini`, which git ignores; `Config/DefaultEngine.ini` gets a `[Core.Log]` line only for a decision everyone shares, recorded in the decision log.
    - Shipping builds compile logging out (our `Vestige.Target.cs` doesn't set `bUseLoggingInShipping`), so the lines cost nothing there.
 - **Reading our lines in the editor's Output Log** (Window > Output Log): the Filters menu has Categories, where we tick ours, and the verbosity filters (Messages, Warnings, Errors); the search box filters by text, so `LogVestige` finds every Vestige category. Editor Preferences > General > Output Log > Category Colorization Mode gives each category its own colour (Colorize Category As Badge is the easiest to read). Both are per-user editor settings, nothing committed; [PlayTest.md](PlayTest.md) says how to set them. The full log of each run is in `Saved/Logs/Vestige.log`.
+- **Reading a line.** In the log file and the console window a line looks like this (the Output Log window leaves out the first two parts, unless its Output Log Window Timestamp Mode, on the same preferences page, adds a time):
+
+  ```
+  [2026.11.02-19.56.43:858][647]LogFarm: Warning: [BP_PlayerCharacter_C_0.Farming] UFarmingComponent::RestoreCurrentTool: The saved tool SomeMod.Scythe isn't on the toolbar, so the first slot is in hand.
+  ```
+
+  | Part | Written by | What it is |
+  | --- | --- | --- |
+  | `[2026.11.02-19.56.43:858]` | The engine | When: date, then time to the millisecond, in UTC (the engine's default, `LogTimes=True` in `BaseEngine.ini`), so an hour behind Swedish winter time |
+  | `[647]` | The engine | The frame the line was written in, counted modulo 1000, so it wraps from 999 to 0. Lines with the same number come from the same frame; the gap between two numbers is how many frames passed |
+  | `LogFarm:` | The engine | The category: which system wrote it |
+  | `Warning:` | The engine | The verbosity. Left out for `Log` lines |
+  | `[BP_PlayerCharacter_C_0.Farming]` | `VESTIGE_LOG` | The sender: the object that wrote the line (here the `Farming` component on the player character), the level's world for code that has no object (`[L_Farm]`), or `None` |
+  | `UFarmingComponent::RestoreCurrentTool:` | `VESTIGE_LOG` | The C++ function the line comes from, with its class |
+  | The rest | The line itself | The message, with its fields (`SomeMod.Scythe`) filled in |
 - **The Visual Logger** (Tools > Debug > Visual Logger, `UE_VLOG` and its shape macros) records lines and shapes per actor over time and plays them back on a timeline. It is for gameplay that moves: the robots' AI gets Visual Logger output with its Gameplay Debugger categories when it is built ([section 19](#19-debugging-and-cheats)). The farm doesn't need it today; its rules are tested instead.
 - **Logs aren't feedback.** A line in the log is for developers and modders. What the player must know goes through `UVestigeFeedbackSubsystem::Notify` ([CodingGuidelines.md, section 10](CodingGuidelines.md#10-errors-logging-and-assertions)), which also logs it to `LogVestigeFeedback`.
 - **Tests** (`Vestige.Logging.*`, in `Tests/VestigeLogTests.cpp` on a test-only category): a line through the macro is exactly `[sender] function: message` with its fields filled in (captured with an output device on `GLog`); a component's sender name is its owner's name and its own, an actor's is its own, and `nullptr` gives `None`; nothing in the macro's arguments is evaluated while the category is turned down. `Vestige.Architecture.LogsUseTheSenderMacro` scans our source, as the include direction test does, and fails on a direct `UE_LOG`, `UE_CLOG`, `UE_LOGFMT` or `UE_CLOGFMT` outside `Template/`, `Tests/` and `Core/VestigeLog.h`.
