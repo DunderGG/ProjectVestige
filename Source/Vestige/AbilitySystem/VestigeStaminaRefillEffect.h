@@ -8,8 +8,9 @@
 #include "VestigeStaminaRefillEffect.generated.h"
 
 /**
- * Refills stamina once, to MaxStamina. Applied when the player sleeps, before the new day starts and is saved.
- * A C++ class rather than a Blueprint asset: its shape is fixed and its magnitude is the target's own MaxStamina.
+ * Sets stamina once, to the amount set by the caller as Vestige.Data.StaminaRefill, kept within 0 to MaxStamina by the
+ * stamina set. Applied when the player sleeps, before the new day starts and is saved: MaxStamina after a good night,
+ * less while exhausted. A C++ class rather than a Blueprint asset: its shape is fixed and its magnitude comes from the caller.
  */
 UCLASS()
 class UVestigeStaminaRefillEffect : public UGameplayEffect

@@ -39,7 +39,7 @@ public:
 	 */
 	FText GetStatusText() const;
 
-	/** "Stamina 85 / 100". Rebuilt when the stamina or its maximum changes. */
+	/** "Stamina 85 / 100", with "Exhausted" after it while exhausted. Rebuilt when the stamina, its maximum or exhaustion changes. */
 	const FText& GetStaminaText() const { return StaminaText; }
 
 	/** Whether the player is out of stamina, so the stamina line warns. Follows Vestige.State.OutOfStamina. */
@@ -89,7 +89,7 @@ private:
 	/** Follows the stamina on the player state's ability system, which outlives the pawn, so this happens once, at BeginPlay. */
 	void FollowAbilitySystem();
 
-	/** Bound to the change delegates of Stamina and MaxStamina. */
+	/** Bound to the change delegates of Stamina and MaxStamina, and to the tag event of Vestige.State.Exhausted. */
 	void RefreshStaminaText();
 
 	/** Bound to the ability system's event for Vestige.State.OutOfStamina being added or removed. */

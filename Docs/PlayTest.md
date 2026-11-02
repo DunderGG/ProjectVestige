@@ -188,6 +188,18 @@ The stamina line turns red while the player is out of stamina. The HUD follows t
 - [ ] **White again**: sleeping (F at the bed, or N) brings the line back to white with "Stamina 100 / 100".
 - [ ] **Colour**: say if the red is hard to read on the dark backdrop, or too loud. It is `VestigeHudStyle::Warning` in `UI/VestigeHudWidget.cpp`.
 
+### Late nights, 2026-11-02
+
+The late-night rules from [GameDesign.md, section 5](GameDesign.md#5-time-days-and-seasons): no pass-out at 02:00, a stamina drain from midnight, and exhaustion after going to bed at 00:00 or later. The tests cover the rules; these checks are for how they feel and read. The commit is the one titled "Add the late-night rules: drain, exhaustion and warnings". Back up `Saved/SaveGames/` first: your save is upgraded to version 4 on the first new day. To get to the night quickly, lower Real Seconds Per Game Hour on the `VestigeDayCycle` in `L_Farm` for the session (Details panel, Farming > Time), and put it back afterwards.
+
+- [ ] **Warnings**: at 22:00 a message says it's getting late, and at 00:00 one says it's past midnight and stamina drains until you sleep.
+- [ ] **Drain**: after midnight the stamina number counts down by itself, about 10 per game hour, even standing still. It stops at 0, the line turns red, and the out-of-stamina message appears once.
+- [ ] **Late bed**: sleeping (F at the bed, or N) after midnight shows "You slept. Day N begins.", then "You went to bed late and wake up exhausted.", then "Game saved.". The HUD reads "Stamina 75 / 100   Exhausted", and the drain has stopped.
+- [ ] **Early bed**: the next night, sleeping before midnight shows "A good night's sleep. You're no longer exhausted." and the HUD reads "Stamina 100 / 100" without "Exhausted".
+- [ ] **All night**: staying up until 06:00 starts the next day where the farmer stands, with "You stayed up all night. Day N begins." and the exhausted message. Nothing jumps: the sun rises as the new day starts.
+- [ ] **Saving**: go to bed late, then stop and play again: the HUD still says "Exhausted", with 75 stamina.
+- [ ] **Feel**: say whether 10 per game hour pushes you toward bed without feeling harsh, and whether 75% is enough of a cost. Both are settings on `BP_PlayerCharacter`'s **Rest** component (Details panel, Farming > Rest), as are the warning and late-night hours.
+
 ### Editor chores
 
 Changes only the editor can make safely. The steps are in [Roadmap.md, Housekeeping](Roadmap.md#3-housekeeping): re-saving the template Blueprints and `L_Farm`, moving `BP_FarmTile` and the materials with redirectors fixed, and regenerating the Android File Server token if it was ever used. After each one, run the [smoke test](#3-smoke-test).

@@ -13,6 +13,7 @@ class UAbilitySystemComponent;
 class UFarmingComponent;
 class UVestigeSaveGame;
 class UVestigeInventoryComponent;
+class UVestigeRestComponent;
 
 /** What reading one save slot found. */
 struct FVestigeSaveSlotRead
@@ -113,6 +114,9 @@ private:
 
 	UFarmingComponent* GetPlayerFarming() const;
 	UVestigeInventoryComponent* GetPlayerInventory() const;
+
+	/** The rest component on the player's pawn, which saves whether the player is exhausted. nullptr if there is none. */
+	UVestigeRestComponent* GetPlayerRest() const;
 
 	/** The ability system on the player's player state, which holds the stamina. nullptr if there is none. */
 	UAbilitySystemComponent* GetPlayerAbilitySystem() const;

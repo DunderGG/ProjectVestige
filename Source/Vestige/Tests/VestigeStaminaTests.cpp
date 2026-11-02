@@ -46,9 +46,13 @@ namespace VestigeStaminaTests
 			AbilitySystem->ApplyGameplayEffectSpecToSelf(*Spec.Data);
 		}
 
-		void Refill()
+		/** Sets stamina to Amount through the refill effect, as sleeping does. */
+		void Refill(float Amount)
 		{
-			AbilitySystem->ApplyGameplayEffectToSelf(GetDefault<UVestigeStaminaRefillEffect>(), 1.f, AbilitySystem->MakeEffectContext());
+			const FGameplayEffectSpecHandle Spec =
+				AbilitySystem->MakeOutgoingSpec(UVestigeStaminaRefillEffect::StaticClass(), 1.f, AbilitySystem->MakeEffectContext());
+			Spec.Data->SetSetByCallerMagnitude(VestigeGameplayTags::Data_StaminaRefill, Amount);
+			AbilitySystem->ApplyGameplayEffectSpecToSelf(*Spec.Data);
 		}
 
 		TEST_METHOD(ThePlayerStartsWithFullStamina)
@@ -85,17 +89,26 @@ namespace VestigeStaminaTests
 		{
 			Spend(GetMaxStamina());
 
-			Refill();
+			Refill(GetMaxStamina());
 
 			ASSERT_THAT(IsTrue(GetStamina() == GetMaxStamina()));
 			ASSERT_THAT(IsFalse(IsOutOfStamina()));
+		}
+
+		TEST_METHOD(ARefillAboveTheMaximumIsClamped)
+		{
+			Spend(10.f);
+
+			Refill(GetMaxStamina() + 50.f);
+
+			ASSERT_THAT(IsTrue(GetStamina() == GetMaxStamina()));
 		}
 
 		TEST_METHOD(StaminaRoundTripsThroughTheSave)
 		{
 			Spend(30.f);
 			const FVestigeStaminaSaveData Data = UVestigeStaminaSet::GetSaveData(*AbilitySystem);
-			Refill();
+			Refill(GetMaxStamina());
 
 			UVestigeStaminaSet::RestoreFromSaveData(*AbilitySystem, Data);
 

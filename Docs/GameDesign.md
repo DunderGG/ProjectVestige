@@ -101,12 +101,14 @@ The day should always offer more to do than there's time for, so choosing is the
 - **Stamina:** tool actions cost stamina. At zero, every action still works but takes twice as long, and costs nothing more. Stamina never goes below zero, so the faster drain after midnight only matters while some is left. Sleep refills it fully, or to 75% when exhausted.
 - **No forced sleep.** The player can stay up as long as they like, but late nights cost:
   - After midnight, **hostile robots** roam the farm and its surroundings. They attack the player, never crops or buildings.
-  - Stamina drains faster.
+  - Stamina drains faster: from midnight it drains steadily, about 10 an hour, even when the player does nothing, until they sleep. (There is no drain by day, so "faster" means it starts.)
   - Sleeping late makes the player **exhausted**: the next day starts with less stamina.
+  - **What counts as late:** going to bed at 00:00 or later. Going to bed before midnight is a good night.
+  - **Staying up all night:** the night ends at 06:00. A player who never went to bed starts the next day where they stand, as if they had gone to bed at the latest possible hour: exhausted.
   - With survival needs on, cold and night radiation also build up (see [section 7](#7-survival-needs)).
 - **Late-night guardrails.** The pressure is gentle: a late night costs the next morning, never the player's progress.
-  - The HUD warns at 22:00 ("getting late") and at 00:00 ("it's dangerous out now").
-  - Exhaustion has one level and never stacks. One night in bed before midnight clears it.
+  - The HUD warns at 22:00 ("getting late") and at 00:00 ("it's dangerous out now"). Until hostile robots exist, the midnight warning names the stamina drain instead.
+  - Exhaustion has one level and never stacks: several late nights in a row are no worse than one. One night in bed before midnight clears it, and the next day starts with full stamina.
   - Being knocked out by night robots sends the player home exhausted, with no item or currency loss until combat and its penalties exist.
 - This replaces the prototype's "pass out at 02:00" rule.
 
@@ -342,6 +344,7 @@ Newest first. Add an entry whenever a design choice is made or reversed. Never d
 
 | Date | Decision | Why |
 |---|---|---|
+| 2026-11-02 | The late-night rules in detail ([section 5](#5-time-days-and-seasons)): going to bed at 00:00 or later is late; the night ends at 06:00, when a player who never slept starts the next day where they stand, exhausted; from midnight stamina drains about 10 an hour until sleep | Something has to end a night nobody sleeps through, or the farm stops; sunrise is the latest bedtime there can be, and needs no faint or teleport. There is no daytime drain, so the faster drain is one that starts at midnight, which pushes toward bed even when the player only walks around |
 | 2026-10-30 | Walking eases in from a press instead of waiting for a tap to end: a tap turns the farmer smoothly with a nudge of a few centimetres (about 2 cm for a 100 ms tap with the tuned 0.25 s ease-in), where it used to turn him in place, and after stopping he turns to face the targeted tile ([section 6](#tiles)). Replaces "a tap turns the farmer in place" from the entry below | In play-testing, turning in place snapped the farmer round in one frame and made him stand still before walking, and shortening the wait made most taps step anyway. Easing in removes the pause, and a nudge that small almost never leaves his tile, so tapping still picks a neighbour |
 | 2026-10-30 | Crop toxicity is explicit per crop, not inferred from mutation or soil; cleanup crops are non-food and their harvest must be contained. Any harmful food must be identified before consumption; the exact warning mechanic remains open | Keeps farming and food rules consistent without making all mutated or irradiated-soil produce hazardous, and prevents cleanup from returning captured contamination to the farm |
 | 2026-10-30 | Tools target the neighbouring tile in the movement direction, snapped to eight directions, and a tap turns the farmer in place ([section 6](#tiles)). Rejected: a crosshair in the middle of the screen, a mouse click on a tile, and the tile straight in front of where the farmer faces | Targeting by facing was fiddly: the third-person camera turns the farmer toward where it walks, so picking the tile beside you meant stepping and hoping. A screen-centre crosshair can't reach the tiles beside or behind the farmer, because the camera sits behind and above. A mouse click conflicts with mouse-look and needs a gamepad fallback anyway; it can be added on top of this later. Snapping works the same on keyboard and gamepad |
@@ -407,7 +410,7 @@ The gameplay values behind the setting's words. Use these names in code, UI text
 | **Weather** | The region, set each day and announced a day ahead | | Regional forecast only; the farm can't change it | Rain waters tiles. Dust storms cut solar output. Radiation storms add tile contamination and **player exposure** outdoors |
 | **Charge** | Power cells | | Solar panels add it; machines draw a set amount to run | Whether a powered machine runs |
 | **Stamina** | The player | | Tool actions spend it; it refills on sleep. Drains faster after midnight | How much work the player can do, and how fast at zero |
-| **Exhaustion** | The player, for one day | | Going to bed late | Starts the next morning at 75% stamina |
+| **Exhaustion** | The player, for one day | | Going to bed at 00:00 or later, or staying up all night | Starts the next morning at 75% stamina; one night in bed before midnight clears it |
 | **Player exposure** | The player, only with survival needs on | Radiation sickness | Radiation storms outdoors, night radiation, eating harmful crops (*open:* standing on contaminated tiles) | Stamina and work speed ([section 7](#7-survival-needs)) |
 
 Tile contamination and player exposure are different values: dirty soil hurts crops, and only weather, night and food hurt the player directly.

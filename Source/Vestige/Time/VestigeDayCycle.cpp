@@ -133,8 +133,10 @@ void AVestigeDayCycle::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
+	const float PreviousTimeOfDay = TimeOfDay;
 	TimeOfDay = FMath::Min(TimeOfDay + DeltaSeconds / RealSecondsPerGameHour, DayEndHour);
 	UpdateLighting();
+	BroadcastHoursStartedSince(PreviousTimeOfDay);
 	if (TimeOfDay < DayEndHour || bDayEndReached)
 	{
 		return;
@@ -145,6 +147,15 @@ void AVestigeDayCycle::Tick(float DeltaSeconds)
 	bDayEndReached = true;
 	SetActorTickEnabled(false);
 	OnDayEndReached.Broadcast(CurrentDay);
+}
+
+void AVestigeDayCycle::BroadcastHoursStartedSince(float PreviousTimeOfDay)
+{
+	const int32 LastHour = FMath::FloorToInt32(TimeOfDay);
+	for (int32 Hour = FMath::FloorToInt32(PreviousTimeOfDay) + 1; Hour <= LastHour; ++Hour)
+	{
+		OnHourStarted.Broadcast(Hour);
+	}
 }
 
 void AVestigeDayCycle::FindLights()

@@ -5,11 +5,14 @@
 
 #include "AbilitySystem/VestigeGameplayTags.h"
 #include "AbilitySystem/VestigeStaminaCostEffect.h"
+#include "AbilitySystem/VestigeStaminaDrainEffect.h"
 #include "AbilitySystem/VestigeStaminaSet.h"
 #include "AbilitySystemComponent.h"
 #include "Components/ActorTestSpawner.h"
+#include "Core/VestigeFeedbackSubsystem.h"
 #include "CQTest.h"
 #include "Farming/VestigeRestComponent.h"
+#include "Farming/VestigeRestSaveData.h"
 #include "Player/VestigePlayerCharacter.h"
 #include "Player/VestigePlayerState.h"
 #include "Time/VestigeClockSaveData.h"
@@ -22,36 +25,19 @@ namespace VestigeRestTests
 	{
 		FActorTestSpawner Spawner;
 
-		/** A day cycle and an actor with a rest component that has begun play, so it listens to the day cycle. */
-		struct FRestSetup
+		/** A day cycle and the game's farmer with its player state, so the rest component has stamina to work on. */
+		struct FPlayerSetup
 		{
 			AVestigeDayCycle* Cycle = nullptr;
+			UAbilitySystemComponent* AbilitySystem = nullptr;
 			UVestigeRestComponent* RestComponent = nullptr;
 		};
 
-		FRestSetup MakeRestingActor()
+		FPlayerSetup Player;
+
+		BEFORE_EACH()
 		{
-			FRestSetup Setup;
-			Setup.Cycle = &Spawner.SpawnActor<AVestigeDayCycle>();
-			AActor& Owner = Spawner.SpawnActor<AActor>();
-			Setup.RestComponent = NewObject<UVestigeRestComponent>(&Owner);
-			Setup.RestComponent->RegisterComponent();
-			Owner.DispatchBeginPlay();
-			return Setup;
-		}
-
-		TEST_METHOD(SleepingStartsTheNextDay)
-		{
-			const FRestSetup Setup = MakeRestingActor();
-
-			Setup.RestComponent->Sleep();
-
-			ASSERT_THAT(IsTrue(Setup.Cycle->GetCurrentDay() == 2));
-		}
-
-		TEST_METHOD(SleepingRefillsStamina)
-		{
-			Spawner.SpawnActor<AVestigeDayCycle>();
+			Player.Cycle = &Spawner.SpawnActor<AVestigeDayCycle>();
 			UClass* PlayerStateClass =
 				LoadClass<AVestigePlayerState>(nullptr, TEXT("/Game/Vestige/Blueprints/BP_PlayerState.BP_PlayerState_C"));
 			UClass* CharacterClass =
@@ -62,35 +48,221 @@ namespace VestigeRestTests
 			AVestigePlayerCharacter& Character = Spawner.SpawnActor<AVestigePlayerCharacter>(FActorSpawnParameters(), CharacterClass);
 			Character.SetPlayerState(&PlayerState);
 			Character.DispatchBeginPlay();
-			UAbilitySystemComponent* AbilitySystem = PlayerState.GetAbilitySystemComponent();
-			UVestigeRestComponent* RestComponent = Character.FindComponentByClass<UVestigeRestComponent>();
-			ASSERT_THAT(IsNotNull(AbilitySystem));
-			ASSERT_THAT(IsNotNull(RestComponent));
+			Player.AbilitySystem = PlayerState.GetAbilitySystemComponent();
+			Player.RestComponent = Character.FindComponentByClass<UVestigeRestComponent>();
+			ASSERT_THAT(IsNotNull(Player.AbilitySystem));
+			ASSERT_THAT(IsNotNull(Player.RestComponent));
+		}
 
-			const FGameplayAttribute Stamina = UVestigeStaminaSet::GetStaminaAttribute();
-			const float MaxStamina = AbilitySystem->GetNumericAttribute(UVestigeStaminaSet::GetMaxStaminaAttribute());
+		static float GetStamina(const FPlayerSetup& Setup)
+		{
+			return Setup.AbilitySystem->GetNumericAttribute(UVestigeStaminaSet::GetStaminaAttribute());
+		}
+
+		static float GetMaxStamina(const FPlayerSetup& Setup)
+		{
+			return Setup.AbilitySystem->GetNumericAttribute(UVestigeStaminaSet::GetMaxStaminaAttribute());
+		}
+
+		/** Spends all stamina through the cost effect, as tool uses do. */
+		static void SpendAllStamina(const FPlayerSetup& Setup)
+		{
+			UAbilitySystemComponent& AbilitySystem = *Setup.AbilitySystem;
 			const FGameplayEffectSpecHandle Cost =
-				AbilitySystem->MakeOutgoingSpec(UVestigeStaminaCostEffect::StaticClass(), 1.f, AbilitySystem->MakeEffectContext());
-			Cost.Data->SetSetByCallerMagnitude(VestigeGameplayTags::Data_StaminaCost, -MaxStamina);
-			AbilitySystem->ApplyGameplayEffectSpecToSelf(*Cost.Data);
-			ASSERT_THAT(IsTrue(AbilitySystem->GetNumericAttribute(Stamina) == 0.f));
+				AbilitySystem.MakeOutgoingSpec(UVestigeStaminaCostEffect::StaticClass(), 1.f, AbilitySystem.MakeEffectContext());
+			Cost.Data->SetSetByCallerMagnitude(VestigeGameplayTags::Data_StaminaCost, -GetMaxStamina(Setup));
+			AbilitySystem.ApplyGameplayEffectSpecToSelf(*Cost.Data);
+		}
+
+		/** Sets the clock to Hour on the current day, the way loading a save does, without broadcasting anything. */
+		static void SetClock(AVestigeDayCycle& Cycle, float Hour)
+		{
+			FVestigeClockSaveData Clock;
+			Clock.Day = Cycle.GetCurrentDay();
+			Clock.TimeOfDay = Hour;
+			Cycle.RestoreFromSaveData(Clock);
+		}
+
+		/** Runs the clock forward by GameHours, the way a frame's tick does. */
+		static void PassHours(AVestigeDayCycle& Cycle, float GameHours)
+		{
+			Cycle.TickActor(GameHours * Cycle.GetRealSecondsPerGameHour(), LEVELTICK_All, Cycle.PrimaryActorTick);
+		}
+
+		/** Sleeps at Hour on the current day. */
+		static void SleepAt(const FPlayerSetup& Setup, float Hour)
+		{
+			SetClock(*Setup.Cycle, Hour);
+			Setup.RestComponent->Sleep();
+		}
+
+		TEST_METHOD(SleepingStartsTheNextDayEvenWithoutStamina)
+		{
+			AActor& Owner = Spawner.SpawnActor<AActor>();
+			UVestigeRestComponent* RestComponent = NewObject<UVestigeRestComponent>(&Owner);
+			RestComponent->RegisterComponent();
+			Owner.DispatchBeginPlay();
 
 			RestComponent->Sleep();
 
-			ASSERT_THAT(IsTrue(AbilitySystem->GetNumericAttribute(Stamina) == MaxStamina));
+			ASSERT_THAT(IsTrue(Player.Cycle->GetCurrentDay() == 2));
 		}
 
-		TEST_METHOD(ReachingTheDayEndPassesOutIntoTheNextDay)
+		TEST_METHOD(SleepingBeforeMidnightRefillsStaminaFully)
 		{
-			const FRestSetup Setup = MakeRestingActor();
+			const FPlayerSetup& Setup = Player;
+			SpendAllStamina(Setup);
 
-			FVestigeClockSaveData LateClock;
-			LateClock.TimeOfDay = Setup.Cycle->GetDayEndHour();
-			Setup.Cycle->RestoreFromSaveData(LateClock);
-			Setup.Cycle->TickActor(0.1f, LEVELTICK_All, Setup.Cycle->PrimaryActorTick);
+			SleepAt(Setup, 23.f);
+
+			ASSERT_THAT(IsTrue(GetStamina(Setup) == GetMaxStamina(Setup)));
+			ASSERT_THAT(IsFalse(Setup.RestComponent->IsExhausted()));
+		}
+
+		TEST_METHOD(SleepingAfterMidnightWakesExhaustedWithLessStamina)
+		{
+			const FPlayerSetup& Setup = Player;
+			SpendAllStamina(Setup);
+
+			SleepAt(Setup, 24.5f);
+
+			ASSERT_THAT(IsTrue(Setup.RestComponent->IsExhausted()));
+			ASSERT_THAT(IsTrue(FMath::IsNearlyEqual(GetStamina(Setup), 0.75f * GetMaxStamina(Setup))));
+		}
+
+		TEST_METHOD(StayingUpUntilTheDayEndStartsTheNextDayExhausted)
+		{
+			const FPlayerSetup& Setup = Player;
+
+			SetClock(*Setup.Cycle, Setup.Cycle->GetDayEndHour());
+			PassHours(*Setup.Cycle, 0.1f);
 
 			ASSERT_THAT(IsTrue(Setup.Cycle->GetCurrentDay() == 2));
 			ASSERT_THAT(IsTrue(Setup.Cycle->GetTimeOfDay() == Setup.Cycle->GetDayStartHour()));
+			ASSERT_THAT(IsTrue(Setup.RestComponent->IsExhausted()));
+		}
+
+		TEST_METHOD(TheDayEndsAtSunriseRatherThanAtTwoInTheMorning)
+		{
+			ASSERT_THAT(IsTrue(Player.Cycle->GetDayEndHour() == Player.Cycle->GetDayStartHour() + 24.f));
+		}
+
+		TEST_METHOD(ANightInBedBeforeMidnightClearsExhaustion)
+		{
+			const FPlayerSetup& Setup = Player;
+			SleepAt(Setup, 25.f);
+			SpendAllStamina(Setup);
+
+			SleepAt(Setup, 22.f);
+
+			ASSERT_THAT(IsFalse(Setup.RestComponent->IsExhausted()));
+			ASSERT_THAT(IsTrue(GetStamina(Setup) == GetMaxStamina(Setup)));
+		}
+
+		TEST_METHOD(ExhaustionHasOneLevelOnly)
+		{
+			const FPlayerSetup& Setup = Player;
+			SleepAt(Setup, 25.f);
+			SleepAt(Setup, 26.f);
+			SleepAt(Setup, 27.f);
+
+			SleepAt(Setup, 21.f);
+
+			ASSERT_THAT(IsFalse(Setup.RestComponent->IsExhausted()));
+		}
+
+		TEST_METHOD(StaminaStartsDrainingAtMidnight)
+		{
+			const FPlayerSetup& Setup = Player;
+			SetClock(*Setup.Cycle, 21.5f);
+
+			PassHours(*Setup.Cycle, 2.f);
+			ASSERT_THAT(IsFalse(Setup.RestComponent->IsDrainingStamina()));
+
+			PassHours(*Setup.Cycle, 1.f);
+			ASSERT_THAT(IsTrue(Setup.RestComponent->IsDrainingStamina()));
+		}
+
+		TEST_METHOD(TheDrainTakesItsRatePerGameHourWhateverTheClockSpeed)
+		{
+			const FPlayerSetup& Setup = Player;
+			SetClock(*Setup.Cycle, 23.5f);
+			PassHours(*Setup.Cycle, 1.f);
+
+			FGameplayEffectQuery DrainQuery;
+			DrainQuery.EffectDefinition = UVestigeStaminaDrainEffect::StaticClass();
+			const TArray<FActiveGameplayEffectHandle> Drains = Setup.AbilitySystem->GetActiveEffects(DrainQuery);
+			ASSERT_THAT(IsTrue(Drains.Num() == 1));
+			const FActiveGameplayEffect* Drain = Setup.AbilitySystem->GetActiveGameplayEffect(Drains[0]);
+			ASSERT_THAT(IsNotNull(Drain));
+
+			// The rest component's default of 10 stamina per game hour, spread over the periods in one game hour.
+			const float PeriodsPerGameHour = Setup.Cycle->GetRealSecondsPerGameHour() / UVestigeStaminaDrainEffect::PeriodSeconds;
+			const float PerPeriod = Drain->Spec.GetSetByCallerMagnitude(VestigeGameplayTags::Data_StaminaDrain, false);
+			ASSERT_THAT(IsTrue(FMath::IsNearlyEqual(PerPeriod * PeriodsPerGameHour, -10.f)));
+		}
+
+		TEST_METHOD(TheDrainStopsWhenTheNextDayStarts)
+		{
+			const FPlayerSetup& Setup = Player;
+			SetClock(*Setup.Cycle, 23.5f);
+			PassHours(*Setup.Cycle, 1.f);
+
+			Setup.RestComponent->Sleep();
+
+			FGameplayEffectQuery DrainQuery;
+			DrainQuery.EffectDefinition = UVestigeStaminaDrainEffect::StaticClass();
+			ASSERT_THAT(IsFalse(Setup.RestComponent->IsDrainingStamina()));
+			ASSERT_THAT(IsTrue(Setup.AbilitySystem->GetActiveEffects(DrainQuery).IsEmpty()));
+		}
+
+		TEST_METHOD(ThePlayerIsWarnedAtTenAndAtMidnight)
+		{
+			const FPlayerSetup& Setup = Player;
+			UVestigeFeedbackSubsystem* Feedback = Spawner.GetWorld().GetSubsystem<UVestigeFeedbackSubsystem>();
+			ASSERT_THAT(IsNotNull(Feedback));
+			TArray<FString> Messages;
+			Feedback->OnFeedback.AddLambda(
+				[&Messages](const FText& Message)
+				{
+					Messages.Add(Message.ToString());
+				});
+			SetClock(*Setup.Cycle, 21.5f);
+
+			PassHours(*Setup.Cycle, 1.f);
+			ASSERT_THAT(IsTrue(Messages.Num() == 1));
+			ASSERT_THAT(IsTrue(Messages[0].Contains(TEXT("getting late"))));
+
+			PassHours(*Setup.Cycle, 2.f);
+			ASSERT_THAT(IsTrue(Messages.Num() == 2));
+			ASSERT_THAT(IsTrue(Messages[1].Contains(TEXT("midnight"))));
+		}
+
+		TEST_METHOD(ExhaustionRoundTripsThroughTheSave)
+		{
+			const FPlayerSetup& Setup = Player;
+			SleepAt(Setup, 25.f);
+			const FVestigeRestSaveData Data = Setup.RestComponent->GetSaveData();
+			SleepAt(Setup, 21.f);
+			ASSERT_THAT(IsFalse(Setup.RestComponent->IsExhausted()));
+
+			Setup.RestComponent->RestoreFromSaveData(Data);
+
+			ASSERT_THAT(IsTrue(Data.bExhausted));
+			ASSERT_THAT(IsTrue(Setup.RestComponent->IsExhausted()));
+		}
+
+		TEST_METHOD(RestoringExhaustionChangesNoStamina)
+		{
+			const FPlayerSetup& Setup = Player;
+			SpendAllStamina(Setup);
+			FVestigeRestSaveData Data;
+			Data.bExhausted = true;
+
+			Setup.RestComponent->RestoreFromSaveData(Data);
+
+			ASSERT_THAT(IsTrue(Setup.RestComponent->IsExhausted()));
+			ASSERT_THAT(IsTrue(GetStamina(Setup) == 0.f));
 		}
 	};
 }

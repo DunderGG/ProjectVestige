@@ -5,6 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "AbilitySystem/VestigeStaminaSaveData.h"
+#include "Farming/VestigeRestSaveData.h"
 #include "Farming/FarmFarmingSaveData.h"
 #include "Farming/FarmTileState.h"
 #include "GameFramework/SaveGame.h"
@@ -44,8 +45,9 @@ public:
 	 * 1: each owner's part in its own struct, tiles by coordinates with their crop's ContentId, two alternating slots.
 	 * 2: the inventory's slots, holding the seeds and harvest that version 1 kept as two counts in Farming.
 	 * 3: the player's stamina.
+	 * 4: whether the player is exhausted.
 	 */
-	static constexpr int32 CurrentVersion = 3;
+	static constexpr int32 CurrentVersion = 4;
 
 	/**
 	 * The two slots saves alternate between, so writing a save never touches the newest good one.
@@ -75,6 +77,10 @@ public:
 	/** Unsaved (bHasStamina false) in saves before version 3. */
 	UPROPERTY()
 	FVestigeStaminaSaveData Stamina;
+
+	/** Not exhausted in saves before version 4. */
+	UPROPERTY()
+	FVestigeRestSaveData Rest;
 
 	/** Every tile, found again by its coordinates. In version 0 saves, in grid order without coordinates or crops. */
 	UPROPERTY()

@@ -12,6 +12,7 @@
 #include "Engine/World.h"
 #include "Farming/FarmGrid.h"
 #include "Farming/FarmingComponent.h"
+#include "Farming/VestigeRestComponent.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerState.h"
 #include "Inventory/VestigeInventoryComponent.h"
@@ -98,6 +99,12 @@ namespace VestigeSaveUpgrade
 	void UpgradeFromVersion2(UVestigeSaveGame& Save)
 	{
 		Save.SaveVersion = 3;
+	}
+
+	/** Version 3 had no exhaustion. Its Rest part reads as not exhausted. */
+	void UpgradeFromVersion3(UVestigeSaveGame& Save)
+	{
+		Save.SaveVersion = 4;
 	}
 }
 
@@ -191,6 +198,10 @@ bool UVestigeSaveSubsystem::UpgradeToCurrentVersion(UVestigeSaveGame& Save, int3
 	{
 		VestigeSaveUpgrade::UpgradeFromVersion2(Save);
 	}
+	if (Save.SaveVersion == 3)
+	{
+		VestigeSaveUpgrade::UpgradeFromVersion3(Save);
+	}
 	return Save.SaveVersion == UVestigeSaveGame::CurrentVersion;
 }
 
@@ -272,6 +283,10 @@ void UVestigeSaveSubsystem::SaveFarm(int32 NewDay)
 	if (const UAbilitySystemComponent* AbilitySystem = GetPlayerAbilitySystem())
 	{
 		Save->Stamina = UVestigeStaminaSet::GetSaveData(*AbilitySystem);
+	}
+	if (const UVestigeRestComponent* Rest = GetPlayerRest())
+	{
+		Save->Rest = Rest->GetSaveData();
 	}
 	Save->Tiles = Grid->GetTilesSaveData();
 
@@ -381,6 +396,10 @@ int32 UVestigeSaveSubsystem::ApplySave(const UVestigeSaveGame& Save, UFarmingCom
 	{
 		UVestigeStaminaSet::RestoreFromSaveData(*AbilitySystem, Save.Stamina);
 	}
+	if (UVestigeRestComponent* Rest = GetPlayerRest())
+	{
+		Rest->RestoreFromSaveData(Save.Rest);
+	}
 	SkippedCount += Grid->RestoreTilesFromSaveData(Save.Tiles, VestigeSaveSlots::LoadSavedCrops(Save.Tiles));
 	return SkippedCount;
 }
@@ -421,6 +440,12 @@ UVestigeInventoryComponent* UVestigeSaveSubsystem::GetPlayerInventory() const
 {
 	const APlayerState* PlayerState = UGameplayStatics::GetPlayerState(GetWorld(), 0);
 	return PlayerState ? PlayerState->FindComponentByClass<UVestigeInventoryComponent>() : nullptr;
+}
+
+UVestigeRestComponent* UVestigeSaveSubsystem::GetPlayerRest() const
+{
+	const APawn* Pawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
+	return Pawn ? Pawn->FindComponentByClass<UVestigeRestComponent>() : nullptr;
 }
 
 UAbilitySystemComponent* UVestigeSaveSubsystem::GetPlayerAbilitySystem() const

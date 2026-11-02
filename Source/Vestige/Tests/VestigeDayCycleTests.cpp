@@ -17,16 +17,16 @@ namespace VestigeDayCycleTests
 	{
 		FActorTestSpawner Spawner;
 
-		/** Counts every broadcast of Event into Count, and remembers the last day it carried in LastDay. */
-		static void CountBroadcasts(FOnVestigeNewDay& Event, int32& Count, int32* LastDay = nullptr)
+		/** Counts every broadcast of Event into Count, and remembers the last day or hour it carried in LastValue. */
+		template <typename EventType> static void CountBroadcasts(EventType& Event, int32& Count, int32* LastValue = nullptr)
 		{
 			Event.AddLambda(
-				[&Count, LastDay](int32 Day)
+				[&Count, LastValue](int32 Value)
 				{
 					++Count;
-					if (LastDay)
+					if (LastValue)
 					{
-						*LastDay = Day;
+						*LastValue = Value;
 					}
 				});
 		}
@@ -127,6 +127,7 @@ namespace VestigeDayCycleTests
 			CountBroadcasts(Cycle.OnNewDay, Broadcasts);
 			CountBroadcasts(Cycle.OnNewDayFinished, Broadcasts);
 			CountBroadcasts(Cycle.OnDayEndReached, Broadcasts);
+			CountBroadcasts(Cycle.OnHourStarted, Broadcasts);
 
 			Cycle.RestoreFromSaveData(MakeClock(0, Cycle.GetDayEndHour() + 5.f));
 
@@ -145,6 +146,54 @@ namespace VestigeDayCycleTests
 			PassHours(Cycle, 0.1f);
 
 			ASSERT_THAT(IsTrue(Broadcasts == 1));
+		}
+
+		TEST_METHOD(EachWholeHourIsBroadcastOnceInOrder)
+		{
+			AVestigeDayCycle& Cycle = Spawner.SpawnActor<AVestigeDayCycle>();
+			TArray<int32> Hours;
+			Cycle.OnHourStarted.AddLambda(
+				[&Hours](int32 Hour)
+				{
+					Hours.Add(Hour);
+				});
+			const int32 StartHour = FMath::FloorToInt32(Cycle.GetDayStartHour());
+
+			PassHours(Cycle, 0.5f);
+			ASSERT_THAT(IsTrue(Hours.IsEmpty()));
+
+			// One long frame that passes three hours still broadcasts each of them.
+			PassHours(Cycle, 3.f);
+			const TArray<int32> Expected = {StartHour + 1, StartHour + 2, StartHour + 3};
+			ASSERT_THAT(IsTrue(Hours == Expected));
+		}
+
+		TEST_METHOD(HoursAfterMidnightCountOnFromTwentyFour)
+		{
+			AVestigeDayCycle& Cycle = Spawner.SpawnActor<AVestigeDayCycle>();
+			TArray<int32> Hours;
+			Cycle.OnHourStarted.AddLambda(
+				[&Hours](int32 Hour)
+				{
+					Hours.Add(Hour);
+				});
+
+			PassHours(Cycle, Cycle.GetDayEndHour());
+
+			ASSERT_THAT(IsTrue(Hours.Contains(24)));
+			ASSERT_THAT(IsTrue(Hours.Last() == FMath::FloorToInt32(Cycle.GetDayEndHour())));
+		}
+
+		TEST_METHOD(StartingTheNextDayBroadcastsNoHour)
+		{
+			AVestigeDayCycle& Cycle = Spawner.SpawnActor<AVestigeDayCycle>();
+			PassHours(Cycle, 2.5f);
+			int32 Broadcasts = 0;
+			CountBroadcasts(Cycle.OnHourStarted, Broadcasts);
+
+			Cycle.StartNextDay();
+
+			ASSERT_THAT(IsTrue(Broadcasts == 0));
 		}
 	};
 }

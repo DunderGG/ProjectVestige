@@ -14,6 +14,7 @@ struct FVestigeClockSaveData;
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnVestigeNewDay, int32 /* Day */);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnVestigeNewDayBlueprint, int32, Day);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnVestigeHourStarted, int32 /* Hour */);
 
 /**
  * Keeps the day counter and the clock, and moves the sun, sky light and exposure to match the time.
@@ -92,11 +93,21 @@ public:
 	 */
 	FOnVestigeNewDay OnDayEndReached;
 
+	/**
+	 * Broadcast each time the running clock reaches a whole hour, with the hour since midnight at the start of the day: 22
+	 * is 22:00, 24 is the next midnight. Once per hour even when a long frame passes several. Not broadcast for the
+	 * DayStartHour a new day starts at, nor when the clock is restored from a save.
+	 */
+	FOnVestigeHourStarted OnHourStarted;
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds) override;
 
 private:
+	/** Broadcasts OnHourStarted for every whole hour after PreviousTimeOfDay, up to and including TimeOfDay. */
+	void BroadcastHoursStartedSince(float PreviousTimeOfDay);
+
 	void FindLights();
 	void UpdateLighting();
 
@@ -108,9 +119,12 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Farming|Time", meta = (AllowPrivateAccess = "true", ClampMin = 0, ClampMax = 23))
 	float DayStartHour = 6.f;
 
-	/** Hour the day ends and the clock stops: OnDayEndReached is broadcast. 26 is 02:00 the next morning. */
+	/**
+	 * Hour the day ends and the clock stops: OnDayEndReached is broadcast. 30 is 06:00 the next morning, so a player who
+	 * never sleeps stays up the whole night and the next day starts at sunrise.
+	 */
 	UPROPERTY(EditAnywhere, Category = "Farming|Time", meta = (AllowPrivateAccess = "true", ClampMin = 1, ClampMax = 30))
-	float DayEndHour = 26.f;
+	float DayEndHour = 30.f;
 
 	/** Hour the sun rises above the horizon. Before it, the moon lights the farm. */
 	UPROPERTY(EditAnywhere, Category = "Farming|Time", meta = (AllowPrivateAccess = "true", ClampMin = 0, ClampMax = 23))

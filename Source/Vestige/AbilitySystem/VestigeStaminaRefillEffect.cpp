@@ -3,20 +3,19 @@
 
 #include "AbilitySystem/VestigeStaminaRefillEffect.h"
 
+#include "AbilitySystem/VestigeGameplayTags.h"
 #include "AbilitySystem/VestigeStaminaSet.h"
 
 UVestigeStaminaRefillEffect::UVestigeStaminaRefillEffect()
 {
 	DurationPolicy = EGameplayEffectDurationType::Instant;
 
-	// The coefficient stays at its default of 1: a full refill.
-	FAttributeBasedFloat FullStamina;
-	FullStamina.BackingAttribute = FGameplayEffectAttributeCaptureDefinition(
-		UVestigeStaminaSet::GetMaxStaminaAttribute(), EGameplayEffectAttributeCaptureSource::Target, false);
+	FSetByCallerFloat Amount;
+	Amount.DataTag = VestigeGameplayTags::Data_StaminaRefill;
 
 	FGameplayModifierInfo Refill;
 	Refill.Attribute = UVestigeStaminaSet::GetStaminaAttribute();
 	Refill.ModifierOp = EGameplayModOp::Override;
-	Refill.ModifierMagnitude = FGameplayEffectModifierMagnitude(FullStamina);
+	Refill.ModifierMagnitude = FGameplayEffectModifierMagnitude(Amount);
 	Modifiers.Add(Refill);
 }

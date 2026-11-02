@@ -104,6 +104,7 @@ void AVestigeHUD::EndPlay(const EEndPlayReason::Type EndPlayReason)
 		CurrentAbilitySystem->GetGameplayAttributeValueChangeDelegate(UVestigeStaminaSet::GetStaminaAttribute()).RemoveAll(this);
 		CurrentAbilitySystem->GetGameplayAttributeValueChangeDelegate(UVestigeStaminaSet::GetMaxStaminaAttribute()).RemoveAll(this);
 		CurrentAbilitySystem->RegisterGameplayTagEvent(VestigeGameplayTags::State_OutOfStamina).RemoveAll(this);
+		CurrentAbilitySystem->RegisterGameplayTagEvent(VestigeGameplayTags::State_Exhausted).RemoveAll(this);
 	}
 	if (UVestigeFeedbackSubsystem* Feedback = UWorld::GetSubsystem<UVestigeFeedbackSubsystem>(GetWorld()))
 	{
@@ -216,6 +217,12 @@ void AVestigeHUD::FollowAbilitySystem()
 		CurrentAbilitySystem->RegisterGameplayTagEvent(VestigeGameplayTags::State_OutOfStamina)
 			.AddUObject(this, &AVestigeHUD::RefreshOutOfStamina);
 		bOutOfStamina = CurrentAbilitySystem->HasMatchingGameplayTag(VestigeGameplayTags::State_OutOfStamina);
+		CurrentAbilitySystem->RegisterGameplayTagEvent(VestigeGameplayTags::State_Exhausted)
+			.AddWeakLambda(this,
+				[this](const FGameplayTag, int32)
+				{
+					RefreshStaminaText();
+				});
 	}
 	RefreshStaminaText();
 }
@@ -243,6 +250,10 @@ void AVestigeHUD::RefreshStaminaText()
 	const int32 MaxStamina = FMath::RoundToInt(CurrentAbilitySystem->GetNumericAttribute(UVestigeStaminaSet::GetMaxStaminaAttribute()));
 	StaminaText = FText::FormatNamed(
 		LOCTEXT("Stamina", "Stamina {Stamina} / {MaxStamina}"), TEXT("Stamina"), Stamina, TEXT("MaxStamina"), MaxStamina);
+	if (CurrentAbilitySystem->HasMatchingGameplayTag(VestigeGameplayTags::State_Exhausted))
+	{
+		StaminaText = FText::FormatNamed(LOCTEXT("StaminaExhausted", "{Stamina}   Exhausted"), TEXT("Stamina"), StaminaText);
+	}
 }
 
 void AVestigeHUD::RefreshToolTexts(const UVestigeToolData* Tool)

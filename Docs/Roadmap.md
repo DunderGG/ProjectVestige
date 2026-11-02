@@ -27,7 +27,7 @@ Contents
 - **Done:** milestone 1, the playable prototype, plus the project's documents and rules.
 - **Now:** the code follows the guidelines and the architecture (both audits' code reviews are closed, 2026-10-29). Next: play-test that clean-up, the editor housekeeping steps in [section 3](#3-housekeeping), then the rest of the milestone 2 foundations.
 - **Next up**, in order:
-  1. The late-night rules in [section 4.3](#43-stamina-and-late-nights), which build on stamina and the bed. Logging, Blueprint events, the interaction interface and the bed are done (2026-11-01 and 2026-11-02); the rest of [section 4.1](#41-foundations) waits for a packaged build (the performance baseline) or for the need that starts it (the ID redirect list, more Blueprint extension points, a second interaction option).
+  1. The rest of [section 4.3](#43-stamina-and-late-nights): holding E to repeat the tool use, and tuning stamina in play. The late-night rules are done (2026-11-02). Logging, Blueprint events, the interaction interface and the bed are done (2026-11-01 and 2026-11-02); the rest of [section 4.1](#41-foundations) waits for a packaged build (the performance baseline) or for the need that starts it (the ID redirect list, more Blueprint extension points, a second interaction option).
 
 ## 2. Milestone 1: playable prototype (done)
 
@@ -64,7 +64,7 @@ A third-person farmer on a small field who can till, plant, water and harvest, w
 - [x] 24-hour clock display
 - [x] Properly dark nights
 - [x] Day cycle speed tuned
-- [x] Pass out at 02:00 (to be replaced, see [stamina and late nights](#43-stamina-and-late-nights))
+- [x] Pass out at 02:00 (replaced on 2026-11-02 by the late-night rules, see [stamina and late nights](#43-stamina-and-late-nights))
 - [x] Save at the start of each new day, load on play start, F9 starts a new game
 
 ### Clean-up after the prototype
@@ -247,12 +247,15 @@ The code changes that the slice's content depends on. Doing them first means add
    - Done 2026-11-01: a use that changes the farm costs the tool's `StaminaCost` (hoe and watering can 2, seeds and hand 1, of 100); one that changes nothing costs nothing. Sleep refills it, and saves store it (version 3)
 - [x] At zero stamina every action still works but takes twice as long; stamina never goes below zero
    - Done 2026-11-01: each tool use takes the tool's `UseSeconds` (0.4 s), doubled at zero, and the next use waits for it
-- [ ] No forced sleep: remove the pass-out at 02:00
-- [ ] After midnight, stamina drains faster
-- [ ] Going to bed late makes the next day start "exhausted" with less stamina; one level only, cleared by one night in bed before midnight
-   - Until then, every night refills stamina fully, a late one and the 02:00 pass-out included (found in play by David, 2026-11-01). The refill becomes 75% while exhausted (Systems.md, section 9)
-- [ ] HUD warnings at 22:00 and 00:00
-- [ ] Tune the stamina numbers in play: 100 stamina, the tool costs and the 0.4 s use time ([PlayTest.md, Stamina](PlayTest.md#2-pending-checks))
+- [x] No forced sleep: remove the pass-out at 02:00
+   - Done 2026-11-02 (decision log): the night ends at 06:00 instead, and a player who never slept starts the next day where they stand, exhausted
+- [x] After midnight, stamina drains faster
+   - Done 2026-11-02: there is no daytime drain, so a drain of 10 per game hour starts at midnight and stops when the next day starts
+- [x] Going to bed late makes the next day start "exhausted" with less stamina; one level only, cleared by one night in bed before midnight
+   - Done 2026-11-02: going to bed at 00:00 or later, or staying up all night, starts the next day at 75%, with "Exhausted" on the HUD; saves store it (version 4)
+- [x] HUD warnings at 22:00 and 00:00
+   - Done 2026-11-02 as feedback messages from the rest component. The midnight one names the drain until hostile robots exist
+- [ ] Tune the stamina numbers in play: 100 stamina, the tool costs and the 0.4 s use time ([PlayTest.md, Stamina](PlayTest.md#2-pending-checks)), and the late-night drain (10 per game hour) and the 75% exhausted refill, which are settings on the farmer's Rest component
 - [ ] Starting stamina from data instead of the constant in `UVestigeStaminaSet` (`VestigeStamina::StartingMaxStamina`), once a second kind of character (a robot) needs other numbers or tuning needs it without a build: for example a starting-values effect granted by the ability set, or Epic's attribute table (`UAttributeSet::InitFromMetaDataTable`)
 - [ ] When tools get animations, a use's time comes from its montage, played at half speed at zero stamina, instead of `UseSeconds` alone (Systems.md, section 9)
 - [x] Show on the HUD that the player is out of stamina, for example the stamina line in red (David, 2026-11-01). The HUD follows the `Vestige.State.OutOfStamina` tag (`RegisterGameplayTagEvent` on the ability system) rather than comparing the number itself, so the rule stays in `UVestigeStaminaSet`, and it changes the line's colour only when the tag changes, never in a per-frame binding
@@ -260,7 +263,7 @@ The code changes that the slice's content depends on. Doing them first means add
 - [ ] Holding E repeats the tool use, so walking along a row while holding it works the row (David, 2026-11-01). E is bound to the press only today. Repeat only after a use that changed the farm, so a use that changes nothing (hoeing tilled soil) stops the repeat quietly instead of posting its message every frame; the next use still waits for `UseSeconds`
 - [x] A bed in the farmhouse to sleep in, instead of a key that works anywhere
    - Done 2026-11-01 without the farmhouse: `AVestigeBed` (`BP_Bed`), a placeholder box along the near edge of the field in `L_Farm`, used with F. N stays as a test key, "Skip day (test)", until the cheat manager (decided with David). The bed moves into the farmhouse when there is one, and gets its mesh with [4.6](#46-interface-and-input)
-- [ ] Hostile robots at night wait until combat exists ([milestone 3](#combat-and-the-wasteland))
+- [ ] Hostile robots at night wait until combat exists ([milestone 3](#combat-and-the-wasteland)). When they come, the midnight warning says "it's dangerous out now" as [GameDesign.md, section 5](GameDesign.md#5-time-days-and-seasons) has it
 
 ### 4.4 The caretaker robot
 
