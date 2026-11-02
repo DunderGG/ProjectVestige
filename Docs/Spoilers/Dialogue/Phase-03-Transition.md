@@ -1,38 +1,38 @@
-# Phase 3 — Transition: A pattern emerges
+# Phase 3 - Transition: A pattern emerges
 
 > **Spoilers.** These drafts let independent clues accumulate without resolving more than the characters can prove.
 
-## T-01 — Independent clues
+## T-01 - Independent clues
 
 **Placement:** The sleeper compares a clinic entry with a separate civic shipment record.
 **Knowledge:** The records are suspicious together, but still incomplete. Cleo knows only what the player shows her.
 
-**PLAYER:** The clinic copy has a name missing. This shipment log has a sealed medical crate sent to the old institute.
+**PLAYER:** The clinic copy has a name missing. This shipping log has a sealed medical crate sent to the old institute.
 
 **CLEO:** Do they mention each other?
 
-**PLAYER:** No. They're from different places, and neither refers to the other.
+**PLAYER:** No. Different places. Different records.
 
 **CLEO:** Then let's keep them separate until we have more.
 
 **PLAYER:** The clinic entry just says "transferred."
 
-**CLEO:** No destination. It could have been routine.
+**CLEO:** No destination. It could be routine.
 
 **PLAYER:** Do you think someone meant to hide something?
 
-**CLEO:** Maybe. This copy doesn't tell us how the name went missing.
+**CLEO:** Maybe. But this copy doesn't tell us who hid it or how.
 
-**PLAYER — CHOICES**
+**PLAYER - CHOICES**
 
-- **[Ask Cleo to preserve the uncertainty]** "Keep the original wording, but mark it as unverified."
-  - **CLEO:** Yes. I'll mark it as unverified, not turn it into an answer.
+- **[Ask Cleo to preserve the uncertainty]** "Keep the original wording, but mark it unverified."
+  - **CLEO:** Yes. Unverified, not explained away.
 - **[Ask to look for another source]** "Can we find a second record before we draw a line between them?"
-  - **CLEO:** We can ask the clinic operator what they know and search the institute index. Neither search guarantees an answer.
+  - **CLEO:** We can ask the clinic operator what they know and search the institute index. Neither is a guarantee.
 - **[Stop investigating for now]** "I need a break from this."
-  - **CLEO:** Of course. The documents will still be here. You do not owe the mystery your whole day.
+  - **CLEO:** Of course. The documents will still be here when you return.
 
-## T-02 — The copied page
+## T-02 - The copied page
 
 **Placement:** The nomad discovers that a route note has been copied. The old signal may be unsafe, but the nomad does not know who copied it or who has seen it.
 **Knowledge:** The page reveals a pattern, not a contact's identity or location. Do not have the nomad share names to make the player useful.
@@ -41,13 +41,13 @@
 
 **PLAYER:** Can someone use it to find the people on your route?
 
-**NOMAD:** Not from this alone. But it gives someone a place to start. I won't wait until it gives them the rest.
+**NOMAD:** Not from this alone. But it gives somebody a place to start. I won't wait until it gives them the rest.
 
 **PLAYER:** We could warn everyone.
 
 **NOMAD:** I'll warn the next stops through the usual channel. No names on the copied page.
 
-**PLAYER — CHOICES**
+**PLAYER - CHOICES**
 
 - **[Offer to help change the markers]** "We can replace the signal and warn the stops that use it."
   - **NOMAD:** Yes. A few trusted stops can share the work. I don't have to carry every leg myself.
@@ -60,7 +60,7 @@
 
 **NOMAD:** Help change the public signal at the farm stop. The rest stays between the people who use those routes.
 
-## T-03 — The farm as a limited stop
+## T-03 - The farm as a limited stop
 
 **Placement:** The nomad, Hob, the sleeper and a Wellspring representative discuss a possible rest and trade stop.
 **Knowledge:** No names, locations or contact list are shared. The assembly and each host retain their own say.
@@ -75,7 +75,7 @@
 
 **WELLSPRING REPRESENTATIVE:** The farm's call is separate from the town's. I can take a proposal to the assembly, but they'll want to talk through the risks.
 
-**PLAYER — CHOICES**
+**PLAYER - CHOICES**
 
 - **[Offer a narrow agreement]** "Rest and trade are possible. No questions about names or destinations."
   - **NOMAD:** That is clear. We should write down who can use the stop and what happens if someone changes their mind.
@@ -86,7 +86,7 @@
 
 **HOB:** Whatever we decide, the nomad's contacts remain theirs to protect.
 
-## T-04 — What the clues do and do not say
+## T-04 - What the clues do and do not say
 
 **Placement:** After at least two independent clues have been found. The group discusses whether to continue toward the institute.
 **Speakers:** PLAYER, CLEO, GAGE, WELLSPRING RESIDENT.
@@ -106,7 +106,7 @@
 
 **CLEO:** They could. The missing name and the shipment are concerning, but they don't prove what happened to anyone.
 
-**PLAYER — CHOICES**
+**PLAYER - CHOICES**
 
 - **[Suggest a careful search]** "Let's look for another source, without bringing anyone from town."
   - **WELLSPRING RESIDENT:** If the assembly agrees to that limit, I can live with it.
@@ -115,7 +115,7 @@
 - **[Ask the resident what would help]** "What conditions would make you feel safer?"
   - **WELLSPRING RESIDENT:** No public route, no town names in a report, and a way to stop if the risk changes.
 
-## T-05 — Optional survivor encounters
+## T-05 - Optional survivor encounters
 
 **Placement:** Use only if an optional survivor path is selected. These are adaptable placeholders; do not combine them into a single convenient guide or make one survivor speak for others.
 
@@ -129,7 +129,7 @@
 
 **SHELTER SURVIVOR:** I might be willing to talk about me. Don't ask me to explain every person who lived there.
 
-**PLAYER — CHOICES**
+**PLAYER - CHOICES**
 
 - **[Respect the limit]** "Then I'll ask what you want to tell me."
   - **SHELTER SURVIVOR:** Better. Start with why you're here.
@@ -154,42 +154,19 @@
 
 **PLAYER:** Do you need anything?
 
-**SECOND SLEEPER:** Water, maybe. And a little time before the questions start.
+**SECOND SLEEPER:** Water, maybe. And a little time.
 
-**PLAYER:** I can get you water. No questions.
+## T-06 - The question
 
-### A person in disguise
+**Placement:** A late transition scene where the player decides whether to stay with the evidence or choose a broader, riskier search.
+**Knowledge:** The town's safety limits and the possibility of a larger pattern are both real.
 
-**Knowledge:** Discovery makes the secret shared by these two people. The sleeper does not gain permission to reveal it.
+**PLAYER:** I can keep chasing the records, or I can stop and ask what the town is willing to carry.
 
-**DISGUISED PERSON:** Don't say it out loud.
+**CLEO:** We need both. We cannot call the pattern proven without a second source, and we cannot pretend a risk doesn't exist because it is inconvenient.
 
-**PLAYER:** I won't.
+**GAGE:** The route is the boundary. If it is unsafe, no one goes beyond it.
 
-**DISGUISED PERSON:** You don't know me. You don't know what happens if they find out.
+**PLAYER:** Then we do this carefully.
 
-**PLAYER:** You're right. I won't tell anyone. Do you want me to leave?
-
-**DISGUISED PERSON:** I want you to stop looking at me like I need rescuing.
-
-**PLAYER:** I can do that. If you want help later, you can ask.
-
-**DISGUISED PERSON:** And if I don't?
-
-**PLAYER:** Then I keep the secret.
-
-## T-06 — The question
-
-**Placement:** The evidence has converged enough to justify searching the institute. The scene ends on a question, not a verdict about every person involved.
-
-**PLAYER:** The records point to people being sent there. We still don't know what was done to them.
-
-**CLEO:** Or who knew. A transfer record cannot answer either question.
-
-**GAGE:** We can inspect the institute. We don't touch anything hazardous, and we don't treat a name on a roster as proof of guilt.
-
-**PLAYER:** The question is whether anyone agreed to what happened.
-
-**CLEO:** And whether they were allowed to change their mind. We need to find out without deciding the answer for them.
-
-**GAGE:** Then we go carefully. If someone asks us to stop, we stop.
+**CLEO:** Yes. Carefully, and without lying to ourselves about how little we know.

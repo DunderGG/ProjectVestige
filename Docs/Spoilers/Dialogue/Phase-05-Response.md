@@ -1,8 +1,8 @@
-# Phase 5 — Late: What happens next belongs to the harmed people
+# Phase 5 - Late: What happens next belongs to the harmed people
 
 > **Spoilers.** These drafts keep safety, care, records, investigation and accountability as distinct choices. Use only the branches the affected person has authorized.
 
-## R-01 — Ask what help is wanted
+## R-01 - Ask what help is wanted
 
 **Placement:** After the survivor has had time and immediate safety is addressed.
 **Knowledge:** The survivor has not agreed to care, testimony, recordkeeping, disclosure or confrontation unless they explicitly do so here.
@@ -15,7 +15,7 @@
 
 **SURVIVOR:** Not yet.
 
-**PLAYER — CHOICES**
+**PLAYER - CHOICES**
 
 - **[Arrange only the requested care]** "I'll tell the medic: equipment only, no examination or questions. I'll wait outside."
   - **SURVIVOR:** Good. Make sure they hear that before they come. I'll stop the visit if I need to.
@@ -26,7 +26,7 @@
 
 **PLAYER:** All right.
 
-## R-02 — Records on the survivor's terms
+## R-02 - Records on the survivor's terms
 
 **Placement:** Only if a survivor chooses to discuss a record or account with Cleo.
 **Speakers:** PLAYER, SURVIVOR, CLEO.
@@ -48,7 +48,7 @@
 
 **CLEO:** Do you want to talk without a record, let me make a transcript, or stop here?
 
-**SURVIVOR — CHOICES**
+**SURVIVOR - CHOICES**
 
 - **[Talk without a record]** "We can talk, but don't write it down."
   - **CLEO:** Understood. I won't record it.
@@ -57,20 +57,14 @@
 - **[Stop for now]** "I don't want to do this today."
   - **CLEO:** Then we stop. Nothing has been recorded.
 
-*[If the survivor chooses to continue:]*
-
 **PLAYER:** Do you want me to stay?
 
-**SURVIVOR — CHOICES**
+**SURVIVOR - CHOICES**
 
 - **[Speak with Cleo alone]** "I want to speak with Cleo alone."
   - **PLAYER:** I'll wait outside. You can ask me back, or not.
 - **[Allow the player to stay]** "You can stay. Don't answer for me."
   - **PLAYER:** I won't.
-
-*[If the survivor approves a transcript, confirm its exact scope in their words before the scene ends. Ask separately whether they want any part sent to the Archive.]*
-
-*[The survivor identifies exactly what may be kept and what must be left out.]*
 
 **SURVIVOR:** That's all I want you to keep. If I ask you to remove it, you remove it.
 
@@ -78,7 +72,7 @@
 
 **CLEO:** Do you want this to stay here, or should I send the part you approved to the Archive?
 
-**SURVIVOR — CHOICES**
+**SURVIVOR - CHOICES**
 
 - **[Keep the record private]** "Keep it here. Don't send it anywhere."
   - **CLEO:** Understood. It stays here.
@@ -87,7 +81,7 @@
 - **[Withdraw permission]** "I've changed my mind. Don't keep the record."
   - **CLEO:** All right. I'll remove my copy. Nothing goes to the Archive.
 
-## R-03 — Specific accountability
+## R-03 - Specific accountability
 
 **Placement:** Investigation or confrontation is discussed only after evidence supports a specific lead and the affected person chooses whether to proceed.
 **Speakers:** PLAYER, SURVIVOR, GAGE.
@@ -103,7 +97,7 @@
 
 **GAGE:** We can bring the evidence to the people with authority to review their work. I won't take you to them or put your name in the report unless you ask.
 
-**PLAYER — CHOICES**
+**PLAYER - CHOICES**
 
 - **[Support a private process]** "We'll report the evidence without identifying the person who shared it."
   - **SURVIVOR:** Yes. Don't promise me what the review will decide.
@@ -118,7 +112,7 @@
 
 **GAGE [IF THE PROCESS IS PAUSED]:** We'll keep the record safe and make no report. I won't contact you about it unless you ask.
 
-## R-04 — Wellspring decides its own limits
+## R-04 - Wellspring decides its own limits
 
 **Placement:** The assembly considers what the town will share or protect after learning of the institute.
 **Speakers:** PLAYER, TOWN ADMINISTRATOR, KEEPER OPERATOR, CLEO.
@@ -136,7 +130,7 @@
 
 **TOWN ADMINISTRATOR:** The assembly can decide what Wellspring shares. It cannot decide what the survivor shares.
 
-**PLAYER — CHOICES**
+**PLAYER - CHOICES**
 
 - **[Support a limited report]** "Share what the institute records establish. Keep the town's locations and the survivor's identity private."
   - **TOWN ADMINISTRATOR:** I'll put that wording to the assembly. It still has to decide.
@@ -145,7 +139,7 @@
 - **[Decline to advise]** "This is Wellspring's decision. I won't choose for the assembly."
   - **TOWN ADMINISTRATOR:** A useful distinction. I'll make it clear that you did not speak for us.
 
-## R-05 — An unfinished aftermath
+## R-05 - An unfinished aftermath
 
 **Placement:** A quiet follow-up only if the affected person agreed to a check-in. Do not use it if they asked for no further contact. There is no single ending for every survivor.
 
@@ -163,80 +157,47 @@
 
 **PLAYER:** Of course.
 
-*[If another affected person has chosen a different response, this scene can occur separately with their own boundaries.]*
+## R-06 - The route continues by choice
 
-*[In a separate follow-up, only if the survivor authorized an Archive copy, agreed to receive an update, and a review is underway:]*
+**Placement:** A final route scene once the town has a clearer risk boundary and the nomad can choose whether to continue their circuit.
+**Knowledge:** The nomad's decision is theirs, not the player's. This is about consent and risk, not gratitude.
 
-**CLEO:** The Archive accepted the excerpt you approved. The catalog doesn't name you or describe what you left out.
+**NOMAD:** I've got the warning in place. The route is still open if the town wants it.
 
-**PLAYER:** And the review?
+**PLAYER:** And if you don't want to keep the route open?
 
-**GAGE:** Still open. No decision yet.
+**NOMAD:** Then I close it. No guilt speech, no crowding. People can bear a hard choice without being told they're selfish.
 
-**PLAYER:** So nothing's settled.
+**PLAYER:** I only want to know where the risk sits.
 
-**CLEO:** No. We can keep the record within the limits you set while the process continues.
+**NOMAD:** It sits where the route is visible. A quiet path is safer until the towns decide what they're ready to protect.
 
-## R-06 — The route continues by choice
+**PLAYER - CHOICES**
 
-**Placement:** The nomad asks whether the farm and other agreed stops want to help sustain the route circuit.
-**Knowledge:** No contact names or destinations are shared. The nomad chooses whether to continue travelling.
+- **[Respect the nomad's decision]** "Then I won't push you."
+  - **NOMAD:** Good. The route is yours to advise on, not mine to carry alone.
+- **[Ask what would make it safer]** "What would make a route appointment feel safer to you?"
+  - **NOMAD:** Specific limits, warned stops and one clear point of contact. People can manage a route if it's not pretending to be a promise.
+- **[Offer to help with warnings]** "I can help carry the warning and keep the details practical."
+  - **NOMAD:** Useful. Keep it simple and keep it honest.
 
-**NOMAD:** I've been carrying the warnings, filters, repairs—everything—myself. That's not working.
+## R-07 - The aquifer overhaul
 
-**PLAYER:** What do you want to change?
+**Placement:** After the town decides on a sustainable repair plan and the player has helped gather evidence or support.
+**Knowledge:** This is a practical outcome, not a victory speech.
 
-**NOMAD:** A few stops could take turns checking supplies and passing on warnings. Only the people who need each piece of information would get it.
+**KEEPER OPERATOR:** The intake floor is clear. The filters are holding. The shared log is working.
 
-**HOB:** The farm can keep a small supply if we agree on what it is and who can use it.
+**GAGE:** Then we don't stop because the problem is solved. We stop because the next inspection date is set.
 
-**PLAYER:** And if the farm needs to stop?
+**CLEO:** And the record is complete enough to be useful.
 
-**NOMAD:** Then it stops. I'd rather hear an honest no than get a promise you resent.
+**PLAYER:** Is that all we needed?
 
-**PLAYER — CHOICES**
+**HOB:** Not all. But it's a start.
 
-- **[Offer a limited role]** "We can store agreed supplies and pass on warnings. No names or route book."
-  - **NOMAD:** That would help. I'll write down the limits, too. No route book, no names.
-- **[Ask for a trial period]** "Let's try it for one route window and review it afterward."
-  - **NOMAD:** Good. We can change the plan when we have something real to judge.
-- **[Decline]** "I can't take that on."
-  - **NOMAD:** Then I won't ask twice. The route has to work without making this place responsible for it.
+**TOWN ADMINISTRATOR:** The assembly can say the town is safer. It cannot say the system is finished.
 
-**HOB:** Whatever we choose, I want it to be a choice we can make again.
+**PLAYER:** Then we keep the work honest.
 
-## R-07 — The aquifer overhaul
-
-**Placement:** Gage's high-trust story reaches the planned joint overhaul of the aquifer pump.
-**Speakers:** PLAYER, GAGE, KEEPER OPERATOR.
-**Knowledge:** The prior pressure-test branch determines the repair history in the report. The overhaul does not erase it or make Gage a spokesperson for the Creed.
-
-**KEEPER OPERATOR:** The replacement coupling is seated. I have checked the seal. The line stays closed until I finish the pressure check.
-
-**GAGE:** Understood. We use the operator's sequence, not my preferred one.
-
-**PLAYER:** I can keep the checklist and call out each reading.
-
-**KEEPER OPERATOR:** That would help. Don't touch the controls unless I ask.
-
-**PLAYER:** I won't.
-
-**GAGE [IF THE PLAYER ABORTED THE TEST]:** We flushed the silt and replaced the cracked pin. That stays in the report.
-
-**GAGE [IF THE PLAYER PUSHED AHEAD]:** We replaced the ruptured gasket and cleaned up the spill. That stays in the report.
-
-**GAGE [IF THE PLAYER CHOSE A STEPPED BLEED-DOWN]:** The test caused no damage or contamination. That stays in the report, too.
-
-**GAGE:** The earlier test stays in the record. We don't rewrite it because today's work goes well.
-
-**KEEPER OPERATOR:** Today's readings are stable. I'm clearing the line for service.
-
-**GAGE:** Good work. I'll put today's readings beside the earlier test, exactly as they happened.
-
-**PLAYER:** Is that what readiness means to you now?
-
-**GAGE:** It means knowing our limits, and trusting the people who know them.
-
-**KEEPER OPERATOR:** Then write that in the handoff. The next shift needs more than a good feeling.
-
-**GAGE:** Agreed. Clear numbers, clear limits, and every name on the work.
+**GAGE:** That is the only way to keep it standing.

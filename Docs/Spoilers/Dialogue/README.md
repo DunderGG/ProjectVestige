@@ -6,13 +6,15 @@ The six phase files follow the timeline's story order. Each scene has a stable d
 
 ## Drafting rules
 
-- Keep dialogue conversational and performable aloud. Prefer short, speakable turns; avoid having characters explain the scene's theme or repeat a consent checklist unless the moment calls for it. Stage directions should guide delivery, not carry information the characters would say.
+- Keep dialogue conversational and performable aloud. Prefer short, speakable turns. If a line can be cut without losing the meaning, cut it.
+- Let characters reveal what they know through pressure, not announcement. A person should not explain the scene's whole theme or the story's entire history unless the moment genuinely demands it.
 - Keep each character's knowledge local to the scene. A character only refers to evidence they personally saw or were told about.
 - Choices can differ in tone or boundary without changing facts the scene has established. Mark consequence branches explicitly.
 - Treat consent to care, an interview, recordkeeping, sharing, or confrontation as separate decisions. Refusal and silence are valid.
 - The identity and wishes of the living exhibit, other possible survivors, the sibling's path, and the parents' sealed message are undecided. Drafts leave those details open.
 - Use only relative references to the Four Days; do not state an absolute in-world year.
 - Do not read faction membership as proof of knowledge or guilt. The Index's cognitive integrations and Iron Creed's frame conversions are separate programs.
+- Silence, pauses, interruptions, and practical actions are part of the dialogue. A good line often does less rather than more.
 
 ## Scene index
 

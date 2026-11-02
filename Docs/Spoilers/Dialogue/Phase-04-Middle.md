@@ -1,13 +1,13 @@
-# Phase 4 — Middle: The trials become undeniable
+# Phase 4 - Middle: The trials become undeniable
 
 > **Spoilers.** The institute establishes the abusive Continuance Trials without making either faction collectively guilty or turning a survivor into evidence.
 
-## M-01 — The institute
+## M-01 - The institute
 
 **Placement:** The main story reaches the old research institute. The player finds corroborating records from separate programs.
 **Knowledge:** The records establish that the Index's cognitive integrations and Iron Creed frame conversions happened. They do not establish one shared command, every member's knowledge, or every individual's responsibility.
 
-**PLAYER:** This isn't just a stack of damaged clinic files. There are intake forms, procedure logs—and people marked "transferred" with no destination.
+**PLAYER:** This isn't just a stack of damaged clinic files. There are intake forms, procedure logs, and people marked "transferred" with no destination.
 
 **CLEO:** The dates line up with what I found. That's not a clerical error. But we don't know what happened to each person.
 
@@ -25,7 +25,7 @@
 
 **GAGE:** We still need to know who did what before we name anyone.
 
-**PLAYER — CHOICES**
+**PLAYER - CHOICES**
 
 - **[Prioritize finding the person]** "Can we reach the person being kept here safely?"
   - **GAGE:** First we check the route and the door. We don't rush into a room we haven't cleared.
@@ -34,7 +34,7 @@
 - **[Ask for a pause]** "I need a moment before we go further."
   - **CLEO:** Take it. The evidence is not going anywhere.
 
-## M-02 — First contact with the living exhibit
+## M-02 - First contact with the living exhibit
 
 **Placement:** The player reaches the person displayed as the Index's "living exhibit." Keep the scene calm and allow distance.
 **Knowledge:** Their identity, condition, history and wishes are not established by this discovery. The player can learn the display is not voluntary without demanding testimony.
@@ -53,7 +53,7 @@
 
 **PLAYER:** Cleo and Gage are outside. They won't come in unless you ask.
 
-**PLAYER — CHOICES**
+**PLAYER - CHOICES**
 
 - **[Offer immediate practical help]** "Would water, medical help, or a quieter room help right now?"
   - **LIVING EXHIBIT:** Water. Leave it where I can reach it. No one touches me.
@@ -64,7 +64,7 @@
 
 **PLAYER:** All right.
 
-## M-03 — Separate evidence wings
+## M-03 - Separate evidence wings
 
 **Placement:** Optional investigations in the Cognitive Wing and Frame Conversion Wing. Use only evidence the player actually finds.
 **Knowledge:** A wing adds detail to its own program. It does not prove a specific person's guilt without corroboration.
@@ -97,7 +97,7 @@
 
 **GAGE:** No. Nothing here tells us. "Readiness" doesn't tell us which current they belonged to.
 
-## M-04 — After the discovery
+## M-04 - After the discovery
 
 **Placement:** A quiet conversation after the player understands the programs were abusive. Include only characters who have seen or been told the relevant evidence.
 
