@@ -2,7 +2,9 @@
 
 > **Spoilers.** These diagrams visualize the provisional story outline and draft scenes; they are not implemented quest maps.
 
-The overview shows the broad story movement. The phase diagrams expand the scene IDs from the [dialogue draft index](../Dialogue/README.md). Arrows show intended story progression within an arc, not mandatory quest prerequisites. Separate character arcs can happen in different orders.
+The overview shows the broad story movement. The phase diagrams are a rhythm map, not a mechanical quest checklist. Arrows show intended story progression within an arc, not mandatory quest prerequisites, and separate character arcs can happen in different orders.
+
+The most important rule for this folder is emotional causality: every beat should serve a character's need, a relationship, or a revelation, not merely inventory a possible scene. A clue is strongest when it creates uncertainty, a decision, or a shift in trust; it is weakest when it converts a mood into a puzzle box.
 
 “Drafted” means a voice-ready scene draft exists; it does not mean the scene, branch or quest is implemented. Optional and undecided story material is labeled as such rather than drawn as required content.
 

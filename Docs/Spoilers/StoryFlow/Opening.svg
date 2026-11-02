@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1500" height="1210" viewBox="0 0 1500 1210" role="img" aria-labelledby="title description">
 	<title id="title">Opening story flow</title>
-	<desc id="description">The six drafted opening scenes move from waking and first farm work to meeting Wellspring, noticing a coordination gap at the pump, and ending with the choice to make a home rather than accept a mission. A family trace can appear in parallel during farm restoration.</desc>
+	<desc id="description">The six drafted opening scenes move from waking and first farm work to meeting Wellspring, dealing with a practical pump problem, and ending with the choice to make a home rather than accept a mission. A family trace can appear in parallel during farm restoration without turning the opening into an immediate conspiracy reveal.</desc>
 	<defs>
 		<marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="strokeWidth">
 			<path d="M 0 0 L 10 5 L 0 10 z" fill="#435466"/>
@@ -61,8 +61,8 @@
 	<rect class="main" x="520" y="490" width="460" height="110" rx="12"/>
 	<text text-anchor="middle" x="750" y="526">
 		<tspan class="title">O-04 · PUMP HANDOFF GAP</tspan>
-		<tspan class="copy" x="750" dy="28">A missed shift handoff explains conflicting readings</tspan>
-		<tspan class="copy" x="750" dy="21">Operators may propose a shared log; town decides</tspan>
+		<tspan class="copy" x="750" dy="28">A missed handoff creates a practical, believable problem</tspan>
+		<tspan class="copy" x="750" dy="21">Operators may propose a shared log; the town decides</tspan>
 	</text>
 
 	<rect class="side" x="50" y="205" width="350" height="100" rx="12"/>

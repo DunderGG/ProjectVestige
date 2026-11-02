@@ -26,7 +26,7 @@
 	</defs>
 
 	<rect class="background" width="1800" height="1740"/>
-	<text class="small" x="40" y="32">T-01 to T-06 · records can be found in different orders; the map separates the central evidence question from optional character arcs</text>
+	<text class="small" x="40" y="32">T-01 to T-07 · records can be found in different orders; the map separates the central evidence question from optional character arcs</text>
 
 	<path class="branch" d="M 450 175 C 540 175 570 220 640 250"/>
 	<path class="branch" d="M 1350 175 C 1260 175 1230 220 1160 250"/>
@@ -82,7 +82,7 @@
 
 	<rect class="main" x="640" y="415" width="520" height="170" rx="12"/>
 	<text text-anchor="middle" x="900" y="451">
-		<tspan class="title">T-04 · TWO OR MORE INDEPENDENT CLUES</tspan>
+		<tspan class="title">T-02 · TWO OR MORE INDEPENDENT CLUES</tspan>
 		<tspan class="copy" x="900" dy="26">The group reviews only sources actually found and shown</tspan>
 		<tspan class="copy" x="900" dy="21">Possible ordinary explanations remain</tspan>
 		<tspan class="copy" x="900" dy="21">The clues suggest study or movement of surviving humans</tspan>
@@ -91,7 +91,7 @@
 
 	<rect class="main" x="640" y="650" width="520" height="140" rx="12"/>
 	<text text-anchor="middle" x="900" y="687">
-		<tspan class="title">T-04 · WELLSPRING SETS SAFETY LIMITS</tspan>
+		<tspan class="title">T-03 · WELLSPRING SETS SAFETY LIMITS</tspan>
 		<tspan class="copy" x="900" dy="26">No public route · no town names in reports</tspan>
 		<tspan class="copy" x="900" dy="21">Check the approach; turn back if risk changes</tspan>
 		<tspan class="copy" x="900" dy="21">Do not search private town records without permission</tspan>
@@ -99,7 +99,7 @@
 
 	<rect class="optional" x="40" y="745" width="410" height="160" rx="12"/>
 	<text text-anchor="middle" x="245" y="780">
-		<tspan class="title">T-05 · OPTIONAL SURVIVOR PATHS</tspan>
+		<tspan class="title">T-06 · OPTIONAL SURVIVOR PATHS</tspan>
 		<tspan class="copy" x="245" dy="25">Shelter survivor: own experience only</tspan>
 		<tspan class="copy" x="245" dy="20">Second sleeper: distinct history and needs</tspan>
 		<tspan class="copy" x="245" dy="20">Disguised person: secret stays theirs</tspan>
@@ -122,7 +122,7 @@
 	</text>
 	<rect class="optional" x="1350" y="850" width="410" height="160" rx="12"/>
 	<text text-anchor="middle" x="1555" y="887">
-		<tspan class="title">T-02 · COPIED ROUTE NOTE</tspan>
+		<tspan class="title">T-04 · COPIED ROUTE NOTE</tspan>
 		<tspan class="copy" x="1555" dy="25">Replace signal; warn relevant stops</tspan>
 		<tspan class="copy" x="1555" dy="20">Close a leg if needed, not blindly the circuit</tspan>
 		<tspan class="copy" x="1555" dy="20">No names or contact locations disclosed</tspan>
@@ -130,7 +130,7 @@
 	<path class="branch" d="M 1555 1010 V 1060"/>
 	<rect class="optional" x="1350" y="1060" width="410" height="155" rx="12"/>
 	<text text-anchor="middle" x="1555" y="1096">
-		<tspan class="title">T-03 · FARM AS A LIMITED STOP</tspan>
+		<tspan class="title">T-05 · FARM AS A LIMITED STOP</tspan>
 		<tspan class="copy" x="1555" dy="25">Rest, water and trade by agreement only</tspan>
 		<tspan class="copy" x="1555" dy="20">Farm residents and assembly decide separately</tspan>
 		<tspan class="copy" x="1555" dy="20">Declining or requiring a safety plan is valid</tspan>
@@ -138,7 +138,7 @@
 
 	<rect class="main" x="640" y="1055" width="520" height="150" rx="12"/>
 	<text text-anchor="middle" x="900" y="1093">
-		<tspan class="title">T-06 · THE CENTRAL QUESTION</tspan>
+		<tspan class="title">T-07 · THE CENTRAL QUESTION</tspan>
 		<tspan class="copy" x="900" dy="27">Were people able to give and withdraw consent?</tspan>
 		<tspan class="copy" x="900" dy="21">Inspect the institute; do not treat a roster as guilt</tspan>
 		<tspan class="copy" x="900" dy="21">Pause or turn back if safety requires it</tspan>

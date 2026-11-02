@@ -24,7 +24,7 @@
 	</defs>
 
 	<rect class="background" width="1700" height="1540"/>
-	<text class="small" x="40" y="32">M-01 to M-04 · main evidence establishes the broad truth; optional records and survivor contact do not gate belief or response</text>
+	<text class="small" x="40" y="32">M-01 to M-07 · main evidence establishes the broad truth; optional records and survivor contact do not gate belief or response</text>
 
 	<path class="path" d="M 850 175 V 225"/>
 	<path class="path" d="M 850 380 V 430"/>
@@ -44,7 +44,7 @@
 
 	<rect class="optional" x="40" y="250" width="380" height="175" rx="12"/>
 	<text text-anchor="middle" x="230" y="287">
-		<tspan class="title">M-03 · COGNITIVE WING · OPTIONAL</tspan>
+		<tspan class="title">M-02 · COGNITIVE WING · OPTIONAL</tspan>
 		<tspan class="copy" x="230" dy="27">Procedure logs add detail to this program</tspan>
 		<tspan class="copy" x="230" dy="21">A log does not establish consent</tspan>
 		<tspan class="copy" x="230" dy="21">“Nonviable” does not explain an outcome</tspan>
@@ -61,7 +61,7 @@
 
 	<rect class="main" x="590" y="225" width="520" height="155" rx="12"/>
 	<text text-anchor="middle" x="850" y="263">
-		<tspan class="title">M-01 · THE CENTRAL TRUTH</tspan>
+		<tspan class="title">M-04 · THE CENTRAL TRUTH</tspan>
 		<tspan class="copy" x="850" dy="27">The Index and Iron Creed ran separate programs</tspan>
 		<tspan class="copy" x="850" dy="21">People were misled, pressured or not allowed to leave</tspan>
 		<tspan class="copy" x="850" dy="21">Both programs caused serious harm; failure was obscured</tspan>
@@ -78,7 +78,7 @@
 
 	<rect class="main" x="590" y="680" width="520" height="170" rx="12"/>
 	<text text-anchor="middle" x="850" y="718">
-		<tspan class="title">M-01 · PLAYER CHOOSES THE NEXT STEP</tspan>
+		<tspan class="title">M-05 · PLAYER CHOOSES THE NEXT STEP</tspan>
 		<tspan class="copy" x="850" dy="27">Prioritize contact → check route and door first</tspan>
 		<tspan class="copy" x="850" dy="21">Clarify evidence → separate fact from inference</tspan>
 		<tspan class="copy" x="850" dy="21">Pause → take time; evidence remains</tspan>
@@ -86,7 +86,7 @@
 
 	<rect class="optional" x="1180" y="610" width="480" height="170" rx="12"/>
 	<text text-anchor="middle" x="1420" y="648">
-		<tspan class="title">M-02 · FIRST CONTACT · ONLY IF APPROACHED</tspan>
+		<tspan class="title">M-06 · FIRST CONTACT · ONLY IF APPROACHED</tspan>
 		<tspan class="copy" x="1420" dy="27">Ask before staying close; the display is not voluntary</tspan>
 		<tspan class="copy" x="1420" dy="21">Offer water with no touching, or leave as requested</tspan>
 		<tspan class="copy" x="1420" dy="21">Ask what name to use; “not yet” is respected</tspan>
@@ -102,7 +102,7 @@
 
 	<rect class="side" x="590" y="910" width="520" height="170" rx="12"/>
 	<text text-anchor="middle" x="850" y="948">
-		<tspan class="title">M-04 · AFTER THE DISCOVERY</tspan>
+		<tspan class="title">M-07 · AFTER THE DISCOVERY</tspan>
 		<tspan class="copy" x="850" dy="27">Cleo reflects on keeping records without asking the people in them</tspan>
 		<tspan class="copy" x="850" dy="21">Gage questions “readiness” used to control another body</tspan>
 		<tspan class="copy" x="850" dy="21">Only characters who know the evidence react to it</tspan>

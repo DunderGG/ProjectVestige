@@ -51,8 +51,8 @@
 	<rect class="open" x="420" y="455" width="660" height="145" rx="12"/>
 	<text text-anchor="middle" x="750" y="491">
 		<tspan class="title">OPEN QUESTION · WHAT MAKES THE FARM “WHOLE AGAIN”?</tspan>
-		<tspan class="copy" x="750" dy="27">Hob has the parents' sealed message and waits for a meaningful threshold</tspan>
-		<tspan class="copy" x="750" dy="21">Threshold and message content are not decided</tspan>
+		<tspan class="copy" x="750" dy="27">Hob keeps the parents' sealed message until the farm feels safe enough to open it</tspan>
+		<tspan class="copy" x="750" dy="21">The exact threshold and message content remain undecided</tspan>
 		<tspan class="copy" x="750" dy="21">Do not turn this into a hidden completion percentage</tspan>
 	</text>
 

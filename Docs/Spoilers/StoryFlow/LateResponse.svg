@@ -27,7 +27,7 @@
 	</defs>
 
 	<rect class="background" width="1800" height="2070"/>
-	<text class="small" x="35" y="30">R-01 to R-07 · after initial contact and immediate safety; independent choices, not a mandatory checklist</text>
+	<text class="small" x="35" y="30">R-01 to R-08 · after initial contact and immediate safety; independent choices, not a mandatory checklist</text>
 
 	<rect class="outcome" x="465" y="55" width="870" height="100" rx="12"/>
 	<text text-anchor="middle" x="900" y="91">
@@ -132,7 +132,7 @@
 	<path class="branch" d="M 1120 655 V 695"/>
 	<rect class="optional" x="935" y="695" width="370" height="190" rx="10"/>
 	<text text-anchor="middle" x="1120" y="730">
-		<tspan class="title">R-03 · POSSIBLE RESPONSES</tspan>
+		<tspan class="title">R-04 · POSSIBLE RESPONSES</tspan>
 		<tspan class="copy" x="1120" dy="24">Private review: report evidence without their name</tspan>
 		<tspan class="copy" x="1120" dy="19">Public release asked about: “not today”;</tspan>
 		<tspan class="copy" x="1120" dy="19">do not raise it again unless they do</tspan>
@@ -150,7 +150,7 @@
 	<text class="lane-title" x="1365" y="262">4 · Wellspring disclosure</text>
 	<rect class="card" x="1365" y="285" width="390" height="145" rx="10"/>
 	<text text-anchor="middle" x="1560" y="319">
-		<tspan class="title">R-04 · ASSEMBLY CONSIDERS RISK</tspan>
+		<tspan class="title">R-05 · ASSEMBLY CONSIDERS RISK</tspan>
 		<tspan class="copy" x="1560" dy="24">The town chooses what it shares</tspan>
 		<tspan class="copy" x="1560" dy="19">The sleeper does not speak for Wellspring</tspan>
 		<tspan class="copy" x="1560" dy="19">The town cannot decide what the survivor shares</tspan>
@@ -176,7 +176,7 @@
 	<text class="lane-title" x="45" y="1403">5 · Follow-up and parallel character payoffs</text>
 	<rect class="card" x="55" y="1430" width="500" height="175" rx="10"/>
 	<text text-anchor="middle" x="305" y="1466">
-		<tspan class="title">R-05 · CHECK-IN ONLY IF AUTHORIZED</tspan>
+		<tspan class="title">R-06 · CHECK-IN ONLY IF AUTHORIZED</tspan>
 		<tspan class="copy" x="305" dy="25">If the survivor says “not today,” ask whether they</tspan>
 		<tspan class="copy" x="305" dy="19">will raise it or want a later check-in</tspan>
 		<tspan class="copy" x="305" dy="19">If they choose to raise it themselves, no later contact</tspan>
@@ -184,14 +184,14 @@
 	</text>
 	<rect class="optional" x="650" y="1430" width="500" height="175" rx="10"/>
 	<text text-anchor="middle" x="900" y="1466">
-		<tspan class="title">R-06 · NOMAD'S ROUTE CONTINUES BY CHOICE</tspan>
+		<tspan class="title">R-07 · NOMAD'S ROUTE CONTINUES BY CHOICE</tspan>
 		<tspan class="copy" x="900" dy="25">Agreed stops may share limited supplies and warnings</tspan>
 		<tspan class="copy" x="900" dy="19">No names or route book; agree on limits and review</tspan>
 		<tspan class="copy" x="900" dy="19">The farm may decline; the nomad remains free to travel</tspan>
 	</text>
 	<rect class="optional" x="1245" y="1430" width="500" height="175" rx="10"/>
 	<text text-anchor="middle" x="1495" y="1466">
-		<tspan class="title">R-07 · GAGE'S HIGH-TRUST AQUIFER OVERHAUL</tspan>
+		<tspan class="title">R-08 · GAGE'S HIGH-TRUST AQUIFER OVERHAUL</tspan>
 		<tspan class="copy" x="1495" dy="25">Operators control the work and clear the line</tspan>
 		<tspan class="copy" x="1495" dy="19">Earlier pressure-test consequences stay in the report</tspan>
 		<tspan class="copy" x="1495" dy="19">A character payoff, not a survivor-response prerequisite</tspan>
@@ -200,7 +200,7 @@
 
 	<rect class="outcome" x="230" y="1730" width="1340" height="120" rx="12"/>
 	<text text-anchor="middle" x="900" y="1766">
-		<tspan class="title">R-05 · AN UNFINISHED, POSSIBLY MIXED AFTERMATH</tspan>
+		<tspan class="title">AFTERMATH · AN UNFINISHED, POSSIBLY MIXED OUTCOME</tspan>
 		<tspan class="copy" x="900" dy="25">One person may accept support; another may choose privacy; records may be partly preserved; a review may remain open</tspan>
 		<tspan class="copy" x="900" dy="19">No single apology, confrontation or institutional reform resolves every harm</tspan>
 	</text>
