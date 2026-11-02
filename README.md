@@ -1,11 +1,13 @@
 <p align="center"><img src="Images/Promotional/Vestige-Social-Preview-CGPT.png" alt="Hob and the sleeper, tending the garden, while the sun rises over the robot cities" width="100%"></p>
 <p align="center"><img src="Images/Promotional/Vestige-Tagline.svg" alt="One forgotten farm. One faithful robot. A whole world waiting to grow again." width="100%"></p>
 
-# Project Vestige
+<h1 align="center">Project Vestige</h1>
 
-A cozy 3D farming and life-sim game set in a retro-futuristic, post-apocalyptic world. You wake from decades of cryosleep under an overgrown homestead. Humans have almost vanished, and robots carry on with the jobs people gave them. You bring the farm back to life, help the town next door, and slowly push out into the wasteland.
+<h3 align="center">A cozy 3D farming and life-sim game set in a retro-futuristic, post-apocalyptic world. 
 
-> **Status: early prototype.** You can till, plant, water, sleep and harvest on a small field, with a day/night clock and saving. The next goal is a one-season vertical slice. See the [roadmap](Docs/Roadmap.md).
+You wake from decades of cryosleep under an overgrown homestead. Humans have almost vanished, and robots carry on with the jobs people gave them. 
+
+You bring the farm back to life, help the town next door, and slowly push out into the wasteland.</h3>
 
 ## 📥 Download
 
