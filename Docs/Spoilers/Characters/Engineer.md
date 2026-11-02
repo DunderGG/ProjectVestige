@@ -23,6 +23,7 @@ Gage is an Iron Creed field engineer visiting Wellspring through a parts-and-exp
   - Habits: Checks every tool twice before seating it; taps a pipe casing with his heavy metal knuckles to listen to its acoustic resonance; instinctively checks overhead clearances and load-bearing lintels upon entering any room.
   - Under pressure, his voice drops an octave and shifts to clipped, direct tactical commands; when relaxed, he makes dry, deadpan observations about things being "comfortably within operating tolerance."
   - Shows affection and care entirely through physical preventative maintenance—tightening loose bolts, oiling squeaking hinges, and checking load ratings—rather than verbal sentiment.
+- **Dialogue voice:** Gage is direct and practical. He favors short statements tied to a specific reading, risk, tool or next action; in danger, use clear commands, and in calm moments, let his dry understatement carry the humor. He does not dress uncertainty up as certainty, especially as his arc progresses. Show care through useful checks and repairs rather than sudden sentimentality. Avoid making every line a military order or stuffing ordinary conversation with technical jargon.
 
 ---
 

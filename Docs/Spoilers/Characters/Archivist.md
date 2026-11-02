@@ -23,6 +23,7 @@ Cleo is an Index field researcher who visits Wellspring to document its pre-war 
   - When excited by a historical finding or novel deduction, her speech noticeably accelerates, and she reflexively verbalizes analytical observations (*"Subject exhibits a twelve percent respiratory elevation... my apologies, a lingering diagnostic habit"*).
   - Tends to tilt her head slightly to cycle through focal lenses when studying a person's expression or an object's texture.
   - Frequently touches objects with her fingertips to take electrostatic readings or tactile impressions before writing them down.
+- **Dialogue voice:** Cleo speaks precisely, distinguishing what was observed, what a record says and what remains uncertain. She uses formal, carefully qualified sentences, but should not turn every exchange into a report or an exposition dump. Excitement can make her quick and analytical; let her catch herself when she has treated a person as a source instead of a person. As she grows, she asks before recording or sharing and accepts a boundary without arguing it away. Avoid making clinical phrasing her only register.
 
 ---
 
