@@ -180,6 +180,14 @@ Our log lines are now split into one category per system, and each line starts w
 - [x] **Console**: `log list` in the console lists our categories, and `log LogVestigeSave Warning` hides the save's `Loading day` line on the next Play (`log reset` brings it back).
 - [x] **Solution**: after regenerating the project files, each layer folder shows its new log header (`Farming/FarmLog.h`, `Save/VestigeSaveLog.h` and so on) and `Core/VestigeLog.h`.
 
+### Out of stamina on the HUD, 2026-11-02
+
+The stamina line turns red while the player is out of stamina. The HUD follows the set's out-of-stamina tag, so it changes colour exactly when the "You're out of stamina" message appears. The commit is the one titled "Show the stamina line in red while out of stamina".
+
+- [ ] **Red at zero**: keep tilling and watering until the HUD reads "Stamina 0 / 100". The line turns red at the same moment as the out-of-stamina message, and stays red while you keep working.
+- [ ] **White again**: sleeping (F at the bed, or N) brings the line back to white with "Stamina 100 / 100".
+- [ ] **Colour**: say if the red is hard to read on the dark backdrop, or too loud. It is `VestigeHudStyle::Warning` in `UI/VestigeHudWidget.cpp`.
+
 ### Editor chores
 
 Changes only the editor can make safely. The steps are in [Roadmap.md, Housekeeping](Roadmap.md#3-housekeeping): re-saving the template Blueprints and `L_Farm`, moving `BP_FarmTile` and the materials with redirectors fixed, and regenerating the Android File Server token if it was ever used. After each one, run the [smoke test](#3-smoke-test).

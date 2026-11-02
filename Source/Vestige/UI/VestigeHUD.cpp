@@ -3,6 +3,7 @@
 
 #include "UI/VestigeHUD.h"
 
+#include "AbilitySystem/VestigeGameplayTags.h"
 #include "AbilitySystem/VestigeStaminaSet.h"
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemGlobals.h"
@@ -15,6 +16,7 @@
 #include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/PlayerState.h"
+#include "GameplayTagContainer.h"
 #include "Interaction/VestigeInteractionComponent.h"
 #include "Inventory/VestigeInventoryComponent.h"
 #include "Player/VestigePlayerCharacter.h"
@@ -101,6 +103,7 @@ void AVestigeHUD::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	{
 		CurrentAbilitySystem->GetGameplayAttributeValueChangeDelegate(UVestigeStaminaSet::GetStaminaAttribute()).RemoveAll(this);
 		CurrentAbilitySystem->GetGameplayAttributeValueChangeDelegate(UVestigeStaminaSet::GetMaxStaminaAttribute()).RemoveAll(this);
+		CurrentAbilitySystem->RegisterGameplayTagEvent(VestigeGameplayTags::State_OutOfStamina).RemoveAll(this);
 	}
 	if (UVestigeFeedbackSubsystem* Feedback = UWorld::GetSubsystem<UVestigeFeedbackSubsystem>(GetWorld()))
 	{
@@ -208,8 +211,22 @@ void AVestigeHUD::FollowAbilitySystem()
 					RefreshStaminaText();
 				});
 		}
+
+		// The set decides when the player is out of stamina; the HUD follows its tag rather than judging the number itself.
+		CurrentAbilitySystem->RegisterGameplayTagEvent(VestigeGameplayTags::State_OutOfStamina)
+			.AddUObject(this, &AVestigeHUD::RefreshOutOfStamina);
+		bOutOfStamina = CurrentAbilitySystem->HasMatchingGameplayTag(VestigeGameplayTags::State_OutOfStamina);
 	}
 	RefreshStaminaText();
+}
+
+void AVestigeHUD::RefreshOutOfStamina(const FGameplayTag Tag, int32 NewCount)
+{
+	bOutOfStamina = NewCount > 0;
+	if (HudWidget)
+	{
+		HudWidget->RefreshStaminaColor();
+	}
 }
 
 void AVestigeHUD::RefreshStaminaText()

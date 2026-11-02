@@ -29,6 +29,9 @@ public:
 	/** Shows the HUD's messages, one box each. The HUD calls it whenever a message arrives or expires. */
 	void RefreshMessages();
 
+	/** Colors the stamina line, in the warning color while the player is out of stamina. The HUD calls it when that changes. */
+	void RefreshStaminaColor();
+
 private:
 	FText GetStatusText() const;
 	FText GetStaminaText() const;
@@ -50,6 +53,7 @@ private:
 
 	TWeakObjectPtr<const AVestigeHUD> Hud;
 
+	TSharedPtr<STextBlock> StaminaLine;
 	TSharedPtr<SVerticalBox> MessageList;
 	TArray<TSharedPtr<SWidget>> MessageBoxes;
 	TArray<TSharedPtr<STextBlock>> MessageTexts;

@@ -16,6 +16,7 @@ namespace VestigeHudStyle
 	const FLinearColor Text(1.f, 1.f, 1.f);
 	const FLinearColor Hint(0.8f, 0.8f, 0.8f);
 	const FLinearColor Message(1.f, 0.9f, 0.55f);
+	const FLinearColor Warning(1.f, 0.3f, 0.25f);
 	const FVector2D ShadowOffset(1.f, 1.f);
 
 	const FName BackdropBrush(TEXT("WhiteBrush"));
@@ -76,9 +77,8 @@ void SVestigeHudWidget::Construct(const FArguments& InArgs)
 				.AutoHeight()
 				.Padding(0.f, VestigeHudStyle::LineSpacing, 0.f, 0.f)
 				[
-					SNew(STextBlock)
+					SAssignNew(StaminaLine, STextBlock)
 					.Font(FCoreStyle::GetDefaultFontStyle(VestigeHudStyle::RegularFont, VestigeHudStyle::InventoryFontSize))
-					.ColorAndOpacity(VestigeHudStyle::Text)
 					.ShadowOffset(VestigeHudStyle::ShadowOffset)
 					.Text(this, &SVestigeHudWidget::GetStaminaText)
 				]
@@ -143,6 +143,14 @@ void SVestigeHudWidget::Construct(const FArguments& InArgs)
 	{
 		AddMessageBoxes(OwningHud->GetMaxMessages());
 	}
+	RefreshStaminaColor();
+}
+
+void SVestigeHudWidget::RefreshStaminaColor()
+{
+	const AVestigeHUD* OwningHud = Hud.Get();
+	const bool bWarn = OwningHud && OwningHud->IsOutOfStamina();
+	StaminaLine->SetColorAndOpacity(bWarn ? VestigeHudStyle::Warning : VestigeHudStyle::Text);
 }
 
 FText SVestigeHudWidget::GetStatusText() const

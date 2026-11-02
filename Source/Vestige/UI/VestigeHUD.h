@@ -17,6 +17,7 @@ class UFarmingComponent;
 class UVestigeToolData;
 class UVestigeInteractionComponent;
 class UVestigeInventoryComponent;
+struct FGameplayTag;
 
 /**
  * Shows the farming HUD for its player: the day and time from the world's AVestigeDayCycle, the tool from the pawn's
@@ -40,6 +41,9 @@ public:
 
 	/** "Stamina 85 / 100". Rebuilt when the stamina or its maximum changes. */
 	const FText& GetStaminaText() const { return StaminaText; }
+
+	/** Whether the player is out of stamina, so the stamina line warns. Follows Vestige.State.OutOfStamina. */
+	bool IsOutOfStamina() const { return bOutOfStamina; }
 
 	/** "Bag: Turnip Seeds 9   Turnip 2", the non-empty slots in order. Rebuilt when the inventory changes. */
 	const FText& GetInventoryText() const { return InventoryText; }
@@ -88,6 +92,9 @@ private:
 	/** Bound to the change delegates of Stamina and MaxStamina. */
 	void RefreshStaminaText();
 
+	/** Bound to the ability system's event for Vestige.State.OutOfStamina being added or removed. */
+	void RefreshOutOfStamina(const FGameplayTag Tag, int32 NewCount);
+
 	void RefreshControlsText();
 
 	/** Shows Message in a box of its own, under the ones already showing, for MessageSeconds. Bound to UVestigeFeedbackSubsystem. */
@@ -115,6 +122,7 @@ private:
 	FText InventoryText;
 	FText ControlsText;
 	FText InteractionText;
+	bool bOutOfStamina = false;
 
 	// The status line as last built, and the day and minute it shows. GetStatusText is a const per-frame getter that
 	// rebuilds them only when they change.
