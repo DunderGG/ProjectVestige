@@ -4,5 +4,5 @@
 
 #include "CoreMinimal.h"
 
-/** Main log category used across the project */
-DECLARE_LOG_CATEGORY_EXTERN(LogVestige, Log, All);
+// The template code includes this header for LogVestige, which VestigeLog.h declares.
+#include "Core/VestigeLog.h"

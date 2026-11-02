@@ -12,11 +12,11 @@
 #include "Content/VestigeContentData.h"
 #include "Content/VestigeItemData.h"
 #include "Content/VestigeToolData.h"
-#include "Core/Vestige.h"
 #include "Core/VestigeFeedbackSubsystem.h"
 #include "Engine/World.h"
 #include "Farming/FarmFarmingSaveData.h"
 #include "Farming/FarmGrid.h"
+#include "Farming/FarmLog.h"
 #include "Farming/FarmTile.h"
 #include "Farming/FarmTileTargeting.h"
 #include "GameFramework/Pawn.h"
@@ -54,7 +54,7 @@ void UFarmingComponent::BeginPlay()
 	}
 	else
 	{
-		UE_LOG(LogVestige, Warning, TEXT("No FarmGrid in %s, so there is nothing to farm."), *GetWorld()->GetMapName());
+		VESTIGE_LOG(this, LogFarm, Warning, "The level {Level} has no FarmGrid, so there is nothing to farm.", GetWorld()->GetMapName());
 
 		// The HUD may not be listening for feedback yet during BeginPlay.
 		GetWorld()->GetTimerManager().SetTimerForNextTick(
@@ -96,8 +96,8 @@ void UFarmingComponent::LoadSeedCrop()
 	const UFarmSeedFragment* Seed = SeedItem ? SeedItem->FindFragment<UFarmSeedFragment>() : nullptr;
 	if (!Seed)
 	{
-		UE_LOG(LogVestige, Warning, TEXT("%s's Seed Item Id (%s) names no item with a seed fragment, so nothing can be planted."),
-			*GetPathName(), *SeedItemId.ToString());
+		VESTIGE_LOG(this, LogFarm, Warning, "The Seed Item Id ({ItemId}) names no item with a seed fragment, so nothing can be planted.",
+			SeedItemId.ToString());
 		return;
 	}
 	SeedCrop = Cast<UFarmCropData>(UVestigeContentData::LoadWithVisuals(Seed->GetCropId()));
@@ -109,7 +109,7 @@ void UFarmingComponent::LoadToolbar()
 
 	if (ToolbarIds.IsEmpty())
 	{
-		UE_LOG(LogVestige, Warning, TEXT("%s has no Toolbar Ids, so the farmer has no tools."), *GetPathName());
+		VESTIGE_LOG(this, LogFarm, Warning, "No Toolbar Ids are set, so the farmer has no tools.");
 	}
 
 	// A missing tool leaves its slot empty, so the other tools keep their keys.
@@ -119,8 +119,8 @@ void UFarmingComponent::LoadToolbar()
 		const UVestigeToolData* Tool = Cast<UVestigeToolData>(UVestigeContentData::LoadWithVisuals(ToolId));
 		if (!Tool)
 		{
-			UE_LOG(LogVestige, Warning, TEXT("Toolbar slot %d of %s (%s) names no tool asset, so the slot is empty."), Tools.Num() + 1,
-				*GetPathName(), *ToolId.ToString());
+			VESTIGE_LOG(this, LogFarm, Warning, "Toolbar slot {Slot} ({ToolId}) names no tool asset, so the slot is empty.",
+				Tools.Num() + 1, ToolId.ToString());
 		}
 		Tools.Add(Tool);
 	}
@@ -141,8 +141,7 @@ bool UFarmingComponent::RestoreCurrentTool(FName ToolContentId)
 	const bool bFound = Toolbar.SelectTool(ToolContentId);
 	if (!bFound)
 	{
-		UE_LOG(
-			LogVestige, Warning, TEXT("The saved tool %s isn't on the toolbar, so the first slot is in hand."), *ToolContentId.ToString());
+		VESTIGE_LOG(this, LogFarm, Warning, "The saved tool {ToolId} isn't on the toolbar, so the first slot is in hand.", ToolContentId);
 		Toolbar.SelectSlot(0);
 	}
 	OnToolChanged.Broadcast(GetCurrentTool());

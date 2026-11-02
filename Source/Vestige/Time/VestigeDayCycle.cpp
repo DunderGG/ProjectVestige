@@ -6,7 +6,6 @@
 #include "Components/LightComponent.h"
 #include "Components/PostProcessComponent.h"
 #include "Components/SkyLightComponent.h"
-#include "Core/Vestige.h"
 #include "Core/VestigeActorLookup.h"
 #include "Engine/DirectionalLight.h"
 #include "Engine/Engine.h"
@@ -15,6 +14,7 @@
 #include "EngineUtils.h"
 #include "ProfilingDebugging/CpuProfilerTrace.h"
 #include "Time/VestigeClockSaveData.h"
+#include "Time/VestigeTimeLog.h"
 
 namespace VestigeDayCycleLighting
 {
@@ -55,7 +55,7 @@ AVestigeDayCycle* AVestigeDayCycle::Get(UWorld* World)
 	check(IsInGameThread());
 	if (!World)
 	{
-		UE_LOG(LogVestige, Error, TEXT("AVestigeDayCycle::Get was called without a world."));
+		VESTIGE_LOG(nullptr, LogVestigeTime, Error, "Called without a world.");
 		return nullptr;
 	}
 
@@ -71,8 +71,8 @@ AVestigeDayCycle* AVestigeDayCycle::Get(UWorld* World)
 		return nullptr;
 	}
 
-	UE_LOG(LogVestige, Warning, TEXT("%s has no VestigeDayCycle, so one was spawned with default settings. Place one to tune it."),
-		*World->GetMapName());
+	VESTIGE_LOG(World, LogVestigeTime, Warning,
+		"The level has no VestigeDayCycle, so one was spawned with default settings. Place one to tune it.");
 	return World->SpawnActor<AVestigeDayCycle>();
 }
 

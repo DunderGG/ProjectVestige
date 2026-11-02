@@ -80,11 +80,80 @@ namespace VestigeArchitectureTests
 		return End > Start ? Trimmed.Mid(Start, End - Start) : FString();
 	}
 
+	/** The module's source folder, which only exists where the game is built from source. */
+	FString GetSourceDir()
+	{
+		return FPaths::ConvertRelativePathToFull(FPaths::Combine(FPaths::GameSourceDir(), TEXT("Vestige")));
+	}
+
+	/** Whether File is a C++ header or source file. */
+	bool IsCodeFile(const FString& File)
+	{
+		const FString Extension = FPaths::GetExtension(File);
+		return Extension == TEXT("h") || Extension == TEXT("cpp");
+	}
+
+	/** File's path from SourceDir ("Farming/FarmGrid.cpp"). */
+	FString GetRelativePath(const FString& File, const FString& SourceDir)
+	{
+		FString RelativePath = File;
+		FPaths::MakePathRelativeTo(RelativePath, *(SourceDir + TEXT("/")));
+		return RelativePath;
+	}
+
+	/**
+	 * The engine's log macros, which our code calls only through VESTIGE_LOG (Systems.md, section 21). The template code
+	 * keeps its own lines, and the macro itself is built on UE_LOGFMT.
+	 */
+	const TCHAR* const DirectLogMacros[] = {TEXT("UE_LOG("), TEXT("UE_CLOG("), TEXT("UE_LOGFMT("), TEXT("UE_CLOGFMT(")};
+	const TCHAR* const LogMacroFile = TEXT("Core/VestigeLog.h");
+
 	TEST_CLASS(Architecture, "Vestige")
 	{
+		TEST_METHOD(LogsUseTheSenderMacro)
+		{
+			const FString SourceDir = GetSourceDir();
+			if (!FPaths::DirectoryExists(SourceDir))
+			{
+				AddInfo(FString::Printf(TEXT("Skipped: there is no source folder at %s."), *SourceDir));
+				return;
+			}
+
+			TArray<FString> Files;
+			IFileManager::Get().FindFilesRecursive(Files, *SourceDir, TEXT("*.*"), true, false);
+			int32 FilesChecked = 0;
+			for (const FString& File : Files)
+			{
+				const FString RelativePath = GetRelativePath(File, SourceDir);
+				if (!IsCodeFile(File) || RelativePath == LogMacroFile || RelativePath.StartsWith(FString(TemplateFolder) + TEXT("/"))
+					|| RelativePath.StartsWith(FString(TestsFolder) + TEXT("/")))
+				{
+					continue;
+				}
+
+				++FilesChecked;
+				TArray<FString> Lines;
+				FFileHelper::LoadFileToStringArray(Lines, *File);
+				for (int32 LineIndex = 0; LineIndex < Lines.Num(); ++LineIndex)
+				{
+					for (const TCHAR* Macro : DirectLogMacros)
+					{
+						if (Lines[LineIndex].Contains(Macro, ESearchCase::CaseSensitive))
+						{
+							AddError(FString::Printf(TEXT("%s(%d) calls %s directly. Log through VESTIGE_LOG with the system's category "
+														  "(Systems.md section 21)."),
+								*RelativePath, LineIndex + 1, Macro));
+						}
+					}
+				}
+			}
+
+			ASSERT_THAT(IsTrue(FilesChecked > 0));
+		}
+
 		TEST_METHOD(IncludeDirection)
 		{
-			const FString SourceDir = FPaths::ConvertRelativePathToFull(FPaths::Combine(FPaths::GameSourceDir(), TEXT("Vestige")));
+			const FString SourceDir = GetSourceDir();
 			if (!FPaths::DirectoryExists(SourceDir))
 			{
 				AddInfo(FString::Printf(TEXT("Skipped: there is no source folder at %s."), *SourceDir));
@@ -105,14 +174,12 @@ namespace VestigeArchitectureTests
 			int32 FilesChecked = 0;
 			for (const FString& File : Files)
 			{
-				const FString Extension = FPaths::GetExtension(File);
-				if (Extension != TEXT("h") && Extension != TEXT("cpp"))
+				if (!IsCodeFile(File))
 				{
 					continue;
 				}
 
-				FString RelativePath = File;
-				FPaths::MakePathRelativeTo(RelativePath, *(SourceDir + TEXT("/")));
+				const FString RelativePath = GetRelativePath(File, SourceDir);
 				FString Folder;
 				FString Rest;
 				if (!RelativePath.Split(TEXT("/"), &Folder, &Rest) || Folder == TestsFolder)

@@ -6,7 +6,7 @@
 #include "AssetRegistry/AssetData.h"
 #include "AssetRegistry/IAssetRegistry.h"
 #include "Content/VestigeContentData.h"
-#include "Core/Vestige.h"
+#include "Content/VestigeContentLog.h"
 #include "ProfilingDebugging/CpuProfilerTrace.h"
 
 TArray<FVestigeDuplicateContentId> UVestigeAssetManager::FindDuplicateContentIds(TConstArrayView<TPair<FPrimaryAssetId, FName>> Assets)
@@ -62,8 +62,8 @@ void UVestigeAssetManager::ReportDuplicateContentIds() const
 		{
 			PackageNames.Add(Package.ToString());
 		}
-		UE_LOG(LogVestige, Error,
-			TEXT("Content ID %s is used by more than one asset, so only one of them is used: %s. Give each its own ID."),
-			*Duplicate.Id.ToString(), *FString::Join(PackageNames, TEXT(", ")));
+		VESTIGE_LOG(this, LogVestigeContent, Error,
+			"Content ID {ContentId} is used by more than one asset, so only one of them is used: {Packages}. Give each its own ID.",
+			Duplicate.Id.ToString(), FString::Join(PackageNames, TEXT(", ")));
 	}
 }

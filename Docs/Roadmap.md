@@ -27,8 +27,7 @@ Contents
 - **Done:** milestone 1, the playable prototype, plus the project's documents and rules.
 - **Now:** the code follows the guidelines and the architecture (both audits' code reviews are closed, 2026-10-29). Next: play-test that clean-up, the editor housekeeping steps in [section 3](#3-housekeeping), then the rest of the milestone 2 foundations.
 - **Next up**, in order:
-  1. Logging ([section 4.1](#41-foundations)), starting with its guide for David to approve. Blueprint events, the interaction interface and the bed are done (2026-11-01).
-  2. The late-night rules in [section 4.3](#43-stamina-and-late-nights), which build on stamina and the bed.
+  1. The late-night rules in [section 4.3](#43-stamina-and-late-nights), which build on stamina and the bed. Logging, Blueprint events, the interaction interface and the bed are done (2026-11-01 and 2026-11-02); the rest of [section 4.1](#41-foundations) waits for a packaged build (the performance baseline) or for the need that starts it (the ID redirect list, more Blueprint extension points, a second interaction option).
 
 ## 2. Milestone 1: playable prototype (done)
 
@@ -190,7 +189,7 @@ The code changes that the slice's content depends on. Doing them first means add
 
 **Logging** (chosen 2026-10-30: build on Unreal's logging instead of a logging tool of our own, which would rebuild what the engine has and lose the Output Log's filters and colours, the log files, crash reports and the `log` console command)
 
-- [ ] A logging guide in [Systems.md](Systems.md), written from Epic's logging documentation and Lyra's source, approved by David before any code (AGENTS rule 13). It covers:
+- [x] A logging guide in [Systems.md](Systems.md), written from Epic's logging documentation and Lyra's source, approved by David before any code (AGENTS rule 13). It covers:
    - categories per system, named `LogVestige<System>` (`LogVestigeSave`, `LogVestigeHud`), or `LogFarm<System>` for farm systems, each declared in its layer's folder
    - which verbosity to use when (Error, Warning, Display, Log, Verbose, VeryVerbose)
    - a small macro on top of `UE_LOGFMT` that adds the sending object's name and function to every line
@@ -198,9 +197,11 @@ The code changes that the slice's content depends on. Doing them first means add
    - setting a category's level with the `log` console command and in the `[Core.Log]` section of `DefaultEngine.ini`
    - reading our lines in the Output Log: its filters, and Category Colorization Mode (Editor Preferences > General > Output Log), which gives each category its own colour
    - the Visual Logger (Tools > Debug > Visual Logger) for debugging actors and gameplay over time
-- [ ] Split `LogVestige` into the per-system categories and move the existing `UE_LOG` calls to them
-- [ ] Add the sender macro and use it in those calls
-- [ ] A note in [PlayTest.md](PlayTest.md) on the colour preference and filtering the Output Log to our categories
+   - Done 2026-11-02 ([Systems.md, section 21](Systems.md#21-logging), decision log), approved by David on 2026-11-01: `LogFarm` for the farm, which is one system, instead of `LogFarm<System>`
+- [x] Split `LogVestige` into the per-system categories and move the existing `UE_LOG` calls to them
+- [x] Add the sender macro and use it in those calls
+   - Done 2026-11-02: `VESTIGE_LOG(Sender, Category, Verbosity, Format, ...)`, with a source test that fails on a direct `UE_LOG`
+- [x] A note in [PlayTest.md](PlayTest.md) on the colour preference and filtering the Output Log to our categories
 
 **Tests**
 

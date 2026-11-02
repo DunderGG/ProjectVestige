@@ -3,7 +3,7 @@
 
 #include "Core/VestigeActorLookup.h"
 
-#include "Core/Vestige.h"
+#include "Core/VestigeLog.h"
 #include "Engine/World.h"
 #include "EngineUtils.h"
 #include "GameFramework/Actor.h"
@@ -25,8 +25,8 @@ AActor* VestigeActorLookup::FindSingle(const UWorld* World, TSubclassOf<AActor> 
 	++It;
 	if (It)
 	{
-		UE_LOG(LogVestige, Error, TEXT("%s has more than one %s. Only %s is used; delete the others."), *World->GetMapName(),
-			*GetNameSafe(ActorClass), *First->GetName());
+		VESTIGE_LOG(World, LogVestige, Error, "The level has more than one {Class}. Only {Used} is used; delete the others.",
+			GetNameSafe(ActorClass), First->GetName());
 	}
 	return First;
 }

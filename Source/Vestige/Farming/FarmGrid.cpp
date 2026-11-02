@@ -4,9 +4,9 @@
 #include "Farming/FarmGrid.h"
 
 #include "Components/BoxComponent.h"
-#include "Core/Vestige.h"
 #include "Core/VestigeActorLookup.h"
 #include "Engine/World.h"
+#include "Farming/FarmLog.h"
 #include "Farming/FarmTile.h"
 #include "ProfilingDebugging/CpuProfilerTrace.h"
 #include "Time/VestigeDayCycle.h"
@@ -91,7 +91,7 @@ void AFarmGrid::SpawnTiles()
 
 	if (!TileClass)
 	{
-		UE_LOG(LogVestige, Warning, TEXT("%s has no Tile Class, so the field is empty."), *GetName());
+		VESTIGE_LOG(this, LogFarm, Warning, "No Tile Class is set, so the field is empty.");
 		return;
 	}
 
@@ -174,8 +174,8 @@ int32 AFarmGrid::RestoreTilesFromSaveData(const TArray<FFarmTileSaveData>& Saved
 		AFarmTile* Tile = GetTileAt(Data.Coordinates);
 		if (!Tile)
 		{
-			UE_LOG(LogVestige, Warning, TEXT("The save has a tile at %s, outside %s, so it was skipped."), *Data.Coordinates.ToString(),
-				*GetName());
+			VESTIGE_LOG(
+				this, LogFarm, Warning, "The save has a tile at {Tile}, outside the grid, so it was skipped.", Data.Coordinates.ToString());
 			++SkippedCount;
 			continue;
 		}
@@ -183,8 +183,8 @@ int32 AFarmGrid::RestoreTilesFromSaveData(const TArray<FFarmTileSaveData>& Saved
 		const UFarmCropData* SavedCrop = Crops.FindRef(Data.CropId);
 		if (!Data.CropId.IsNone() && !SavedCrop)
 		{
-			UE_LOG(LogVestige, Warning, TEXT("The save has a crop %s that no longer exists, so tile %s is empty."), *Data.CropId.ToString(),
-				*Data.Coordinates.ToString());
+			VESTIGE_LOG(this, LogFarm, Warning, "The save has a crop {CropId} that no longer exists, so tile {Tile} is empty.", Data.CropId,
+				Data.Coordinates.ToString());
 			++SkippedCount;
 		}
 		Tile->RestoreFromSaveData(Data, SavedCrop);

@@ -3,7 +3,7 @@
 
 #include "Content/VestigeContentData.h"
 
-#include "Core/Vestige.h"
+#include "Content/VestigeContentLog.h"
 #include "Engine/AssetManager.h"
 
 #if WITH_EDITOR
@@ -30,8 +30,8 @@ const UVestigeContentData* UVestigeContentData::LoadWithVisuals(const FPrimaryAs
 	const UVestigeContentData* Content = AssetManager->GetPrimaryAssetObject<UVestigeContentData>(ContentAssetId);
 	if (!Content)
 	{
-		UE_LOG(LogVestige, Warning, TEXT("No content asset has the ID %s. Check the asset's Content Id and folder."),
-			*ContentAssetId.ToString());
+		VESTIGE_LOG(AssetManager, LogVestigeContent, Warning,
+			"No content asset has the ID {ContentId}. Check the asset's Content Id and folder.", ContentAssetId.ToString());
 	}
 	return Content;
 }

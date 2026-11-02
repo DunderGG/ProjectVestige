@@ -23,7 +23,7 @@ The one place for what to check by hand in the editor.
 - **Start the game:** open `/Game/Maps/L_Farm` (Content Browser > `Content/Maps`, double-click), then Play (Alt+P) for Play in Editor. For what players get, and for any performance numbers, use the arrow next to Play > Standalone Game instead.
 - **Graphics settings (scalability):** the quickest way, which works in Play in Editor and in Standalone Game, is the console ([see below](#1-before-you-test)). While playing, open it, type `scalability 2` and press Enter for High, or `scalability 3` for Epic (0 is Low, 1 Medium). Everything switches at once. To see whether hardware ray tracing is on, type `r.Lumen.HardwareRayTracing` on its own: it prints 0 at High and 1 at Epic. New players start at **High**. The level viewport keeps its own setting between sessions (its Settings menu > Engine Scalability Settings); the console changes it too.
 - **Saves** live in `Saved/SaveGames/`: `Farm.sav` and `Farm2.sav` are the two slots saves alternate between, and `Farm_Version0.sav` and `Farm_Version1.sav` are backups of saves from older save versions, made before their first upgrade. Before testing anything that writes saves, copy the folder somewhere safe, and copy it back afterwards to get your farm back. F9 in the game deletes both slots and starts a new game on day 1; the backups stay.
-- **Logs:** Window > Output Log. Our messages are under `LogVestige`; note any warning or error even if the game looks fine.
+- **Logs:** Window > Output Log. Each of our systems has its own category (`LogFarm`, `LogVestigeSave`, `LogVestigeFeedback` and the others in [Systems.md, section 21](Systems.md#21-logging)), and each line starts with who wrote it, as in `[FarmGrid_1] AFarmGrid::SpawnTiles: ...`. To see only ours, type `LogVestige` or `LogFarm` in the search box, or open the Output Log's **Filters** menu > **Categories** and tick ours. To give each category its own colour, open Edit > Editor Preferences > General > Output Log and set **Category Colorization Mode** to **Colorize Category As Badge**. Both are your own editor settings and aren't committed. To see a system's tracing lines, type `log LogFarm Verbose` in the console (and `log reset` to go back). Note any warning or error even if the game looks fine; the full log of the last run is `Saved/Logs/Vestige.log`.
 - **Console**, for `scalability`, `stat fps`, `stat unit` and similar commands. While playing, press **§** (the key under Esc on a Swedish keyboard) or the key left of Backspace (´ and `), the US layout's console key. If neither works, press Shift+F1 to free the mouse, click the **Cmd** box at the bottom of the editor (in the Output Log panel, or the status bar at the bottom left), type the command there and press Enter; it goes to the game you are playing. Click back into the game viewport afterwards.
 
 ## 2. Pending checks
@@ -75,7 +75,7 @@ Raises the cap from the message boxes checks above.
 
 - [ ] **At most five** (77a2218): with five boxes showing, a sixth message pushes out the oldest. Tilling and planting quickly along a row is the easiest way to get there. The boxes stay clear of the key hints and the status line.
 - [ ] **Settings** (77a2218): Edit > Project Settings > Game > Vestige HUD shows Max Messages (5) and Message Seconds (3). Changing them takes effect the next time you press Play, and is saved to `Config/DefaultGame.ini`; tell the agent the values you settle on.
-- [ ] **Log** (77a2218): every message also appears in the Output Log (Window > Output Log, filter on `LogVestige`) as `Feedback: ...`, so you can read messages that have already faded.
+- [ ] **Log** (77a2218): every message also appears in the Output Log (Window > Output Log, filter on `LogVestigeFeedback`) as `[L_Farm] UVestigeFeedbackSubsystem::Notify: ...`, so you can read messages that have already faded. (Updated 2026-11-02 for the logging categories; the line read `LogVestige: Feedback: ...` before.)
 
 ### Unreal Engine 5.8.4 build, 2026-10-30
 
@@ -168,6 +168,16 @@ The player now sleeps in a bed, by walking up to it and pressing **F** ([Systems
 - [x] **Tool by the bed**: standing on the edge tile next to the bed, facing into the field, the prompt shows and E still uses the tool on the framed tile, not the bed. (Moved 2026-11-01: the bed first stood too far from the field to test this.)
 - [x] **Assets**: `DA_AbilitySet_Player` lists `VestigeGameplayAbility_Interact` under Abilities, and `Content/Vestige/Blueprints/BP_Bed` opens with a cube **BedMesh** and an **InteractionVolume** box. Project Settings > Engine > Collision lists an Object Channel **Interactable** (default response Ignore) and a preset **VestigeInteractable**. None of them asks to be saved when you close it.
 - [x] **Solution**: after regenerating the project files, the solution shows the new `Interaction` folder under `Source/Vestige`.
+
+### Logging, 2026-11-02
+
+Our log lines are now split into one category per system, and each line starts with its sender and function ([Systems.md, section 21](Systems.md#21-logging)). The tests check the line format and that no code logs around the macro; these checks are for the Output Log itself. The commit is the one titled "Split the log into a category per system with a sender macro".
+
+- [ ] **Colours**: with Category Colorization Mode set as in [Before you test](#1-before-you-test), `LogFarm`, `LogVestigeSave`, `LogVestigeFeedback` and the others each show in their own colour. Say which mode you settle on.
+- [ ] **Lines**: playing a day and sleeping shows `LogVestigeFeedback` lines such as `[L_Farm] UVestigeFeedbackSubsystem::Notify: Game saved.`, and a load at Play shows `LogVestigeSave: [VestigeSaveSubsystem_0] UVestigeSaveSubsystem::LoadFarm: Loading day ...`. No line shows `{` braces or a field name instead of its value.
+- [ ] **Filters**: the Output Log's Filters > Categories menu lists our categories, and ticking only `LogFarm` hides the save and feedback lines.
+- [ ] **Console**: `log list` in the console lists our categories, and `log LogVestigeSave Warning` hides the save's `Loading day` line on the next Play (`log reset` brings it back).
+- [ ] **Solution**: after regenerating the project files, each layer folder shows its new log header (`Farming/FarmLog.h`, `Save/VestigeSaveLog.h` and so on) and `Core/VestigeLog.h`.
 
 ### Editor chores
 

@@ -4,9 +4,9 @@
 #include "AbilitySystem/VestigeAbilitySet.h"
 
 #include "Abilities/GameplayAbility.h"
+#include "AbilitySystem/VestigeAbilitySystemLog.h"
 #include "AbilitySystemComponent.h"
 #include "AttributeSet.h"
-#include "Core/Vestige.h"
 #include "GameFramework/Actor.h"
 
 void UVestigeAbilitySet::GiveTo(UAbilitySystemComponent& AbilitySystem) const
@@ -14,8 +14,9 @@ void UVestigeAbilitySet::GiveTo(UAbilitySystemComponent& AbilitySystem) const
 	AActor* Owner = AbilitySystem.GetOwner();
 	if (!Owner || !Owner->HasAuthority())
 	{
-		UE_LOG(LogVestige, Warning, TEXT("%s can't be given to %s: only the authority over its owner can grant abilities."), *GetName(),
-			*AbilitySystem.GetPathName());
+		VESTIGE_LOG(this, LogVestigeAbilitySystem, Warning,
+			"Can't be given to {AbilitySystem}: only the authority over its owner can grant abilities.",
+			VestigeLog::GetSenderName(&AbilitySystem));
 		return;
 	}
 

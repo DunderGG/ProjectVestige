@@ -4,8 +4,8 @@
 #include "Inventory/VestigeInventoryComponent.h"
 
 #include "Content/VestigeItemData.h"
-#include "Core/Vestige.h"
 #include "Engine/AssetManager.h"
+#include "Inventory/VestigeInventoryLog.h"
 #include "Inventory/VestigeInventorySaveData.h"
 #include "ProfilingDebugging/CpuProfilerTrace.h"
 
@@ -49,7 +49,7 @@ void UVestigeInventoryComponent::LoadItems()
 			Items.Add(ItemId, Item);
 		}
 	}
-	UE_LOG(LogVestige, Log, TEXT("%s loaded %d item definitions."), *GetPathName(), Items.Num());
+	VESTIGE_LOG(this, LogVestigeInventory, Log, "Loaded {Count} item definitions.", Items.Num());
 }
 
 void UVestigeInventoryComponent::AddStartingItems()
@@ -59,8 +59,8 @@ void UVestigeInventoryComponent::AddStartingItems()
 		const UVestigeItemData* Item = FindItem(Stack.ItemId);
 		if (Item && !Inventory.TryAdd(*Item, Stack.Count))
 		{
-			UE_LOG(
-				LogVestige, Warning, TEXT("%s has no room for its %d starting %s."), *GetPathName(), Stack.Count, *Stack.ItemId.ToString());
+			VESTIGE_LOG(
+				this, LogVestigeInventory, Warning, "No room for the {Count} starting {ItemId}.", Stack.Count, Stack.ItemId.ToString());
 		}
 	}
 }
@@ -70,7 +70,7 @@ const UVestigeItemData* UVestigeInventoryComponent::FindItem(const FPrimaryAsset
 	const TObjectPtr<const UVestigeItemData>* Item = Items.Find(ItemId);
 	if (!Item)
 	{
-		UE_LOG(LogVestige, Warning, TEXT("No item has the ID %s."), *ItemId.ToString());
+		VESTIGE_LOG(this, LogVestigeInventory, Warning, "No item has the ID {ItemId}.", ItemId.ToString());
 		return nullptr;
 	}
 	return *Item;
@@ -155,8 +155,8 @@ int32 UVestigeInventoryComponent::RestoreFromSaveData(const FVestigeInventorySav
 		}
 		if (Added < Leftover.Value)
 		{
-			UE_LOG(LogVestige, Warning, TEXT("No room for %d saved %s, so they were left out."), Leftover.Value - Added,
-				*Leftover.Key->GetContentId().ToString());
+			VESTIGE_LOG(this, LogVestigeInventory, Warning, "No room for {Count} saved {ItemId}, so they were left out.",
+				Leftover.Value - Added, Leftover.Key->GetContentId());
 			++SkippedCount;
 		}
 	}

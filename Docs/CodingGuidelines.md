@@ -314,13 +314,13 @@ void UVestigeSaveSubsystem::SaveFarm(int32 NewDay)
 
 ## 10. Errors, logging and assertions
 
-- Log with the project category `LogVestige` (declared in `Vestige.h`):
+- Log through `VESTIGE_LOG` with the system's own category, declared in its layer's log header (`Farming/FarmLog.h`). It prints the sender and the function before the message. The categories, the format and when to use which verbosity are in [Systems.md, section 21](Systems.md#21-logging):
 
 ```cpp
-UE_LOG(LogVestige, Warning, TEXT("No FarmGrid in %s; farming is disabled."), *GetWorld()->GetMapName());
+VESTIGE_LOG(this, LogFarm, Warning, "No Tile Class is set, so the field is empty.");
 ```
 
-- Verbosity: `Error` for broken state, `Warning` for recoverable setup problems, `Log` for notable events, `Verbose` for detailed tracing.
+- Verbosity in short: `Error` for broken state, `Warning` for recoverable setup problems, `Log` for notable one-off events, `Verbose` for tracing an action. Nothing is logged every frame.
 - Never leave `GEngine->AddOnScreenDebugMessage` as a permanent feature.
 - Assertions:
   - `check(Condition)`: a programmer error that makes continuing pointless. Compiled out in shipping builds, so never put side effects inside.
@@ -445,7 +445,7 @@ The game is one module, `Vestige`, split into folders. **The folders are the arc
 ```
 Source/Vestige/
     Vestige.Build.cs
-    Core/           Shared services that know no game rules: VestigeActorLookup, UVestigeFeedbackSubsystem, the module and log category
+    Core/           Shared services that know no game rules: VestigeActorLookup, UVestigeFeedbackSubsystem, the module, VESTIGE_LOG and the shared log categories
     AbilitySystem/  Gameplay Ability System parts that know no farm: the stamina set and effects, ability sets, native tags
     Interaction/    The interactable interface, the interaction component and the interact ability
     Content/        Content definitions: UVestigeContentData and its subclasses, UVestigeAssetManager

@@ -3,13 +3,13 @@
 
 #include "Core/VestigeFeedbackSubsystem.h"
 
-#include "Core/Vestige.h"
+#include "Core/VestigeLog.h"
 #include "Engine/World.h"
 
 void UVestigeFeedbackSubsystem::Notify(const UWorld* World, const FText& Message)
 {
-	// The HUD lets messages fade, so the log keeps the full history (Output Log, filtered to LogVestige).
-	UE_LOG(LogVestige, Log, TEXT("Feedback: %s"), *Message.ToString());
+	// The HUD lets messages fade, so the log keeps the full history (Output Log, filtered to LogVestigeFeedback).
+	VESTIGE_LOG(World, LogVestigeFeedback, Log, "{Message}", Message.ToString());
 
 	if (UVestigeFeedbackSubsystem* Feedback = UWorld::GetSubsystem<UVestigeFeedbackSubsystem>(World))
 	{

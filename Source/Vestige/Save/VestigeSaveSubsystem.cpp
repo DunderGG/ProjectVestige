@@ -8,7 +8,6 @@
 #include "AbilitySystemGlobals.h"
 #include "Content/FarmCropData.h"
 #include "Content/VestigeContentData.h"
-#include "Core/Vestige.h"
 #include "Core/VestigeFeedbackSubsystem.h"
 #include "Engine/World.h"
 #include "Farming/FarmGrid.h"
@@ -19,6 +18,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "ProfilingDebugging/CpuProfilerTrace.h"
 #include "Save/VestigeSaveGame.h"
+#include "Save/VestigeSaveLog.h"
 #include "Time/VestigeDayCycle.h"
 
 #define LOCTEXT_NAMESPACE "VestigeSaveSubsystem"
@@ -238,7 +238,8 @@ void UVestigeSaveSubsystem::BindAndLoad()
 	DayCycle = AVestigeDayCycle::Find(GetWorld());
 	if (!Grid || !DayCycle)
 	{
-		UE_LOG(LogVestige, Warning, TEXT("Saving is off in %s: it needs a FarmGrid and a VestigeDayCycle."), *GetWorld()->GetMapName());
+		VESTIGE_LOG(this, LogVestigeSave, Warning, "Saving is off in {Level}: it needs a FarmGrid and a VestigeDayCycle.",
+			GetWorld()->GetMapName());
 		return;
 	}
 
@@ -258,7 +259,7 @@ void UVestigeSaveSubsystem::SaveFarm(int32 NewDay)
 	}
 	if (!bSavingAllowed)
 	{
-		UE_LOG(LogVestige, Warning, TEXT("Not saving day %d: the save couldn't be loaded, so it is kept as it is."), NewDay);
+		VESTIGE_LOG(this, LogVestigeSave, Warning, "Not saving day {Day}: the save couldn't be loaded, so it is kept as it is.", NewDay);
 		return;
 	}
 
@@ -277,8 +278,8 @@ void UVestigeSaveSubsystem::SaveFarm(int32 NewDay)
 	const int32 Slot = GetSlotToWrite(NewestSlot);
 	if (!UGameplayStatics::SaveGameToSlot(Save, UVestigeSaveGame::SlotNames[Slot], UVestigeSaveGame::UserIndex))
 	{
-		UE_LOG(
-			LogVestige, Error, TEXT("Couldn't write the save to slot %s. The previous save is kept."), UVestigeSaveGame::SlotNames[Slot]);
+		VESTIGE_LOG(this, LogVestigeSave, Error, "Couldn't write the save to slot {Slot}. The previous save is kept.",
+			UVestigeSaveGame::SlotNames[Slot]);
 		UVestigeFeedbackSubsystem::Notify(GetWorld(), LOCTEXT("SaveFailed", "Couldn't save the game. The previous save is kept."));
 		return;
 	}
@@ -296,7 +297,7 @@ void UVestigeSaveSubsystem::LoadFarm()
 	UVestigeInventoryComponent* Inventory = GetPlayerInventory();
 	if (!Farming || !Inventory)
 	{
-		UE_LOG(LogVestige, Warning, TEXT("Not loading the save: the player has no farming component or no inventory."));
+		VESTIGE_LOG(this, LogVestigeSave, Warning, "Not loading the save: the player has no farming component or no inventory.");
 		return;
 	}
 
@@ -310,7 +311,8 @@ void UVestigeSaveSubsystem::LoadFarm()
 	{
 		if (Slots[Slot].bExists && !Slots[Slot].Save)
 		{
-			UE_LOG(LogVestige, Warning, TEXT("Save slot %s couldn't be read as a farm save."), UVestigeSaveGame::SlotNames[Slot]);
+			VESTIGE_LOG(
+				this, LogVestigeSave, Warning, "Save slot {Slot} couldn't be read as a farm save.", UVestigeSaveGame::SlotNames[Slot]);
 		}
 	}
 
@@ -321,13 +323,14 @@ void UVestigeSaveSubsystem::LoadFarm()
 		return;
 
 	case EVestigeLoadOutcome::RefuseUnreadable:
-		UE_LOG(LogVestige, Error, TEXT("No save slot could be read. The files are left as they are and saving is off."));
+		VESTIGE_LOG(this, LogVestigeSave, Error, "No save slot could be read. The files are left as they are and saving is off.");
 		RefuseToSave(LOCTEXT(
 			"SaveUnreadable", "The save couldn't be read. It is kept as it is, and the game won't save until you start a new game."));
 		return;
 
 	case EVestigeLoadOutcome::RefuseNewer:
-		UE_LOG(LogVestige, Error, TEXT("Slot %s holds a save from a newer version (%d, this build writes %d). Saving is off."),
+		VESTIGE_LOG(this, LogVestigeSave, Error,
+			"Slot {Slot} holds a save from a newer version ({Version}, this build writes {CurrentVersion}). Saving is off.",
 			UVestigeSaveGame::SlotNames[Decision.Slot], Slots[Decision.Slot].Save->SaveVersion, UVestigeSaveGame::CurrentVersion);
 		RefuseToSave(LOCTEXT("SaveTooNew",
 			"The save is from a newer version of the game. It is kept as it is, and the game won't save until you start a new game."));
@@ -344,7 +347,7 @@ void UVestigeSaveSubsystem::LoadFarm()
 		BackUpBeforeUpgrade(Decision.Slot, SavedVersion);
 		if (!UpgradeToCurrentVersion(Save, Grid->GetWidth()))
 		{
-			UE_LOG(LogVestige, Error, TEXT("The save in slot %s (version %d) couldn't be upgraded. Saving is off."),
+			VESTIGE_LOG(this, LogVestigeSave, Error, "The save in slot {Slot} (version {Version}) couldn't be upgraded. Saving is off.",
 				UVestigeSaveGame::SlotNames[Decision.Slot], SavedVersion);
 			RefuseToSave(LOCTEXT(
 				"SaveNotUpgraded", "The save couldn't be read. It is kept as it is, and the game won't save until you start a new game."));
@@ -352,7 +355,7 @@ void UVestigeSaveSubsystem::LoadFarm()
 		}
 	}
 
-	UE_LOG(LogVestige, Log, TEXT("Loading day %d from save slot %s (version %d, save %d)."), Save.Clock.Day,
+	VESTIGE_LOG(this, LogVestigeSave, Log, "Loading day {Day} from save slot {Slot} (version {Version}, save {Sequence}).", Save.Clock.Day,
 		UVestigeSaveGame::SlotNames[Decision.Slot], SavedVersion, Save.SaveSequence);
 	NewestSlot = Decision.Slot;
 	NewestSequence = Save.SaveSequence;
@@ -400,12 +403,12 @@ void UVestigeSaveSubsystem::BackUpBeforeUpgrade(int32 Slot, int32 Version) const
 	if (!UGameplayStatics::LoadDataFromSlot(Bytes, UVestigeSaveGame::SlotNames[Slot], UVestigeSaveGame::UserIndex)
 		|| !UGameplayStatics::SaveDataToSlot(Bytes, BackupSlot, UVestigeSaveGame::UserIndex))
 	{
-		UE_LOG(LogVestige, Warning, TEXT("Couldn't back up the version %d save in slot %s before upgrading it."), Version,
-			UVestigeSaveGame::SlotNames[Slot]);
+		VESTIGE_LOG(this, LogVestigeSave, Warning, "Couldn't back up the version {Version} save in slot {Slot} before upgrading it.",
+			Version, UVestigeSaveGame::SlotNames[Slot]);
 		return;
 	}
-	UE_LOG(LogVestige, Log, TEXT("Backed up the version %d save in slot %s to %s before upgrading it."), Version,
-		UVestigeSaveGame::SlotNames[Slot], *BackupSlot);
+	VESTIGE_LOG(this, LogVestigeSave, Log, "Backed up the version {Version} save in slot {Slot} to {Backup} before upgrading it.", Version,
+		UVestigeSaveGame::SlotNames[Slot], BackupSlot);
 }
 
 UFarmingComponent* UVestigeSaveSubsystem::GetPlayerFarming() const
