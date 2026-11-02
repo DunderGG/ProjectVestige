@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1740" viewBox="0 0 1800 1740" role="img" aria-labelledby="title description">
 	<title id="title">Transition: evidence paths and the decision to investigate</title>
-	<desc id="description">Two independent records are compared without assuming a connection. Optional local searches may add context. After at least two independent clues, Wellspring sets safety limits and the group chooses a careful search or a pause. The nomad route and possible survivor encounters are independent optional arcs.</desc>
+	<desc id="description">Two independent records are compared without assuming a connection, and the story respects the boundary between an anomaly and a conclusion. Optional local searches may add context. After at least two independent clues, Wellspring sets safety limits and the group chooses a careful search or a pause, never a secret-solution rush. The nomad route and possible survivor encounters remain independent optional arcs.</desc>
 	<defs>
 		<marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="strokeWidth">
 			<path d="M 0 0 L 10 5 L 0 10 z" fill="#435466"/>
