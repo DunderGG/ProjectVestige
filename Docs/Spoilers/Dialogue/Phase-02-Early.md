@@ -154,19 +154,53 @@
 
 ## E-06 - Bastion readiness
 
-**Placement:** Optional scene after Gage has seen the sleeper act carefully around risky systems.
-**Knowledge:** The town is not yet at the center of a crisis. This is about trust and mutual risk assessment.
+**Placement:** Optional scene after Gage has seen the sleeper act carefully around risky systems. It works as a trust beat before any route is approved.
+**Knowledge:** The town is not yet at the center of a crisis. This is about trust, route discipline and the difference between fear and risk.
 
-**GAGE:** If you ever visit the Bastion, remember this: the gates are not a measure of our strength. They are a measure of what we are willing to keep safe.
+**GAGE:** The Bastion doesn't open its gates because someone is impressive. It opens them when the route is clear and the people on it know what they are doing.
 
-**PLAYER:** That's a lot to hear from a gate.
+**PLAYER:** That sounds like a very strict way to make a friend.
 
-**GAGE:** It's true. We build for what can fail. We do not build to prove we can survive alone.
+**GAGE:** The rule is simple: we do not let people wander in because they are curious. The gear is older than the town, and it does not forgive carelessness.
 
-**PLAYER:** So the point is not to be untouchable.
+**PLAYER:** So the gate is a warning, not a challenge.
 
-**GAGE:** No. The point is to avoid making the same mistake twice.
+**GAGE:** Exactly. If you ever visit, remember that. We build for what can fail, not for what we want to believe about ourselves.
 
+**PLAYER:** That sounds like a very different kind of pride.
+
+**GAGE:** That is the difference. We do not build to look untouchable. We build so the next person does not die because we assumed the system was safe.
+
+**PLAYER:** And nobody gets a free pass because they're important?
+
+**GAGE:** No. Not even the engineers who signed the route. Clear work, clean reports and a line you can explain when the pressure spikes. That's what gets respect.
+
+**PLAYER:** I thought the Bastion was just a place with a lot of old machines.
+
+**GAGE:** The Bastion is full of old machines, and they do not care whether you are useful, frightened or in a hurry. They only care whether your hands are slow enough to listen.
+
+**PLAYER - CHOICES**
+
+- **[Ask what a safe route looks like]** "What does a safe route there actually look like?"
+  - **GAGE:** Two checks before the gate. One person on intake, one on the line. No one crosses a marked boundary without a reason and a clear signal. If the board reads high, you wait.
+  - **PLAYER:** So the route has rules, not just trust.
+  - **GAGE:** Trust without rules is just a story someone tells after the fact.
+- **[Ask whether he would ever trust a mistake]** "Would you trust somebody if they'd already made a mistake once?"
+  - **GAGE:** If they reported it before it spread, and if they still knew what a safe line looked like. A person who keeps their hands closed after the fault is not reliable. A person who tells the truth and fixes it is.
+  - **PLAYER:** That seems harsher than I expected.
+  - **GAGE:** That is not harsh. It is practical. We are not creating a place for perfect people. We are creating a place that can still function when one of them fails.
+- **[Ask whether the place is frightening]** "It sounds like a place built to make people nervous."
+  - **GAGE:** Fear is not the same thing as danger. The Bastion is meant to hold the worst of the system in one place so the rest of the town does not have to carry it all at once.
+  - **PLAYER:** So the point is not to be untouched by it.
+  - **GAGE:** No. The point is to keep the damage from becoming routine.
+
+**PLAYER:** Why tell me this now?
+
+**GAGE:** Because you stopped the test when it was going wrong. That's not the same as knowing the whole system, but it is enough to start.
+
+**PLAYER:** That is a strange standard.
+
+**GAGE:** This is the only standard we have that does not break under pressure.
 ## E-07 - Cleo's request and record limits
 
 **Placement:** The player spends time with Cleo after collecting early records.

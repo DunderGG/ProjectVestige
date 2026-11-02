@@ -7,6 +7,7 @@ The six phase files follow the timeline's story order. Each scene has a stable d
 ## Drafting rules
 
 - Keep dialogue conversational and performable aloud. Prefer short, speakable turns. If a line can be cut without losing the meaning, cut it.
+- Avoid repeated sentence starters, empty filler and generic replies like "It is"/"It's" unless the hesitation itself is the point. Let the line carry shape, pressure or character.
 - Let characters reveal what they know through pressure, not announcement. A person should not explain the scene's whole theme or the story's entire history unless the moment genuinely demands it.
 - Keep each character's knowledge local to the scene. A character only refers to evidence they personally saw or were told about.
 - Choices can differ in tone or boundary without changing facts the scene has established. Mark consequence branches explicitly.

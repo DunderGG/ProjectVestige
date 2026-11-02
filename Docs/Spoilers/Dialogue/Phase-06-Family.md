@@ -61,11 +61,11 @@
 
 **PLAYER:** I thought this would answer more.
 
-**HOB:** I know. It answers what they wanted you to hear. It cannot answer what they did not know.
+**HOB:** It answers what they wanted you to hear. It cannot answer what they did not know.
 
 **PLAYER:** I wish they were here to tell me themselves.
 
-**HOB:** So do I.
+**HOB:** So do I. I would rather have them here too.
 
 ## F-03 - The sibling remains their own person
 

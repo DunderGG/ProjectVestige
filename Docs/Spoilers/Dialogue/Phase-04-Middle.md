@@ -7,9 +7,9 @@
 **Placement:** The main story reaches the old research institute. The player finds corroborating records from separate programs.
 **Knowledge:** The records establish that the Index's cognitive integrations and Iron Creed frame conversions happened. They do not establish one shared command, every member's knowledge, or every individual's responsibility.
 
-**PLAYER:** This isn't just a stack of damaged clinic files. There are intake forms, procedure logs, and people marked "transferred" with no destination.
+**PLAYER:** This is not just a stack of damaged clinic files. There are intake forms, procedure logs and people marked "transferred" with no destination.
 
-**CLEO:** The dates line up with what I found. That's not a clerical error. But we don't know what happened to each person.
+**CLEO:** The dates line up with what I found. That is not a clerical error. But we still do not know what happened to each person.
 
 **GAGE:** The other wing has frame-conversion notes. The equipment request bears the Creed's name. That tells us who supplied it, not who in the network knew.
 
@@ -17,9 +17,9 @@
 
 **CLEO:** The records put both projects here. They were separate programs.
 
-**GAGE:** They called it preparation. Some people were misled. Others weren't allowed to leave. That isn't consent.
+**GAGE:** They called it preparation. Some people were misled. Others were not allowed to leave. That is not consent.
 
-**PLAYER:** Then there's no softer way to put it. They hurt people.
+**PLAYER:** Then there is no softer way to put it. They hurt people.
 
 **CLEO:** Yes.
 

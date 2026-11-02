@@ -163,9 +163,18 @@
 
 **PLAYER:** I can keep chasing the records, or I can stop and ask what the town is willing to carry.
 
-**CLEO:** We need both. We cannot call the pattern proven without a second source, and we cannot pretend a risk doesn't exist because it is inconvenient.
+**CLEO:** We need both. We cannot call the pattern proven without a second source, and we cannot pretend a risk does not exist because it is inconvenient.
 
 **GAGE:** The route is the boundary. If it is unsafe, no one goes beyond it.
+
+**PLAYER - CHOICES**
+
+- **[Keep the search narrow]** "We keep the search narrow. We gather one more source, then we stop and ask the town what it can carry."
+  - **CLEO:** That is the careful version. It keeps the evidence honest and the risk visible.
+- **[Pause and ask the town]** "We stop here. We tell the town what we know, and we let them decide what level of risk they will carry."
+  - **GAGE:** That is the safer move. We do not treat a warning as a command.
+- **[Push for a broader search]** "We keep looking. The pattern is already large enough that I do not want to pretend it is small."
+  - **CLEO:** Then we need a limit. We are not searching the whole world on a hunch.
 
 **PLAYER:** Then we do this carefully.
 
