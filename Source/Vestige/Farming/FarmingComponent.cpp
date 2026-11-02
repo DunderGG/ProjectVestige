@@ -4,6 +4,7 @@
 #include "Farming/FarmingComponent.h"
 
 #include "AbilitySystem/VestigeGameplayTags.h"
+#include "Abilities/GameplayAbility.h"
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemGlobals.h"
 #include "Components/SceneComponent.h"
@@ -84,6 +85,7 @@ void UFarmingComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	{
 		Root->TransformUpdated.RemoveAll(this);
 	}
+	FollowAbilitySystem(nullptr);
 	Super::EndPlay(EndPlayReason);
 }
 
@@ -170,6 +172,78 @@ void UFarmingComponent::UseTool()
 	}
 }
 
+void UFarmingComponent::StartUsingTool()
+{
+	bToolUseHeld = true;
+	FollowAbilitySystem(UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(GetOwner()));
+	UseTool();
+}
+
+void UFarmingComponent::StopUsingTool()
+{
+	bToolUseHeld = false;
+}
+
+void UFarmingComponent::RepeatToolUse()
+{
+	if (!bToolUseHeld)
+	{
+		return;
+	}
+	const UVestigeToolData* Tool = GetCurrentTool();
+	const AFarmTile* Tile = FindTargetTile();
+	if (Tool && Tile && WouldToolChange(*Tool, *Tile))
+	{
+		UseTool();
+	}
+}
+
+bool UFarmingComponent::WouldToolChange(const UVestigeToolData& Tool, const AFarmTile& Tile) const
+{
+	switch (Tool.GetAction())
+	{
+	case EFarmToolAction::Till:
+		return Tile.CanTill();
+
+	case EFarmToolAction::Plant:
+		return HasSeedToPlant() && Tile.CanPlant();
+
+	case EFarmToolAction::Water:
+		return Tile.CanWater();
+
+	case EFarmToolAction::Harvest:
+		return Tile.IsRipe() && HasRoomForHarvest(*Tile.GetCrop());
+	}
+	return false;
+}
+
+void UFarmingComponent::ContinueAfterUse(const FAbilityEndedData& EndedData)
+{
+	const UGameplayAbility* Ability = EndedData.AbilityThatEnded;
+	if (Ability && Ability->GetAssetTags().HasTagExact(VestigeGameplayTags::Ability_UseTool))
+	{
+		RepeatToolUse();
+	}
+}
+
+void UFarmingComponent::FollowAbilitySystem(UAbilitySystemComponent* AbilitySystem)
+{
+	UAbilitySystemComponent* Followed = FollowedAbilitySystem.Get();
+	if (Followed == AbilitySystem)
+	{
+		return;
+	}
+	if (Followed)
+	{
+		Followed->OnAbilityEnded.RemoveAll(this);
+	}
+	FollowedAbilitySystem = AbilitySystem;
+	if (AbilitySystem)
+	{
+		AbilitySystem->OnAbilityEnded.AddUObject(this, &UFarmingComponent::ContinueAfterUse);
+	}
+}
+
 bool UFarmingComponent::UseToolOnTarget()
 {
 	AFarmTile* Tile = FindTargetTile();
@@ -222,8 +296,7 @@ bool UFarmingComponent::Till(AFarmTile& Tile) const
 
 bool UFarmingComponent::Plant(AFarmTile& Tile)
 {
-	UVestigeInventoryComponent* Inventory = GetInventory();
-	if (!Inventory || !SeedCrop || Inventory->GetItemCount(SeedItemId) <= 0)
+	if (!HasSeedToPlant())
 	{
 		Notify(LOCTEXT("OutOfSeeds", "Out of seeds."));
 		return false;
@@ -233,7 +306,7 @@ bool UFarmingComponent::Plant(AFarmTile& Tile)
 		Notify(LOCTEXT("CantPlant", "Seeds need empty tilled soil."));
 		return false;
 	}
-	Inventory->TryRemoveItem(SeedItemId, 1);
+	GetInventory()->TryRemoveItem(SeedItemId, 1);
 	Notify(LOCTEXT("Planted", "Planted a seed."));
 	return true;
 }
@@ -255,8 +328,7 @@ bool UFarmingComponent::Harvest(AFarmTile& Tile)
 	}
 
 	// Asked before harvesting, so a full bag leaves the crop in the ground instead of destroying it.
-	UVestigeInventoryComponent* Inventory = GetInventory();
-	if (!Inventory || !Inventory->CanAddItem(Crop->GetHarvestItemId(), Crop->GetYield()))
+	if (!HasRoomForHarvest(*Crop))
 	{
 		Notify(LOCTEXT("BagFull", "No room in your bag."));
 		return false;
@@ -265,10 +337,22 @@ bool UFarmingComponent::Harvest(AFarmTile& Tile)
 	{
 		return false;
 	}
-	Inventory->TryAddItem(Crop->GetHarvestItemId(), Crop->GetYield());
+	GetInventory()->TryAddItem(Crop->GetHarvestItemId(), Crop->GetYield());
 	Notify(LOCTEXT("Harvested", "Harvested a crop!"));
 	OnCropHarvested.Broadcast(Crop, &Tile);
 	return true;
+}
+
+bool UFarmingComponent::HasSeedToPlant() const
+{
+	const UVestigeInventoryComponent* Inventory = GetInventory();
+	return Inventory && SeedCrop && Inventory->GetItemCount(SeedItemId) > 0;
+}
+
+bool UFarmingComponent::HasRoomForHarvest(const UFarmCropData& Crop) const
+{
+	const UVestigeInventoryComponent* Inventory = GetInventory();
+	return Inventory && Inventory->CanAddItem(Crop.GetHarvestItemId(), Crop.GetYield());
 }
 
 UVestigeInventoryComponent* UFarmingComponent::GetInventory() const
@@ -319,6 +403,9 @@ void UFarmingComponent::UpdateTargetTile()
 	}
 	TargetTile = NewTarget;
 	OnTargetTileChanged.Broadcast(NewTarget);
+
+	// Walking along a row with the key held works each tile it reaches.
+	RepeatToolUse();
 }
 
 void UFarmingComponent::FollowOwnerTransform(

@@ -12,7 +12,9 @@ class AFarmGrid;
 class AFarmTile;
 class UFarmCropData;
 class UVestigeToolData;
+class UAbilitySystemComponent;
 class UVestigeInventoryComponent;
+struct FAbilityEndedData;
 struct FFarmFarmingSaveData;
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnFarmToolChanged, const UVestigeToolData* /* Tool */);
@@ -46,6 +48,19 @@ public:
 	 * is still under way, or without an ability system.
 	 */
 	void UseTool();
+
+	/**
+	 * The use key is pressed: uses the tool once, like UseTool, and keeps using it while the key is held. Each later
+	 * use starts when the last one has finished or the target tile changes, and only if it would change the target
+	 * tile; a use that would change nothing is skipped quietly until the next tile, so only the press posts its message.
+	 */
+	void StartUsingTool();
+
+	/** The use key is released: no more uses start. A use under way still finishes. */
+	void StopUsingTool();
+
+	/** Whether the use key is held, so uses repeat. */
+	bool IsToolUseHeld() const { return bToolUseHeld; }
 
 	/**
 	 * Applies the tool in hand to the target tile, and tells the player what happened. Returns false when nothing on the
@@ -128,6 +143,24 @@ private:
 	 */
 	UVestigeInventoryComponent* GetInventory() const;
 
+	/** Whether the inventory holds a seed item the Seeds tool can plant. */
+	bool HasSeedToPlant() const;
+
+	/** Whether the inventory has room for what Crop yields. */
+	bool HasRoomForHarvest(const UFarmCropData& Crop) const;
+
+	/** Starts the next use while the use key is held, if it would change the target tile. */
+	void RepeatToolUse();
+
+	/** Whether Tool's action would change Tile now, asking the same rules ApplyTool follows, but changing nothing. */
+	bool WouldToolChange(const UVestigeToolData& Tool, const AFarmTile& Tile) const;
+
+	/** Repeats the tool use once a use-tool ability has ended. Bound to the owner's ability system's OnAbilityEnded. */
+	void ContinueAfterUse(const FAbilityEndedData& EndedData);
+
+	/** Listens for the end of uses on AbilitySystem, and stops listening to the one before. */
+	void FollowAbilitySystem(UAbilitySystemComponent* AbilitySystem);
+
 	/** Applies Tool's action to Tile. Each of these returns whether the tile changed. */
 	bool ApplyTool(const UVestigeToolData& Tool, AFarmTile& Tile);
 	bool Till(AFarmTile& Tile) const;
@@ -148,6 +181,12 @@ private:
 
 	/** The owner's tile when the target was last found, so moving within a tile does no work. */
 	FIntPoint OwnerCoordinates = FIntPoint::ZeroValue;
+
+	/** Set while the use key is held. */
+	bool bToolUseHeld = false;
+
+	/** The ability system whose ended uses repeat the tool use, found on the first press: the pawn begins play unpossessed. */
+	TWeakObjectPtr<UAbilitySystemComponent> FollowedAbilitySystem;
 
 	/** The seed item the Seeds tool plants, by its ID (VestigeItem:Base.TurnipSeeds). Its seed fragment names the crop. */
 	UPROPERTY(EditDefaultsOnly, Category = "Farming", meta = (AllowPrivateAccess = "true", AllowedTypes = "VestigeItem"))

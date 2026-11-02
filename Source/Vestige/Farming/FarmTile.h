@@ -42,6 +42,9 @@ public:
 	EFarmTileState GetState() const { return TileState.GetState(); }
 	bool IsWatered() const { return TileState.IsWatered(); }
 	bool IsRipe() const { return TileState.IsRipe(); }
+	bool CanTill() const { return TileState.CanTill(); }
+	bool CanPlant() const { return TileState.CanPlant(); }
+	bool CanWater() const { return TileState.CanWater(); }
 	int32 GetGrowthDays() const { return TileState.GetGrowthDays(); }
 
 	/** The crop growing here, or nullptr if nothing is planted. */

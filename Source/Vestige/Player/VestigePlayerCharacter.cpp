@@ -121,7 +121,9 @@ void AVestigePlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerI
 		return;
 	}
 
-	EnhancedInput->BindAction(UseToolAction, ETriggerEvent::Started, Farming.Get(), &UFarmingComponent::UseTool);
+	// Holding the key repeats the use, so walking along a row works it.
+	EnhancedInput->BindAction(UseToolAction, ETriggerEvent::Started, Farming.Get(), &UFarmingComponent::StartUsingTool);
+	EnhancedInput->BindAction(UseToolAction, ETriggerEvent::Completed, Farming.Get(), &UFarmingComponent::StopUsingTool);
 	EnhancedInput->BindAction(InteractAction, ETriggerEvent::Started, Interaction.Get(), &UVestigeInteractionComponent::Interact);
 	EnhancedInput->BindAction(SkipDayAction, ETriggerEvent::Started, Rest.Get(), &UVestigeRestComponent::Sleep);
 	EnhancedInput->BindAction(NewGameAction, ETriggerEvent::Started, this, &AVestigePlayerCharacter::StartNewGame);

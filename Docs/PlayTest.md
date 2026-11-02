@@ -200,6 +200,17 @@ The late-night rules from [GameDesign.md, section 5](GameDesign.md#5-time-days-a
 - [ ] **Saving**: go to bed late, then stop and play again: the HUD still says "Exhausted", with 75 stamina.
 - [ ] **Feel**: say whether 10 per game hour pushes you toward bed without feeling harsh, and whether 75% is enough of a cost. Both are settings on `BP_PlayerCharacter`'s **Rest** component (Details panel, Farming > Rest), as are the warning and late-night hours.
 
+### Holding E, 2026-11-02
+
+Holding E keeps using the tool: the next use starts when the last one has finished or when the framed tile changes, and only if it would change that tile. The tests cover the rule; these checks are for the feel. The commit is the one titled "Repeat the tool use while E is held".
+
+- [ ] **A row**: with the hoe, hold E and walk along a row of grass. Every tile you pass is tilled, one "Tilled the soil." message each, and walking doesn't need to stop.
+- [ ] **Quiet skips**: hold E with the hoe while standing still facing a tile you just tilled. Nothing more happens and no message repeats. Walk on with E still held, and the next grass tile is tilled.
+- [ ] **The press says why**: press E once facing tilled soil with the hoe. "Only grass can be tilled." shows once, not again while you hold E.
+- [ ] **Release**: let go of E halfway along a row. The use under way finishes, and no tile after it changes.
+- [ ] **Watering and planting**: holding E with the watering can waters a row of tilled soil, and with the seeds plants a row until the seeds run out, then stops quietly.
+- [ ] **Speed**: say whether walking with E held outruns the 0.4 s use (tiles left behind unworked). If so, the use time or the walk speed needs tuning.
+
 ### Editor chores
 
 Changes only the editor can make safely. The steps are in [Roadmap.md, Housekeeping](Roadmap.md#3-housekeeping): re-saving the template Blueprints and `L_Farm`, moving `BP_FarmTile` and the materials with redirectors fixed, and regenerating the Android File Server token if it was ever used. After each one, run the [smoke test](#3-smoke-test).

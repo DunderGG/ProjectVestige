@@ -53,6 +53,11 @@ public:
 	EFarmTileState GetState() const { return State; }
 	bool IsWatered() const { return bWatered; }
 	bool IsRipe() const;
+
+	// Whether the action would change the tile now, without doing it. Harvesting can when IsRipe.
+	bool CanTill() const { return State == EFarmTileState::Grass; }
+	bool CanPlant() const { return State == EFarmTileState::Tilled; }
+	bool CanWater() const { return State != EFarmTileState::Grass && !bWatered; }
 	int32 GetGrowthDays() const { return GrowthDays; }
 
 	/** The crop growing here, or nullptr if nothing is planted. */

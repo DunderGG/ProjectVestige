@@ -7,7 +7,7 @@
 
 bool FFarmTileState::Till()
 {
-	if (State != EFarmTileState::Grass)
+	if (!CanTill())
 	{
 		return false;
 	}
@@ -17,7 +17,7 @@ bool FFarmTileState::Till()
 
 bool FFarmTileState::Plant(const UFarmCropData* InCrop)
 {
-	if (State != EFarmTileState::Tilled || !InCrop)
+	if (!CanPlant() || !InCrop)
 	{
 		return false;
 	}
@@ -29,7 +29,7 @@ bool FFarmTileState::Plant(const UFarmCropData* InCrop)
 
 bool FFarmTileState::Water()
 {
-	if (State == EFarmTileState::Grass || bWatered)
+	if (!CanWater())
 	{
 		return false;
 	}

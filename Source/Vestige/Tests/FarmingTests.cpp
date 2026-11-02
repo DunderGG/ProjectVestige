@@ -11,6 +11,7 @@
 #include "Content/FarmCropData.h"
 #include "Content/VestigeItemData.h"
 #include "Content/VestigeToolData.h"
+#include "Core/VestigeFeedbackSubsystem.h"
 #include "CQTest.h"
 #include "Engine/AssetManager.h"
 #include "Farming/FarmFarmingSaveData.h"
@@ -345,6 +346,97 @@ namespace FarmingTests
 
 			ASSERT_THAT(IsFalse(FarmingComponent->RestoreFromSaveData(Data)));
 			ASSERT_THAT(IsTrue(FarmingComponent->GetToolbar().GetCurrentSlot() == 0));
+		}
+
+		/** Collects every feedback message from now on into Messages. */
+		void ListenToFeedback(TArray<FString>& Messages)
+		{
+			UVestigeFeedbackSubsystem* Feedback = Spawner.GetWorld().GetSubsystem<UVestigeFeedbackSubsystem>();
+			ASSERT_THAT(IsNotNull(Feedback));
+			Feedback->OnFeedback.AddLambda(
+				[&Messages](const FText& Message)
+				{
+					Messages.Add(Message.ToString());
+				});
+		}
+
+		/** Moves the farmer one tile on along the row, so the target becomes tile (4, 0). */
+		AFarmTile* StepToNextTile()
+		{
+			Farmer->SetActorLocation(FVector(350.f, 50.f, 0.f));
+			return Grid->GetTileAt(FIntPoint(4, 0));
+		}
+
+		TEST_METHOD(HoldingTheUseKeyWorksTheNextTileOnceTheUseHasFinished)
+		{
+			Hold(TEXT("Base.Hoe"), 0);
+			FarmingComponent->StartUsingTool();
+			AFarmTile* NextTile = StepToNextTile();
+			ASSERT_THAT(IsNotNull(NextTile));
+			ASSERT_THAT(IsTrue(NextTile->GetState() == EFarmTileState::Grass));
+
+			AbilitySystem->CancelAllAbilities();
+
+			ASSERT_THAT(IsTrue(NextTile->GetState() == EFarmTileState::Tilled));
+			AbilitySystem->CancelAllAbilities();
+		}
+
+		TEST_METHOD(HoldingTheUseKeyWorksTheNextTileWhenTheTargetChanges)
+		{
+			Hold(TEXT("Base.Hoe"), 0);
+			FarmingComponent->StartUsingTool();
+			AbilitySystem->CancelAllAbilities();
+
+			AFarmTile* NextTile = StepToNextTile();
+
+			ASSERT_THAT(IsNotNull(NextTile));
+			ASSERT_THAT(IsTrue(NextTile->GetState() == EFarmTileState::Tilled));
+			AbilitySystem->CancelAllAbilities();
+		}
+
+		TEST_METHOD(ARepeatThatWouldChangeNothingIsSkippedQuietly)
+		{
+			Hold(TEXT("Base.Hoe"), 0);
+			TArray<FString> Messages;
+			ListenToFeedback(Messages);
+			FarmingComponent->StartUsingTool();
+
+			// The use ends on the tile it just tilled, which the hoe can't change again.
+			AbilitySystem->CancelAllAbilities();
+
+			ASSERT_THAT(IsTrue(Messages.Num() == 1));
+			ASSERT_THAT(IsFalse(IsUsingTool()));
+			ASSERT_THAT(IsTrue(GetStamina() == GetMaxStamina() - GetHeldTool().GetStaminaCost()));
+		}
+
+		TEST_METHOD(ThePressSaysWhyAUseChangesNothingAndTheRepeatWaitsForTheNextTile)
+		{
+			Hold(TEXT("Base.Hoe"), 0);
+			TargetTile()->Till();
+			TArray<FString> Messages;
+			ListenToFeedback(Messages);
+
+			FarmingComponent->StartUsingTool();
+			ASSERT_THAT(IsTrue(Messages.Num() == 1));
+
+			AFarmTile* NextTile = StepToNextTile();
+			ASSERT_THAT(IsNotNull(NextTile));
+			ASSERT_THAT(IsTrue(NextTile->GetState() == EFarmTileState::Tilled));
+			AbilitySystem->CancelAllAbilities();
+		}
+
+		TEST_METHOD(ReleasingTheUseKeyStopsTheRepeat)
+		{
+			Hold(TEXT("Base.Hoe"), 0);
+			FarmingComponent->StartUsingTool();
+			FarmingComponent->StopUsingTool();
+			AbilitySystem->CancelAllAbilities();
+
+			AFarmTile* NextTile = StepToNextTile();
+
+			ASSERT_THAT(IsNotNull(NextTile));
+			ASSERT_THAT(IsTrue(NextTile->GetState() == EFarmTileState::Grass));
+			ASSERT_THAT(IsFalse(FarmingComponent->IsToolUseHeld()));
 		}
 	};
 }
