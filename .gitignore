@@ -12,6 +12,16 @@ DerivedDataCache/
 *.sdf
 *.blend1
 
+# Local AI coding agent instructions and configuration.
+AGENTS.md
+CLAUDE.md
+GEMINI.md
+COPILOT.md
+.cursorrules
+.claude/
+.cursor/
+.aider*
+
 # Microsoft's Visual Studio integration plugin, which Visual Studio copies into a project on request. Each developer
 # installs it for themselves; the project lists it as optional, so it is ignored where it is missing.
 Plugins/VisualStudioTools/
