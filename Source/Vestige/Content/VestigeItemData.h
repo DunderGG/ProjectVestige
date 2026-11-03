@@ -58,14 +58,14 @@ protected:
 
 private:
 	/** How many of this item fit in one inventory slot. 1 for items that don't stack. */
-	UPROPERTY(EditDefaultsOnly, Category = "Farming", meta = (AllowPrivateAccess = "true", ClampMin = 1))
+	UPROPERTY(EditDefaultsOnly, Category = "Item", meta = (AllowPrivateAccess = "true", ClampMin = 1))
 	int32 MaxStackSize = 99;
 
 	/** What selling one of this item pays. Not used yet: there is no currency. */
-	UPROPERTY(EditDefaultsOnly, Category = "Farming|Economy", meta = (AllowPrivateAccess = "true", ClampMin = 0))
+	UPROPERTY(EditDefaultsOnly, Category = "Economy", meta = (AllowPrivateAccess = "true", ClampMin = 0))
 	int32 SellPrice = 0;
 
 	/** What only some items have, one fragment per aspect (Farm Seed Fragment makes the item a seed). At most one of each class. */
-	UPROPERTY(EditDefaultsOnly, Instanced, Category = "Farming", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditDefaultsOnly, Instanced, Category = "Item", meta = (AllowPrivateAccess = "true"))
 	TArray<TObjectPtr<UVestigeItemFragment>> Fragments;
 };

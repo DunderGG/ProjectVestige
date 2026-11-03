@@ -234,6 +234,15 @@ The frame's material, `M_TileHighlight`, is now set on `BP_PlayerCharacter`'s hi
 - [ ] **Asset**: open `Content/Vestige/Blueprints/BP_PlayerCharacter`, select its **TargetHighlight** component: Highlight Material is `M_TileHighlight` (Details panel, Farming > Visuals). The Blueprint doesn't ask to be saved when you close it.
 - [ ] **Frame**: in Play in Editor the frame around the target tile is yellow and unlit as before, also at night, and the Output Log has no "No Highlight Material" warning and no "missing usage flag".
 
+### Details categories, 2026-11-03
+
+The general types' settings moved out of the `Farming` categories into ones named for their topic; the farm types (tiles, grid, crops, the farming component and the highlight) keep `Farming`. Only display names changed, so nothing needs saving. The commit is the one titled "Name the general types' Details categories by topic".
+
+- [ ] **Day cycle**: the `VestigeDayCycle` in `L_Farm` shows its settings under **Time** and **Lighting** (Night Post Process too).
+- [ ] **Player Blueprint**: in `BP_PlayerCharacter`, Move Ramp Seconds is under **Input** with the template's input actions, the **Rest** component's hours and drain under **Rest**, and the **CharacterMovement** component's Tool Use Speed Scale under **Movement**.
+- [ ] **Assets**: a tool data asset shows **Content**, **Tool** and **Visuals**; an item shows **Content**, **Item** and **Economy**; a crop shows **Content** and **Farming** with Growth, Harvest and Visuals.
+- [ ] **Blueprint menus**: in any Blueprint's graph, right-click and search: Get Day Cycle is under **Time**, Get Content Id under **Content**. In Add Component, the Vestige Rest component is listed under **Rest**.
+
 ### Editor chores
 
 Changes only the editor can make safely. The steps are in [Roadmap.md, Housekeeping](Roadmap.md#3-housekeeping): re-saving the template Blueprints and `L_Farm`, moving `BP_FarmTile` and the materials with redirectors fixed, and regenerating the Android File Server token if it was ever used. After each one, run the [smoke test](#3-smoke-test).

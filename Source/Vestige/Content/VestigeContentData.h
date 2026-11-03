@@ -51,7 +51,7 @@ public:
 	 * Extension point: the ID that saves and mods know this content by (Base.Turnip), so a Blueprint can tell which crop or
 	 * tool an event names.
 	 */
-	UFUNCTION(BlueprintPure, Category = "Farming")
+	UFUNCTION(BlueprintPure, Category = "Content")
 	FName GetContentId() const { return ContentId; }
 
 	const FText& GetDisplayName() const { return DisplayName; }
@@ -67,10 +67,10 @@ protected:
 
 private:
 	/** Stable ID of the form Namespace.Name (Base.Turnip). Saves and lookups use it; never change it once shipped. */
-	UPROPERTY(EditDefaultsOnly, Category = "Farming", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditDefaultsOnly, Category = "Content", meta = (AllowPrivateAccess = "true"))
 	FName ContentId;
 
 	/** Name shown to the player. */
-	UPROPERTY(EditDefaultsOnly, Category = "Farming", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditDefaultsOnly, Category = "Content", meta = (AllowPrivateAccess = "true"))
 	FText DisplayName;
 };

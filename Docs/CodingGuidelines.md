@@ -246,7 +246,7 @@ TObjectPtr<AFarmGrid> Grid;
 | `VisibleInstanceOnly` | Runtime state you want to inspect while debugging in the editor |
 | no edit specifier | Internal references the editor shouldn't show |
 
-- Always give edited properties a `Category`. Use `"Farming"` and subcategories with `|`: `"Farming|Time"`, `"Farming|Lighting"`, `"Farming|Visuals"`.
+- Always give edited properties a `Category` named for what the settings are about, in plain words without a project prefix: `"Time"`, `"Lighting"`, `"Rest"`, `"Inventory"`, `"Visuals"`. The `Farm` types ([section 2.2](#22-the-vestige-and-farm-project-prefixes)) put theirs under `"Farming"`, with subcategories after `|`: `"Farming|Growth"`, `"Farming|Visuals"`. Where our setting belongs with the engine's, use the engine's category, as our input settings join the template's in `"Input"`. The same names place Blueprint functions and events in the Blueprint menus (Get Day Cycle under Time), and a component's `ClassGroup`, which groups it in the Add Component list, follows the same rule.
 - Add `ClampMin` / `ClampMax` meta where a value has a sensible range.
 - Expose to Blueprints (`BlueprintReadOnly`, `BlueprintCallable`, `BlueprintPure`) **only when a Blueprint actually needs it, or as a deliberate modding extension point** marked `/** Extension point: ... */` (see [Architecture.md, Designing for mods](Architecture.md#12-designing-for-mods)). Everything exposed becomes an API we have to keep stable. Prefer `BlueprintReadOnly` to `BlueprintReadWrite`.
 - Core rules live in C++. Blueprints are for content: picking meshes, tuning values, laying out levels, small visual-only behavior.
@@ -509,7 +509,6 @@ Existing code that doesn't yet match these guidelines. Fix them when touching th
 
 Add an entry here when code is committed that doesn't meet the guide, with what is missing, and a roadmap item to fix it.
 
-- The general types' Details categories still start with `Farming` ([section 6](#6-uproperty-ufunction-and-blueprint-exposure) says so too, until the rule is decided). [Roadmap.md, Housekeeping](Roadmap.md#3-housekeeping).
 
 ## 17. Review checklist
 

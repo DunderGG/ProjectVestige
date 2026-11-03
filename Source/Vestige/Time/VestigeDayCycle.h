@@ -45,7 +45,7 @@ public:
 	 * Extension point: the world's day cycle for Blueprints, from Get, so a level that has none still gets one. Bind to
 	 * its On New Day event to react to a new day.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "Farming|Time", meta = (WorldContext = "WorldContextObject", DisplayName = "Get Day Cycle"))
+	UFUNCTION(BlueprintCallable, Category = "Time", meta = (WorldContext = "WorldContextObject", DisplayName = "Get Day Cycle"))
 	static AVestigeDayCycle* GetDayCycle(const UObject* WorldContextObject);
 
 	/** Ends the current day and sets the clock to the next morning, then broadcasts OnNewDay and OnNewDayBlueprint. */
@@ -81,7 +81,7 @@ public:
 	 * reacted (crops have grown), and before OnNewDayFinished, so what a listener changes is saved. The same contract as
 	 * OnNewDay: finish every change to saved state in the handler (Architecture.md, section 15).
 	 */
-	UPROPERTY(BlueprintAssignable, Category = "Farming|Time", meta = (DisplayName = "On New Day"))
+	UPROPERTY(BlueprintAssignable, Category = "Time", meta = (DisplayName = "On New Day"))
 	FOnVestigeNewDayBlueprint OnNewDayBlueprint;
 
 	/** Broadcast after OnNewDay and OnNewDayBlueprint, once everything has reacted to the new day. Saving listens here. */
@@ -112,61 +112,61 @@ private:
 	void UpdateLighting();
 
 	/** Real seconds per in-game hour. */
-	UPROPERTY(EditAnywhere, Category = "Farming|Time", meta = (AllowPrivateAccess = "true", ClampMin = 0.1))
+	UPROPERTY(EditAnywhere, Category = "Time", meta = (AllowPrivateAccess = "true", ClampMin = 0.1))
 	float RealSecondsPerGameHour = 40.f;
 
 	/** Hour each day starts at after sleeping. */
-	UPROPERTY(EditAnywhere, Category = "Farming|Time", meta = (AllowPrivateAccess = "true", ClampMin = 0, ClampMax = 23))
+	UPROPERTY(EditAnywhere, Category = "Time", meta = (AllowPrivateAccess = "true", ClampMin = 0, ClampMax = 23))
 	float DayStartHour = 6.f;
 
 	/**
 	 * Hour the day ends and the clock stops: OnDayEndReached is broadcast. 30 is 06:00 the next morning, so a player who
 	 * never sleeps stays up the whole night and the next day starts at sunrise.
 	 */
-	UPROPERTY(EditAnywhere, Category = "Farming|Time", meta = (AllowPrivateAccess = "true", ClampMin = 1, ClampMax = 30))
+	UPROPERTY(EditAnywhere, Category = "Time", meta = (AllowPrivateAccess = "true", ClampMin = 1, ClampMax = 30))
 	float DayEndHour = 30.f;
 
 	/** Hour the sun rises above the horizon. Before it, the moon lights the farm. */
-	UPROPERTY(EditAnywhere, Category = "Farming|Time", meta = (AllowPrivateAccess = "true", ClampMin = 0, ClampMax = 23))
+	UPROPERTY(EditAnywhere, Category = "Time", meta = (AllowPrivateAccess = "true", ClampMin = 0, ClampMax = 23))
 	float SunriseHour = 6.f;
 
 	/** Hour the sun sets. Must be later than SunriseHour. */
-	UPROPERTY(EditAnywhere, Category = "Farming|Time", meta = (AllowPrivateAccess = "true", ClampMin = 1, ClampMax = 24))
+	UPROPERTY(EditAnywhere, Category = "Time", meta = (AllowPrivateAccess = "true", ClampMin = 1, ClampMax = 24))
 	float SunsetHour = 20.f;
 
 	/** Light moved with the time of day. Left empty, the first DirectionalLight in the level is used. */
-	UPROPERTY(EditAnywhere, Category = "Farming|Lighting", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, Category = "Lighting", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<ADirectionalLight> Sun;
 
 	/** Dimmed at night. Left empty, the first SkyLight in the level is used. */
-	UPROPERTY(EditAnywhere, Category = "Farming|Lighting", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, Category = "Lighting", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<ASkyLight> SkyLight;
 
 	/** Highest angle of the sun above the horizon at midday, in degrees. */
-	UPROPERTY(EditAnywhere, Category = "Farming|Lighting", meta = (AllowPrivateAccess = "true", ClampMin = 10, ClampMax = 90))
+	UPROPERTY(EditAnywhere, Category = "Lighting", meta = (AllowPrivateAccess = "true", ClampMin = 10, ClampMax = 90))
 	float MaxSunElevation = 65.f;
 
 	/** Share of the daytime light intensity left at night, for moonlight. */
-	UPROPERTY(EditAnywhere, Category = "Farming|Lighting", meta = (AllowPrivateAccess = "true", ClampMin = 0, ClampMax = 1))
+	UPROPERTY(EditAnywhere, Category = "Lighting", meta = (AllowPrivateAccess = "true", ClampMin = 0, ClampMax = 1))
 	float NightLightFraction = 0.03f;
 
 	/**
 	 * Exposure change at night, in stops. Auto-exposure brightens dark scenes back up,
 	 * so this pulls it down again. More negative is darker; 0 turns it off.
 	 */
-	UPROPERTY(EditAnywhere, Category = "Farming|Lighting", meta = (AllowPrivateAccess = "true", ClampMin = -8, ClampMax = 0))
+	UPROPERTY(EditAnywhere, Category = "Lighting", meta = (AllowPrivateAccess = "true", ClampMin = -8, ClampMax = 0))
 	float NightExposureBias = -2.5f;
 
 	/** Sun color near the horizon. It blends to the sun's color as placed in the level as the sun rises. */
-	UPROPERTY(EditAnywhere, Category = "Farming|Lighting", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, Category = "Lighting", meta = (AllowPrivateAccess = "true"))
 	FLinearColor SunriseColor = FLinearColor(1.f, 0.55f, 0.3f);
 
 	/** Color of the directional light at night, when it stands in for the moon. */
-	UPROPERTY(EditAnywhere, Category = "Farming|Lighting", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, Category = "Lighting", meta = (AllowPrivateAccess = "true"))
 	FLinearColor MoonColor = FLinearColor(0.5f, 0.6f, 1.f);
 
 	/** Covers the whole level and darkens the exposure at night. */
-	UPROPERTY(VisibleAnywhere, Category = "Farming")
+	UPROPERTY(VisibleAnywhere, Category = "Lighting")
 	TObjectPtr<UPostProcessComponent> NightPostProcess;
 
 	int32 CurrentDay = 1;

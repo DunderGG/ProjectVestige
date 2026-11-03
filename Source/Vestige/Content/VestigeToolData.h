@@ -44,18 +44,18 @@ protected:
 
 private:
 	/** What the tool does to the tile in front of the farmer. */
-	UPROPERTY(EditDefaultsOnly, Category = "Farming", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditDefaultsOnly, Category = "Tool", meta = (AllowPrivateAccess = "true"))
 	EFarmToolAction Action = EFarmToolAction::Till;
 
 	/** Stamina one use takes. A use that changes nothing on the farm costs nothing. */
-	UPROPERTY(EditDefaultsOnly, Category = "Farming", meta = (AllowPrivateAccess = "true", ClampMin = 0))
+	UPROPERTY(EditDefaultsOnly, Category = "Tool", meta = (AllowPrivateAccess = "true", ClampMin = 0))
 	float StaminaCost = 0.f;
 
 	/** How long one use takes, in seconds, before the next can start. Longer while the player is out of stamina. */
-	UPROPERTY(EditDefaultsOnly, Category = "Farming", meta = (AllowPrivateAccess = "true", ClampMin = 0, Units = "s"))
+	UPROPERTY(EditDefaultsOnly, Category = "Tool", meta = (AllowPrivateAccess = "true", ClampMin = 0, Units = "s"))
 	float UseSeconds = 0.4f;
 
 	/** Mesh held in the right hand. The farmer Blueprint's HeldTool component sets its grip offset and rotation. */
-	UPROPERTY(EditDefaultsOnly, Category = "Farming|Visuals", meta = (AllowPrivateAccess = "true", AssetBundles = "Visuals"))
+	UPROPERTY(EditDefaultsOnly, Category = "Visuals", meta = (AllowPrivateAccess = "true", AssetBundles = "Visuals"))
 	TSoftObjectPtr<UStaticMesh> HeldMesh;
 };

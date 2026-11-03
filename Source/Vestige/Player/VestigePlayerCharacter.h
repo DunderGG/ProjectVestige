@@ -99,13 +99,13 @@ private:
 	 * Seconds from a movement press until the farmer walks at full strength. A tap shorter than this moves him a few
 	 * centimetres, so a tile next to him can be picked without leaving his own tile, while a held key walks at once.
 	 */
-	UPROPERTY(EditDefaultsOnly, Category = "Farming|Input", meta = (AllowPrivateAccess = "true", ClampMin = 0))
+	UPROPERTY(EditDefaultsOnly, Category = "Input", meta = (AllowPrivateAccess = "true", ClampMin = 0))
 	float MoveRampSeconds = 0.25f;
 
 	UPROPERTY(VisibleAnywhere, Category = "Farming")
 	TObjectPtr<UFarmingComponent> Farming;
 
-	UPROPERTY(VisibleAnywhere, Category = "Farming")
+	UPROPERTY(VisibleAnywhere, Category = "Rest")
 	TObjectPtr<UVestigeRestComponent> Rest;
 
 	UPROPERTY(VisibleAnywhere, Category = "Interaction")
@@ -116,7 +116,7 @@ private:
 	TObjectPtr<UFarmTargetHighlightComponent> TargetHighlight;
 
 	/** Attached to the right hand. Move and rotate it in the Blueprint to line up each tool's grip. */
-	UPROPERTY(VisibleAnywhere, Category = "Farming")
+	UPROPERTY(VisibleAnywhere, Category = "Tool")
 	TObjectPtr<UStaticMeshComponent> HeldTool;
 
 	// Input is created in code so no input assets are needed yet. These can move to IA_ and IMC_ assets later.

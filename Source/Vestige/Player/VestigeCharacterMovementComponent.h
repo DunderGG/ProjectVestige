@@ -48,7 +48,7 @@ protected:
 
 private:
 	/** Share of the walking speed left while the use key is held, so walking along a row with a tool is steady. */
-	UPROPERTY(EditDefaultsOnly, Category = "Farming|Movement", meta = (AllowPrivateAccess = "true", ClampMin = 0.1, ClampMax = 1))
+	UPROPERTY(EditDefaultsOnly, Category = "Movement", meta = (AllowPrivateAccess = "true", ClampMin = 0.1, ClampMax = 1))
 	float ToolUseSpeedScale = 0.5f;
 
 	FVector IdleFacing = FVector::ZeroVector;

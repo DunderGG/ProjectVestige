@@ -19,7 +19,7 @@ struct FVestigeRestSaveData;
  * refilled to ExhaustedRefillFraction of the maximum; an earlier night refills it fully and clears exhaustion.
  * Lives on the player's pawn and changes stamina through gameplay effects on the owner's ability system.
  */
-UCLASS(ClassGroup = (Farming), meta = (BlueprintSpawnableComponent))
+UCLASS(ClassGroup = (Rest), meta = (BlueprintSpawnableComponent))
 class UVestigeRestComponent : public UActorComponent
 {
 	GENERATED_BODY()
@@ -75,22 +75,22 @@ private:
 	UAbilitySystemComponent* GetAbilitySystem() const;
 
 	/** Hour of the "getting late" warning, from midnight at the start of the day. */
-	UPROPERTY(EditDefaultsOnly, Category = "Farming|Rest", meta = (AllowPrivateAccess = "true", ClampMin = 0, ClampMax = 30))
+	UPROPERTY(EditDefaultsOnly, Category = "Rest", meta = (AllowPrivateAccess = "true", ClampMin = 0, ClampMax = 30))
 	int32 LateWarningHour = 22;
 
 	/**
 	 * Hour the late night starts, from midnight at the start of the day (24 is midnight): stamina starts draining, and
 	 * going to bed from then on makes the player exhausted.
 	 */
-	UPROPERTY(EditDefaultsOnly, Category = "Farming|Rest", meta = (AllowPrivateAccess = "true", ClampMin = 0, ClampMax = 30))
+	UPROPERTY(EditDefaultsOnly, Category = "Rest", meta = (AllowPrivateAccess = "true", ClampMin = 0, ClampMax = 30))
 	int32 LateNightHour = 24;
 
 	/** Stamina the late night drains per game hour, whatever the clock's speed. */
-	UPROPERTY(EditDefaultsOnly, Category = "Farming|Rest", meta = (AllowPrivateAccess = "true", ClampMin = 0))
+	UPROPERTY(EditDefaultsOnly, Category = "Rest", meta = (AllowPrivateAccess = "true", ClampMin = 0))
 	float LateNightDrainPerGameHour = 10.f;
 
 	/** Share of the maximum stamina an exhausted player starts the day with. */
-	UPROPERTY(EditDefaultsOnly, Category = "Farming|Rest", meta = (AllowPrivateAccess = "true", ClampMin = 0, ClampMax = 1))
+	UPROPERTY(EditDefaultsOnly, Category = "Rest", meta = (AllowPrivateAccess = "true", ClampMin = 0, ClampMax = 1))
 	float ExhaustedRefillFraction = 0.75f;
 
 	UPROPERTY()
