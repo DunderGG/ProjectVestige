@@ -20,6 +20,7 @@
 #include "Farming/FarmLog.h"
 #include "Farming/FarmTile.h"
 #include "Farming/FarmTileTargeting.h"
+#include "GameFramework/Character.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerState.h"
 #include "Inventory/VestigeInventoryComponent.h"
@@ -72,6 +73,10 @@ void UFarmingComponent::BeginPlay()
 	{
 		Root->TransformUpdated.AddUObject(this, &UFarmingComponent::FollowOwnerTransform);
 	}
+	if (ACharacter* Character = Cast<ACharacter>(GetOwner()))
+	{
+		Character->LandedDelegate.AddDynamic(this, &UFarmingComponent::ContinueAfterLanding);
+	}
 	UpdateTargetTile();
 }
 
@@ -84,6 +89,10 @@ void UFarmingComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	if (USceneComponent* Root = GetOwner() ? GetOwner()->GetRootComponent() : nullptr)
 	{
 		Root->TransformUpdated.RemoveAll(this);
+	}
+	if (ACharacter* Character = Cast<ACharacter>(GetOwner()))
+	{
+		Character->LandedDelegate.RemoveDynamic(this, &UFarmingComponent::ContinueAfterLanding);
 	}
 	FollowAbilitySystem(nullptr);
 	Super::EndPlay(EndPlayReason);
@@ -226,6 +235,11 @@ void UFarmingComponent::ContinueAfterUse(const FAbilityEndedData& EndedData)
 	{
 		RepeatToolUse();
 	}
+}
+
+void UFarmingComponent::ContinueAfterLanding(const FHitResult& Hit)
+{
+	RepeatToolUse();
 }
 
 void UFarmingComponent::FollowAbilitySystem(UAbilitySystemComponent* AbilitySystem)

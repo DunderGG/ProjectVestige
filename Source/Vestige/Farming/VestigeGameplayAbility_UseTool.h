@@ -38,6 +38,11 @@ protected:
 	virtual void EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
 		const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled) override;
 
+	/** Refuses while the avatar is in the air (jumping or falling): tools work only from the ground. */
+	virtual bool CanActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
+		const FGameplayTagContainer* SourceTags, const FGameplayTagContainer* TargetTags,
+		FGameplayTagContainer* OptionalRelevantTags) const override;
+
 	/** Always passes: an action works at any stamina, and the stamina set keeps a cost from taking it below zero. */
 	virtual bool CheckCost(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
 		FGameplayTagContainer* OptionalRelevantTags) const override;

@@ -74,7 +74,7 @@ namespace VestigePlayerCharacterTests
 			ASSERT_THAT(IsTrue(Movement->GetMaxSpeed() == WalkSpeed));
 		}
 
-		TEST_METHOD(HoldingTheUseKeyDoesNotSlowFalling)
+		TEST_METHOD(HoldingTheUseKeySlowsJumpsToo)
 		{
 			AVestigePlayerCharacter& Farmer = Spawner.SpawnActor<AVestigePlayerCharacter>();
 			Farmer.DispatchBeginPlay();
@@ -87,7 +87,7 @@ namespace VestigePlayerCharacterTests
 
 			Farming->StartUsingTool();
 
-			ASSERT_THAT(IsTrue(Movement->GetMaxSpeed() == FallingSpeed));
+			ASSERT_THAT(IsTrue(FMath::IsNearlyEqual(Movement->GetMaxSpeed(), FallingSpeed * 0.5f)));
 		}
 
 		TEST_METHOD(TheFarmerBlueprintTurnsWithTheVestigeMovementComponent)

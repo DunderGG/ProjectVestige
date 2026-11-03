@@ -10,6 +10,7 @@
 #include "Engine/World.h"
 #include "Farming/FarmingComponent.h"
 #include "GameFramework/Actor.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "TimerManager.h"
 
 namespace VestigeUseTool
@@ -71,6 +72,20 @@ void UVestigeGameplayAbility_UseTool::EndAbility(const FGameplayAbilitySpecHandl
 	}
 	ToolInUse = nullptr;
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
+}
+
+bool UVestigeGameplayAbility_UseTool::CanActivateAbility(const FGameplayAbilitySpecHandle Handle,
+	const FGameplayAbilityActorInfo* ActorInfo, const FGameplayTagContainer* SourceTags, const FGameplayTagContainer* TargetTags,
+	FGameplayTagContainer* OptionalRelevantTags) const
+{
+	// Otherwise jumping along a row would work it without the slower walk that holding the use key brings.
+	const UCharacterMovementComponent* Movement =
+		ActorInfo ? Cast<UCharacterMovementComponent>(ActorInfo->MovementComponent.Get()) : nullptr;
+	if (Movement && Movement->IsFalling())
+	{
+		return false;
+	}
+	return Super::CanActivateAbility(Handle, ActorInfo, SourceTags, TargetTags, OptionalRelevantTags);
 }
 
 bool UVestigeGameplayAbility_UseTool::CheckCost(

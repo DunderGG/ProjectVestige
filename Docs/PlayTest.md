@@ -219,6 +219,14 @@ After David's play-test: the farmer walks at half speed while E is held, so a ro
 - [ ] **No E, no change**: walking without E, and jumping or falling with E held, feel as before.
 - [ ] **Feel**: say if half is too slow or not slow enough. It is Tool Use Speed Scale on `BP_PlayerCharacter`'s **CharacterMovement** component (Details panel, Farming > Movement).
 
+### No tools in the air, 2026-11-03
+
+After David found that jumping got round the slower walk: tools don't work while the farmer is in the air, a held E carries on when he lands, and a jump with E held is slowed like the walk. The tests cover the rules. The commit is the one titled "Keep tools on the ground".
+
+- [ ] **Jumping**: hold E with the hoe and jump along a row of grass. No tile changes while he is in the air, and the tile he faces when he lands is tilled.
+- [ ] **No speed-up**: with E held, jumping along the row is no faster than walking it.
+- [ ] **Press in the air**: press E once during a jump without holding it. Nothing happens, and no message shows.
+
 ### Editor chores
 
 Changes only the editor can make safely. The steps are in [Roadmap.md, Housekeeping](Roadmap.md#3-housekeeping): re-saving the template Blueprints and `L_Farm`, moving `BP_FarmTile` and the materials with redirectors fixed, and regenerating the Android File Server token if it was ever used. After each one, run the [smoke test](#3-smoke-test).

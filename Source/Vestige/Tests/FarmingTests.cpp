@@ -19,6 +19,7 @@
 #include "Farming/FarmingComponent.h"
 #include "Farming/FarmTile.h"
 #include "Farming/VestigeGameplayAbility_UseTool.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Inventory/VestigeInventoryComponent.h"
 #include "Inventory/VestigeInventorySaveData.h"
 #include "Player/VestigePlayerCharacter.h"
@@ -422,6 +423,31 @@ namespace FarmingTests
 			AFarmTile* NextTile = StepToNextTile();
 			ASSERT_THAT(IsNotNull(NextTile));
 			ASSERT_THAT(IsTrue(NextTile->GetState() == EFarmTileState::Tilled));
+			AbilitySystem->CancelAllAbilities();
+		}
+
+		TEST_METHOD(NoToolWorksInTheAir)
+		{
+			Hold(TEXT("Base.Hoe"), 0);
+			Farmer->GetCharacterMovement()->SetMovementMode(MOVE_Falling);
+
+			UseToolAndFinish();
+
+			ASSERT_THAT(IsTrue(TargetTile()->GetState() == EFarmTileState::Grass));
+			ASSERT_THAT(IsTrue(GetStamina() == GetMaxStamina()));
+		}
+
+		TEST_METHOD(LandingWithTheUseKeyHeldWorksTheTarget)
+		{
+			Hold(TEXT("Base.Hoe"), 0);
+			Farmer->GetCharacterMovement()->SetMovementMode(MOVE_Falling);
+			FarmingComponent->StartUsingTool();
+			ASSERT_THAT(IsTrue(TargetTile()->GetState() == EFarmTileState::Grass));
+
+			Farmer->GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+			Farmer->Landed(FHitResult());
+
+			ASSERT_THAT(IsTrue(TargetTile()->GetState() == EFarmTileState::Tilled));
 			AbilitySystem->CancelAllAbilities();
 		}
 

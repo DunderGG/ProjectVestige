@@ -162,6 +162,10 @@ private:
 	/** Repeats the tool use once a use-tool ability has ended. Bound to the owner's ability system's OnAbilityEnded. */
 	void ContinueAfterUse(const FAbilityEndedData& EndedData);
 
+	/** Repeats the tool use once the owner lands, since no use can start in the air. Bound to the owner's LandedDelegate. */
+	UFUNCTION()
+	void ContinueAfterLanding(const FHitResult& Hit);
+
 	/** Listens for the end of uses on AbilitySystem, and stops listening to the one before. */
 	void FollowAbilitySystem(UAbilitySystemComponent* AbilitySystem);
 

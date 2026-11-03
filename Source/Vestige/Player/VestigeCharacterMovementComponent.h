@@ -30,7 +30,10 @@ public:
 	/** Whether the farmer is holding the use key, so he walks at ToolUseSpeedScale of his speed. */
 	void SetToolUseHeld(bool bHeld) { bToolUseHeld = bHeld; }
 
-	/** The walking speed, scaled down while the use key is held; other movement modes keep the engine's speed. */
+	/**
+	 * The speed on the ground and in the air (falling moves at the walking speed), scaled down while the use key is held,
+	 * so jumping can't get round the slower walk. Swimming and flying keep the engine's speed.
+	 */
 	virtual float GetMaxSpeed() const override;
 
 	/**

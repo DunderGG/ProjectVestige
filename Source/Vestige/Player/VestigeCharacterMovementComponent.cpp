@@ -18,7 +18,7 @@ FRotator UVestigeCharacterMovementComponent::GetTurnTarget(
 float UVestigeCharacterMovementComponent::GetMaxSpeed() const
 {
 	const float Speed = Super::GetMaxSpeed();
-	return bToolUseHeld && IsWalking() ? Speed * ToolUseSpeedScale : Speed;
+	return bToolUseHeld && (IsWalking() || IsFalling()) ? Speed * ToolUseSpeedScale : Speed;
 }
 
 FRotator UVestigeCharacterMovementComponent::ComputeOrientToMovementRotation(
