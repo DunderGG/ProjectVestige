@@ -10,6 +10,7 @@
 #include "Farming/FarmTargetHighlightComponent.h"
 #include "Farming/FarmTile.h"
 #include "Materials/Material.h"
+#include "Materials/MaterialInstanceDynamic.h"
 #include "Materials/MaterialInterface.h"
 #include "Player/VestigePlayerCharacter.h"
 
@@ -117,15 +118,22 @@ namespace FarmTargetingTests
 		}
 
 		/**
-		 * Without the instanced mesh usage saved on the asset, the game draws the engine's default material instead.
-		 * The editor sets a missing flag in memory and marks it dirty, so a dirty flag fails too.
+		 * The character Blueprint the game uses sets the frame's material, and without the instanced mesh usage saved on
+		 * that material the game draws the engine's default material instead. The editor sets a missing flag in memory
+		 * and marks it dirty, so a dirty flag fails too.
 		 */
 		TEST_METHOD(HighlightMaterialIsSavedForInstancedMeshes)
 		{
-			const UFarmTargetHighlightComponent* Highlight = Farmer->FindComponentByClass<UFarmTargetHighlightComponent>();
+			UClass* FarmerClass =
+				LoadClass<AVestigePlayerCharacter>(nullptr, TEXT("/Game/Vestige/Blueprints/BP_PlayerCharacter.BP_PlayerCharacter_C"));
+			ASSERT_THAT(IsNotNull(FarmerClass));
+			AVestigePlayerCharacter& BlueprintFarmer = Spawner.SpawnActor<AVestigePlayerCharacter>(FActorSpawnParameters(), FarmerClass);
+			BlueprintFarmer.DispatchBeginPlay();
+			const UFarmTargetHighlightComponent* Highlight = BlueprintFarmer.FindComponentByClass<UFarmTargetHighlightComponent>();
 			ASSERT_THAT(IsNotNull(Highlight));
 			UMaterialInterface* Material = Highlight->GetMaterial(0);
-			ASSERT_THAT(IsNotNull(Material));
+			// The frame tints a dynamic instance of the material the Blueprint sets; without one it keeps the mesh's own.
+			ASSERT_THAT(IsNotNull(Cast<UMaterialInstanceDynamic>(Material)));
 			UMaterial* BaseMaterial = Material->GetMaterial();
 			ASSERT_THAT(IsNotNull(BaseMaterial));
 

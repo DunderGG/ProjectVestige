@@ -29,6 +29,9 @@ protected:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 private:
+	/** Puts HighlightMaterial, tinted with HighlightColor, on the frame. Warns when no material is set. */
+	void ApplyHighlightMaterial();
+
 	/** Adds the four bars of the frame, around a tile of AFarmTile::UnscaledSize. */
 	void BuildFrame();
 
@@ -38,6 +41,8 @@ private:
 	/**
 	 * Material for the frame: unlit, so the frame stays visible at night, with a vector parameter called Color.
 	 * It must have Used with Instanced Static Meshes set and saved, or the game draws the engine's default material instead.
+	 * Set on the player character Blueprint's highlight component (M_TileHighlight), not in C++, so code never names our
+	 * content by path.
 	 */
 	UPROPERTY(EditDefaultsOnly, Category = "Farming|Visuals", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UMaterialInterface> HighlightMaterial;

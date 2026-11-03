@@ -227,6 +227,13 @@ After David found that jumping got round the slower walk: tools don't work while
 - [x] **No speed-up**: with E held, jumping along the row is no faster than walking it.
 - [x] **Press in the air**: press E once during a jump without holding it. Nothing happens, and no message shows.
 
+### Tile highlight material from the Blueprint, 2026-11-03
+
+The frame's material, `M_TileHighlight`, is now set on `BP_PlayerCharacter`'s highlight component (by script) instead of in C++. The test checks the Blueprint has it; these checks are for how it looks. The commit is the one titled "Set the tile highlight material on the player Blueprint".
+
+- [ ] **Asset**: open `Content/Vestige/Blueprints/BP_PlayerCharacter`, select its **TargetHighlight** component: Highlight Material is `M_TileHighlight` (Details panel, Farming > Visuals). The Blueprint doesn't ask to be saved when you close it.
+- [ ] **Frame**: in Play in Editor the frame around the target tile is yellow and unlit as before, also at night, and the Output Log has no "No Highlight Material" warning and no "missing usage flag".
+
 ### Editor chores
 
 Changes only the editor can make safely. The steps are in [Roadmap.md, Housekeeping](Roadmap.md#3-housekeeping): re-saving the template Blueprints and `L_Farm`, moving `BP_FarmTile` and the materials with redirectors fixed, and regenerating the Android File Server token if it was ever used. After each one, run the [smoke test](#3-smoke-test).

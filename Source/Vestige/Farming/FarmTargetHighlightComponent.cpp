@@ -4,6 +4,7 @@
 #include "Farming/FarmTargetHighlightComponent.h"
 
 #include "Engine/StaticMesh.h"
+#include "Farming/FarmLog.h"
 #include "Farming/FarmingComponent.h"
 #include "Farming/FarmTile.h"
 #include "GameFramework/Actor.h"
@@ -27,11 +28,9 @@ UFarmTargetHighlightComponent::UFarmTargetHighlightComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
 
+	// An engine placeholder, which ConstructorHelpers may load. HighlightMaterial is our own asset, so the Blueprint sets it.
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> CubeMesh(TEXT("/Engine/BasicShapes/Cube.Cube"));
-	static ConstructorHelpers::FObjectFinder<UMaterialInterface> UnlitMaterial(
-		TEXT("/Game/Vestige/Materials/M_TileHighlight.M_TileHighlight"));
 	SetStaticMesh(CubeMesh.Object);
-	HighlightMaterial = UnlitMaterial.Object;
 
 	// The frame sits on a tile in the world, not on the farmer, and moves only when the target changes.
 	SetUsingAbsoluteLocation(true);
@@ -48,11 +47,7 @@ void UFarmTargetHighlightComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (UMaterialInstanceDynamic* Material = UMaterialInstanceDynamic::Create(HighlightMaterial, this))
-	{
-		Material->SetVectorParameterValue(FarmTargetHighlight::ColorParameter, HighlightColor);
-		SetMaterial(0, Material);
-	}
+	ApplyHighlightMaterial();
 	BuildFrame();
 
 	Farming = GetOwner() ? GetOwner()->FindComponentByClass<UFarmingComponent>() : nullptr;
@@ -70,6 +65,20 @@ void UFarmTargetHighlightComponent::EndPlay(const EEndPlayReason::Type EndPlayRe
 		OwnerFarming->OnTargetTileChanged.RemoveAll(this);
 	}
 	Super::EndPlay(EndPlayReason);
+}
+
+void UFarmTargetHighlightComponent::ApplyHighlightMaterial()
+{
+	if (!HighlightMaterial)
+	{
+		VESTIGE_LOG(this, LogFarm, Warning, "No Highlight Material is set, so the frame draws with the mesh's own material.");
+		return;
+	}
+	if (UMaterialInstanceDynamic* Material = UMaterialInstanceDynamic::Create(HighlightMaterial, this))
+	{
+		Material->SetVectorParameterValue(FarmTargetHighlight::ColorParameter, HighlightColor);
+		SetMaterial(0, Material);
+	}
 }
 
 void UFarmTargetHighlightComponent::BuildFrame()

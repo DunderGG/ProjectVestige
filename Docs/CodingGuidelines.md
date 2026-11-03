@@ -385,7 +385,7 @@ Not in `Tick`, not in a timer that runs every frame, and not in a Slate or UMG b
 - **No synchronous loads during interactive play.** `LoadSynchronous`, `TryLoad`, `WaitUntilComplete` and `UVestigeContentData::LoadWithVisuals` are only for play start and loading screens, where the cost is known. Everything else loads asynchronously (`FStreamableManager`, the Asset Manager) before it is needed.
 - In Blueprints, a **Cast To** node or a variable of another Blueprint's type is a hard reference that loads that Blueprint and everything it references. Cast to C++ base classes or use interfaces instead.
 - Check the **Size Map** and **Reference Viewer** (right-click the asset in the Content Browser) for every new or changed Blueprint and data asset, and make sure it doesn't drag in unrelated content.
-- `ConstructorHelpers` only in constructors, and only for engine placeholder assets.
+- `ConstructorHelpers` only in constructors, and only for engine placeholder assets. Our own assets are set in a Blueprint's defaults or a data asset (`M_TileHighlight` on `BP_PlayerCharacter`'s highlight component), so code never names our content by path and the editor can move it.
 
 ### 12.5 Components and rendering from code
 
@@ -509,7 +509,6 @@ Existing code that doesn't yet match these guidelines. Fix them when touching th
 
 Add an entry here when code is committed that doesn't meet the guide, with what is missing, and a roadmap item to fix it.
 
-- `UFarmTargetHighlightComponent` loads our own `M_TileHighlight` with `ConstructorHelpers` ([section 12.4](#124-assets-and-loading)). [Roadmap.md, Housekeeping](Roadmap.md#3-housekeeping).
 - The general types' Details categories still start with `Farming` ([section 6](#6-uproperty-ufunction-and-blueprint-exposure) says so too, until the rule is decided). [Roadmap.md, Housekeeping](Roadmap.md#3-housekeeping).
 
 ## 17. Review checklist
