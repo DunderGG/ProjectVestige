@@ -184,48 +184,48 @@ Our log lines are now split into one category per system, and each line starts w
 
 The stamina line turns red while the player is out of stamina. The HUD follows the set's out-of-stamina tag, so it changes colour exactly when the "You're out of stamina" message appears. The commit is the one titled "Show the stamina line in red while out of stamina".
 
-- [ ] **Red at zero**: keep tilling and watering until the HUD reads "Stamina 0 / 100". The line turns red at the same moment as the out-of-stamina message, and stays red while you keep working.
-- [ ] **White again**: sleeping (F at the bed, or N) brings the line back to white with "Stamina 100 / 100".
-- [ ] **Colour**: say if the red is hard to read on the dark backdrop, or too loud. It is `VestigeHudStyle::Warning` in `UI/VestigeHudWidget.cpp`.
+- [x] **Red at zero**: keep tilling and watering until the HUD reads "Stamina 0 / 100". The line turns red at the same moment as the out-of-stamina message, and stays red while you keep working.
+- [x] **White again**: sleeping (F at the bed, or N) brings the line back to white with "Stamina 100 / 100".
+- [x] **Colour**: say if the red is hard to read on the dark backdrop, or too loud. It is `VestigeHudStyle::Warning` in `UI/VestigeHudWidget.cpp`.
 
 ### Late nights, 2026-11-02
 
 The late-night rules from [GameDesign.md, section 5](GameDesign.md#5-time-days-and-seasons): no pass-out at 02:00, a stamina drain from midnight, and exhaustion after going to bed at 00:00 or later. The tests cover the rules; these checks are for how they feel and read. The commit is the one titled "Add the late-night rules: drain, exhaustion and warnings". Back up `Saved/SaveGames/` first: your save is upgraded to version 4 on the first new day. To get to the night quickly, lower Real Seconds Per Game Hour on the `VestigeDayCycle` in `L_Farm` for the session (Details panel, Farming > Time), and put it back afterwards.
 
-- [ ] **Warnings**: at 22:00 a message says it's getting late, and at 00:00 one says it's past midnight and stamina drains until you sleep.
-- [ ] **Drain**: after midnight the stamina number counts down by itself, about 10 per game hour, even standing still. It stops at 0, the line turns red, and the out-of-stamina message appears once.
-- [ ] **Late bed**: sleeping (F at the bed, or N) after midnight shows "You slept. Day N begins.", then "You went to bed late and wake up exhausted.", then "Game saved.". The HUD reads "Stamina 75 / 100   Exhausted", and the drain has stopped.
-- [ ] **Early bed**: the next night, sleeping before midnight shows "A good night's sleep. You're no longer exhausted." and the HUD reads "Stamina 100 / 100" without "Exhausted".
-- [ ] **All night**: staying up until 06:00 starts the next day where the farmer stands, with "You stayed up all night. Day N begins." and the exhausted message. Nothing jumps: the sun rises as the new day starts.
-- [ ] **Saving**: go to bed late, then stop and play again: the HUD still says "Exhausted", with 75 stamina.
-- [ ] **Feel**: say whether 10 per game hour pushes you toward bed without feeling harsh, and whether 75% is enough of a cost. Both are settings on `BP_PlayerCharacter`'s **Rest** component (Details panel, Farming > Rest), as are the warning and late-night hours.
+- [x] **Warnings**: at 22:00 a message says it's getting late, and at 00:00 one says it's past midnight and stamina drains until you sleep.
+- [x] **Drain**: after midnight the stamina number counts down by itself, about 10 per game hour, even standing still. It stops at 0, the line turns red, and the out-of-stamina message appears once.
+- [x] **Late bed**: sleeping (F at the bed, or N) after midnight shows "You slept. Day N begins.", then "You went to bed late and wake up exhausted.", then "Game saved.". The HUD reads "Stamina 75 / 100   Exhausted", and the drain has stopped.
+- [x] **Early bed**: the next night, sleeping before midnight shows "A good night's sleep. You're no longer exhausted." and the HUD reads "Stamina 100 / 100" without "Exhausted".
+- [x] **All night**: staying up until 06:00 starts the next day where the farmer stands, with "You stayed up all night. Day N begins." and the exhausted message. Nothing jumps: the sun rises as the new day starts.
+- [x] **Saving**: go to bed late, then stop and play again: the HUD still says "Exhausted", with 75 stamina.
+- [x] **Feel**: say whether 10 per game hour pushes you toward bed without feeling harsh, and whether 75% is enough of a cost. Both are settings on `BP_PlayerCharacter`'s **Rest** component (Details panel, Farming > Rest), as are the warning and late-night hours.
 
 ### Holding E, 2026-11-02
 
 Holding E keeps using the tool: the next use starts when the last one has finished or when the framed tile changes, and only if it would change that tile. The tests cover the rule; these checks are for the feel. The commit is the one titled "Repeat the tool use while E is held".
 
-- [ ] **A row**: with the hoe, hold E and walk along a row of grass. Every tile you pass is tilled, one "Tilled the soil." message each, and walking doesn't need to stop.
-- [ ] **Quiet skips**: hold E with the hoe while standing still facing a tile you just tilled. Nothing more happens and no message repeats. Walk on with E still held, and the next grass tile is tilled.
-- [ ] **The press says why**: press E once facing tilled soil with the hoe. "Only grass can be tilled." shows once, not again while you hold E.
-- [ ] **Release**: let go of E halfway along a row. The use under way finishes, and no tile after it changes.
-- [ ] **Watering and planting**: holding E with the watering can waters a row of tilled soil, and with the seeds plants a row until the seeds run out, then stops quietly.
-- [ ] **Speed**: say whether walking with E held outruns the 0.4 s use (tiles left behind unworked). If so, the use time or the walk speed needs tuning.
+- [x] **A row**: with the hoe, hold E and walk along a row of grass. Every tile you pass is tilled, one "Tilled the soil." message each, and walking doesn't need to stop.
+- [x] **Quiet skips**: hold E with the hoe while standing still facing a tile you just tilled. Nothing more happens and no message repeats. Walk on with E still held, and the next grass tile is tilled.
+- [x] **The press says why**: press E once facing tilled soil with the hoe. "Only grass can be tilled." shows once, not again while you hold E.
+- [x] **Release**: let go of E halfway along a row. The use under way finishes, and no tile after it changes.
+- [x] **Watering and planting**: holding E with the watering can waters a row of tilled soil, and with the seeds plants a row until the seeds run out, then stops quietly.
+- [x] **Speed**: say whether walking with E held outruns the 0.4 s use (tiles left behind unworked). If so, the use time or the walk speed needs tuning.
 
 ### Slower walk while holding E, 2026-11-03
 
 After David's play-test: the farmer walks at half speed while E is held, so a row is worked evenly. The tests check the speed; these checks are for the feel. The commit is the one titled "Walk at half speed while E is held".
 
-- [ ] **Slower**: holding E while walking along a row moves at about half speed, and every tile of the row is worked. Letting go brings back the normal walk at once.
-- [ ] **No E, no change**: walking without E, and jumping or falling with E held, feel as before.
-- [ ] **Feel**: say if half is too slow or not slow enough. It is Tool Use Speed Scale on `BP_PlayerCharacter`'s **CharacterMovement** component (Details panel, Farming > Movement).
+- [x] **Slower**: holding E while walking along a row moves at about half speed, and every tile of the row is worked. Letting go brings back the normal walk at once.
+- [x] **No E, no change**: walking without E, and jumping or falling with E held, feel as before.
+- [x] **Feel**: say if half is too slow or not slow enough. It is Tool Use Speed Scale on `BP_PlayerCharacter`'s **CharacterMovement** component (Details panel, Farming > Movement).
 
 ### No tools in the air, 2026-11-03
 
 After David found that jumping got round the slower walk: tools don't work while the farmer is in the air, a held E carries on when he lands, and a jump with E held is slowed like the walk. The tests cover the rules. The commit is the one titled "Keep tools on the ground".
 
-- [ ] **Jumping**: hold E with the hoe and jump along a row of grass. No tile changes while he is in the air, and the tile he faces when he lands is tilled.
-- [ ] **No speed-up**: with E held, jumping along the row is no faster than walking it.
-- [ ] **Press in the air**: press E once during a jump without holding it. Nothing happens, and no message shows.
+- [x] **Jumping**: hold E with the hoe and jump along a row of grass. No tile changes while he is in the air, and the tile he faces when he lands is tilled.
+- [x] **No speed-up**: with E held, jumping along the row is no faster than walking it.
+- [x] **Press in the air**: press E once during a jump without holding it. Nothing happens, and no message shows.
 
 ### Editor chores
 
