@@ -196,12 +196,12 @@ Visiting the Archive through Cleo’s storyline opens unique facilities that adh
 
 ## 8. Technical & Implementation Notes
 
-- **Data Asset:** Defined as `UFarmCharacterData` asset `Base.Character.Cleo`.
-- **Dialogue Tables:** Stored in `Content/Narrative/Dialogue/DT_Dialogue_Cleo.uasset`.
+- **Data Asset:** Defined as `UVestigeCharacterData` asset `Base.Character.Cleo`.
+- **Dialogue Tables:** Stored in `Content/Vestige/Dialogue/DT_Dialogue_Cleo.uasset`.
 - **Audio Cue Requirements:**
   - Ambient mechanical clicks when her focal lens cycles.
   - Soft relay hum and high-frequency chime during analytical dialogue prompts.
-- **Schedule Component:** Driven by `UFarmScheduleComponent` with conditional weather overrides for radiation storms (`EFarmWeather::RadiationStorm`).
+- **Schedule:** A daily routine stored in the character data and run by the robot's AI controller and StateTree ([Systems.md, section 10](../../Systems.md#10-robots-ai-routines-and-crowds)), with conditional weather overrides for radiation storms. Weather isn't designed yet; a weather kind will be data, not an enum.
 
 ---
 

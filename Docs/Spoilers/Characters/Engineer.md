@@ -200,13 +200,13 @@ Visiting the Bastion through Gage’s storyline opens unique facilities that adh
 
 ## 8. Technical & Implementation Notes
 
-- **Data Asset:** Defined as `UFarmCharacterData` asset `Base.Character.Gage`.
-- **Dialogue Tables:** Stored in `Content/Narrative/Dialogue/DT_Dialogue_Gage.uasset`.
+- **Data Asset:** Defined as `UVestigeCharacterData` asset `Base.Character.Gage`.
+- **Dialogue Tables:** Stored in `Content/Vestige/Dialogue/DT_Dialogue_Gage.uasset`.
 - **Audio Cue Requirements:**
   - Heavy, resonant footsteps with metallic impact sound.
   - Low hydraulic pressure hiss when bending or standing.
   - Rhythmic ratchet clicks of his pneumatic socket wrench.
-- **Schedule Component:** Driven by `UFarmScheduleComponent` with conditional weather overrides for radiation storms (`EFarmWeather::RadiationStorm`).
+- **Schedule:** A daily routine stored in the character data and run by the robot's AI controller and StateTree ([Systems.md, section 10](../../Systems.md#10-robots-ai-routines-and-crowds)), with conditional weather overrides for radiation storms. Weather isn't designed yet; a weather kind will be data, not an enum.
 
 ---
 
