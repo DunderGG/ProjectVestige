@@ -211,6 +211,14 @@ Holding E keeps using the tool: the next use starts when the last one has finish
 - [ ] **Watering and planting**: holding E with the watering can waters a row of tilled soil, and with the seeds plants a row until the seeds run out, then stops quietly.
 - [ ] **Speed**: say whether walking with E held outruns the 0.4 s use (tiles left behind unworked). If so, the use time or the walk speed needs tuning.
 
+### Slower walk while holding E, 2026-11-03
+
+After David's play-test: the farmer walks at half speed while E is held, so a row is worked evenly. The tests check the speed; these checks are for the feel. The commit is the one titled "Walk at half speed while E is held".
+
+- [ ] **Slower**: holding E while walking along a row moves at about half speed, and every tile of the row is worked. Letting go brings back the normal walk at once.
+- [ ] **No E, no change**: walking without E, and jumping or falling with E held, feel as before.
+- [ ] **Feel**: say if half is too slow or not slow enough. It is Tool Use Speed Scale on `BP_PlayerCharacter`'s **CharacterMovement** component (Details panel, Farming > Movement).
+
 ### Editor chores
 
 Changes only the editor can make safely. The steps are in [Roadmap.md, Housekeeping](Roadmap.md#3-housekeeping): re-saving the template Blueprints and `L_Farm`, moving `BP_FarmTile` and the materials with redirectors fixed, and regenerating the Android File Server token if it was ever used. After each one, run the [smoke test](#3-smoke-test).

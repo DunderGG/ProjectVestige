@@ -27,6 +27,12 @@ public:
 	/** The direction to turn toward while there is no movement input. A zero vector leaves the farmer facing as he is. */
 	void SetIdleFacing(const FVector& Direction) { IdleFacing = Direction; }
 
+	/** Whether the farmer is holding the use key, so he walks at ToolUseSpeedScale of his speed. */
+	void SetToolUseHeld(bool bHeld) { bToolUseHeld = bHeld; }
+
+	/** The walking speed, scaled down while the use key is held; other movement modes keep the engine's speed. */
+	virtual float GetMaxSpeed() const override;
+
 	/**
 	 * The rotation to turn toward: along MoveDirection while there is one, else toward IdleDirection, else
 	 * CurrentRotation. Only the ground direction counts.
@@ -38,5 +44,10 @@ protected:
 		const FRotator& CurrentRotation, float DeltaTime, FRotator& DeltaRotation) const override;
 
 private:
+	/** Share of the walking speed left while the use key is held, so walking along a row with a tool is steady. */
+	UPROPERTY(EditDefaultsOnly, Category = "Farming|Movement", meta = (AllowPrivateAccess = "true", ClampMin = 0.1, ClampMax = 1))
+	float ToolUseSpeedScale = 0.5f;
+
 	FVector IdleFacing = FVector::ZeroVector;
+	bool bToolUseHeld = false;
 };

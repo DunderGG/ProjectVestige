@@ -5,6 +5,7 @@
 
 #include "Components/ActorTestSpawner.h"
 #include "CQTest.h"
+#include "Farming/FarmingComponent.h"
 #include "Player/VestigeCharacterMovementComponent.h"
 #include "Player/VestigePlayerCharacter.h"
 
@@ -53,6 +54,40 @@ namespace VestigePlayerCharacterTests
 			const UVestigeCharacterMovementComponent* Movement = Farmer.GetCharacterMovement<UVestigeCharacterMovementComponent>();
 			ASSERT_THAT(IsNotNull(Movement));
 			ASSERT_THAT(IsTrue(Movement->RotationRate.Yaw == VestigeMovement::TurnDegreesPerSecond));
+		}
+
+		TEST_METHOD(HoldingTheUseKeyHalvesTheWalkingSpeed)
+		{
+			AVestigePlayerCharacter& Farmer = Spawner.SpawnActor<AVestigePlayerCharacter>();
+			Farmer.DispatchBeginPlay();
+			UVestigeCharacterMovementComponent* Movement = Farmer.GetCharacterMovement<UVestigeCharacterMovementComponent>();
+			UFarmingComponent* Farming = Farmer.FindComponentByClass<UFarmingComponent>();
+			ASSERT_THAT(IsNotNull(Movement));
+			ASSERT_THAT(IsNotNull(Farming));
+			Movement->SetMovementMode(MOVE_Walking);
+			const float WalkSpeed = Movement->GetMaxSpeed();
+
+			Farming->StartUsingTool();
+			ASSERT_THAT(IsTrue(FMath::IsNearlyEqual(Movement->GetMaxSpeed(), WalkSpeed * 0.5f)));
+
+			Farming->StopUsingTool();
+			ASSERT_THAT(IsTrue(Movement->GetMaxSpeed() == WalkSpeed));
+		}
+
+		TEST_METHOD(HoldingTheUseKeyDoesNotSlowFalling)
+		{
+			AVestigePlayerCharacter& Farmer = Spawner.SpawnActor<AVestigePlayerCharacter>();
+			Farmer.DispatchBeginPlay();
+			UVestigeCharacterMovementComponent* Movement = Farmer.GetCharacterMovement<UVestigeCharacterMovementComponent>();
+			UFarmingComponent* Farming = Farmer.FindComponentByClass<UFarmingComponent>();
+			ASSERT_THAT(IsNotNull(Movement));
+			ASSERT_THAT(IsNotNull(Farming));
+			Movement->SetMovementMode(MOVE_Falling);
+			const float FallingSpeed = Movement->GetMaxSpeed();
+
+			Farming->StartUsingTool();
+
+			ASSERT_THAT(IsTrue(Movement->GetMaxSpeed() == FallingSpeed));
 		}
 
 		TEST_METHOD(TheFarmerBlueprintTurnsWithTheVestigeMovementComponent)

@@ -15,6 +15,12 @@ FRotator UVestigeCharacterMovementComponent::GetTurnTarget(
 	return GroundIdle.IsZero() ? CurrentRotation : GroundIdle.Rotation();
 }
 
+float UVestigeCharacterMovementComponent::GetMaxSpeed() const
+{
+	const float Speed = Super::GetMaxSpeed();
+	return bToolUseHeld && IsWalking() ? Speed * ToolUseSpeedScale : Speed;
+}
+
 FRotator UVestigeCharacterMovementComponent::ComputeOrientToMovementRotation(
 	const FRotator& CurrentRotation, float DeltaTime, FRotator& DeltaRotation) const
 {

@@ -19,6 +19,7 @@ struct FFarmFarmingSaveData;
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnFarmToolChanged, const UVestigeToolData* /* Tool */);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnFarmTargetTileChanged, const AFarmTile* /* Tile */);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnFarmToolUseHeldChanged, bool /* bHeld */);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnFarmCropHarvested, const UFarmCropData*, Crop, const AFarmTile*, Tile);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnFarmToolUsed, const UVestigeToolData*, Tool, const AFarmTile*, Tile);
 
@@ -102,6 +103,9 @@ public:
 
 	/** Broadcast when the target tile changes, with nullptr when there stops being one. */
 	FOnFarmTargetTileChanged OnTargetTileChanged;
+
+	/** Broadcast when the use key is pressed or released, with whether it is now held. The farmer walks slower meanwhile. */
+	FOnFarmToolUseHeldChanged OnToolUseHeldChanged;
 
 	/**
 	 * Extension point: broadcast when the owner harvests Crop from Tile, once the harvest is in the bag and the tile is

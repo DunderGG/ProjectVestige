@@ -77,11 +77,18 @@ void AVestigePlayerCharacter::BeginPlay()
 	// Follow the component's tool so the hand also updates when a save is loaded.
 	Farming->OnToolChanged.AddUObject(this, &AVestigePlayerCharacter::ShowHeldTool);
 	ShowHeldTool(Farming->GetCurrentTool());
+
+	// Holding the use key slows the walk, which belongs to the movement component.
+	if (UVestigeCharacterMovementComponent* Movement = GetCharacterMovement<UVestigeCharacterMovementComponent>())
+	{
+		Farming->OnToolUseHeldChanged.AddUObject(Movement, &UVestigeCharacterMovementComponent::SetToolUseHeld);
+	}
 }
 
 void AVestigePlayerCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Farming->OnToolChanged.RemoveAll(this);
+	Farming->OnToolUseHeldChanged.RemoveAll(GetCharacterMovement());
 	Super::EndPlay(EndPlayReason);
 }
 

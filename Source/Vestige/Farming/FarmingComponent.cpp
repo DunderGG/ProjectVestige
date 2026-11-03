@@ -175,6 +175,7 @@ void UFarmingComponent::UseTool()
 void UFarmingComponent::StartUsingTool()
 {
 	bToolUseHeld = true;
+	OnToolUseHeldChanged.Broadcast(bToolUseHeld);
 	FollowAbilitySystem(UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(GetOwner()));
 	UseTool();
 }
@@ -182,6 +183,7 @@ void UFarmingComponent::StartUsingTool()
 void UFarmingComponent::StopUsingTool()
 {
 	bToolUseHeld = false;
+	OnToolUseHeldChanged.Broadcast(bToolUseHeld);
 }
 
 void UFarmingComponent::RepeatToolUse()
