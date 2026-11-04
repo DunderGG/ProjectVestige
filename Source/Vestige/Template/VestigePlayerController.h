@@ -18,6 +18,11 @@ class AVestigePlayerController : public APlayerController
 {
 	GENERATED_BODY()
 	
+public:
+
+	/** Constructor */
+	AVestigePlayerController();
+
 protected:
 
 	/** Input Mapping Contexts */

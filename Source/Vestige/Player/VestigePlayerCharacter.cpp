@@ -22,7 +22,6 @@
 #include "InputMappingContext.h"
 #include "Player/VestigeCharacterMovementComponent.h"
 #include "Player/VestigePlayerState.h"
-#include "Save/VestigeSaveSubsystem.h"
 
 #define LOCTEXT_NAMESPACE "VestigePlayerCharacter"
 
@@ -98,8 +97,6 @@ void AVestigePlayerCharacter::CreateInput()
 
 	UseToolAction = AddInputAction(EKeys::E, LOCTEXT("UseTool", "Use tool"));
 	InteractAction = AddInputAction(EKeys::F, LOCTEXT("Interact", "Interact"));
-	SkipDayAction = AddInputAction(EKeys::N, LOCTEXT("SkipDay", "Skip day (test)"));
-	NewGameAction = AddInputAction(EKeys::F9, LOCTEXT("NewGame", "New game"));
 
 	// The number keys pick toolbar slots. Their hints name the tool in the slot, so the actions have no description.
 	const FKey ToolbarKeys[] = {
@@ -132,8 +129,6 @@ void AVestigePlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerI
 	EnhancedInput->BindAction(UseToolAction, ETriggerEvent::Started, Farming.Get(), &UFarmingComponent::StartUsingTool);
 	EnhancedInput->BindAction(UseToolAction, ETriggerEvent::Completed, Farming.Get(), &UFarmingComponent::StopUsingTool);
 	EnhancedInput->BindAction(InteractAction, ETriggerEvent::Started, Interaction.Get(), &UVestigeInteractionComponent::Interact);
-	EnhancedInput->BindAction(SkipDayAction, ETriggerEvent::Started, Rest.Get(), &UVestigeRestComponent::Sleep);
-	EnhancedInput->BindAction(NewGameAction, ETriggerEvent::Started, this, &AVestigePlayerCharacter::StartNewGame);
 	for (int32 Slot = 0; Slot < ToolbarSlotActions.Num(); ++Slot)
 	{
 		EnhancedInput->BindAction(
@@ -256,14 +251,6 @@ FKey AVestigePlayerCharacter::GetMappedKey(const UInputAction* Action) const
 		}
 	}
 	return EKeys::Invalid;
-}
-
-void AVestigePlayerCharacter::StartNewGame()
-{
-	if (UVestigeSaveSubsystem* Saves = GetWorld()->GetSubsystem<UVestigeSaveSubsystem>())
-	{
-		Saves->StartNewGame();
-	}
 }
 
 void AVestigePlayerCharacter::ShowHeldTool(const UVestigeToolData* Tool)

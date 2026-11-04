@@ -139,7 +139,8 @@ The fixes from the [code review](CodeReview.md) of 2026-11-04, in the order to d
 
 Quick wins:
 
-- [ ] Move the test keys, F9 (new game) and N (skip day), to a `UVestigeCheatManager` with exec functions compiled out of Shipping, reached from the console ([CodeReview.md, H5](CodeReview.md#h5--f9-deletes-both-saves-with-one-key-in-a-shipped-build); moved here from [section 6](#6-before-a-public-release), and it also ends the F9 screenshot clash in [Open problems](#open-problems)). A real New game comes with the main menu, behind a confirmation
+- [x] Move the test keys, F9 (new game) and N (skip day), to a `UVestigeCheatManager` with exec functions compiled out of Shipping, reached from the console ([CodeReview.md, H5](CodeReview.md#h5--f9-deletes-both-saves-with-one-key-in-a-shipped-build); moved here from [section 6](#6-before-a-public-release), and it also ends the F9 screenshot clash in [Open problems](#open-problems)). A real New game comes with the main menu, behind a confirmation
+   - Done 2026-11-04: the console commands `NewGame` and `SkipDay` in `UVestigeCheatManager` (`Player/`), set as the template player controller's cheat class outside Shipping; F9 and N are no longer bound. The New game in the menu is part of "Main menu, settings and save slots" in [section 6](#6-before-a-public-release)
 - [ ] Delete save versions 0 to 3: their upgrades and backups, the legacy fields, `EFarmTool` and `UFarmSaveGame`. Restart at version 1 and delete the development saves; keep the two alternating slots and the refusal to load or overwrite a newer save ([H4](CodeReview.md#h4--save-upgrade-code-for-a-game-nobody-else-has-played))
 - [ ] First performance baseline: a packaged build of `L_Farm` with a few hundred crop meshes, measured on the hardware closest to the target (RTX 2060 class, 1080p High) and recorded in Architecture.md ([H8](CodeReview.md#h8--rendering-is-unreals-maximum-feature-set-unmeasured-on-the-target); moved here from [4.1](#41-foundations))
 - [ ] Move the sun in small steps (for example every 0.25 degrees) instead of every frame, so virtual shadow maps keep their cache ([H8](CodeReview.md#h8--rendering-is-unreals-maximum-feature-set-unmeasured-on-the-target))
@@ -426,13 +427,14 @@ Roughly in the order from [GameDesign.md section 13](GameDesign.md#13-scope-and-
 ### Open problems
 > Anything minor we have been putting off.
 
-- [ ] F9 seems to be a hotkey for taking screenshots in the editor, noticed it when starting new game.
+- [x] F9 seems to be a hotkey for taking screenshots in the editor, noticed it when starting new game.
+   - Done 2026-11-04: F9 is no longer bound; a new game is the `NewGame` console command ([4.0](#40-structure-from-the-code-review))
 
 ## 6. Before a public release
 
 - [ ] Realistic art direction: Lumen, Nanite and Megascans for the world, custom Blender work for robots, machines and crops. Replace the low-poly placeholders
 - [ ] Replace the Epic template code and content (character, animations, input) with our own
-- [ ] Main menu, settings and save slots
+- [ ] Main menu, settings and save slots. Its New game asks for confirmation before it replaces a save ([CodeReview.md, H5](CodeReview.md#h5--f9-deletes-both-saves-with-one-key-in-a-shipped-build))
 - Moving the test keys F9 and N into a cheat manager: moved to [4.0](#40-structure-from-the-code-review), because F9 deletes the saves (code review, 2026-11-04)
 - [ ] Turn save compatibility on at the first public build: a version per saved owner, with upgrades from then on ([CodeReview.md, H4](CodeReview.md#h4--save-upgrade-code-for-a-game-nobody-else-has-played))
 - [ ] Music and sound effects

@@ -22,11 +22,10 @@ namespace VestigePlayerCharacterTests
 
 			const TArray<FVestigeKeyHint> Hints = Farmer.GetActionKeyHints();
 
-			ASSERT_THAT(IsTrue(Hints.Num() == 4));
+			// The test keys N and F9 are console commands now (UVestigeCheatManager), so they are neither bound nor hinted.
+			ASSERT_THAT(IsTrue(Hints.Num() == 2));
 			ASSERT_THAT(IsTrue(Hints[0].Key.ToString() == TEXT("E")));
 			ASSERT_THAT(IsTrue(Hints[1].Key.ToString() == TEXT("F")));
-			ASSERT_THAT(IsTrue(Hints[2].Key.ToString() == TEXT("N")));
-			ASSERT_THAT(IsTrue(Hints[3].Key.ToString() == TEXT("F9")));
 			for (const FVestigeKeyHint& Hint : Hints)
 			{
 				ASSERT_THAT(IsFalse(Hint.Action.IsEmpty()));

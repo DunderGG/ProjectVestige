@@ -7,7 +7,16 @@
 #include "InputMappingContext.h"
 #include "Blueprint/UserWidget.h"
 #include "Core/Vestige.h"
+#include "Player/VestigeCheatManager.h"
 #include "Widgets/Input/SVirtualJoystick.h"
+
+AVestigePlayerController::AVestigePlayerController()
+{
+#if UE_WITH_CHEAT_MANAGER
+	// The developer console commands. The engine never creates a cheat manager in Shipping builds.
+	CheatClass = UVestigeCheatManager::StaticClass();
+#endif
+}
 
 void AVestigePlayerController::BeginPlay()
 {

@@ -78,6 +78,8 @@ F9 (new game: delete both slots and reopen the map) and N (skip the day) are in 
 
 **Fix.** Now: a `UVestigeCheatManager` with exec functions, compiled out of Shipping and reached from the console. A real "New game" comes with the main menu, behind a confirmation.
 
+**Status: Resolved (2026-11-04).** F9 and N are no longer bound. `UVestigeCheatManager` has the console commands `NewGame` and `SkipDay`, the template player controller sets it as its cheat class outside Shipping, and the engine never creates a cheat manager in Shipping. The New game in the main menu stays with [Roadmap.md, section 6](Roadmap.md#6-before-a-public-release).
+
 ### H6 — Input is built in C++ with hard-coded keys
 
 `AVestigePlayerCharacter::CreateInput` makes the input actions and the mapping context in code, with E, F, N, F9 and 1 to 9 fixed, "so no input assets are needed yet". That blocks key rebinding (Enhanced Input's user settings are built around assets), gamepad and handheld mappings, and accessibility. In Unreal, input assets are the normal way and take minutes to make in the editor.

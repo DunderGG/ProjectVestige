@@ -48,7 +48,7 @@ public:
 	TArray<FVestigeKeyHint> GetToolbarKeyHints() const;
 
 	/**
-	 * The other farming keys and what they do (use tool, interact, skip day, new game), in the order they are mapped.
+	 * The other farming keys and what they do (use tool, interact), in the order they are mapped.
 	 * Read from the mapping context, so the hints always name the keys that are really bound.
 	 */
 	TArray<FVestigeKeyHint> GetActionKeyHints() const;
@@ -76,8 +76,6 @@ protected:
 	virtual void UnPossessed() override;
 
 private:
-	void StartNewGame();
-
 	/** Creates the farming input actions and maps their keys. Runs once, before the farmer is first possessed. */
 	void CreateInput();
 
@@ -128,13 +126,6 @@ private:
 
 	UPROPERTY(Transient)
 	TObjectPtr<UInputAction> InteractAction;
-
-	/** A test key: sleeps wherever the player is, to skip to the next day. Moves to the cheat manager with F9. */
-	UPROPERTY(Transient)
-	TObjectPtr<UInputAction> SkipDayAction;
-
-	UPROPERTY(Transient)
-	TObjectPtr<UInputAction> NewGameAction;
 
 	/** One action per number key; the index is the toolbar slot it selects. */
 	UPROPERTY(Transient)

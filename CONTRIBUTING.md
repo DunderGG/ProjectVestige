@@ -54,8 +54,7 @@ In short, you need Windows 10 or 11, Git with **Git LFS**, Unreal Engine **5.8**
 | Space | Jump |
 | 1 / 2 / 3 / 4 | Hoe / seeds / watering can / hand |
 | E | Use the current tool on the tile in front of you |
-| N | Sleep to the next day (the game saves) |
-| F9 | Delete the save and start a new game |
+| F | Use what is in front of you (the bed sleeps to the next day, and the game saves) |
 
 Till the grass, plant seeds, water them each day, sleep, and harvest when the crop is ripe.
 
@@ -152,7 +151,7 @@ Each crop, tool and item is a **data asset**: an asset in the Content Browser wh
    | Seasons, Water Need, Contamination Tolerance | Fill in what you intend. The game doesn't use them yet; they are there so crops don't need changing when seasons and contamination arrive |
 
 4. **Save it and check it.** Right-click the `Content/Vestige/Crops` folder and choose *Validate Assets*: a missing or badly formed Content Id, or a Harvest Item Id that names no item, shows as an error. Restart the editor and check the Output Log for an "is used by more than one asset" error, which means another asset already has your ID.
-5. **Try it in the game.** For now the Seeds tool plants one kind of seed, chosen on the farmer. Make a seed item for your crop first ([Adding an item](#adding-an-item)). Then open `Content/Vestige/Blueprints/BP_PlayerCharacter`, select its **Farming** component and set **Seed Item Id** to your seeds. Open `Content/Vestige/Blueprints/BP_PlayerState`, select its **Inventory** component and change the item under **Starting Items** to your seeds. Press F9 in the game to start a new game with them. Change both back before you commit, unless your pull request is meant to change the starting crop. Choosing between several seed kinds comes with the hotbar ([Roadmap.md](Docs/Roadmap.md)).
+5. **Try it in the game.** For now the Seeds tool plants one kind of seed, chosen on the farmer. Make a seed item for your crop first ([Adding an item](#adding-an-item)). Then open `Content/Vestige/Blueprints/BP_PlayerCharacter`, select its **Farming** component and set **Seed Item Id** to your seeds. Open `Content/Vestige/Blueprints/BP_PlayerState`, select its **Inventory** component and change the item under **Starting Items** to your seeds. Start a new game with them: while playing, open the console and type `NewGame` ([PlayTest.md](Docs/PlayTest.md#1-before-you-test) says how to open it). Change both back before you commit, unless your pull request is meant to change the starting crop. Choosing between several seed kinds comes with the hotbar ([Roadmap.md](Docs/Roadmap.md)).
 6. **Open a pull request** with the data asset, the meshes, their `.blend` source and a screenshot of each growth stage in the game.
 
 ### Adding a tool
