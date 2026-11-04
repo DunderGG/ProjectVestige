@@ -106,6 +106,8 @@ Slate is the engine's own UI layer; game HUDs are normally UMG widgets, with Com
 
 **Status: Ray tracing off, Lumen kept at High (2026-11-04).** David decided hardware ray tracing isn't needed while the game is being developed: `r.RayTracing` is off for the whole project and Lumen runs in software at every level. The baseline showed ray tracing cost nothing measurable at runtime at High (0 ms, 0.2 MB of geometry), so the gain is in shader compiles, cook time and package size, not frame time. High keeps Lumen, about 0.6 ms of the 6.0 ms GPU frame; the volumetric clouds (1.4 ms) are the next GPU item in [Roadmap.md, 4.0](Roadmap.md#40-structure-from-the-code-review). Whether Epic gets it back is decided with the final art ([Roadmap.md, section 6](Roadmap.md#6-before-a-public-release)). Reasons in [Architecture.md, decision log](Architecture.md#16-decision-log).
 
+**Status: Clouds cheaper below Epic (2026-11-04).** The engine's scalability levels don't touch volumetric clouds, so they cost the same at every level. `Config/DefaultScalability.ini` now caps their samples at High (48 along the view ray and 5 toward the sun, against the engine's 96 and 10), and lower at Medium and Low; Epic is unchanged. In the packaged build, off screen, the cloud pass fell from 0.83 ms to 0.31 ms at High, and screenshots of mornings and evenings show the same clouds with slightly grainier edges. The level's clouds stay volumetric. The windowed baseline measured them at 1.37 ms, so the next windowed run in [Roadmap.md, 4.0](Roadmap.md#40-structure-from-the-code-review) measures them again. Reasons in [Architecture.md, decision log](Architecture.md#16-decision-log).
+
 ## Medium
 
 ### M1 — The day cycle is both the clock and the lighting

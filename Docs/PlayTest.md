@@ -286,6 +286,14 @@ Hardware ray tracing is off for the whole project, so Epic now lights the farm w
 - [ ] **High**: press Play, open the console and type `scalability 2`. A day and a night look as before, and the nights are still properly dark.
 - [ ] **Epic**: type `scalability 3` and look at a day and a night again. Epic may look a little different from before, mostly in shadowed corners and reflections, since it no longer uses hardware ray tracing. Say if anything looks worse than High or clearly worse than it used to.
 
+### Cheaper clouds below Epic, 2026-11-04
+
+The volumetric clouds take fewer samples at High, Medium and Low, set in `Config/DefaultScalability.ini`. The tests cover the settings for each level; these checks are for how the clouds look while they move, which screenshots can't show. The commit is the one titled "Make the volumetric clouds cheaper below Epic".
+
+- [ ] **High**: press Play, open the console and type `scalability 2`. Watch the clouds through a morning and an evening, turning the camera now and then. They look as before, perhaps a little grainier at the edges, with no flicker, crawling noise or smearing when the camera turns. Say if it bothers you; High can take more samples.
+- [ ] **Medium and Low**: type `scalability 1`, then `scalability 0`, and look again. The edges are grainier; the clouds shouldn't flicker or break up.
+- [ ] **Back to Epic**: after Low, type `scalability 3`. The clouds are smooth again, as before this change.
+
 ### Editor chores
 
 Changes only the editor can make safely. The steps are in [Roadmap.md, Housekeeping](Roadmap.md#3-housekeeping): re-saving the template Blueprints and `L_Farm`, moving `BP_FarmTile` and the materials with redirectors fixed, and regenerating the Android File Server token if it was ever used. After each one, run the [smoke test](#3-smoke-test).
