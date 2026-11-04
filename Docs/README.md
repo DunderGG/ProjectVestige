@@ -18,6 +18,7 @@ This folder contains project documentation for setting up, designing, building, 
 
 | Document | Purpose |
 |---|---|
+| [`CodeReview.md`](CodeReview.md) | Record findings from a senior review of the game's code and architecture, with fixes tracked in the roadmap. |
 | [`ArchitectureAudit.md`](ArchitectureAudit.md) | Record findings from an architecture review. |
 | [`CodingGuidelinesAudit.md`](CodingGuidelinesAudit.md) | Record findings from a coding-guidelines review. |
 | [`GameDesignAudit.md`](GameDesignAudit.md) | Record findings from a game-design review. |

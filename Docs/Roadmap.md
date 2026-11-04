@@ -27,7 +27,8 @@ Contents
 - **Done:** milestone 1, the playable prototype, plus the project's documents and rules.
 - **Now:** the code follows the guidelines and the architecture (both audits' code reviews are closed, 2026-10-29). Next: play-test that clean-up, the editor housekeeping steps in [section 3](#3-housekeeping), then the rest of the milestone 2 foundations.
 - **Next up**, in order:
-  1. The rest of [section 4.3](#43-stamina-and-late-nights): tuning stamina and the late-night numbers in play. The late-night rules, the red stamina line and holding E are done (2026-11-02); starting stamina from data and montage timing wait for their triggers. Logging, Blueprint events, the interaction interface and the bed are done (2026-11-01 and 2026-11-02); the rest of [section 4.1](#41-foundations) waits for a packaged build (the performance baseline) or for the need that starts it (the ID redirect list, more Blueprint extension points, a second interaction option).
+  1. [Section 4.0](#40-structure-from-the-code-review): the structural fixes from the [code review](CodeReview.md) (2026-11-04), the quick wins first, then the world structure and the tiles before 4.2 builds on them.
+  2. The rest of [section 4.3](#43-stamina-and-late-nights): tuning stamina and the late-night numbers in play. The late-night rules, the red stamina line and holding E are done (2026-11-02); starting stamina from data and montage timing wait for their triggers. Logging, Blueprint events, the interaction interface and the bed are done (2026-11-01 and 2026-11-02); the rest of [section 4.1](#41-foundations) waits for a packaged build (the performance baseline) or for the need that starts it (the ID redirect list, more Blueprint extension points, a second interaction option).
 
 ## 2. Milestone 1: playable prototype (done)
 
@@ -117,12 +118,59 @@ Small things to finish before milestone 2 starts.
    - Done 2026-11-03: categories are named for their topic without a prefix (`Time`, `Lighting`, `Rest`, `Input`...), and only the farm types use `Farming` ([CodingGuidelines.md, section 6](CodingGuidelines.md#6-uproperty-ufunction-and-blueprint-exposure))
 - [x] Update the class names in the lore drafts (`Docs/Spoilers/Characters/`): they name `UFarmCharacterData`, which the planned design now calls `UVestigeCharacterData` ([Systems.md](Systems.md))
    - Done 2026-11-03 in `Archivist.md` and `Engineer.md`. Their technical notes also named a `UFarmScheduleComponent`, an `EFarmWeather` enum and a `Content/Narrative/` folder, which the planned design doesn't have: the schedule is now a routine in the character data run by the AI controller and StateTree (Systems.md, section 10), weather is left unnamed until it is designed, and the dialogue tables are under `Content/Vestige/Dialogue/`
+- [ ] Rules from the [code review](CodeReview.md#project-rules-that-are-themselves-wrong) (2026-11-04), each *(decide)* by David, then changed in its document:
+   - Replace the strict linear layer order with folders that depend on `Core/` and the features they declare, and plan a `VestigeCore` module once a boundary settles ([M3](CodeReview.md#m3--the-strict-linear-layer-order-is-the-wrong-shape))
+   - Cut `Architecture.md` to principles and a one-page system map, keep ownership in the class comments, and log only hard-to-undo decisions ([M8](CodeReview.md#m8--the-documents-outweigh-the-code), rule 5)
+   - Performance as a frame budget per system and a packaged-build profile at every milestone, with micro rules only for per-tile and per-frame code (rule 1)
+   - Drop "change structure only when a profile says so" for structural choices whose cost is known up front (rule 2)
+   - Let a system be prototyped and played before its `Systems.md` guide; keep guide approval for adopting engine frameworks (rule 3)
+   - Build what is right for the game even when it needs an editor asset; David makes the asset or the agent writes the steps (rule 6)
+   - One class prefix, `Vestige`, for new types, and no more renames of existing `Farm` classes ([L1](CodeReview.md#low))
 
 ## 4. Milestone 2: vertical slice
 
 **Goal:** one full 28-day season that proves the farming core and a first relationship with the caretaker robot. The town, humans, exploration, combat and survival needs are tested in later milestones. See [GameDesign.md section 13](GameDesign.md#13-scope-and-milestones).
 
 **Done when** a player can start a new game, meet the caretaker robot, grow three or four crops (one of them mutated) in soil with water and radiation to manage, run out of stamina, pay for staying up late, set up a sprinkler, sell the harvest, and play through to the end of the season, and playtests meet the experience criteria in [GameDesign.md section 13](GameDesign.md#next-vertical-slice).
+
+### 4.0 Structure from the code review
+
+The fixes from the [code review](CodeReview.md) of 2026-11-04, in the order to do them. C1 and C2 come before [4.2](#42-farming-depth), because water and radiation on every tile build on the world structure and the tile representation. Each item names its finding; tick the item and add a status line under the finding in the same commit.
+
+Quick wins:
+
+- [ ] Move the test keys, F9 (new game) and N (skip day), to a `UVestigeCheatManager` with exec functions compiled out of Shipping, reached from the console ([CodeReview.md, H5](CodeReview.md#h5--f9-deletes-both-saves-with-one-key-in-a-shipped-build); moved here from [section 6](#6-before-a-public-release), and it also ends the F9 screenshot clash in [Open problems](#open-problems)). A real New game comes with the main menu, behind a confirmation
+- [ ] Delete save versions 0 to 3: their upgrades and backups, the legacy fields, `EFarmTool` and `UFarmSaveGame`. Restart at version 1 and delete the development saves; keep the two alternating slots and the refusal to load or overwrite a newer save ([H4](CodeReview.md#h4--save-upgrade-code-for-a-game-nobody-else-has-played))
+- [ ] First performance baseline: a packaged build of `L_Farm` with a few hundred crop meshes, measured on the hardware closest to the target (RTX 2060 class, 1080p High) and recorded in Architecture.md ([H8](CodeReview.md#h8--rendering-is-unreals-maximum-feature-set-unmeasured-on-the-target); moved here from [4.1](#41-foundations))
+- [ ] Move the sun in small steps (for example every 0.25 degrees) instead of every frame, so virtual shadow maps keep their cache ([H8](CodeReview.md#h8--rendering-is-unreals-maximum-feature-set-unmeasured-on-the-target))
+- [ ] Turn off `r.RayTracing` unless the Epic tier is a product goal, then decide from the baseline whether High uses Lumen *(decide)* ([H8](CodeReview.md#h8--rendering-is-unreals-maximum-feature-set-unmeasured-on-the-target))
+
+Before 4.2:
+
+- [ ] Decide the world structure: separate maps for the farm, the town and the zones, or one streamed world, and record it in the decision log *(decide)* ([C1](CodeReview.md#c1--all-game-state-lives-in-the-level-but-the-game-needs-several-maps))
+- [ ] The clock and each map's farm data in game-instance subsystems that advance whether or not their map is loaded; `AFarmGrid` becomes a view of the farm data ([C1](CodeReview.md#c1--all-game-state-lives-in-the-level-but-the-game-needs-several-maps))
+- [ ] Split the lighting from the clock: a sky actor in each level listens to the clock and owns the sun, the sky light and the night exposure ([M1](CodeReview.md#m1--the-day-cycle-is-both-the-clock-and-the-lighting))
+- [ ] Tiles as a `TArray<FFarmTileState>` drawn with one instanced static mesh component per mesh and per-instance custom data for colour and wetness: no actor and no dynamic material per tile ([C2](CodeReview.md#c2--one-actor-per-tile-each-with-two-meshes-and-two-dynamic-materials))
+- [ ] A save registry: each saveable owner has a stable key, its own struct and its own version; the save keeps keys it doesn't know (mod data), is read into a game-instance subsystem before the world starts, and owners pull their part when they initialise ([H3](CodeReview.md#h3--the-save-subsystem-knows-every-system-by-name))
+- [ ] Our own game mode and player controller in a `Game/` folder, outside `Template/`. The game mode owns the end of the day; the rest component only asks for sleep and applies the stamina effects ([M2](CodeReview.md#m2--a-pawn-component-ends-the-worlds-day), [M6](CodeReview.md#m6--the-template-code-is-load-bearing))
+
+Before more tools and [4.6](#46-interface-and-input):
+
+- [ ] Each tool data asset names the ability that is its behaviour, granted while the tool is in hand; the abilities do the tile work through an interface on the grid, and holding the key repeats inside the ability. Remove `EFarmToolAction` and the switch in the farming component ([H1](CodeReview.md#h1--the-gameplay-ability-system-gates-tools-but-doesnt-run-them))
+- [ ] Tunable gameplay effects (tool costs, the late-night drain, exhaustion) as `GE_` data assets instead of C++ classes ([H1](CodeReview.md#h1--the-gameplay-ability-system-gates-tools-but-doesnt-run-them))
+- [ ] Split `UFarmingComponent`: a targeting component for the aim and the target tile, the toolbar into the inventory hotbar, and planting from the seed item in hand instead of one `SeedItemId` ([H2](CodeReview.md#h2--ufarmingcomponent-does-seven-jobs-and-can-plant-only-one-seed))
+- [ ] Input actions and mapping contexts as `IA_` and `IMC_` assets, bound by gameplay tag through an input config data asset ([H6](CodeReview.md#h6--input-is-built-in-c-with-hard-coded-keys); replaces the "decide when" item in 4.6)
+- [ ] The HUD in UMG with a C++ base class or view model, before the hotbar; Common UI with the first menu ([H7](CodeReview.md#h7--the-hud-is-raw-slate-written-in-c))
+- [ ] Gameplay reports results and failure reasons (a tag or an enum), and presentation picks the text, sound or effect; no message for a use that worked ([M4](CodeReview.md#m4--gameplay-code-writes-the-players-text))
+- [ ] One content catalogue loaded once for every inventory, with item icons in their own bundle loaded when a UI needs them ([M5](CodeReview.md#m5--every-inventory-loads-and-keeps-every-item-definition))
+- [ ] The late-night drain on the clock's own events instead of a real-time effect period ([M7](CodeReview.md#m7--game-time-events-run-on-real-time))
+
+When working nearby:
+
+- [ ] Remove the data fields nothing reads (`Seasons`, `WaterNeed`, `ContaminationTolerance` on crops, `SellPrice` on items) until their feature is designed ([L2](CodeReview.md#low))
+- [ ] Standard ability tasks (wait delay, montages) instead of timers in abilities ([L3](CodeReview.md#low))
+- [ ] Write saves with `AsyncSaveGameToSlot` once they grow ([L4](CodeReview.md#low))
+- [ ] A script that builds and runs the tests before each commit ([L5](CodeReview.md#low))
 
 ### 4.1 Foundations
 
@@ -224,7 +272,7 @@ The code changes that the slice's content depends on. Doing them first means add
 - [x] A shipping-safe highlight for the targeted tile, replacing the debug box
 - [x] The HUD keeps its references instead of searching the world every frame
 - [x] Trace scopes on the new day, loading and saving
-- [ ] First performance baseline, measured in a packaged build on the target hardware and recorded in Architecture.md
+- First performance baseline: moved to [4.0](#40-structure-from-the-code-review) (code review, 2026-11-04)
 
 ### 4.2 Farming depth
 
@@ -293,7 +341,7 @@ The code changes that the slice's content depends on. Doing them first means add
 ### 4.6 Interface and input
 
 - [ ] An inventory or hotbar for several seed and crop types, built in UMG with C++ base classes
-- [ ] Input actions as assets once there are more keys than the prototype's handful *(decide when)*
+- Input actions as assets: moved to [4.0](#40-structure-from-the-code-review) and decided as now (code review, 2026-11-04)
 - [x] A project material for the tile highlight frame (`M_TileHighlight`, unlit), replacing the engine material it uses today
    - Done 2026-10-31, earlier than planned: in 5.8 the engine material drew as the default grey material (Architecture.md, decision log)
 - [ ] Meshes for the new crops, the sprinkler, the shipping bin, the water source and the bed
@@ -385,7 +433,8 @@ Roughly in the order from [GameDesign.md section 13](GameDesign.md#13-scope-and-
 - [ ] Realistic art direction: Lumen, Nanite and Megascans for the world, custom Blender work for robots, machines and crops. Replace the low-poly placeholders
 - [ ] Replace the Epic template code and content (character, animations, input) with our own
 - [ ] Main menu, settings and save slots
-- [ ] Move the test keys, F9 (new game) and N (skip day), into a `UVestigeCheatManager` or the menus ([Systems.md, section 19](Systems.md#19-debugging-and-cheats))
+- Moving the test keys F9 and N into a cheat manager: moved to [4.0](#40-structure-from-the-code-review), because F9 deletes the saves (code review, 2026-11-04)
+- [ ] Turn save compatibility on at the first public build: a version per saved owner, with upgrades from then on ([CodeReview.md, H4](CodeReview.md#h4--save-upgrade-code-for-a-game-nobody-else-has-played))
 - [ ] Music and sound effects
 - [ ] Settle how many feedback messages the HUD shows at once (Project Settings > Game > Vestige HUD; five while the game is being built, 2026-10-30)
 - [ ] Final names for the game, the world, the town, the coin, the caretaker and the robot makers
