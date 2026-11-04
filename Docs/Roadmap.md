@@ -155,11 +155,12 @@ Quick wins:
 
 Before 4.2:
 
-- [ ] Decide the world structure: separate maps for the farm, the town and the zones, or one streamed world, and record it in the decision log *(decide)* ([C1](CodeReview.md#c1--all-game-state-lives-in-the-level-but-the-game-needs-several-maps))
+- [x] Decide the world structure: separate maps for the farm, the town and the zones, or one streamed world, and record it in the decision log *(decide)* ([C1](CodeReview.md#c1--all-game-state-lives-in-the-level-but-the-game-needs-several-maps))
+   - Done 2026-11-04, decided by David: separate maps opened with `OpenLevel`; the simulation lives in game-instance subsystems, the player's data crosses a map change as an in-memory snapshot, and interiors are part of their map ([Architecture.md, section 2](Architecture.md#2-unreals-gameplay-framework-where-things-go), [decision log](Architecture.md#16-decision-log))
 - [ ] The clock and each map's farm data in game-instance subsystems that advance whether or not their map is loaded; `AFarmGrid` becomes a view of the farm data ([C1](CodeReview.md#c1--all-game-state-lives-in-the-level-but-the-game-needs-several-maps))
 - [ ] Split the lighting from the clock: a sky actor in each level listens to the clock and owns the sun, the sky light and the night exposure ([M1](CodeReview.md#m1--the-day-cycle-is-both-the-clock-and-the-lighting))
 - [ ] Tiles as a `TArray<FFarmTileState>` drawn with one instanced static mesh component per mesh and per-instance custom data for colour and wetness: no actor and no dynamic material per tile ([C2](CodeReview.md#c2--one-actor-per-tile-each-with-two-meshes-and-two-dynamic-materials))
-- [ ] A save registry: each saveable owner has a stable key, its own struct and its own version; the save keeps keys it doesn't know (mod data), is read into a game-instance subsystem before the world starts, and owners pull their part when they initialise ([H3](CodeReview.md#h3--the-save-subsystem-knows-every-system-by-name))
+- [ ] A save registry: each saveable owner has a stable key, its own struct and its own version; the save keeps keys it doesn't know (mod data), is read into a game-instance subsystem before the world starts, and owners pull their part when they initialise. The same snapshot carries the player's data (inventory, stamina, exhaustion) across a map change: owners write their part before the map closes and read it back in the new one, with a test that the player's data survives reopening the map ([H3](CodeReview.md#h3--the-save-subsystem-knows-every-system-by-name))
 - [ ] Our own game mode and player controller in a `Game/` folder, outside `Template/`. The game mode owns the end of the day; the rest component only asks for sleep and applies the stamina effects ([M2](CodeReview.md#m2--a-pawn-component-ends-the-worlds-day), [M6](CodeReview.md#m6--the-template-code-is-load-bearing))
 
 Before more tools and [4.6](#46-interface-and-input):
@@ -380,7 +381,7 @@ Roughly in the order from [GameDesign.md section 13](GameDesign.md#13-scope-and-
 
 ### The robot town
 
-- [ ] Separate maps with loading between them: the farm, the town, later the wasteland zones
+- [ ] Separate maps with loading between them: the farm, the town, later the wasteland zones. Opened with `OpenLevel` as [Architecture.md, section 2](Architecture.md#2-unreals-gameplay-framework-where-things-go) decides: an owner for travel in the game instance, zones and hubs as data assets naming their maps, and a loading screen
 - [ ] The robot town map
 - [ ] Townsfolk with schedules, likes and dislikes, and their own backstories (starting with the administrator, the clinic robot, the mail carrier, the engineer and the weather broadcaster)
 - [ ] Gifts, requests and personal events

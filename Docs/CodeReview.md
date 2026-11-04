@@ -36,6 +36,8 @@ The clock is a placed actor (`AVestigeDayCycle`), the farm is a placed actor tha
 
 **Fix.** Decide the world structure now, as a decision log entry. Recommended: keep the simulation outside the level. A `UGameInstanceSubsystem` owns the clock and each map's farm data (an array of tile states per map) and advances them whether or not the map is loaded. Levels become views: `AFarmGrid` reads the farm data and draws it. This works with separate maps and with a single streamed world, so it doesn't lock in the level layout.
 
+**Status: World structure decided (2026-11-04).** David chose separate maps opened with `OpenLevel`. The clock and each map's farm data go into game-instance subsystems, the player's data crosses a map change as an in-memory snapshot built with the save registry (H3), and interiors are part of their outdoor map. Moving the clock and the farm data is the next item in [Roadmap.md, 4.0](Roadmap.md#40-structure-from-the-code-review). Reasons in [Architecture.md, decision log](Architecture.md#16-decision-log).
+
 ### C2 — One actor per tile, each with two meshes and two dynamic materials
 
 `AFarmGrid` spawns a full `AFarmTile` actor for every tile, grass included. Each has a root, two `UStaticMeshComponent`s and two `UMaterialInstanceDynamic`s created in `BeginPlay`, even when real art meshes are used. The 8 x 8 test field is 64 actors, 128 mesh components and 128 unique materials. A real farm ("the biggest map", [GameDesign.md](GameDesign.md)) is thousands of tiles. Unique dynamic materials also stop Unreal from merging those draws.
