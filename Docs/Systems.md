@@ -112,7 +112,7 @@ Contents
 - Game time is separate from real time and from `UWorld::GetTimeSeconds`. Pausing and menus stop game time.
 - Daily changes happen in `OnNewDay` listeners that finish synchronously ([Architecture.md, section 15](Architecture.md#15-the-day-flow)).
 - Seasons are gameplay tags and change on a day event; weather is chosen once per day from data (per-season weights), so it's saved as a value, not re-rolled on load.
-- Lighting, fog and sky react to time and weather through the day cycle; nothing else moves the sun.
+- Lighting, fog and sky react to time and weather through the day cycle; nothing else moves the sun. The sun turns in small steps, not every frame, so virtual shadow maps keep its cached shadows between them; brightness and colour may change every frame.
 
 **Pitfalls:**
 

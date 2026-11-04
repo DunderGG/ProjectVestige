@@ -73,6 +73,15 @@ public:
 
 	float GetRealSecondsPerGameHour() const { return RealSecondsPerGameHour; }
 
+	/**
+	 * Where the clock puts the sun now, or the moon at night. The sun itself turns to it in steps of SunStepDegrees, so
+	 * it can be up to a step behind.
+	 */
+	FRotator GetSunRotation() const;
+
+	/** Smallest turn of the sun, in degrees. */
+	float GetSunStepDegrees() const { return SunStepDegrees; }
+
 	/** Broadcast with the new day's number every time a new day starts. The farm reacts here, e.g. crops grow. */
 	FOnVestigeNewDay OnNewDay;
 
@@ -111,6 +120,9 @@ private:
 	void FindLights();
 	void UpdateLighting();
 
+	/** Turns the sun to GetSunRotation once it is at least SunStepDegrees away from it. */
+	void TurnSunInSteps();
+
 	/** Real seconds per in-game hour. */
 	UPROPERTY(EditAnywhere, Category = "Time", meta = (AllowPrivateAccess = "true", ClampMin = 0.1))
 	float RealSecondsPerGameHour = 40.f;
@@ -145,6 +157,14 @@ private:
 	/** Highest angle of the sun above the horizon at midday, in degrees. */
 	UPROPERTY(EditAnywhere, Category = "Lighting", meta = (AllowPrivateAccess = "true", ClampMin = 10, ClampMax = 90))
 	float MaxSunElevation = 65.f;
+
+	/**
+	 * Smallest turn of the sun or moon, in degrees: it waits until the clock has moved it this far. Virtual shadow maps
+	 * keep the sun's shadows cached until its direction changes, then draw them all again, so a sun that turns every
+	 * frame redraws them every frame. Brightness, color and exposure still change smoothly. 0 turns it every frame.
+	 */
+	UPROPERTY(EditAnywhere, Category = "Lighting", meta = (AllowPrivateAccess = "true", ClampMin = 0, ClampMax = 5))
+	float SunStepDegrees = 0.25f;
 
 	/** Share of the daytime light intensity left at night, for moonlight. */
 	UPROPERTY(EditAnywhere, Category = "Lighting", meta = (AllowPrivateAccess = "true", ClampMin = 0, ClampMax = 1))

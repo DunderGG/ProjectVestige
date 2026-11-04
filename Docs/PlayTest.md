@@ -267,6 +267,17 @@ The console command `BenchmarkField` makes the farm a field of ripe crops for th
 - [ ] **Harvest**: the hand tool harvests the ripe turnips, and the bag fills as usual.
 - [ ] **Back to normal**: type `NewGame`. The map reopens on day 1 with the normal 8 by 8 grass field.
 
+### Sun in steps, 2026-11-04
+
+The sun (and the moon at night) now turns in quarter-degree steps instead of every frame, so the shadows it casts stay cached between steps. The tests cover the steps and that a new day moves the sun at once; these checks are for how it looks. The commit is the one titled "Turn the sun in small steps".
+
+`L_Farm`'s day cycle runs a game hour in about 1.5 seconds, which turns the sun every few frames anyway. To see the steps at the normal pace, select the `VestigeDayCycle` in `L_Farm` and set **Real Seconds Per Game Hour** (Details panel, **Time**) to 40 for these checks, then set it back without saving the level, or tell me if 40 should stay.
+
+- [ ] **Midday shadows**: press Play and watch the farmer's and the crops' shadows for a game hour around midday. They creep along as before, with no visible jumps or flicker.
+- [ ] **Sunrise, sunset and moonlight**: watch the long shadows just after 06:00, before 20:00, and the moon's shadows after 20:00. They move in small hops about every half second. Say whether the hops are noticeable; if they are, lower **Sun Step Degrees** on the `VestigeDayCycle` (Details panel, **Lighting**) and tell me which value looks smooth.
+- [ ] **Smooth fades**: the warm sunrise colour, the evening dimming and the darkening into night still fade without steps.
+- [ ] **New day**: sleep in the bed. The morning starts with the sun at its sunrise position at once, not turning there over a few seconds.
+
 ### Editor chores
 
 Changes only the editor can make safely. The steps are in [Roadmap.md, Housekeeping](Roadmap.md#3-housekeeping): re-saving the template Blueprints and `L_Farm`, moving `BP_FarmTile` and the materials with redirectors fixed, and regenerating the Android File Server token if it was ever used. After each one, run the [smoke test](#3-smoke-test).

@@ -100,7 +100,9 @@ Slate is the engine's own UI layer; game HUDs are normally UMG widgets, with Com
 
 **Fix.** Measure a packaged build of `L_Farm` with a few hundred crop meshes on the hardware closest to the target now, not after the art. Move the sun in small steps (for example every 0.25 degrees) instead of every frame. Turn off `r.RayTracing` unless the Epic tier is a real product goal, because it costs memory and build time even when High doesn't use it. Then decide whether High uses Lumen at all.
 
-**Status: Baseline measured (2026-11-04).** A packaged Development build with a 20 by 20 field of ripe turnips (the console command `BenchmarkField 20 Base.Turnip`) runs at 7.05 ms per frame at 1080p High on an RTX 4070 Ti Super, with the render thread ahead of the GPU; on an RTX 2060 the GPU alone is estimated near 18 ms. The numbers, the method and what they say are in [Architecture.md, section 10](Architecture.md#measuring). The sun steps and the ray tracing decision are still open in [Roadmap.md, 4.0](Roadmap.md#40-structure-from-the-code-review).
+**Status: Baseline measured (2026-11-04).** A packaged Development build with a 20 by 20 field of ripe turnips (the console command `BenchmarkField 20 Base.Turnip`) runs at 7.05 ms per frame at 1080p High on an RTX 4070 Ti Super, with the render thread ahead of the GPU; on an RTX 2060 the GPU alone is estimated near 18 ms. The numbers, the method and what they say are in [Architecture.md, section 10](Architecture.md#measuring). The ray tracing decision is still open in [Roadmap.md, 4.0](Roadmap.md#40-structure-from-the-code-review).
+
+**Status: Sun steps done (2026-11-04).** `AVestigeDayCycle` turns the sun only once the clock has moved it `SunStepDegrees` (0.25 degrees), so virtual shadow maps keep their cached shadows between turns; brightness, colour and exposure still change every frame, because the engine's shadow cache only resets on a change of the light's direction. The shadow depths are measured again in the follow-up baseline item.
 
 ## Medium
 

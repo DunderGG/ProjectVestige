@@ -36,6 +36,32 @@ namespace VestigeDayCycleLighting
 	{
 		return FMath::Clamp(Arc * Rate, 0.f, 1.f);
 	}
+
+	/** Where the sun is on its path across the sky by day, or the moon by night. */
+	struct FSkyPosition
+	{
+		bool bDaytime = true;
+
+		/** 0 when it rises to 1 when it sets. */
+		float Progress = 0.f;
+
+		/** 0 at the horizon to 1 at its highest point. */
+		float Arc = 0.f;
+	};
+
+	/** The sun arcs across the sky from sunrise to sunset, and the moon takes the same path from sunset to sunrise. */
+	FSkyPosition GetSkyPosition(float TimeOfDay, float SunriseHour, float SunsetHour)
+	{
+		const float Hour = FMath::Fmod(TimeOfDay, HoursPerDay);
+		const float DayLength = SunsetHour - SunriseHour;
+		const float HoursSinceSunset = FMath::Fmod(Hour - SunsetHour + HoursPerDay, HoursPerDay);
+
+		FSkyPosition Position;
+		Position.bDaytime = Hour >= SunriseHour && Hour < SunsetHour;
+		Position.Progress = Position.bDaytime ? (Hour - SunriseHour) / DayLength : HoursSinceSunset / (HoursPerDay - DayLength);
+		Position.Arc = FMath::Sin(Position.Progress * PI);
+		return Position;
+	}
 }
 
 AVestigeDayCycle::AVestigeDayCycle()
@@ -198,24 +224,15 @@ void AVestigeDayCycle::UpdateLighting()
 
 	using namespace VestigeDayCycleLighting;
 
-	// Progress runs 0 to 1 from sunrise to sunset by day, and from sunset to the next sunrise by night.
-	// The sun arcs across the sky by day and the moon takes the same path by night.
-	const float Hour = FMath::Fmod(TimeOfDay, HoursPerDay);
-	const float DayLength = SunsetHour - SunriseHour;
-	const bool bDaytime = Hour >= SunriseHour && Hour < SunsetHour;
-	const float HoursSinceSunset = FMath::Fmod(Hour - SunsetHour + HoursPerDay, HoursPerDay);
-	const float Progress = bDaytime ? (Hour - SunriseHour) / DayLength : HoursSinceSunset / (HoursPerDay - DayLength);
-	const float Arc = FMath::Sin(Progress * PI);
-
-	const float Elevation = FMath::Lerp(MinSunElevation, MaxSunElevation, Arc);
-	Sun->SetActorRotation(FRotator(-Elevation, SunYaw + Progress * SunArcYaw, 0.f));
+	TurnSunInSteps();
 
 	// Light fades in after sunrise and out before sunset, warm near the horizon.
-	const float Daylight = bDaytime ? FadeIn(Arc, DaylightFadeRate) : 0.f;
+	const FSkyPosition Sky = GetSkyPosition(TimeOfDay, SunriseHour, SunsetHour);
+	const float Daylight = Sky.bDaytime ? FadeIn(Sky.Arc, DaylightFadeRate) : 0.f;
 	const float Brightness = FMath::Lerp(NightLightFraction, 1.f, Daylight);
 	ULightComponent* SunLight = Sun->GetLightComponent();
 	SunLight->SetIntensity(DaySunIntensity * Brightness);
-	SunLight->SetLightColor(bDaytime ? FMath::Lerp(SunriseColor, DaySunColor, FadeIn(Arc, WarmColorFadeRate)) : MoonColor);
+	SunLight->SetLightColor(Sky.bDaytime ? FMath::Lerp(SunriseColor, DaySunColor, FadeIn(Sky.Arc, WarmColorFadeRate)) : MoonColor);
 
 	if (SkyLight)
 	{
@@ -224,6 +241,26 @@ void AVestigeDayCycle::UpdateLighting()
 
 	// Darken the exposure over the first part of the night and ease it off again toward sunrise,
 	// so daytime, mornings and evenings keep the normal exposure.
-	const float Darkness = bDaytime ? 0.f : FadeIn(Arc, NightExposureFadeRate);
+	const float Darkness = Sky.bDaytime ? 0.f : FadeIn(Sky.Arc, NightExposureFadeRate);
 	NightPostProcess->Settings.AutoExposureBias = NightExposureBias * Darkness;
+}
+
+void AVestigeDayCycle::TurnSunInSteps()
+{
+	// After a jump in the clock (a new day, a loaded save) the sun is usually far behind, so it follows at once.
+	const FQuat Target = GetSunRotation().Quaternion();
+	const double DegreesBehind = FMath::RadiansToDegrees(Sun->GetActorQuat().AngularDistance(Target));
+	if (DegreesBehind >= SunStepDegrees)
+	{
+		Sun->SetActorRotation(Target);
+	}
+}
+
+FRotator AVestigeDayCycle::GetSunRotation() const
+{
+	using namespace VestigeDayCycleLighting;
+
+	const FSkyPosition Sky = GetSkyPosition(TimeOfDay, SunriseHour, SunsetHour);
+	const float Elevation = FMath::Lerp(MinSunElevation, MaxSunElevation, Sky.Arc);
+	return FRotator(-Elevation, SunYaw + Sky.Progress * SunArcYaw, 0.f);
 }
