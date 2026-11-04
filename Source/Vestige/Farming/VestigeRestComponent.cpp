@@ -13,7 +13,7 @@
 #include "Core/VestigeFeedbackSubsystem.h"
 #include "Engine/World.h"
 #include "Farming/VestigeRestSaveData.h"
-#include "Time/VestigeDayCycle.h"
+#include "Time/VestigeClockSubsystem.h"
 
 #define LOCTEXT_NAMESPACE "VestigeRestComponent"
 
@@ -35,11 +35,11 @@ void UVestigeRestComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	DayCycle = AVestigeDayCycle::Get(GetWorld());
-	if (DayCycle)
+	Clock = UVestigeClockSubsystem::Get(GetWorld());
+	if (Clock)
 	{
-		DayCycle->OnHourStarted.AddUObject(this, &UVestigeRestComponent::ReactToHour);
-		DayCycle->OnDayEndReached.AddUObject(this, &UVestigeRestComponent::StayUpAllNight);
+		Clock->OnHourStarted.AddUObject(this, &UVestigeRestComponent::ReactToHour);
+		Clock->OnDayEndReached.AddUObject(this, &UVestigeRestComponent::StayUpAllNight);
 	}
 }
 
@@ -47,10 +47,11 @@ void UVestigeRestComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	// The drain lives on the player state's ability system, which outlives this pawn.
 	StopLateNightDrain();
-	if (DayCycle)
+	if (Clock)
 	{
-		DayCycle->OnHourStarted.RemoveAll(this);
-		DayCycle->OnDayEndReached.RemoveAll(this);
+		Clock->OnHourStarted.RemoveAll(this);
+		Clock->OnDayEndReached.RemoveAll(this);
+		Clock = nullptr;
 	}
 	Super::EndPlay(EndPlayReason);
 }
@@ -105,19 +106,19 @@ void UVestigeRestComponent::StayUpAllNight(int32 EndedDay)
 
 void UVestigeRestComponent::StartNextDay(const FText& MessageFormat)
 {
-	if (!DayCycle)
+	if (!Clock)
 	{
 		return;
 	}
 
 	// Raised first, so messages from anything reacting to the new day, like saving, follow it.
-	UVestigeFeedbackSubsystem::Notify(GetWorld(), FText::FormatNamed(MessageFormat, TEXT("Day"), DayCycle->GetCurrentDay() + 1));
+	UVestigeFeedbackSubsystem::Notify(GetWorld(), FText::FormatNamed(MessageFormat, TEXT("Day"), Clock->GetCurrentDay() + 1));
 
 	// Before the new day starts, so the save made at its start holds the new stamina and exhaustion.
 	StopLateNightDrain();
 	if (UAbilitySystemComponent* AbilitySystem = GetAbilitySystem())
 	{
-		const bool bLateNight = DayCycle->GetTimeOfDay() >= LateNightHour;
+		const bool bLateNight = Clock->GetTimeOfDay() >= LateNightHour;
 		if (bLateNight)
 		{
 			WakeExhausted(*AbilitySystem);
@@ -127,7 +128,7 @@ void UVestigeRestComponent::StartNextDay(const FText& MessageFormat)
 			WakeRested(*AbilitySystem);
 		}
 	}
-	DayCycle->StartNextDay();
+	Clock->StartNextDay();
 }
 
 void UVestigeRestComponent::WakeExhausted(UAbilitySystemComponent& AbilitySystem)
@@ -169,7 +170,7 @@ void UVestigeRestComponent::RefillStamina(UAbilitySystemComponent& AbilitySystem
 void UVestigeRestComponent::StartLateNightDrain()
 {
 	UAbilitySystemComponent* AbilitySystem = GetAbilitySystem();
-	if (!AbilitySystem || !DayCycle || IsDrainingStamina())
+	if (!AbilitySystem || !Clock || IsDrainingStamina())
 	{
 		return;
 	}
@@ -182,7 +183,7 @@ void UVestigeRestComponent::StartLateNightDrain()
 	}
 
 	// The effect drains once per period of real time, so the amount per period follows the clock's speed.
-	const float GameHoursPerPeriod = UVestigeStaminaDrainEffect::PeriodSeconds / DayCycle->GetRealSecondsPerGameHour();
+	const float GameHoursPerPeriod = UVestigeStaminaDrainEffect::PeriodSeconds / Clock->GetRealSecondsPerGameHour();
 	Spec.Data->SetSetByCallerMagnitude(VestigeGameplayTags::Data_StaminaDrain, -LateNightDrainPerGameHour * GameHoursPerPeriod);
 	LateNightDrain = AbilitySystem->ApplyGameplayEffectSpecToSelf(*Spec.Data);
 	DrainedAbilitySystem = AbilitySystem;

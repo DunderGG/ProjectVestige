@@ -6,7 +6,7 @@
 #include "CoreMinimal.h"
 #include "VestigeClockSaveData.generated.h"
 
-/** AVestigeDayCycle's part of a save: plain values only. UVestigeSaveGame holds it; the day cycle fills it and restores from it. */
+/** UVestigeClockSubsystem's part of a save: plain values only. UVestigeSaveGame holds it; the clock fills it and restores from it. */
 USTRUCT()
 struct FVestigeClockSaveData
 {

@@ -40,7 +40,7 @@ Contents
 
 ## 1. Saving and loading
 
-**Status:** built (`UVestigeSaveSubsystem`, `UVestigeSaveGame`, and each owner's save struct next to the owner), with the safety rules in [Architecture.md, section 6](Architecture.md#6-saving): a save version (1, with no upgrades until the first public build), owners saving their own parts, tiles by coordinates with crop IDs, two alternating slots, and a save that can't be read left untouched with saving off. The decision of what to load (`UVestigeSaveSubsystem::DecideLoad`) is a static function, so its rules are tested without touching the player's save files.
+**Status:** built (`UVestigeSaveSubsystem`, `UVestigeSaveGame`, and each owner's save struct next to the owner), with the safety rules in [Architecture.md, section 6](Architecture.md#6-saving): a save version (2, with no upgrades until the first public build), owners saving their own parts, each map's field by its ID with its tiles by coordinates and crop IDs, two alternating slots, and a save that can't be read left untouched with saving off. The decision of what to load (`UVestigeSaveSubsystem::DecideLoad`) is a static function, so its rules are tested without touching the player's save files.
 
 **References:** Epic's "Saving and Loading Your Game" (`USaveGame`, `UGameplayStatics::SaveGameToSlot` and `AsyncSaveGameToSlot`); `UPROPERTY(SaveGame)` with `FObjectAndNameAsStringProxyArchive` (`ArIsSaveGame = true`) for serializing marked properties; `FCustomVersion` for versioned binary data. Lyra only saves settings (`ULyraSettingsShared`, a `USaveGame` written with `AsyncSaveGameToSlot`), not the world, so this guide relies on Epic's documentation more than on Lyra.
 
@@ -101,18 +101,18 @@ Contents
 
 ## 4. Time, days and seasons
 
-**Status:** day and clock built (`AVestigeDayCycle`). Seasons and weather are milestone 2 and 3.
+**Status:** day and clock built (`UVestigeClockSubsystem`, a game-instance subsystem, with `UVestigeClockSettings`; 2026-11-04), and the lighting that follows it (`AVestigeDayCycle`). Seasons and weather are milestone 2 and 3.
 
 **References:** no single Epic system; the rules here follow [Architecture.md, sections 15 and 18](Architecture.md#15-the-day-flow). Lighting follows Epic's "Sky Atmosphere", "Exponential Height Fog" and "Lumen" pages.
 
 **Rules:**
 
-- One owner of game time (`AVestigeDayCycle` today). Everything else reads it or listens to its events (`OnNewDay`, `OnNewDayFinished`, `OnHourStarted`, `OnDayEndReached`). Nothing keeps its own clock: something that happens at a time of day listens to `OnHourStarted`, which carries the hour since the start of the day's midnight (22 for 22:00, 24 for the next midnight), rather than watching the clock or running a timer of its own.
-- Blueprints, and so mods, hear of a new day through `On New Day` (`OnNewDayBlueprint`), the extension point broadcast after `OnNewDay` and before the save ([Architecture.md, section 12](Architecture.md#extension-points-today)). A Blueprint finds the day cycle with **Get Day Cycle**.
-- Game time is separate from real time and from `UWorld::GetTimeSeconds`. Pausing and menus stop game time.
+- One owner of game time (`UVestigeClockSubsystem`), in the game instance so it keeps time across maps; its speed and hours are project settings (`UVestigeClockSettings`), never a level's. Everything else reads it or listens to its events (`OnNewDay`, `OnNewDayFinished`, `OnHourStarted`, `OnDayEndReached`). Nothing keeps its own clock: something that happens at a time of day listens to `OnHourStarted`, which carries the hour since the start of the day's midnight (22 for 22:00, 24 for the next midnight), rather than watching the clock or running a timer of its own.
+- Blueprints, and so mods, hear of a new day through `On New Day` (`OnNewDayBlueprint`), the extension point broadcast after `OnNewDay` and before the save ([Architecture.md, section 12](Architecture.md#extension-points-today)). A Blueprint finds the clock with **Get Vestige Clock**.
+- Game time is separate from real time and from `UWorld::GetTimeSeconds`. Pausing and menus stop game time: the clock ticks with the open world, so pause stops it and time dilation (`slomo`) speeds it.
 - Daily changes happen in `OnNewDay` listeners that finish synchronously ([Architecture.md, section 15](Architecture.md#15-the-day-flow)).
 - Seasons are gameplay tags and change on a day event; weather is chosen once per day from data (per-season weights), so it's saved as a value, not re-rolled on load.
-- Lighting, fog and sky react to time and weather through the day cycle; nothing else moves the sun. The sun turns in small steps, not every frame, so virtual shadow maps keep its cached shadows between them; brightness and colour may change every frame.
+- Lighting, fog and sky react to time and weather through the day cycle, which reads the clock and never changes it; nothing else moves the sun. The sun turns in small steps, not every frame, so virtual shadow maps keep its cached shadows between them; brightness and colour may change every frame.
 
 **Pitfalls:**
 
@@ -479,13 +479,13 @@ Built differently from the approved design, decided on 2026-11-01 (decision log)
 
 ## 20. Maps, loading screens and the main menu
 
-**Status:** one map (`L_Farm`), no menu, no loading screen ([Architecture.md, section 2](Architecture.md#2-unreals-gameplay-framework-where-things-go)).
+**Status:** one map (`L_Farm`), no menu, no loading screen. Decided 2026-11-04: separate maps opened with `OpenLevel`, with the clock and the farm data in game-instance subsystems (built) ([Architecture.md, section 2](Architecture.md#2-unreals-gameplay-framework-where-things-go)).
 
 **References:** Epic's "Level Streaming", "World Partition", "Level Instances" and "Data Layers" pages, and the MoviePlayer loading screen; Lyra's CommonLoadingScreen plugin (a loading screen shown during map loads and while systems report they're not ready) and its front-end map.
 
 **Rules:**
 
-- The farm, the town and the wasteland are separate maps or streamed sublevels; decide with a profile and log it before the town is built. World Partition is for large open worlds; small hand-made areas usually don't need it.
+- The farm, the town and the wasteland are separate maps opened with `OpenLevel` (decision log, 2026-11-04), not streamed sublevels or World Partition. What must go on while its map is closed lives in a game-instance subsystem; a level only shows it.
 - A main menu is its own small map with its own game mode, so it loads nothing from the farm.
 - A loading screen covers map changes and stays up until the systems that load content at start (the toolbar, crops, the save) report ready, as Lyra's loading screen waits on its "loading processors".
 - Before any of this, the save subsystem split and the game-instance rules in [Architecture.md, sections 2 and 6](Architecture.md#6-saving) apply.
@@ -516,7 +516,7 @@ Built differently from the approved design, decided on 2026-11-01 (decision log)
   | `LogVestigeFeedback` | Every message for the player, written by `UVestigeFeedbackSubsystem::Notify` | `Core/VestigeLog.h` |
   | `LogVestigeAbilitySystem` | Ability sets, stamina, abilities | `AbilitySystem/VestigeAbilitySystemLog.h` |
   | `LogVestigeContent` | Loading content, content IDs, the Asset Manager's checks | `Content/VestigeContentLog.h` |
-  | `LogVestigeTime` | The day cycle | `Time/VestigeTimeLog.h` |
+  | `LogVestigeTime` | The clock and the day cycle | `Time/VestigeTimeLog.h` |
   | `LogVestigeInventory` | Items and the inventory | `Inventory/VestigeInventoryLog.h` |
   | `LogFarm` | The farm: grid, tiles, crops, tools | `Farming/FarmLog.h` |
   | `LogVestigeSave` | Saving and loading | `Save/VestigeSaveLog.h` |

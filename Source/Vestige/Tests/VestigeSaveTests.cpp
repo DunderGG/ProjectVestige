@@ -7,11 +7,11 @@
 #include "Components/ActorTestSpawner.h"
 #include "Content/FarmCropData.h"
 #include "CQTest.h"
-#include "Farming/FarmGrid.h"
-#include "Farming/FarmTile.h"
+#include "Farming/FarmField.h"
+#include "Farming/FarmFieldSaveData.h"
+#include "Farming/FarmFieldSubsystem.h"
 #include "Save/VestigeSaveGame.h"
 #include "Save/VestigeSaveSubsystem.h"
-#include "Time/VestigeDayCycle.h"
 
 // A namespace keeps the fixture's short name from hiding other declarations in unity builds.
 namespace VestigeSaveTests
@@ -33,13 +33,19 @@ namespace VestigeSaveTests
 
 		static FVestigeSaveSlotRead MakeEmptySlot() { return {false, nullptr}; }
 
-		/** A default 8 x 8 grid that has spawned its tiles. */
-		AFarmGrid& MakeGrid()
+		/** The test game instance's farm fields, as the game has them. */
+		UFarmFieldSubsystem& GetFarmFields()
 		{
-			AFarmGrid& Grid = Spawner.SpawnActor<AFarmGrid>();
-			Grid.DispatchBeginPlay();
-			return Grid;
+			if (!UFarmFieldSubsystem::Get(&Spawner.GetWorld()))
+			{
+				Spawner.InitializeGameSubsystems();
+			}
+			return *UFarmFieldSubsystem::Get(&Spawner.GetWorld());
 		}
+
+		static inline const FIntPoint FieldSize = FIntPoint(8, 8);
+		static inline const FName FarmId = TEXT("Base.Farm");
+		static inline const FName TownId = TEXT("Base.Town");
 
 		const UFarmCropData& MakeCrop(FName ContentId)
 		{
@@ -117,58 +123,64 @@ namespace VestigeSaveTests
 			ASSERT_THAT(IsTrue(UVestigeSaveSubsystem::GetSlotToWrite(1) == 0));
 		}
 
-		TEST_METHOD(ClockRoundTrips)
-		{
-			AVestigeDayCycle& Saved = Spawner.SpawnActor<AVestigeDayCycle>();
-			Saved.StartNextDay();
-			Saved.StartNextDay();
-			AVestigeDayCycle& Restored = Spawner.SpawnActor<AVestigeDayCycle>();
-
-			Restored.RestoreFromSaveData(Saved.GetSaveData());
-
-			ASSERT_THAT(IsTrue(Restored.GetCurrentDay() == 3));
-			ASSERT_THAT(IsTrue(Restored.GetTimeOfDay() == Saved.GetTimeOfDay()));
-		}
-
-		TEST_METHOD(TilesRoundTripByCoordinatesWithTheirOwnCrop)
+		TEST_METHOD(FieldsRoundTripByIdAndCoordinatesWithTheirOwnCrop)
 		{
 			const UFarmCropData& Turnip = MakeCrop(TEXT("Base.Turnip"));
 			const UFarmCropData& Carrot = MakeCrop(TEXT("Base.Carrot"));
-			AFarmGrid& Saved = MakeGrid();
-			Saved.GetTileAt(FIntPoint(2, 3))->Till();
-			Saved.GetTileAt(FIntPoint(2, 3))->Plant(&Carrot);
-			Saved.GetTileAt(FIntPoint(5, 0))->Till();
-			Saved.GetTileAt(FIntPoint(5, 0))->Water();
+			UFarmFieldSubsystem& FarmFields = GetFarmFields();
+			UFarmField& Farm = FarmFields.FindOrAddField(FarmId, FieldSize);
+			Farm.Till(FIntPoint(2, 3));
+			Farm.Plant(FIntPoint(2, 3), &Carrot);
+			Farm.Till(FIntPoint(5, 0));
+			Farm.Water(FIntPoint(5, 0));
+			FarmFields.FindOrAddField(TownId, FIntPoint(3, 2)).Till(FIntPoint(1, 1));
 
-			// Reversed, so a tile can only land in the right place by its coordinates.
-			TArray<FFarmTileSaveData> SavedTiles = Saved.GetTilesSaveData();
-			Algo::Reverse(SavedTiles);
-			AFarmGrid& Restored = MakeGrid();
-			const int32 Skipped = Restored.RestoreTilesFromSaveData(
-				SavedTiles, {{FName(TEXT("Base.Turnip")), &Turnip}, {FName(TEXT("Base.Carrot")), &Carrot}});
+			// Reversed, so a field and a tile can only land in the right place by their ID and coordinates.
+			TArray<FFarmFieldSaveData> SavedFields = FarmFields.GetSaveData();
+			Algo::Reverse(SavedFields);
+			for (FFarmFieldSaveData& Field : SavedFields)
+			{
+				Algo::Reverse(Field.Tiles);
+			}
+			FarmFields.StartNewGame();
+			const int32 Skipped =
+				FarmFields.RestoreFromSaveData(SavedFields, {{FName(TEXT("Base.Turnip")), &Turnip}, {FName(TEXT("Base.Carrot")), &Carrot}});
 
 			ASSERT_THAT(IsTrue(Skipped == 0));
-			ASSERT_THAT(IsTrue(Restored.GetTileAt(FIntPoint(2, 3))->GetCrop() == &Carrot));
-			ASSERT_THAT(IsTrue(Restored.GetTileAt(FIntPoint(5, 0))->IsWatered()));
-			ASSERT_THAT(IsTrue(Restored.GetTileAt(FIntPoint(0, 0))->GetState() == EFarmTileState::Grass));
+			const UFarmField* RestoredFarm = FarmFields.FindField(FarmId);
+			const UFarmField* RestoredTown = FarmFields.FindField(TownId);
+			ASSERT_THAT(IsNotNull(RestoredFarm));
+			ASSERT_THAT(IsNotNull(RestoredTown));
+			ASSERT_THAT(IsTrue(RestoredFarm->GetSize() == FieldSize));
+			ASSERT_THAT(IsTrue(RestoredFarm->GetTile(FIntPoint(2, 3))->GetCrop() == &Carrot));
+			ASSERT_THAT(IsTrue(RestoredFarm->GetTile(FIntPoint(5, 0))->IsWatered()));
+			ASSERT_THAT(IsTrue(RestoredFarm->GetTile(FIntPoint(0, 0))->GetState() == EFarmTileState::Grass));
+			ASSERT_THAT(IsTrue(RestoredTown->GetSize() == FIntPoint(3, 2)));
+			ASSERT_THAT(IsTrue(RestoredTown->GetTile(FIntPoint(1, 1))->GetState() == EFarmTileState::Tilled));
 		}
 
-		TEST_METHOD(UnknownCropsAndTilesOutsideTheGridAreSkipped)
+		TEST_METHOD(UnknownCropsAndTilesOutsideTheFieldAreSkipped)
 		{
-			AFarmGrid& Grid = MakeGrid();
-			FFarmTileSaveData Planted;
+			UFarmFieldSubsystem& FarmFields = GetFarmFields();
+			UFarmField& Farm = FarmFields.FindOrAddField(FarmId, FieldSize);
+			FFarmFieldSaveData Saved;
+			Saved.FieldId = FarmId;
+			Saved.Size = FIntPoint(50, 50);
+			FFarmTileSaveData& Planted = Saved.Tiles.AddDefaulted_GetRef();
 			Planted.Coordinates = FIntPoint(1, 1);
 			Planted.State = EFarmTileState::Planted;
 			Planted.CropId = TEXT("SomeMod.Pumpkin");
-			FFarmTileSaveData Outside;
+			FFarmTileSaveData& Outside = Saved.Tiles.AddDefaulted_GetRef();
 			Outside.Coordinates = FIntPoint(40, 2);
 			Outside.State = EFarmTileState::Tilled;
 
-			const int32 Skipped = Grid.RestoreTilesFromSaveData({Planted, Outside}, {});
+			const int32 Skipped = FarmFields.RestoreFromSaveData({Saved}, {});
 
+			// The field already exists, so it keeps the size its grid gave it.
 			ASSERT_THAT(IsTrue(Skipped == 2));
-			ASSERT_THAT(IsTrue(Grid.GetTileAt(FIntPoint(1, 1))->GetState() == EFarmTileState::Tilled));
-			ASSERT_THAT(IsNull(Grid.GetTileAt(FIntPoint(1, 1))->GetCrop()));
+			ASSERT_THAT(IsTrue(Farm.GetSize() == FieldSize));
+			ASSERT_THAT(IsTrue(Farm.GetTile(FIntPoint(1, 1))->GetState() == EFarmTileState::Tilled));
+			ASSERT_THAT(IsNull(Farm.GetTile(FIntPoint(1, 1))->GetCrop()));
 		}
 	};
 }

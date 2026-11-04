@@ -7,6 +7,7 @@
 #include "Content/VestigeContentData.h"
 #include "Core/VestigeLog.h"
 #include "Engine/World.h"
+#include "Farming/FarmField.h"
 #include "Farming/FarmGrid.h"
 #include "Farming/FarmTileState.h"
 #include "Farming/VestigeRestComponent.h"
@@ -56,9 +57,9 @@ void UVestigeCheatManager::BenchmarkField(int32 FieldSize, FName CropId)
 	}
 
 	AFarmGrid* Grid = AFarmGrid::Find(GetWorld());
-	if (!Grid)
+	if (!Grid || !Grid->GetField())
 	{
-		VESTIGE_LOG(this, LogVestige, Warning, "There is no farm grid to fill.");
+		VESTIGE_LOG(this, LogVestige, Warning, "There is no farm grid with a field to fill.");
 		return;
 	}
 
@@ -73,7 +74,7 @@ void UVestigeCheatManager::BenchmarkField(int32 FieldSize, FName CropId)
 
 	Grid->Resize(FIntPoint(FieldSize));
 
-	// The grid puts each tile into this state the way it restores a save, so the field follows the tiles' own rules.
+	// The field puts each tile into this state the way it restores a save, so the field follows the tiles' own rules.
 	TArray<FFarmTileSaveData> RipeTiles;
 	RipeTiles.Reserve(FieldSize * FieldSize);
 	for (int32 Y = 0; Y < FieldSize; ++Y)
@@ -90,5 +91,5 @@ void UVestigeCheatManager::BenchmarkField(int32 FieldSize, FName CropId)
 
 	TMap<FName, const UFarmCropData*> Crops;
 	Crops.Add(CropId, Crop);
-	Grid->RestoreTilesFromSaveData(RipeTiles, Crops);
+	Grid->GetField()->RestoreTilesFromSaveData(RipeTiles, Crops);
 }

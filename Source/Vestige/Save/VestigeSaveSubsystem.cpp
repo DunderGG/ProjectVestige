@@ -10,7 +10,8 @@
 #include "Content/VestigeContentData.h"
 #include "Core/VestigeFeedbackSubsystem.h"
 #include "Engine/World.h"
-#include "Farming/FarmGrid.h"
+#include "Farming/FarmFieldSaveData.h"
+#include "Farming/FarmFieldSubsystem.h"
 #include "Farming/FarmingComponent.h"
 #include "Farming/VestigeRestComponent.h"
 #include "GameFramework/Pawn.h"
@@ -20,7 +21,7 @@
 #include "ProfilingDebugging/CpuProfilerTrace.h"
 #include "Save/VestigeSaveGame.h"
 #include "Save/VestigeSaveLog.h"
-#include "Time/VestigeDayCycle.h"
+#include "Time/VestigeClockSubsystem.h"
 
 #define LOCTEXT_NAMESPACE "VestigeSaveSubsystem"
 
@@ -37,27 +38,30 @@ namespace VestigeSaveSlots
 		return Read;
 	}
 
-	/** Loads each crop the saved tiles name, once, with its meshes. Crops that no longer exist are left out. */
-	TMap<FName, const UFarmCropData*> LoadSavedCrops(const TArray<FFarmTileSaveData>& SavedTiles)
+	/** Loads each crop the saved fields' tiles name, once, with its meshes. Crops that no longer exist are left out. */
+	TMap<FName, const UFarmCropData*> LoadSavedCrops(const TArray<FFarmFieldSaveData>& SavedFields)
 	{
 		TMap<FName, const UFarmCropData*> Crops;
 		TSet<FName> Missing;
-		for (const FFarmTileSaveData& Tile : SavedTiles)
+		for (const FFarmFieldSaveData& Field : SavedFields)
 		{
-			if (Tile.CropId.IsNone() || Crops.Contains(Tile.CropId) || Missing.Contains(Tile.CropId))
+			for (const FFarmTileSaveData& Tile : Field.Tiles)
 			{
-				continue;
-			}
+				if (Tile.CropId.IsNone() || Crops.Contains(Tile.CropId) || Missing.Contains(Tile.CropId))
+				{
+					continue;
+				}
 
-			// Loading at play start, before the player can act, is when waiting for a load is allowed.
-			const FPrimaryAssetId CropAssetId(UFarmCropData::AssetType, Tile.CropId);
-			if (const UFarmCropData* Crop = Cast<UFarmCropData>(UVestigeContentData::LoadWithVisuals(CropAssetId)))
-			{
-				Crops.Add(Tile.CropId, Crop);
-			}
-			else
-			{
-				Missing.Add(Tile.CropId);
+				// Loading at play start, before the player can act, is when waiting for a load is allowed.
+				const FPrimaryAssetId CropAssetId(UFarmCropData::AssetType, Tile.CropId);
+				if (const UFarmCropData* Crop = Cast<UFarmCropData>(UVestigeContentData::LoadWithVisuals(CropAssetId)))
+				{
+					Crops.Add(Tile.CropId, Crop);
+				}
+				else
+				{
+					Missing.Add(Tile.CropId);
+				}
 			}
 		}
 		return Crops;
@@ -115,7 +119,7 @@ void UVestigeSaveSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 	Super::OnWorldBeginPlay(InWorld);
 
 	// This runs before the actors' BeginPlay. The world broadcasts OnWorldBeginPlay once all of them have run, so the
-	// grid's tiles and the farmer's toolbar are ready by then.
+	// grid has its field and the farmer's toolbar is ready by then.
 	WorldBeginPlayHandle = InWorld.OnWorldBeginPlay.AddUObject(this, &UVestigeSaveSubsystem::BindAndLoad);
 }
 
@@ -125,9 +129,9 @@ void UVestigeSaveSubsystem::Deinitialize()
 	{
 		World->OnWorldBeginPlay.Remove(WorldBeginPlayHandle);
 	}
-	if (DayCycle)
+	if (Clock)
 	{
-		DayCycle->OnNewDayFinished.RemoveAll(this);
+		Clock->OnNewDayFinished.RemoveAll(this);
 	}
 	Super::Deinitialize();
 }
@@ -138,6 +142,16 @@ void UVestigeSaveSubsystem::StartNewGame()
 	{
 		UGameplayStatics::DeleteGameInSlot(SlotName, UVestigeSaveGame::UserIndex);
 	}
+
+	// The clock and the fields belong to the game instance, which survives opening the map.
+	if (UVestigeClockSubsystem* GameClock = UVestigeClockSubsystem::Get(GetWorld()))
+	{
+		GameClock->StartNewGame();
+	}
+	if (UFarmFieldSubsystem* GameFields = UFarmFieldSubsystem::Get(GetWorld()))
+	{
+		GameFields->StartNewGame();
+	}
 	UGameplayStatics::OpenLevel(GetWorld(), FName(*UGameplayStatics::GetCurrentLevelName(GetWorld())));
 }
 
@@ -145,16 +159,16 @@ void UVestigeSaveSubsystem::BindAndLoad()
 {
 	GetWorld()->OnWorldBeginPlay.Remove(WorldBeginPlayHandle);
 
-	Grid = AFarmGrid::Find(GetWorld());
-	DayCycle = AVestigeDayCycle::Find(GetWorld());
-	if (!Grid || !DayCycle)
+	Clock = UVestigeClockSubsystem::Get(GetWorld());
+	FarmFields = UFarmFieldSubsystem::Get(GetWorld());
+	if (!Clock || !FarmFields)
 	{
-		VESTIGE_LOG(this, LogVestigeSave, Warning, "Saving is off in {Level}: it needs a FarmGrid and a VestigeDayCycle.",
+		VESTIGE_LOG(this, LogVestigeSave, Warning, "Saving is off in {Level}: it has no game instance with a clock and farm fields.",
 			GetWorld()->GetMapName());
 		return;
 	}
 
-	DayCycle->OnNewDayFinished.AddUObject(this, &UVestigeSaveSubsystem::SaveFarm);
+	Clock->OnNewDayFinished.AddUObject(this, &UVestigeSaveSubsystem::SaveFarm);
 	LoadFarm();
 }
 
@@ -177,7 +191,7 @@ void UVestigeSaveSubsystem::SaveFarm(int32 NewDay)
 	UVestigeSaveGame* Save = Cast<UVestigeSaveGame>(UGameplayStatics::CreateSaveGameObject(UVestigeSaveGame::StaticClass()));
 	Save->SaveVersion = UVestigeSaveGame::CurrentVersion;
 	Save->SaveSequence = NewestSequence + 1;
-	Save->Clock = DayCycle->GetSaveData();
+	Save->Clock = Clock->GetSaveData();
 	Save->Farming = Farming->GetSaveData();
 	Save->Inventory = Inventory->GetSaveData();
 	if (const UAbilitySystemComponent* AbilitySystem = GetPlayerAbilitySystem())
@@ -188,7 +202,7 @@ void UVestigeSaveSubsystem::SaveFarm(int32 NewDay)
 	{
 		Save->Rest = Rest->GetSaveData();
 	}
-	Save->Tiles = Grid->GetTilesSaveData();
+	Save->Fields = FarmFields->GetSaveData();
 
 	const int32 Slot = GetSlotToWrite(NewestSlot);
 	if (!UGameplayStatics::SaveGameToSlot(Save, UVestigeSaveGame::SlotNames[Slot], UVestigeSaveGame::UserIndex))
@@ -278,7 +292,7 @@ void UVestigeSaveSubsystem::LoadFarm()
 int32 UVestigeSaveSubsystem::ApplySave(const UVestigeSaveGame& Save, UFarmingComponent& Farming, UVestigeInventoryComponent& Inventory)
 {
 	int32 SkippedCount = 0;
-	DayCycle->RestoreFromSaveData(Save.Clock);
+	Clock->RestoreFromSaveData(Save.Clock);
 	if (!Farming.RestoreFromSaveData(Save.Farming))
 	{
 		++SkippedCount;
@@ -292,7 +306,7 @@ int32 UVestigeSaveSubsystem::ApplySave(const UVestigeSaveGame& Save, UFarmingCom
 	{
 		Rest->RestoreFromSaveData(Save.Rest);
 	}
-	SkippedCount += Grid->RestoreTilesFromSaveData(Save.Tiles, VestigeSaveSlots::LoadSavedCrops(Save.Tiles));
+	SkippedCount += FarmFields->RestoreFromSaveData(Save.Fields, VestigeSaveSlots::LoadSavedCrops(Save.Fields));
 	return SkippedCount;
 }
 

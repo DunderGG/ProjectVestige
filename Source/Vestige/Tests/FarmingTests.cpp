@@ -15,6 +15,7 @@
 #include "CQTest.h"
 #include "Engine/AssetManager.h"
 #include "Farming/FarmFarmingSaveData.h"
+#include "Farming/FarmField.h"
 #include "Farming/FarmGrid.h"
 #include "Farming/FarmingComponent.h"
 #include "Farming/FarmTile.h"
@@ -47,6 +48,8 @@ namespace FarmingTests
 		 */
 		BEFORE_EACH()
 		{
+			// The grid's field and the clock live in the game instance.
+			Spawner.InitializeGameSubsystems();
 			Grid = &Spawner.SpawnActor<AFarmGrid>();
 			Grid->DispatchBeginPlay();
 
@@ -131,7 +134,7 @@ namespace FarmingTests
 				for (int32 Day = 0; Day < Crop->GetDaysToMature(); ++Day)
 				{
 					TargetTile()->Water();
-					TargetTile()->AdvanceDay();
+					Grid->GetField()->AdvanceDay();
 				}
 			}
 			return Crop;

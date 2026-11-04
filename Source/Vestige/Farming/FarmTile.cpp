@@ -6,6 +6,7 @@
 #include "Components/StaticMeshComponent.h"
 #include "Content/FarmCropData.h"
 #include "Engine/StaticMesh.h"
+#include "Farming/FarmField.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "UObject/ConstructorHelpers.h"
 
@@ -77,61 +78,49 @@ void AFarmTile::BeginPlay()
 
 	SoilMaterial = SoilMesh->CreateDynamicMaterialInstance(0);
 	CropMaterial = CropMesh->CreateDynamicMaterialInstance(0);
-	RefreshVisuals();
+	Refresh();
+}
+
+void AFarmTile::ShowFieldTile(UFarmField& InField, const FIntPoint& InCoordinates)
+{
+	Field = &InField;
+	Coordinates = InCoordinates;
+	Refresh();
+}
+
+const FFarmTileState& AFarmTile::GetTileState() const
+{
+	static const FFarmTileState Grass;
+	const UFarmField* CurrentField = Field.Get();
+	const FFarmTileState* Tile = CurrentField ? CurrentField->GetTile(Coordinates) : nullptr;
+	return Tile ? *Tile : Grass;
 }
 
 bool AFarmTile::Till()
 {
-	return RefreshIfChanged(TileState.Till());
+	UFarmField* CurrentField = Field.Get();
+	return CurrentField && CurrentField->Till(Coordinates);
 }
 
 bool AFarmTile::Plant(const UFarmCropData* InCrop)
 {
-	return RefreshIfChanged(TileState.Plant(InCrop));
+	UFarmField* CurrentField = Field.Get();
+	return CurrentField && CurrentField->Plant(Coordinates, InCrop);
 }
 
 bool AFarmTile::Water()
 {
-	return RefreshIfChanged(TileState.Water());
+	UFarmField* CurrentField = Field.Get();
+	return CurrentField && CurrentField->Water(Coordinates);
 }
 
 bool AFarmTile::Harvest()
 {
-	return RefreshIfChanged(TileState.Harvest());
+	UFarmField* CurrentField = Field.Get();
+	return CurrentField && CurrentField->Harvest(Coordinates);
 }
 
-void AFarmTile::AdvanceDay()
-{
-	TileState.AdvanceDay();
-	RefreshVisuals();
-}
-
-FFarmTileSaveData AFarmTile::GetSaveData() const
-{
-	FFarmTileSaveData Data;
-	Data.State = GetState();
-	Data.bWatered = IsWatered();
-	Data.GrowthDays = GetGrowthDays();
-	Data.CropId = GetCrop() ? GetCrop()->GetContentId() : NAME_None;
-	return Data;
-}
-
-void AFarmTile::RestoreFromSaveData(const FFarmTileSaveData& Data, const UFarmCropData* SavedCrop)
-{
-	TileState.Restore(Data.State, Data.bWatered, Data.GrowthDays, SavedCrop);
-	RefreshVisuals();
-}
-
-bool AFarmTile::RefreshIfChanged(bool bChanged)
-{
-	if (bChanged)
-	{
-		RefreshVisuals();
-	}
-	return bChanged;
-}
-
-void AFarmTile::RefreshVisuals()
+void AFarmTile::Refresh()
 {
 	RefreshSoil();
 	RefreshCrop();

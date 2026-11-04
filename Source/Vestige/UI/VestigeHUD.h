@@ -8,19 +8,19 @@
 #include "UI/VestigeHudMessages.h"
 #include "VestigeHUD.generated.h"
 
-class AVestigeDayCycle;
 class AVestigePlayerCharacter;
 class APawn;
 class SVestigeHudWidget;
 class UAbilitySystemComponent;
 class UFarmingComponent;
+class UVestigeClockSubsystem;
 class UVestigeToolData;
 class UVestigeInteractionComponent;
 class UVestigeInventoryComponent;
 struct FGameplayTag;
 
 /**
- * Shows the farming HUD for its player: the day and time from the world's AVestigeDayCycle, the tool from the pawn's
+ * Shows the farming HUD for its player: the day and time from the game's UVestigeClockSubsystem, the tool from the pawn's
  * UFarmingComponent, the items from the inventory and the stamina from the ability system on the player state, the
  * farmer's key hints, the prompt for the interactable the pawn's UVestigeInteractionComponent focuses, and the feedback
  * messages UVestigeFeedbackSubsystem carries.
@@ -110,7 +110,7 @@ private:
 	float MessageSeconds = 0.f;
 	int32 MaxMessages = 0;
 
-	TWeakObjectPtr<const AVestigeDayCycle> DayCycle;
+	TWeakObjectPtr<const UVestigeClockSubsystem> Clock;
 	TWeakObjectPtr<UFarmingComponent> Farming;
 	TWeakObjectPtr<UVestigeInteractionComponent> Interaction;
 	TWeakObjectPtr<UVestigeInventoryComponent> Inventory;

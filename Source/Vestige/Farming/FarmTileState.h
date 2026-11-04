@@ -19,7 +19,7 @@ enum class EFarmTileState : uint8
 
 /**
  * One tile's farming state and the rules that change it: tilling, planting, watering, growing and harvesting.
- * A plain struct, so the rules can be tested without spawning a tile. AFarmTile owns one and shows it.
+ * A plain struct, so the rules can be tested without spawning a tile. UFarmField holds one per tile; AFarmTile shows one.
  * Every change goes through a function that checks it, so impossible states (a planted tile without a crop) can't happen.
  * Its ScriptName keeps it apart from EFarmTileState in Python, which drops both prefixes.
  */
@@ -79,8 +79,8 @@ private:
 };
 
 /**
- * One tile's part of a save: plain values and content IDs only. AFarmTile fills the state and crop, AFarmGrid adds where
- * the tile is, and UVestigeSaveGame holds the list.
+ * One tile's part of a save: plain values and content IDs only. UFarmField fills one per tile, with where the tile is,
+ * and its FFarmFieldSaveData holds the list.
  */
 USTRUCT()
 struct FFarmTileSaveData

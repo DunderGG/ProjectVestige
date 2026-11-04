@@ -6,15 +6,12 @@
 #include "Components/LightComponent.h"
 #include "Components/PostProcessComponent.h"
 #include "Components/SkyLightComponent.h"
-#include "Core/VestigeActorLookup.h"
 #include "Engine/DirectionalLight.h"
-#include "Engine/Engine.h"
 #include "Engine/SkyLight.h"
 #include "Engine/World.h"
 #include "EngineUtils.h"
-#include "ProfilingDebugging/CpuProfilerTrace.h"
-#include "Time/VestigeClockSaveData.h"
-#include "Time/VestigeTimeLog.h"
+#include "Time/VestigeClockSettings.h"
+#include "Time/VestigeClockSubsystem.h"
 
 namespace VestigeDayCycleLighting
 {
@@ -66,7 +63,7 @@ namespace VestigeDayCycleLighting
 
 AVestigeDayCycle::AVestigeDayCycle()
 {
-	// Ticks to run the clock and move the sun. Stops while the clock is stopped at the end of the day.
+	// Ticks to follow the clock: brightness, colour and exposure change every frame, the sun turns in steps.
 	PrimaryActorTick.bCanEverTick = true;
 
 	NightPostProcess = CreateDefaultSubobject<UPostProcessComponent>(TEXT("NightPostProcess"));
@@ -76,112 +73,25 @@ AVestigeDayCycle::AVestigeDayCycle()
 	NightPostProcess->Settings.AutoExposureBias = 0.f;
 }
 
-AVestigeDayCycle* AVestigeDayCycle::Get(UWorld* World)
-{
-	check(IsInGameThread());
-	if (!World)
-	{
-		VESTIGE_LOG(nullptr, LogVestigeTime, Error, "Called without a world.");
-		return nullptr;
-	}
-
-	if (AVestigeDayCycle* Existing = Find(World))
-	{
-		return Existing;
-	}
-
-	// Actors' BeginPlay runs before the world counts as begun, so "running" means initialized for play and not ending.
-	const bool bRunningGameWorld = World->IsGameWorld() && World->AreActorsInitialized() && !World->bIsTearingDown;
-	if (!bRunningGameWorld)
-	{
-		return nullptr;
-	}
-
-	VESTIGE_LOG(World, LogVestigeTime, Warning,
-		"The level has no VestigeDayCycle, so one was spawned with default settings. Place one to tune it.");
-	return World->SpawnActor<AVestigeDayCycle>();
-}
-
-AVestigeDayCycle* AVestigeDayCycle::Find(const UWorld* World)
-{
-	return Cast<AVestigeDayCycle>(VestigeActorLookup::FindSingle(World, StaticClass()));
-}
-
-AVestigeDayCycle* AVestigeDayCycle::GetDayCycle(const UObject* WorldContextObject)
-{
-	UWorld* World = GEngine ? GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull) : nullptr;
-	return Get(World);
-}
-
 void AVestigeDayCycle::BeginPlay()
 {
 	Super::BeginPlay();
 
-	TimeOfDay = DayStartHour;
+	Clock = UVestigeClockSubsystem::Get(GetWorld());
 	FindLights();
-	UpdateLighting();
-}
-
-void AVestigeDayCycle::StartNextDay()
-{
-	TRACE_CPUPROFILER_EVENT_SCOPE(AVestigeDayCycle::StartNextDay);
-
-	++CurrentDay;
-	TimeOfDay = DayStartHour;
-	bDayEndReached = false;
-	SetActorTickEnabled(true);
-	UpdateLighting();
-	OnNewDay.Broadcast(CurrentDay);
-	OnNewDayBlueprint.Broadcast(CurrentDay);
-	OnNewDayFinished.Broadcast(CurrentDay);
-}
-
-FVestigeClockSaveData AVestigeDayCycle::GetSaveData() const
-{
-	FVestigeClockSaveData Data;
-	Data.Day = CurrentDay;
-	Data.TimeOfDay = TimeOfDay;
-	return Data;
-}
-
-void AVestigeDayCycle::RestoreFromSaveData(const FVestigeClockSaveData& Data)
-{
-	CurrentDay = FMath::Max(1, Data.Day);
-	TimeOfDay = FMath::Clamp(Data.TimeOfDay, DayStartHour, DayEndHour);
-	bDayEndReached = false;
-
-	// A clock restored at DayEndHour reaches the end on the next tick, so OnDayEndReached isn't lost.
-	SetActorTickEnabled(true);
 	UpdateLighting();
 }
 
 void AVestigeDayCycle::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
-
-	const float PreviousTimeOfDay = TimeOfDay;
-	TimeOfDay = FMath::Min(TimeOfDay + DeltaSeconds / RealSecondsPerGameHour, DayEndHour);
 	UpdateLighting();
-	BroadcastHoursStartedSince(PreviousTimeOfDay);
-	if (TimeOfDay < DayEndHour || bDayEndReached)
-	{
-		return;
-	}
-
-	// The clock stops at DayEndHour until the next day starts, and nothing changes meanwhile. Stop ticking first,
-	// so a listener that starts the next day turns it back on.
-	bDayEndReached = true;
-	SetActorTickEnabled(false);
-	OnDayEndReached.Broadcast(CurrentDay);
 }
 
-void AVestigeDayCycle::BroadcastHoursStartedSince(float PreviousTimeOfDay)
+float AVestigeDayCycle::GetTimeOfDay() const
 {
-	const int32 LastHour = FMath::FloorToInt32(TimeOfDay);
-	for (int32 Hour = FMath::FloorToInt32(PreviousTimeOfDay) + 1; Hour <= LastHour; ++Hour)
-	{
-		OnHourStarted.Broadcast(Hour);
-	}
+	const UVestigeClockSubsystem* CurrentClock = Clock.Get();
+	return CurrentClock ? CurrentClock->GetTimeOfDay() : UVestigeClockSettings::Get().GetDayStartHour();
 }
 
 void AVestigeDayCycle::FindLights()
@@ -227,7 +137,7 @@ void AVestigeDayCycle::UpdateLighting()
 	TurnSunInSteps();
 
 	// Light fades in after sunrise and out before sunset, warm near the horizon.
-	const FSkyPosition Sky = GetSkyPosition(TimeOfDay, SunriseHour, SunsetHour);
+	const FSkyPosition Sky = GetSkyPosition(GetTimeOfDay(), SunriseHour, SunsetHour);
 	const float Daylight = Sky.bDaytime ? FadeIn(Sky.Arc, DaylightFadeRate) : 0.f;
 	const float Brightness = FMath::Lerp(NightLightFraction, 1.f, Daylight);
 	ULightComponent* SunLight = Sun->GetLightComponent();
@@ -247,7 +157,7 @@ void AVestigeDayCycle::UpdateLighting()
 
 void AVestigeDayCycle::TurnSunInSteps()
 {
-	// After a jump in the clock (a new day, a loaded save) the sun is usually far behind, so it follows at once.
+	// After a jump in the clock (a new day, a loaded save) the sun is usually far behind, so it follows on the next frame.
 	const FQuat Target = GetSunRotation().Quaternion();
 	const double DegreesBehind = FMath::RadiansToDegrees(Sun->GetActorQuat().AngularDistance(Target));
 	if (DegreesBehind >= SunStepDegrees)
@@ -260,7 +170,7 @@ FRotator AVestigeDayCycle::GetSunRotation() const
 {
 	using namespace VestigeDayCycleLighting;
 
-	const FSkyPosition Sky = GetSkyPosition(TimeOfDay, SunriseHour, SunsetHour);
+	const FSkyPosition Sky = GetSkyPosition(GetTimeOfDay(), SunriseHour, SunsetHour);
 	const float Elevation = FMath::Lerp(MinSunElevation, MaxSunElevation, Sky.Arc);
 	return FRotator(-Elevation, SunYaw + Sky.Progress * SunArcYaw, 0.f);
 }

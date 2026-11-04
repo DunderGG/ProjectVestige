@@ -9,15 +9,17 @@
 #include "FarmTile.generated.h"
 
 class UFarmCropData;
+class UFarmField;
 class UStaticMesh;
 class UStaticMeshComponent;
 class UMaterialInstanceDynamic;
 class UMaterialInterface;
-struct FFarmTileSaveData;
 
 /**
- * One square of farmland, in the world: it can be tilled, planted, watered and harvested.
- * Its rules and state are an FFarmTileState; the actor applies them and shows the result with its meshes.
+ * One square of farmland in the world, showing one tile of a UFarmField: it can be tilled, planted, watered and harvested.
+ * The tile's state and rules are an FFarmTileState in the field, which outlives the level; the actor asks the field to
+ * change it and shows the result with its meshes. AFarmGrid spawns one per tile and tells it to show itself again when the
+ * field changes.
  */
 UCLASS()
 class AFarmTile : public AActor
@@ -30,43 +32,41 @@ public:
 
 	AFarmTile();
 
-	// The farming actions follow FFarmTileState's rules, documented there, and return false when they change nothing.
+	/** Shows the tile at InCoordinates in InField from now on. Called by the grid that spawns it. */
+	void ShowFieldTile(UFarmField& InField, const FIntPoint& InCoordinates);
+
+	/** Shows the field's tile again, after it changed. */
+	void Refresh();
+
+	// The farming actions ask the field, following FFarmTileState's rules, documented there. They return false when they
+	// change nothing, and always without a field. The field's change event makes the grid refresh this tile.
 	bool Till();
 	bool Plant(const UFarmCropData* InCrop);
 	bool Water();
 	bool Harvest();
 
-	/** Called once per in-game day. Watered crops grow one stage, then the soil dries out. */
-	void AdvanceDay();
-
-	EFarmTileState GetState() const { return TileState.GetState(); }
-	bool IsWatered() const { return TileState.IsWatered(); }
-	bool IsRipe() const { return TileState.IsRipe(); }
-	bool CanTill() const { return TileState.CanTill(); }
-	bool CanPlant() const { return TileState.CanPlant(); }
-	bool CanWater() const { return TileState.CanWater(); }
-	int32 GetGrowthDays() const { return TileState.GetGrowthDays(); }
+	// The field's tile; a tile that shows no field reads as grass.
+	EFarmTileState GetState() const { return GetTileState().GetState(); }
+	bool IsWatered() const { return GetTileState().IsWatered(); }
+	bool IsRipe() const { return GetTileState().IsRipe(); }
+	bool CanTill() const { return GetTileState().CanTill(); }
+	bool CanPlant() const { return GetTileState().CanPlant(); }
+	bool CanWater() const { return GetTileState().CanWater(); }
+	int32 GetGrowthDays() const { return GetTileState().GetGrowthDays(); }
 
 	/** The crop growing here, or nullptr if nothing is planted. */
-	const UFarmCropData* GetCrop() const { return TileState.GetCrop(); }
+	const UFarmCropData* GetCrop() const { return GetTileState().GetCrop(); }
 
-	/** The tile's state and its crop's ContentId, for saving. The grid adds the tile's coordinates. */
-	FFarmTileSaveData GetSaveData() const;
-
-	/**
-	 * Puts the tile straight into a saved state, as FFarmTileState::Restore does, and shows it. SavedCrop is the crop
-	 * Data.CropId names, already loaded, or nullptr if there is none or it no longer exists.
-	 */
-	void RestoreFromSaveData(const FFarmTileSaveData& Data, const UFarmCropData* SavedCrop);
+	/** The tile's column (X) and row (Y) in its field. */
+	FIntPoint GetCoordinates() const { return Coordinates; }
 
 protected:
 	virtual void BeginPlay() override;
 
 private:
-	/** Shows the state again if bChanged, and returns bChanged, so each action stays one line. */
-	bool RefreshIfChanged(bool bChanged);
+	/** The field's tile, or a grass tile if the actor shows no field or its coordinates are outside it. */
+	const FFarmTileState& GetTileState() const;
 
-	void RefreshVisuals();
 	void RefreshSoil();
 	void RefreshCrop();
 
@@ -105,6 +105,9 @@ private:
 	UPROPERTY()
 	TObjectPtr<UMaterialInstanceDynamic> CropMaterial;
 
+	/** The field this tile shows. The field outlives the level, so the tile only points at it. */
+	TWeakObjectPtr<UFarmField> Field;
+
 	UPROPERTY(VisibleInstanceOnly, Category = "Farming")
-	FFarmTileState TileState;
+	FIntPoint Coordinates = FIntPoint::ZeroValue;
 };

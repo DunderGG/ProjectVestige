@@ -13,7 +13,7 @@
 #include "Player/VestigePlayerCharacter.h"
 #include "Player/VestigePlayerState.h"
 #include "Tests/VestigeTestInteractable.h"
-#include "Time/VestigeDayCycle.h"
+#include "Time/VestigeClockSubsystem.h"
 
 #define LOCTEXT_NAMESPACE "VestigeInteractionTests"
 
@@ -158,7 +158,9 @@ namespace VestigeInteractionTests
 
 		TEST_METHOD(TheBedSleepsAnActorWithARestComponent)
 		{
-			const AVestigeDayCycle& Cycle = Spawner.SpawnActor<AVestigeDayCycle>();
+			Spawner.InitializeGameSubsystems();
+			const UVestigeClockSubsystem* Clock = UVestigeClockSubsystem::Get(&Spawner.GetWorld());
+			ASSERT_THAT(IsNotNull(Clock));
 			UVestigeInteractionComponent& Interaction = MakeInteractor();
 			AActor& Interactor = *Interaction.GetOwner();
 			UVestigeRestComponent* Rest = NewObject<UVestigeRestComponent>(&Interactor);
@@ -170,7 +172,7 @@ namespace VestigeInteractionTests
 			ASSERT_THAT(IsTrue(Interaction.GetFocusedOption().Action == AVestigeBed::SleepAction));
 			ASSERT_THAT(IsTrue(Interaction.InteractWithFocus()));
 
-			ASSERT_THAT(IsTrue(Cycle.GetCurrentDay() == 2));
+			ASSERT_THAT(IsTrue(Clock->GetCurrentDay() == 2));
 		}
 
 		TEST_METHOD(TheBedOffersNothingToAnActorThatCantSleep)

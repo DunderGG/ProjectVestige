@@ -10,15 +10,12 @@
 class ADirectionalLight;
 class ASkyLight;
 class UPostProcessComponent;
-struct FVestigeClockSaveData;
-
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnVestigeNewDay, int32 /* Day */);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnVestigeNewDayBlueprint, int32, Day);
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnVestigeHourStarted, int32 /* Hour */);
+class UVestigeClockSubsystem;
 
 /**
- * Keeps the day counter and the clock, and moves the sun, sky light and exposure to match the time.
- * Place one in the level to tweak its settings. If there is none, one is spawned with default settings.
+ * Moves the sun, sky light and exposure to match the time on the game's clock (UVestigeClockSubsystem). Presentation only:
+ * it reads the clock and never changes it. Place one in each level whose sky follows the time of day; a level without one
+ * keeps its lights as placed.
  */
 UCLASS()
 class AVestigeDayCycle : public AActor
@@ -29,51 +26,6 @@ public:
 	AVestigeDayCycle();
 
 	/**
-	 * Returns the world's day cycle, spawning one with a warning if a running game world has none.
-	 * The only code that spawns a day cycle. Returns nullptr without spawning in editor and preview worlds,
-	 * before the world is initialized for play and while it is torn down. Game thread only.
-	 */
-	static AVestigeDayCycle* Get(UWorld* World);
-
-	/**
-	 * Returns the world's day cycle, or nullptr if there is none yet. Never spawns one.
-	 * Searches the world, so call it once and keep the result.
-	 */
-	static AVestigeDayCycle* Find(const UWorld* World);
-
-	/**
-	 * Extension point: the world's day cycle for Blueprints, from Get, so a level that has none still gets one. Bind to
-	 * its On New Day event to react to a new day.
-	 */
-	UFUNCTION(BlueprintCallable, Category = "Time", meta = (WorldContext = "WorldContextObject", DisplayName = "Get Day Cycle"))
-	static AVestigeDayCycle* GetDayCycle(const UObject* WorldContextObject);
-
-	/** Ends the current day and sets the clock to the next morning, then broadcasts OnNewDay and OnNewDayBlueprint. */
-	void StartNextDay();
-
-	/** The day and clock, for saving. */
-	FVestigeClockSaveData GetSaveData() const;
-
-	/**
-	 * Sets the day and clock from a save without broadcasting anything. The day becomes at least 1 and the clock is
-	 * clamped between DayStartHour and DayEndHour; a clock at DayEndHour still broadcasts OnDayEndReached on its next tick.
-	 */
-	void RestoreFromSaveData(const FVestigeClockSaveData& Data);
-
-	int32 GetCurrentDay() const { return CurrentDay; }
-
-	/** Hours since midnight at the start of the current day. Goes past 24 after midnight, up to DayEndHour. */
-	float GetTimeOfDay() const { return TimeOfDay; }
-
-	/** Hour each day starts at after sleeping. */
-	float GetDayStartHour() const { return DayStartHour; }
-
-	/** Hour the day ends and the clock stops. Past 24 means after midnight. */
-	float GetDayEndHour() const { return DayEndHour; }
-
-	float GetRealSecondsPerGameHour() const { return RealSecondsPerGameHour; }
-
-	/**
 	 * Where the clock puts the sun now, or the moon at night. The sun itself turns to it in steps of SunStepDegrees, so
 	 * it can be up to a step behind.
 	 */
@@ -82,61 +34,19 @@ public:
 	/** Smallest turn of the sun, in degrees. */
 	float GetSunStepDegrees() const { return SunStepDegrees; }
 
-	/** Broadcast with the new day's number every time a new day starts. The farm reacts here, e.g. crops grow. */
-	FOnVestigeNewDay OnNewDay;
-
-	/**
-	 * Extension point: OnNewDay for Blueprints, with the new day's number. Broadcast after OnNewDay, so the farm has
-	 * reacted (crops have grown), and before OnNewDayFinished, so what a listener changes is saved. The same contract as
-	 * OnNewDay: finish every change to saved state in the handler (Architecture.md, section 15).
-	 */
-	UPROPERTY(BlueprintAssignable, Category = "Time", meta = (DisplayName = "On New Day"))
-	FOnVestigeNewDayBlueprint OnNewDayBlueprint;
-
-	/** Broadcast after OnNewDay and OnNewDayBlueprint, once everything has reacted to the new day. Saving listens here. */
-	FOnVestigeNewDay OnNewDayFinished;
-
-	/**
-	 * Broadcast once per day, with the day's number, when the clock reaches DayEndHour. The clock then stops until
-	 * StartNextDay. Whoever owns the end of the player's day (UVestigeRestComponent) reacts here.
-	 */
-	FOnVestigeNewDay OnDayEndReached;
-
-	/**
-	 * Broadcast each time the running clock reaches a whole hour, with the hour since midnight at the start of the day: 22
-	 * is 22:00, 24 is the next midnight. Once per hour even when a long frame passes several. Not broadcast for the
-	 * DayStartHour a new day starts at, nor when the clock is restored from a save.
-	 */
-	FOnVestigeHourStarted OnHourStarted;
-
 protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds) override;
 
 private:
-	/** Broadcasts OnHourStarted for every whole hour after PreviousTimeOfDay, up to and including TimeOfDay. */
-	void BroadcastHoursStartedSince(float PreviousTimeOfDay);
+	/** The clock's time of day, or the day's start hour without a clock (outside a game). */
+	float GetTimeOfDay() const;
 
 	void FindLights();
 	void UpdateLighting();
 
 	/** Turns the sun to GetSunRotation once it is at least SunStepDegrees away from it. */
 	void TurnSunInSteps();
-
-	/** Real seconds per in-game hour. */
-	UPROPERTY(EditAnywhere, Category = "Time", meta = (AllowPrivateAccess = "true", ClampMin = 0.1))
-	float RealSecondsPerGameHour = 40.f;
-
-	/** Hour each day starts at after sleeping. */
-	UPROPERTY(EditAnywhere, Category = "Time", meta = (AllowPrivateAccess = "true", ClampMin = 0, ClampMax = 23))
-	float DayStartHour = 6.f;
-
-	/**
-	 * Hour the day ends and the clock stops: OnDayEndReached is broadcast. 30 is 06:00 the next morning, so a player who
-	 * never sleeps stays up the whole night and the next day starts at sunrise.
-	 */
-	UPROPERTY(EditAnywhere, Category = "Time", meta = (AllowPrivateAccess = "true", ClampMin = 1, ClampMax = 30))
-	float DayEndHour = 30.f;
 
 	/** Hour the sun rises above the horizon. Before it, the moon lights the farm. */
 	UPROPERTY(EditAnywhere, Category = "Time", meta = (AllowPrivateAccess = "true", ClampMin = 0, ClampMax = 23))
@@ -189,11 +99,8 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Lighting")
 	TObjectPtr<UPostProcessComponent> NightPostProcess;
 
-	int32 CurrentDay = 1;
-	float TimeOfDay = DayStartHour;
-
-	/** Set when OnDayEndReached is broadcast, so it is broadcast once per day. */
-	bool bDayEndReached = false;
+	/** The clock the lighting follows, found at BeginPlay. */
+	TWeakObjectPtr<const UVestigeClockSubsystem> Clock;
 
 	// The lights' settings as placed in the level, used as the daytime values.
 	float SunYaw = 0.f;

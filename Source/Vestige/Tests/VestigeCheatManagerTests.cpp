@@ -12,7 +12,7 @@
 #include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerController.h"
 #include "Player/VestigeCheatManager.h"
-#include "Time/VestigeDayCycle.h"
+#include "Time/VestigeClockSubsystem.h"
 
 // A namespace keeps the fixture's short name from hiding other declarations in unity builds.
 namespace VestigeCheatManagerTests
@@ -20,6 +20,9 @@ namespace VestigeCheatManagerTests
 	TEST_CLASS(Cheats, "Vestige")
 	{
 		FActorTestSpawner Spawner;
+
+		/** The game instance holds the clock and the farm fields the commands work on. */
+		BEFORE_EACH() { Spawner.InitializeGameSubsystems(); }
 
 		TEST_METHOD(TheGamesPlayerControllerUsesTheVestigeCheatManager)
 		{
@@ -34,7 +37,8 @@ namespace VestigeCheatManagerTests
 
 		TEST_METHOD(SkipDaySleepsWhereThePlayerStands)
 		{
-			const AVestigeDayCycle& Cycle = Spawner.SpawnActor<AVestigeDayCycle>();
+			const UVestigeClockSubsystem* Clock = UVestigeClockSubsystem::Get(&Spawner.GetWorld());
+			ASSERT_THAT(IsNotNull(Clock));
 			APawn& Pawn = Spawner.SpawnActor<APawn>();
 			UVestigeRestComponent* Rest = NewObject<UVestigeRestComponent>(&Pawn);
 			Rest->RegisterComponent();
@@ -45,7 +49,7 @@ namespace VestigeCheatManagerTests
 
 			Cheats->SkipDay();
 
-			ASSERT_THAT(IsTrue(Cycle.GetCurrentDay() == 2));
+			ASSERT_THAT(IsTrue(Clock->GetCurrentDay() == 2));
 		}
 
 		/** A cheat manager for a player controller in the test world. */

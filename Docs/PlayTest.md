@@ -241,7 +241,7 @@ The general types' settings moved out of the `Farming` categories into ones name
 - [ ] **Day cycle**: the `VestigeDayCycle` in `L_Farm` shows its settings under **Time** and **Lighting** (Night Post Process too).
 - [ ] **Player Blueprint**: in `BP_PlayerCharacter`, Move Ramp Seconds is under **Input** with the template's input actions, the **Rest** component's hours and drain under **Rest**, and the **CharacterMovement** component's Tool Use Speed Scale under **Movement**.
 - [ ] **Assets**: a tool data asset shows **Content**, **Tool** and **Visuals**; an item shows **Content**, **Item** and **Economy**; a crop shows **Content** and **Farming** with Growth, Harvest and Visuals.
-- [ ] **Blueprint menus**: in any Blueprint's graph, right-click and search: Get Day Cycle is under **Time**, Get Content Id under **Content**. In Add Component, the Vestige Rest component is listed under **Rest**.
+- [ ] **Blueprint menus**: in any Blueprint's graph, right-click and search: Get Vestige Clock is there (it replaced Get Day Cycle on 2026-11-04), Get Content Id under **Content**. In Add Component, the Vestige Rest component is listed under **Rest**.
 
 ### Test keys as console commands, 2026-11-04
 
@@ -294,6 +294,19 @@ The volumetric clouds take fewer samples at High, Medium and Low, set in `Config
 - [ ] **Medium and Low**: type `scalability 1`, then `scalability 0`, and look again. The edges are grainier; the clouds shouldn't flicker or break up.
 - [ ] **Back to Epic**: after Low, type `scalability 3`. The clouds are smooth again, as before this change.
 
+### Clock and fields in the game instance, 2026-11-04
+
+The clock and the farm moved out of the level into the game instance; the grid, its tiles and the day cycle's lighting now only show them. The rules are covered by tests; these checks are for the editor and play. The commit is the one titled "Move the clock and the farm data into the game instance".
+
+- [ ] **Leftover nodes**: open `BP_PlayerCharacter`. It shows compile errors from the Print String nodes left from the extension point checks (Get Day Cycle, Bind Event to On New Day, Print String in the Event Graph). Delete those nodes, compile and save. This also finishes the housekeeping item in [Roadmap.md, section 3](Roadmap.md#3-housekeeping). Until then the test `Vestige.Farming.AFullBagLeavesTheCropInTheGround`, the first to load the Blueprint, fails on the compile errors.
+- [ ] **Old save refused**: press Play. The HUD says the save couldn't be read and saving is off (the save version is now 2). Type `NewGame` in the console; the map reopens on day 1.
+- [ ] **Clock settings**: Project Settings > Game > **Vestige Clock** shows Real Seconds Per Game Hour (40), Day Start Hour (6) and Day End Hour (30). The `VestigeDayCycle` in `L_Farm` shows only **Lighting** and the sunrise and sunset hours under **Time**. The clock now runs at 40 seconds per game hour; `slomo 20` in the console speeds it up for testing. Tell me if L_Farm's old fast clock should come back as the project setting.
+- [ ] **Grid**: the `FarmGrid` in `L_Farm` shows **Field Id** `Base.Farm` under **Farming**.
+- [ ] **A day of farming**: till, plant and water a few tiles, sleep, and check that the watered crops grew and the soil dried, as before. Stop, press Play again: the field, the day and the time come back from the save.
+- [ ] **Pause**: with the clock running, open the pause or console with the game paused (`pause` in the console). The clock on the HUD stops, and runs again after `pause` once more.
+- [ ] **New game**: after a few days, `NewGame` reopens the map on day 1 at 06:00 with grass everywhere.
+- [ ] **Benchmark field**: `BenchmarkField 20 Base.Turnip` still makes a 20 by 20 field of ripe turnips.
+
 ### Editor chores
 
 Changes only the editor can make safely. The steps are in [Roadmap.md, Housekeeping](Roadmap.md#3-housekeeping): re-saving the template Blueprints and `L_Farm`, moving `BP_FarmTile` and the materials with redirectors fixed, and regenerating the Android File Server token if it was ever used. After each one, run the [smoke test](#3-smoke-test).
@@ -305,7 +318,7 @@ About five minutes in `L_Farm`, in Play in Editor at High. Run it before pushing
 1. **Start:** a new game (the console command `NewGame`) starts on day 1 at 06:00. The HUD shows the day, the clock, the tool, the stamina ("Stamina 100 / 100"), the bag ("Bag: Turnip Seeds 10") and the key hints; the Output Log has no `LogVestige` errors.
 2. **Tools:** with each tool on the tile in front of you: the hoe (1) tills grass, the seeds (2) plant in tilled soil and use a seed, the watering can (3) darkens the soil, and the hand (4) does nothing on an unripe crop. The tool in hand changes with each key. Each action shows a short message, and each one that changes the farm lowers the stamina; facing away from the field says "Stand facing a farm tile." and costs nothing.
 3. **Growing:** water a planted tile and sleep in the bed (walk up to it, F), a few times; the console command `SkipDay` skips a day the same way. The crop grows one stage per watered night, and a tile left dry doesn't grow. Harvest the ripe crop with the hand; a Turnip stack appears in the bag or grows. Each night in bed refills the stamina.
-4. **Day and night:** let the clock run through an evening (it moves about one hour every 40 seconds unless the level's day cycle is set faster). The sun sets with warm light, the night is properly dark with faint moonlight, and at 02:00 the farmer passes out into the next day.
+4. **Day and night:** let the clock run through an evening (it moves about one hour every 40 seconds unless Project Settings > Game > Vestige Clock is set faster). The sun sets with warm light, the night is properly dark with faint moonlight, and at 02:00 the farmer passes out into the next day.
 5. **Saving:** sleep in the bed ("Game saved."), stop the game and play again. The day, the bag, the tool in hand and every tile, crops included, come back.
 6. **Highlight:** walk along the field edge and turn. The frame is bright yellow, by day and at night, follows the tile in front of you and disappears off the field.
 7. **Performance:** in the console, `stat fps` and `stat unit`. In a busy part of the farm, by day and by night, the frame stays under 16.6 ms (60 fps), and sleeping shows no visible hitch ([Architecture.md, section 10](Architecture.md#10-performance-by-design)). Play in Editor adds its own cost, so check a doubtful number in Standalone Game. For a hitch on the new day, start the game with `-trace=default` and open the trace in Unreal Insights (`Engine\Binaries\Win64\UnrealInsights.exe`): `AVestigeDayCycle::StartNextDay` shows the whole new day, with the tiles, the save and the load inside it.

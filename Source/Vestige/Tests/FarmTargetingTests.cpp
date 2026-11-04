@@ -27,6 +27,8 @@ namespace FarmTargetingTests
 		/** A default 8 x 8 grid of 1 m tiles with a corner at the origin, and a farmer, both playing. */
 		BEFORE_EACH()
 		{
+			// The grid's field lives in the game instance.
+			Spawner.InitializeGameSubsystems();
 			Grid = &Spawner.SpawnActor<AFarmGrid>();
 			Grid->DispatchBeginPlay();
 			Farmer = &Spawner.SpawnActor<AVestigePlayerCharacter>();

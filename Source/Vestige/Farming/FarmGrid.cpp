@@ -6,10 +6,11 @@
 #include "Components/BoxComponent.h"
 #include "Core/VestigeActorLookup.h"
 #include "Engine/World.h"
+#include "Farming/FarmField.h"
+#include "Farming/FarmFieldSubsystem.h"
 #include "Farming/FarmLog.h"
 #include "Farming/FarmTile.h"
 #include "ProfilingDebugging/CpuProfilerTrace.h"
-#include "Time/VestigeDayCycle.h"
 
 namespace FarmGridEditor
 {
@@ -49,10 +50,15 @@ void AFarmGrid::BeginPlay()
 {
 	Super::BeginPlay();
 
-	DayCycle = AVestigeDayCycle::Get(GetWorld());
-	if (AVestigeDayCycle* Cycle = DayCycle.Get())
+	if (UFarmFieldSubsystem* FarmFields = UFarmFieldSubsystem::Get(GetWorld()))
 	{
-		Cycle->OnNewDay.AddUObject(this, &AFarmGrid::AdvanceTiles);
+		Field = &FarmFields->FindOrAddField(FieldId, FIntPoint(Width, Height));
+		Field->OnTileChanged.AddUObject(this, &AFarmGrid::RefreshTile);
+		Field->OnTilesChanged.AddUObject(this, &AFarmGrid::RefreshTiles);
+	}
+	else
+	{
+		VESTIGE_LOG(this, LogFarm, Warning, "There is no game instance with farm fields, so the field is empty.");
 	}
 
 	SpawnTiles();
@@ -62,9 +68,11 @@ void AFarmGrid::BeginPlay()
 
 void AFarmGrid::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	if (AVestigeDayCycle* Cycle = DayCycle.Get())
+	if (Field)
 	{
-		Cycle->OnNewDay.RemoveAll(this);
+		Field->OnTileChanged.RemoveAll(this);
+		Field->OnTilesChanged.RemoveAll(this);
+		Field = nullptr;
 	}
 
 	// When the grid alone goes (destroyed, or its sublevel streamed out), its tiles go with it. When the whole world
@@ -97,6 +105,10 @@ void AFarmGrid::Resize(const FIntPoint& NewSize)
 	DestroyTiles();
 	Width = FMath::Max(NewSize.X, 1);
 	Height = FMath::Max(NewSize.Y, 1);
+	if (Field)
+	{
+		Field->Resize(FIntPoint(Width, Height));
+	}
 	UpdateBounds();
 	SpawnTiles();
 }
@@ -110,9 +122,13 @@ void AFarmGrid::SpawnTiles()
 {
 	TRACE_CPUPROFILER_EVENT_SCOPE(AFarmGrid::SpawnTiles);
 
+	if (!Field)
+	{
+		return;
+	}
 	if (!TileClass)
 	{
-		VESTIGE_LOG(this, LogFarm, Warning, "No Tile Class is set, so the field is empty.");
+		VESTIGE_LOG(this, LogFarm, Warning, "No Tile Class is set, so the field isn't shown.");
 		return;
 	}
 
@@ -130,7 +146,12 @@ void AFarmGrid::SpawnTiles()
 		{
 			const FVector LocalCenter((X + 0.5f) * TileSize, (Y + 0.5f) * TileSize, 0.f);
 			const FTransform TileTransform(GetActorRotation(), GridTransform.TransformPosition(LocalCenter), TileScale);
-			Tiles.Add(GetWorld()->SpawnActor<AFarmTile>(TileClass, TileTransform, SpawnParams));
+			AFarmTile* Tile = GetWorld()->SpawnActor<AFarmTile>(TileClass, TileTransform, SpawnParams);
+			if (Tile)
+			{
+				Tile->ShowFieldTile(*Field, FIntPoint(X, Y));
+			}
+			Tiles.Add(Tile);
 		}
 	}
 }
@@ -168,60 +189,23 @@ AFarmTile* AFarmGrid::GetTileAt(const FIntPoint& Coordinates) const
 	return Tiles.IsValidIndex(Index) ? Tiles[Index].Get() : nullptr;
 }
 
-TArray<FFarmTileSaveData> AFarmGrid::GetTilesSaveData() const
+void AFarmGrid::RefreshTile(const FIntPoint& Coordinates)
 {
-	TRACE_CPUPROFILER_EVENT_SCOPE(AFarmGrid::GetTilesSaveData);
-
-	TArray<FFarmTileSaveData> SavedTiles;
-	SavedTiles.Reserve(Tiles.Num());
-	for (int32 Index = 0; Index < Tiles.Num(); ++Index)
+	if (AFarmTile* Tile = GetTileAt(Coordinates))
 	{
-		if (const AFarmTile* Tile = Tiles[Index])
-		{
-			FFarmTileSaveData& Data = SavedTiles.Add_GetRef(Tile->GetSaveData());
-			Data.Coordinates = FIntPoint(Index % Width, Index / Width);
-		}
+		Tile->Refresh();
 	}
-	return SavedTiles;
 }
 
-int32 AFarmGrid::RestoreTilesFromSaveData(const TArray<FFarmTileSaveData>& SavedTiles, const TMap<FName, const UFarmCropData*>& Crops)
+void AFarmGrid::RefreshTiles()
 {
-	TRACE_CPUPROFILER_EVENT_SCOPE(AFarmGrid::RestoreTilesFromSaveData);
-
-	int32 SkippedCount = 0;
-	for (const FFarmTileSaveData& Data : SavedTiles)
-	{
-		AFarmTile* Tile = GetTileAt(Data.Coordinates);
-		if (!Tile)
-		{
-			VESTIGE_LOG(
-				this, LogFarm, Warning, "The save has a tile at {Tile}, outside the grid, so it was skipped.", Data.Coordinates.ToString());
-			++SkippedCount;
-			continue;
-		}
-
-		const UFarmCropData* SavedCrop = Crops.FindRef(Data.CropId);
-		if (!Data.CropId.IsNone() && !SavedCrop)
-		{
-			VESTIGE_LOG(this, LogFarm, Warning, "The save has a crop {CropId} that no longer exists, so tile {Tile} is empty.", Data.CropId,
-				Data.Coordinates.ToString());
-			++SkippedCount;
-		}
-		Tile->RestoreFromSaveData(Data, SavedCrop);
-	}
-	return SkippedCount;
-}
-
-void AFarmGrid::AdvanceTiles(int32 NewDay)
-{
-	TRACE_CPUPROFILER_EVENT_SCOPE(AFarmGrid::AdvanceTiles);
+	TRACE_CPUPROFILER_EVENT_SCOPE(AFarmGrid::RefreshTiles);
 
 	for (AFarmTile* Tile : Tiles)
 	{
 		if (Tile)
 		{
-			Tile->AdvanceDay();
+			Tile->Refresh();
 		}
 	}
 }

@@ -20,7 +20,7 @@
 #include "Interaction/VestigeInteractionComponent.h"
 #include "Inventory/VestigeInventoryComponent.h"
 #include "Player/VestigePlayerCharacter.h"
-#include "Time/VestigeDayCycle.h"
+#include "Time/VestigeClockSubsystem.h"
 #include "TimerManager.h"
 #include "UI/VestigeHudSettings.h"
 #include "UI/VestigeHudWidget.h"
@@ -74,7 +74,7 @@ void AVestigeHUD::BeginPlay()
 		return;
 	}
 
-	DayCycle = AVestigeDayCycle::Get(GetWorld());
+	Clock = UVestigeClockSubsystem::Get(GetWorld());
 	PlayerOwner->OnPossessedPawnChanged.AddDynamic(this, &AVestigeHUD::FollowPawn);
 	FollowPawn(nullptr, PlayerOwner->GetPawn());
 	FollowInventory();
@@ -123,14 +123,14 @@ void AVestigeHUD::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 FText AVestigeHUD::GetStatusText() const
 {
-	const AVestigeDayCycle* Cycle = DayCycle.Get();
-	if (!Cycle)
+	const UVestigeClockSubsystem* CurrentClock = Clock.Get();
+	if (!CurrentClock)
 	{
 		return FText::GetEmpty();
 	}
 
-	const int32 Day = Cycle->GetCurrentDay();
-	const int32 ClockMinutes = VestigeHudClock::ToShownMinutes(Cycle->GetTimeOfDay());
+	const int32 Day = CurrentClock->GetCurrentDay();
+	const int32 ClockMinutes = VestigeHudClock::ToShownMinutes(CurrentClock->GetTimeOfDay());
 	if (Day != StatusDay || ClockMinutes != StatusClockMinutes)
 	{
 		StatusDay = Day;

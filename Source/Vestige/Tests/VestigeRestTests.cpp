@@ -16,7 +16,7 @@
 #include "Player/VestigePlayerCharacter.h"
 #include "Player/VestigePlayerState.h"
 #include "Time/VestigeClockSaveData.h"
-#include "Time/VestigeDayCycle.h"
+#include "Time/VestigeClockSubsystem.h"
 
 // A namespace keeps the fixture's short name from hiding other declarations in unity builds.
 namespace VestigeRestTests
@@ -25,10 +25,10 @@ namespace VestigeRestTests
 	{
 		FActorTestSpawner Spawner;
 
-		/** A day cycle and the game's farmer with its player state, so the rest component has stamina to work on. */
+		/** The game's clock and farmer with its player state, so the rest component has stamina to work on. */
 		struct FPlayerSetup
 		{
-			AVestigeDayCycle* Cycle = nullptr;
+			UVestigeClockSubsystem* Clock = nullptr;
 			UAbilitySystemComponent* AbilitySystem = nullptr;
 			UVestigeRestComponent* RestComponent = nullptr;
 		};
@@ -37,7 +37,9 @@ namespace VestigeRestTests
 
 		BEFORE_EACH()
 		{
-			Player.Cycle = &Spawner.SpawnActor<AVestigeDayCycle>();
+			Spawner.InitializeGameSubsystems();
+			Player.Clock = UVestigeClockSubsystem::Get(&Spawner.GetWorld());
+			ASSERT_THAT(IsNotNull(Player.Clock));
 			UClass* PlayerStateClass =
 				LoadClass<AVestigePlayerState>(nullptr, TEXT("/Game/Vestige/Blueprints/BP_PlayerState.BP_PlayerState_C"));
 			UClass* CharacterClass =
@@ -75,24 +77,24 @@ namespace VestigeRestTests
 		}
 
 		/** Sets the clock to Hour on the current day, the way loading a save does, without broadcasting anything. */
-		static void SetClock(AVestigeDayCycle& Cycle, float Hour)
+		static void SetClock(UVestigeClockSubsystem& GameClock, float Hour)
 		{
-			FVestigeClockSaveData Clock;
-			Clock.Day = Cycle.GetCurrentDay();
-			Clock.TimeOfDay = Hour;
-			Cycle.RestoreFromSaveData(Clock);
+			FVestigeClockSaveData Data;
+			Data.Day = GameClock.GetCurrentDay();
+			Data.TimeOfDay = Hour;
+			GameClock.RestoreFromSaveData(Data);
 		}
 
 		/** Runs the clock forward by GameHours, the way a frame's tick does. */
-		static void PassHours(AVestigeDayCycle& Cycle, float GameHours)
+		static void PassHours(UVestigeClockSubsystem& GameClock, float GameHours)
 		{
-			Cycle.TickActor(GameHours * Cycle.GetRealSecondsPerGameHour(), LEVELTICK_All, Cycle.PrimaryActorTick);
+			GameClock.Tick(GameHours * GameClock.GetRealSecondsPerGameHour());
 		}
 
 		/** Sleeps at Hour on the current day. */
 		static void SleepAt(const FPlayerSetup& Setup, float Hour)
 		{
-			SetClock(*Setup.Cycle, Hour);
+			SetClock(*Setup.Clock, Hour);
 			Setup.RestComponent->Sleep();
 		}
 
@@ -105,7 +107,7 @@ namespace VestigeRestTests
 
 			RestComponent->Sleep();
 
-			ASSERT_THAT(IsTrue(Player.Cycle->GetCurrentDay() == 2));
+			ASSERT_THAT(IsTrue(Player.Clock->GetCurrentDay() == 2));
 		}
 
 		TEST_METHOD(SleepingBeforeMidnightRefillsStaminaFully)
@@ -134,17 +136,17 @@ namespace VestigeRestTests
 		{
 			const FPlayerSetup& Setup = Player;
 
-			SetClock(*Setup.Cycle, Setup.Cycle->GetDayEndHour());
-			PassHours(*Setup.Cycle, 0.1f);
+			SetClock(*Setup.Clock, Setup.Clock->GetDayEndHour());
+			PassHours(*Setup.Clock, 0.1f);
 
-			ASSERT_THAT(IsTrue(Setup.Cycle->GetCurrentDay() == 2));
-			ASSERT_THAT(IsTrue(Setup.Cycle->GetTimeOfDay() == Setup.Cycle->GetDayStartHour()));
+			ASSERT_THAT(IsTrue(Setup.Clock->GetCurrentDay() == 2));
+			ASSERT_THAT(IsTrue(Setup.Clock->GetTimeOfDay() == Setup.Clock->GetDayStartHour()));
 			ASSERT_THAT(IsTrue(Setup.RestComponent->IsExhausted()));
 		}
 
 		TEST_METHOD(TheDayEndsAtSunriseRatherThanAtTwoInTheMorning)
 		{
-			ASSERT_THAT(IsTrue(Player.Cycle->GetDayEndHour() == Player.Cycle->GetDayStartHour() + 24.f));
+			ASSERT_THAT(IsTrue(Player.Clock->GetDayEndHour() == Player.Clock->GetDayStartHour() + 24.f));
 		}
 
 		TEST_METHOD(ANightInBedBeforeMidnightClearsExhaustion)
@@ -174,20 +176,20 @@ namespace VestigeRestTests
 		TEST_METHOD(StaminaStartsDrainingAtMidnight)
 		{
 			const FPlayerSetup& Setup = Player;
-			SetClock(*Setup.Cycle, 21.5f);
+			SetClock(*Setup.Clock, 21.5f);
 
-			PassHours(*Setup.Cycle, 2.f);
+			PassHours(*Setup.Clock, 2.f);
 			ASSERT_THAT(IsFalse(Setup.RestComponent->IsDrainingStamina()));
 
-			PassHours(*Setup.Cycle, 1.f);
+			PassHours(*Setup.Clock, 1.f);
 			ASSERT_THAT(IsTrue(Setup.RestComponent->IsDrainingStamina()));
 		}
 
 		TEST_METHOD(TheDrainTakesItsRatePerGameHourWhateverTheClockSpeed)
 		{
 			const FPlayerSetup& Setup = Player;
-			SetClock(*Setup.Cycle, 23.5f);
-			PassHours(*Setup.Cycle, 1.f);
+			SetClock(*Setup.Clock, 23.5f);
+			PassHours(*Setup.Clock, 1.f);
 
 			FGameplayEffectQuery DrainQuery;
 			DrainQuery.EffectDefinition = UVestigeStaminaDrainEffect::StaticClass();
@@ -197,7 +199,7 @@ namespace VestigeRestTests
 			ASSERT_THAT(IsNotNull(Drain));
 
 			// The rest component's default of 10 stamina per game hour, spread over the periods in one game hour.
-			const float PeriodsPerGameHour = Setup.Cycle->GetRealSecondsPerGameHour() / UVestigeStaminaDrainEffect::PeriodSeconds;
+			const float PeriodsPerGameHour = Setup.Clock->GetRealSecondsPerGameHour() / UVestigeStaminaDrainEffect::PeriodSeconds;
 			const float PerPeriod = Drain->Spec.GetSetByCallerMagnitude(VestigeGameplayTags::Data_StaminaDrain, false);
 			ASSERT_THAT(IsTrue(FMath::IsNearlyEqual(PerPeriod * PeriodsPerGameHour, -10.f)));
 		}
@@ -205,8 +207,8 @@ namespace VestigeRestTests
 		TEST_METHOD(TheDrainStopsWhenTheNextDayStarts)
 		{
 			const FPlayerSetup& Setup = Player;
-			SetClock(*Setup.Cycle, 23.5f);
-			PassHours(*Setup.Cycle, 1.f);
+			SetClock(*Setup.Clock, 23.5f);
+			PassHours(*Setup.Clock, 1.f);
 
 			Setup.RestComponent->Sleep();
 
@@ -227,13 +229,13 @@ namespace VestigeRestTests
 				{
 					Messages.Add(Message.ToString());
 				});
-			SetClock(*Setup.Cycle, 21.5f);
+			SetClock(*Setup.Clock, 21.5f);
 
-			PassHours(*Setup.Cycle, 1.f);
+			PassHours(*Setup.Clock, 1.f);
 			ASSERT_THAT(IsTrue(Messages.Num() == 1));
 			ASSERT_THAT(IsTrue(Messages[0].Contains(TEXT("getting late"))));
 
-			PassHours(*Setup.Cycle, 2.f);
+			PassHours(*Setup.Clock, 2.f);
 			ASSERT_THAT(IsTrue(Messages.Num() == 2));
 			ASSERT_THAT(IsTrue(Messages[1].Contains(TEXT("midnight"))));
 		}

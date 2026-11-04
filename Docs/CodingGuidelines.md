@@ -87,7 +87,7 @@ The template classes (`AVestigeCharacter`, `AVestigeGameMode`, `AVestigePlayerCo
 - Functions that do something are **verbs**: `Till()`, `StartNextDay()`, `RefreshVisuals()`.
 - Functions that only **query state** and return a `bool` ask a **question**: `IsRipe()`, `AreTilesReady()`, `HasMessages()`.
 - Functions that **do something that can fail** keep their verb name and return `bool` for success: `AFarmTile::Till()` returns `false` when the tile isn't grass. Say in the `/** */` comment what `false` means. Don't rename them as questions (`DidTillSucceed()`) or add a `Try` prefix.
-- Getters use `Get`: `GetCurrentDay()`. `Find` returns `nullptr` when nothing exists; `Get` may create it (see `AVestigeDayCycle::Find` vs `AVestigeDayCycle::Get`).
+- Getters use `Get`: `GetCurrentDay()`. `Find` returns `nullptr` when nothing exists; `Get` may create it, or returns a subsystem that always exists in a game (`AFarmGrid::Find`, `UVestigeClockSubsystem::Get`).
 - Delegates: the type is `FOn<Prefix><Event>` with the type's project prefix, the member is `On<Event>`: `FOnVestigeNewDay OnNewDay`. A Blueprint twin of a native delegate ([Architecture.md, section 4](Architecture.md#4-how-systems-talk-to-each-other)) adds `Blueprint` to both: `FOnVestigeNewDayBlueprint OnNewDayBlueprint`, shown to Blueprints with `DisplayName = "On New Day"`.
 - Event handlers are named for what they do, not when they run: `AdvanceTiles(int32 NewDay)`, `SaveFarm(int32 NewDay)`, not `HandleOnNewDay`.
 - Units go in the name or the comment when not obvious: `RealSecondsPerGameHour`, `TileSize` with `/** ...in cm */`.
@@ -449,7 +449,7 @@ Source/Vestige/
     AbilitySystem/  Gameplay Ability System parts that know no farm: the stamina set and effects, ability sets, native tags
     Interaction/    The interactable interface, the interaction component and the interact ability
     Content/        Content definitions: UVestigeContentData and its subclasses, UVestigeAssetManager
-    Time/           The day cycle and its save struct
+    Time/           The clock, its settings and save struct, and the day cycle's lighting
     Inventory/      The inventory component, its slot rules and save struct
     Farming/        Tiles and tile state, the grid, the farming, rest and highlight components, the bed, the use-tool ability, the toolbar, their save structs
     Save/           UVestigeSaveGame and UVestigeSaveSubsystem

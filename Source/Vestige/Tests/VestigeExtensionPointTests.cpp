@@ -7,7 +7,7 @@
 #include "CQTest.h"
 #include "Farming/FarmingComponent.h"
 #include "Interaction/VestigeInteractable.h"
-#include "Time/VestigeDayCycle.h"
+#include "Time/VestigeClockSubsystem.h"
 #include "UObject/Class.h"
 #include "UObject/UnrealType.h"
 
@@ -30,7 +30,7 @@ namespace VestigeExtensionPointTests
 		TEST_METHOD(EventsStayAssignableInBlueprints)
 		{
 			const FExtensionPoint Events[] = {
-				{AVestigeDayCycle::StaticClass(), GET_MEMBER_NAME_CHECKED(AVestigeDayCycle, OnNewDayBlueprint)},
+				{UVestigeClockSubsystem::StaticClass(), GET_MEMBER_NAME_CHECKED(UVestigeClockSubsystem, OnNewDayBlueprint)},
 				{UFarmingComponent::StaticClass(), GET_MEMBER_NAME_CHECKED(UFarmingComponent, OnCropHarvested)},
 				{UFarmingComponent::StaticClass(), GET_MEMBER_NAME_CHECKED(UFarmingComponent, OnToolUsed)},
 			};
@@ -65,7 +65,6 @@ namespace VestigeExtensionPointTests
 		TEST_METHOD(FunctionsStayCallableFromBlueprints)
 		{
 			const FExtensionPoint Functions[] = {
-				{AVestigeDayCycle::StaticClass(), GET_FUNCTION_NAME_CHECKED(AVestigeDayCycle, GetDayCycle)},
 				{UVestigeContentData::StaticClass(), GET_FUNCTION_NAME_CHECKED(UVestigeContentData, GetContentId)},
 			};
 			for (const FExtensionPoint& Function : Functions)
@@ -78,6 +77,14 @@ namespace VestigeExtensionPointTests
 				}
 			}
 		}
+
+#if WITH_METADATA
+		TEST_METHOD(TheClockStaysReachableFromBlueprints)
+		{
+			// A game-instance subsystem gets its Get node (Get Vestige Clock) only while it is a Blueprint type.
+			ASSERT_THAT(IsTrue(UVestigeClockSubsystem::StaticClass()->GetBoolMetaDataHierarchical(TEXT("BlueprintType"))));
+		}
+#endif
 	};
 }
 

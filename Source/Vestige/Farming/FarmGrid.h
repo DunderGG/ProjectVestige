@@ -7,17 +7,17 @@
 #include "GameFramework/Actor.h"
 #include "FarmGrid.generated.h"
 
-class AVestigeDayCycle;
 class AFarmTile;
-class UFarmCropData;
 class UBoxComponent;
-struct FFarmTileSaveData;
+class UFarmField;
 
 DECLARE_MULTICAST_DELEGATE(FOnFarmTilesReady);
 
 /**
- * A rectangle of farm tiles, spawned at BeginPlay with the actor's location as one corner.
- * Advances every tile when the world's AVestigeDayCycle starts a new day.
+ * A view of one field (UFarmField) in its level: where the field lies, with the actor's location as one corner, and a tile
+ * actor for each of its tiles, spawned at BeginPlay. The field's data and rules live in UFarmFieldSubsystem, which keeps
+ * the field when the map closes and grows it on every new day; the grid finds its field there by FieldId, redraws a tile
+ * when the field says it changed, and converts between world and grid space.
  */
 UCLASS()
 class AFarmGrid : public AActor
@@ -54,19 +54,13 @@ public:
 	/** Number of tiles along the actor's X axis. */
 	int32 GetWidth() const { return Width; }
 
-	/** Every tile's saved state with its coordinates, for saving. */
-	TArray<FFarmTileSaveData> GetTilesSaveData() const;
+	/** The field this grid shows, or nullptr before BeginPlay or in a world without a game instance. */
+	UFarmField* GetField() const { return Field; }
 
 	/**
-	 * Restores the tiles a save mentions, each found by its coordinates, with its crop looked up in Crops by ContentId.
-	 * Tiles the save doesn't mention keep their state. Entries outside the grid are skipped, and a crop missing from Crops
-	 * leaves its tile as empty tilled soil, each with a warning. Returns how many entries it couldn't fully restore.
-	 */
-	int32 RestoreTilesFromSaveData(const TArray<FFarmTileSaveData>& SavedTiles, const TMap<FName, const UFarmCropData*>& Crops);
-
-	/**
-	 * Replaces every tile with a field of NewSize (columns X, rows Y) grass tiles, with the same corner. For developer tools
-	 * such as the benchmark field (UVestigeCheatManager), not for play. OnTilesReady doesn't fire again.
+	 * Makes the field NewSize (columns X, rows Y), with the same corner, keeping the tiles that fit, and spawns a tile for
+	 * each. For developer tools such as the benchmark field (UVestigeCheatManager), not for play. OnTilesReady doesn't fire
+	 * again.
 	 */
 	void Resize(const FIntPoint& NewSize);
 
@@ -82,7 +76,7 @@ protected:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 private:
-	/** Spawns Width x Height tiles of TileClass, row by row. */
+	/** Spawns a tile of TileClass for each of the field's Width x Height tiles, row by row. */
 	void SpawnTiles();
 
 	/** Destroys every tile and empties the list. */
@@ -91,8 +85,18 @@ private:
 	/** Fits the editor outline to Width x Height tiles. */
 	void UpdateBounds();
 
-	/** Grows watered crops and dries the soil on every tile. */
-	void AdvanceTiles(int32 NewDay);
+	/** Shows the tile at Coordinates again. Bound to the field's OnTileChanged. */
+	void RefreshTile(const FIntPoint& Coordinates);
+
+	/** Shows every tile again. Bound to the field's OnTilesChanged. */
+	void RefreshTiles();
+
+	/**
+	 * Which field this grid shows: its ID in UFarmFieldSubsystem and in saves, unique across every map. Base content uses
+	 * the Base namespace (Base.Farm), a mod's map its own. Changing it on a placed grid starts that field over.
+	 */
+	UPROPERTY(EditAnywhere, Category = "Farming", meta = (AllowPrivateAccess = "true"))
+	FName FieldId = TEXT("Base.Farm");
 
 	/** Number of tiles along the actor's X axis. */
 	UPROPERTY(EditAnywhere, Category = "Farming", meta = (AllowPrivateAccess = "true", ClampMin = 1))
@@ -106,7 +110,7 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Farming", meta = (AllowPrivateAccess = "true", ClampMin = 10))
 	float TileSize = 100.f;
 
-	/** Tile actor to spawn. A Blueprint subclass of AFarmTile (BP_FarmTile) sets how tiles look. */
+	/** Tile actor to spawn, one per tile. A Blueprint subclass of AFarmTile (BP_FarmTile) sets how tiles look. */
 	UPROPERTY(EditAnywhere, Category = "Farming", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<AFarmTile> TileClass;
 
@@ -117,8 +121,9 @@ private:
 	UPROPERTY()
 	TArray<TObjectPtr<AFarmTile>> Tiles;
 
-	/** The day cycle this grid listens to, so EndPlay can stop listening. */
-	TWeakObjectPtr<AVestigeDayCycle> DayCycle;
+	/** The field shown, from UFarmFieldSubsystem at BeginPlay. It outlives the grid, so EndPlay stops listening to it. */
+	UPROPERTY()
+	TObjectPtr<UFarmField> Field;
 
 	bool bTilesReady = false;
 };

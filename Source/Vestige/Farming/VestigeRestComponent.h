@@ -8,8 +8,8 @@
 #include "Components/ActorComponent.h"
 #include "VestigeRestComponent.generated.h"
 
-class AVestigeDayCycle;
 class UAbilitySystemComponent;
+class UVestigeClockSubsystem;
 struct FVestigeRestSaveData;
 
 /**
@@ -27,7 +27,7 @@ class UVestigeRestComponent : public UActorComponent
 public:
 	UVestigeRestComponent();
 
-	/** Ends the day and starts the next one, exhausted if it is LateNightHour or later. Does nothing without a day cycle. */
+	/** Ends the day and starts the next one, exhausted if it is LateNightHour or later. Does nothing without a clock. */
 	void Sleep();
 
 	/** Whether the owner is exhausted from a late night. False without an ability system. */
@@ -47,10 +47,10 @@ protected:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 private:
-	/** Warns at LateWarningHour, and warns and starts the drain at LateNightHour. Bound to AVestigeDayCycle::OnHourStarted. */
+	/** Warns at LateWarningHour, and warns and starts the drain at LateNightHour. Bound to UVestigeClockSubsystem::OnHourStarted. */
 	void ReactToHour(int32 Hour);
 
-	/** Starts the next day when the clock reaches the end of the day. Bound to AVestigeDayCycle::OnDayEndReached. */
+	/** Starts the next day when the clock reaches the end of the day. Bound to UVestigeClockSubsystem::OnDayEndReached. */
 	void StayUpAllNight(int32 EndedDay);
 
 	/**
@@ -93,8 +93,9 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Rest", meta = (AllowPrivateAccess = "true", ClampMin = 0, ClampMax = 1))
 	float ExhaustedRefillFraction = 0.75f;
 
+	/** The game's clock, found at BeginPlay. It outlives the pawn, so EndPlay stops listening to it. */
 	UPROPERTY()
-	TObjectPtr<AVestigeDayCycle> DayCycle;
+	TObjectPtr<UVestigeClockSubsystem> Clock;
 
 	/** The late-night drain while it runs, on the owner's ability system. */
 	FActiveGameplayEffectHandle LateNightDrain;

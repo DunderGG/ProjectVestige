@@ -7,10 +7,10 @@
 #include "Subsystems/WorldSubsystem.h"
 #include "VestigeSaveSubsystem.generated.h"
 
-class AVestigeDayCycle;
-class AFarmGrid;
 class UAbilitySystemComponent;
+class UFarmFieldSubsystem;
 class UFarmingComponent;
+class UVestigeClockSubsystem;
 class UVestigeSaveGame;
 class UVestigeInventoryComponent;
 class UVestigeRestComponent;
@@ -51,12 +51,14 @@ struct FVestigeLoadDecision
 };
 
 /**
- * Saves the farm every time a new day starts and loads it when play begins, following the rules in Architecture.md,
- * section 6. Each owner writes and restores its own part of the save; this subsystem collects, versions and writes them.
- * Saves alternate between two slots, so a failed write keeps the last good save. A save that can't be loaded is left
- * untouched, and saving stays off for the session, until the player starts a new game.
- * A world subsystem because everything it saves lives in the world, and a fresh one comes with every new world,
- * so starting a new game is just deleting the saves and opening the map again.
+ * Saves the game every time a new day starts and loads it when play begins, following the rules in Architecture.md,
+ * section 6. Each owner writes and restores its own part of the save; this subsystem collects, versions and writes them:
+ * the clock (UVestigeClockSubsystem) and every map's fields (UFarmFieldSubsystem) from the game instance, the player's
+ * data from the world. Saves alternate between two slots, so a failed write keeps the last good save. A save that can't be
+ * loaded is left untouched, and saving stays off for the session, until the player starts a new game.
+ * A world subsystem because the player's data lives in the world, and a fresh one comes with every new world. It loads the
+ * save each time a world begins play, which is right while the game has one map; the save registry moves loading to the
+ * game instance before there is travel between maps (Roadmap.md, 4.0).
  */
 UCLASS()
 class UVestigeSaveSubsystem : public UWorldSubsystem
@@ -76,8 +78,8 @@ public:
 	static int32 GetSlotToWrite(int32 NewestSlot);
 
 	/**
-	 * Deletes both save slots and opens the map again, starting the farm from day 1. This is the player's explicit choice,
-	 * so it also replaces a save that couldn't be loaded.
+	 * Deletes both save slots, puts the clock back to day 1, drops every field and opens the map again. This is the player's
+	 * explicit choice, so it also replaces a save that couldn't be loaded.
 	 */
 	void StartNewGame();
 
@@ -113,10 +115,10 @@ private:
 	UAbilitySystemComponent* GetPlayerAbilitySystem() const;
 
 	UPROPERTY()
-	TObjectPtr<AVestigeDayCycle> DayCycle;
+	TObjectPtr<UVestigeClockSubsystem> Clock;
 
 	UPROPERTY()
-	TObjectPtr<AFarmGrid> Grid;
+	TObjectPtr<UFarmFieldSubsystem> FarmFields;
 
 	FDelegateHandle WorldBeginPlayHandle;
 

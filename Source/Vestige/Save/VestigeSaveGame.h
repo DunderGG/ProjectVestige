@@ -7,17 +7,17 @@
 #include "AbilitySystem/VestigeStaminaSaveData.h"
 #include "Farming/VestigeRestSaveData.h"
 #include "Farming/FarmFarmingSaveData.h"
-#include "Farming/FarmTileState.h"
+#include "Farming/FarmFieldSaveData.h"
 #include "GameFramework/SaveGame.h"
 #include "Inventory/VestigeInventorySaveData.h"
 #include "Time/VestigeClockSaveData.h"
 #include "VestigeSaveGame.generated.h"
 
 /**
- * The saved data layout: everything needed to pick the farm back up, as plain values and content IDs.
+ * The saved data layout: everything needed to pick the game back up, as plain values and content IDs.
  * A data container with no logic, so its members are public like a struct's. Each owner writes and restores its own
- * part: the clock (AVestigeDayCycle), the tool in hand (UFarmingComponent), the inventory (UVestigeInventoryComponent), the
- * stamina (UVestigeStaminaSet), the rest (UVestigeRestComponent) and the tiles (AFarmGrid, AFarmTile).
+ * part: the clock (UVestigeClockSubsystem), the tool in hand (UFarmingComponent), the inventory (UVestigeInventoryComponent),
+ * the stamina (UVestigeStaminaSet), the rest (UVestigeRestComponent) and every map's fields (UFarmFieldSubsystem).
  * Until the first public build there are no upgrades: raise CurrentVersion when a change makes older saves load wrong, and
  * older saves are then refused (Architecture.md, section 6). A new field whose default suits older saves needs no new version.
  */
@@ -27,8 +27,11 @@ class UVestigeSaveGame : public USaveGame
 	GENERATED_BODY()
 
 public:
-	/** The layout this build writes. Restarted at 1 on 2026-11-04, when the development saves were deleted. */
-	static constexpr int32 CurrentVersion = 1;
+	/**
+	 * The layout this build writes. Restarted at 1 on 2026-11-04, when the development saves were deleted, and 2 since the
+	 * same day, when the tiles moved into one entry per field.
+	 */
+	static constexpr int32 CurrentVersion = 2;
 
 	/** The two slots saves alternate between, so writing a save never touches the newest good one. */
 	static constexpr const TCHAR* SlotNames[] = {TEXT("Farm"), TEXT("Farm2")};
@@ -57,7 +60,7 @@ public:
 	UPROPERTY()
 	FVestigeRestSaveData Rest;
 
-	/** Every tile, found again by its coordinates. */
+	/** Every field of every map, found again by its FieldId, each with its tiles by coordinates. */
 	UPROPERTY()
-	TArray<FFarmTileSaveData> Tiles;
+	TArray<FFarmFieldSaveData> Fields;
 };
