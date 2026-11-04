@@ -64,6 +64,12 @@ public:
 	 */
 	int32 RestoreTilesFromSaveData(const TArray<FFarmTileSaveData>& SavedTiles, const TMap<FName, const UFarmCropData*>& Crops);
 
+	/**
+	 * Replaces every tile with a field of NewSize (columns X, rows Y) grass tiles, with the same corner. For developer tools
+	 * such as the benchmark field (UVestigeCheatManager), not for play. OnTilesReady doesn't fire again.
+	 */
+	void Resize(const FIntPoint& NewSize);
+
 	/** True once BeginPlay has spawned the tiles. Check it before binding to OnTilesReady, which only fires once. */
 	bool AreTilesReady() const { return bTilesReady; }
 
@@ -78,6 +84,12 @@ protected:
 private:
 	/** Spawns Width x Height tiles of TileClass, row by row. */
 	void SpawnTiles();
+
+	/** Destroys every tile and empties the list. */
+	void DestroyTiles();
+
+	/** Fits the editor outline to Width x Height tiles. */
+	void UpdateBounds();
 
 	/** Grows watered crops and dries the soil on every tile. */
 	void AdvanceTiles(int32 NewDay);

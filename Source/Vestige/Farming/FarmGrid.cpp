@@ -35,7 +35,11 @@ AFarmGrid::AFarmGrid()
 void AFarmGrid::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
+	UpdateBounds();
+}
 
+void AFarmGrid::UpdateBounds()
+{
 	const FVector HalfSize(Width * TileSize * 0.5f, Height * TileSize * 0.5f, FarmGridEditor::BoundsHalfHeight);
 	Bounds->SetBoxExtent(HalfSize);
 	Bounds->SetRelativeLocation(FVector(HalfSize.X, HalfSize.Y, 0.f));
@@ -67,17 +71,34 @@ void AFarmGrid::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	// ends, the world destroys them itself.
 	if (EndPlayReason == EEndPlayReason::Destroyed || EndPlayReason == EEndPlayReason::RemovedFromWorld)
 	{
-		for (AFarmTile* Tile : Tiles)
-		{
-			if (IsValid(Tile))
-			{
-				Tile->Destroy();
-			}
-		}
+		DestroyTiles();
 	}
 	Tiles.Reset();
 	bTilesReady = false;
 	Super::EndPlay(EndPlayReason);
+}
+
+void AFarmGrid::DestroyTiles()
+{
+	TRACE_CPUPROFILER_EVENT_SCOPE(AFarmGrid::DestroyTiles);
+
+	for (AFarmTile* Tile : Tiles)
+	{
+		if (IsValid(Tile))
+		{
+			Tile->Destroy();
+		}
+	}
+	Tiles.Reset();
+}
+
+void AFarmGrid::Resize(const FIntPoint& NewSize)
+{
+	DestroyTiles();
+	Width = FMath::Max(NewSize.X, 1);
+	Height = FMath::Max(NewSize.Y, 1);
+	UpdateBounds();
+	SpawnTiles();
 }
 
 AFarmGrid* AFarmGrid::Find(const UWorld* World)

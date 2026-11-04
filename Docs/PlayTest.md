@@ -259,6 +259,14 @@ The save upgrades are gone and the save version starts again at 1, so your curre
 - [ ] **Delete the development saves**: run the console command `NewGame` (it deletes `Farm.sav` and `Farm2.sav`), then stop the game and delete the old upgrade backups `Farm_Version0.sav`, `Farm_Version2.sav` and `Farm_Version3.sav` from `Saved/SaveGames/` by hand. Nothing makes backups any more.
 - [ ] **New save round trip**: play from day 1, plant and water a tile, sleep ("Game saved."), stop and play again: "Welcome back. Day 2." with the bag, the tool in hand, the stamina and the tile as you left them. `Saved/SaveGames/` holds only `Farm.sav` (and `Farm2.sav` after a second night).
 
+### Benchmark field, 2026-11-04
+
+The console command `BenchmarkField` makes the farm a field of ripe crops for the performance baseline. The tests cover that every tile gets a ripe crop and that an unknown crop changes nothing; these checks are for how it looks and plays. The commit is the one titled "Measure the first performance baseline".
+
+- [ ] **Field**: back up `Saved/SaveGames/` first. Press Play, open the console and type `BenchmarkField 20 Base.Turnip`. The 8 by 8 field becomes a 20 by 20 field of ripe turnips with the same corner, and the frame around the targeted tile follows you across it.
+- [ ] **Harvest**: the hand tool harvests the ripe turnips, and the bag fills as usual.
+- [ ] **Back to normal**: type `NewGame`. The map reopens on day 1 with the normal 8 by 8 grass field.
+
 ### Editor chores
 
 Changes only the editor can make safely. The steps are in [Roadmap.md, Housekeeping](Roadmap.md#3-housekeeping): re-saving the template Blueprints and `L_Farm`, moving `BP_FarmTile` and the materials with redirectors fixed, and regenerating the Android File Server token if it was ever used. After each one, run the [smoke test](#3-smoke-test).

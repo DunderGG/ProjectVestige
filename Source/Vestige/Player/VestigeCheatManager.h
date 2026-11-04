@@ -25,4 +25,12 @@ public:
 	/** Console: SkipDay. The player sleeps where they stand, as in the bed, to start the next day. */
 	UFUNCTION(Exec)
 	void SkipDay();
+
+	/**
+	 * Console: BenchmarkField <Size> <CropId>, for example BenchmarkField 20 Base.Turnip. Makes the farm a Size x Size field
+	 * with a ripe CropId on every tile, the busy farm the performance baseline measures (Architecture.md, section 10).
+	 * The next save keeps that field, so use it in a build made for measuring.
+	 */
+	UFUNCTION(Exec)
+	void BenchmarkField(int32 FieldSize, FName CropId);
 };

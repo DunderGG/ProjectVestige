@@ -4,7 +4,10 @@
 #if WITH_DEV_AUTOMATION_TESTS
 
 #include "Components/ActorTestSpawner.h"
+#include "Content/FarmCropData.h"
 #include "CQTest.h"
+#include "Farming/FarmGrid.h"
+#include "Farming/FarmTile.h"
 #include "Farming/VestigeRestComponent.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerController.h"
@@ -43,6 +46,42 @@ namespace VestigeCheatManagerTests
 			Cheats->SkipDay();
 
 			ASSERT_THAT(IsTrue(Cycle.GetCurrentDay() == 2));
+		}
+
+		/** A cheat manager for a player controller in the test world. */
+		UVestigeCheatManager* SpawnCheats()
+		{
+			APlayerController& Controller = Spawner.SpawnActor<APlayerController>();
+			return NewObject<UVestigeCheatManager>(&Controller);
+		}
+
+		TEST_METHOD(BenchmarkFieldPlantsARipeCropOnEveryTileOfTheNewSize)
+		{
+			AFarmGrid& Grid = Spawner.SpawnActor<AFarmGrid>();
+			Grid.DispatchBeginPlay();
+			const AFarmTile* OldTile = Grid.GetTileAt(FIntPoint(0, 0));
+
+			SpawnCheats()->BenchmarkField(3, TEXT("Base.Turnip"));
+
+			ASSERT_THAT(IsTrue(Grid.GetTiles().Num() == 9));
+			ASSERT_THAT(IsFalse(IsValid(OldTile)));
+			ASSERT_THAT(IsNotNull(Grid.GetTileAt(FIntPoint(2, 2))));
+			ASSERT_THAT(IsNull(Grid.GetTileAt(FIntPoint(3, 0))));
+			for (const AFarmTile* Tile : Grid.GetTiles())
+			{
+				ASSERT_THAT(IsTrue(Tile && Tile->IsRipe() && Tile->GetCrop()->GetContentId() == TEXT("Base.Turnip")));
+			}
+		}
+
+		TEST_METHOD(BenchmarkFieldWithAnUnknownCropLeavesTheFarmAlone)
+		{
+			AFarmGrid& Grid = Spawner.SpawnActor<AFarmGrid>();
+			Grid.DispatchBeginPlay();
+			const int32 TileCount = Grid.GetTiles().Num();
+
+			SpawnCheats()->BenchmarkField(3, TEXT("Base.NoSuchCrop"));
+
+			ASSERT_THAT(IsTrue(Grid.GetTiles().Num() == TileCount));
 		}
 	};
 }
