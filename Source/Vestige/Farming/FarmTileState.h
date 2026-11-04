@@ -87,7 +87,7 @@ struct FFarmTileSaveData
 {
 	GENERATED_BODY()
 
-	/** The tile's column (X) and row (Y) in the grid. Version 0 saves have none; the upgrade adds them. */
+	/** The tile's column (X) and row (Y) in the grid. */
 	UPROPERTY()
 	FIntPoint Coordinates = FIntPoint::ZeroValue;
 

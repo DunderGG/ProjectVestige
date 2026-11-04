@@ -14,24 +14,12 @@
 #include "VestigeSaveGame.generated.h"
 
 /**
- * The hard-coded tools from before tools were data assets. Only read when upgrading a version 0 save.
- * The names must stay as they are, because those saves store the enum by name.
- */
-UENUM()
-enum class EFarmTool : uint8
-{
-	Hoe,
-	Seeds,
-	WateringCan,
-	Hand
-};
-
-/**
  * The saved data layout: everything needed to pick the farm back up, as plain values and content IDs.
  * A data container with no logic, so its members are public like a struct's. Each owner writes and restores its own
  * part: the clock (AVestigeDayCycle), the tool in hand (UFarmingComponent), the inventory (UVestigeInventoryComponent), the
- * stamina (UVestigeStaminaSet) and the tiles (AFarmGrid, AFarmTile).
- * Raise CurrentVersion with every layout change and add an upgrade step to UVestigeSaveSubsystem::UpgradeToCurrentVersion.
+ * stamina (UVestigeStaminaSet), the rest (UVestigeRestComponent) and the tiles (AFarmGrid, AFarmTile).
+ * Until the first public build there are no upgrades: raise CurrentVersion when a change makes older saves load wrong, and
+ * older saves are then refused (Architecture.md, section 6). A new field whose default suits older saves needs no new version.
  */
 UCLASS()
 class UVestigeSaveGame : public USaveGame
@@ -39,24 +27,14 @@ class UVestigeSaveGame : public USaveGame
 	GENERATED_BODY()
 
 public:
-	/**
-	 * The layout this build writes.
-	 * 0: before save versions. Flat fields, tiles in grid order without coordinates or crops, one slot.
-	 * 1: each owner's part in its own struct, tiles by coordinates with their crop's ContentId, two alternating slots.
-	 * 2: the inventory's slots, holding the seeds and harvest that version 1 kept as two counts in Farming.
-	 * 3: the player's stamina.
-	 * 4: whether the player is exhausted.
-	 */
-	static constexpr int32 CurrentVersion = 4;
+	/** The layout this build writes. Restarted at 1 on 2026-11-04, when the development saves were deleted. */
+	static constexpr int32 CurrentVersion = 1;
 
-	/**
-	 * The two slots saves alternate between, so writing a save never touches the newest good one.
-	 * The first is also the single slot version 0 saves used.
-	 */
+	/** The two slots saves alternate between, so writing a save never touches the newest good one. */
 	static constexpr const TCHAR* SlotNames[] = {TEXT("Farm"), TEXT("Farm2")};
 	static constexpr int32 UserIndex = 0;
 
-	/** The layout version this save was written with. Saves from before versions existed read as 0. */
+	/** The layout version this save was written with. 0 in a file that has none. */
 	UPROPERTY()
 	int32 SaveVersion = 0;
 
@@ -70,53 +48,16 @@ public:
 	UPROPERTY()
 	FFarmFarmingSaveData Farming;
 
-	/** Empty in saves before version 2. */
 	UPROPERTY()
 	FVestigeInventorySaveData Inventory;
 
-	/** Unsaved (bHasStamina false) in saves before version 3. */
 	UPROPERTY()
 	FVestigeStaminaSaveData Stamina;
 
-	/** Not exhausted in saves before version 4. */
 	UPROPERTY()
 	FVestigeRestSaveData Rest;
 
-	/** Every tile, found again by its coordinates. In version 0 saves, in grid order without coordinates or crops. */
+	/** Every tile, found again by its coordinates. */
 	UPROPERTY()
 	TArray<FFarmTileSaveData> Tiles;
-
-	// The rest is the version 0 layout, kept under its old names so old saves still read into it. Only the upgrade
-	// reads these fields.
-
-	UPROPERTY()
-	int32 Day = 1;
-
-	UPROPERTY()
-	float TimeOfDay = 0.f;
-
-	UPROPERTY()
-	int32 Seeds = 0;
-
-	UPROPERTY()
-	int32 HarvestedCrops = 0;
-
-	/** ContentId of the tool in hand. Empty in version 0 saves made before tools were data assets. */
-	UPROPERTY()
-	FName CurrentToolId;
-
-	/** The tool in hand in saves made before tools were data assets. Only read when CurrentToolId is empty. */
-	UPROPERTY()
-	EFarmTool CurrentTool = EFarmTool::Hoe;
-};
-
-/**
- * The save game's name before 2026-11-01, kept so older saves still load. A save file names its class in its header, and
- * loading finds that class without applying [CoreRedirects], which only work for asset references. Nothing creates one:
- * saving always writes a UVestigeSaveGame, so a loaded save of this class is replaced by the next save.
- */
-UCLASS(NotBlueprintable, HideDropdown)
-class UFarmSaveGame final : public UVestigeSaveGame
-{
-	GENERATED_BODY()
 };

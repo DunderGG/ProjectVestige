@@ -12,7 +12,7 @@ struct FVestigeRestSaveData
 {
 	GENERATED_BODY()
 
-	/** Whether the day started exhausted after a late night. False in saves before version 4. */
+	/** Whether the day started exhausted after a late night. */
 	UPROPERTY()
 	bool bExhausted = false;
 };

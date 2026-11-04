@@ -34,7 +34,7 @@ enum class EVestigeLoadOutcome : uint8
 	/** Load the newest readable save. */
 	Load,
 
-	/** No slot could be read. Leave the files alone and turn saving off. */
+	/** No slot could be read, or each holds a save from an older version. Leave the files alone and turn saving off. */
 	RefuseUnreadable,
 
 	/** A slot holds a save from a newer version of the game. Leave the files alone and turn saving off. */
@@ -65,8 +65,9 @@ class UVestigeSaveSubsystem : public UWorldSubsystem
 
 public:
 	/**
-	 * Decides what loading does with what each slot holds: refuse if any slot holds a newer version, load the readable save
-	 * with the highest sequence number, refuse if files exist but none is readable, or start a new game.
+	 * Decides what loading does with what each slot holds: refuse if any slot holds a newer version, load the readable save of
+	 * the current version with the highest sequence number, refuse if files exist but none of them is that, or start a new game.
+	 * An older version counts as unreadable: there are no upgrades before the first public build.
 	 * Static, so the rules are tested without touching the player's save files.
 	 */
 	static FVestigeLoadDecision DecideLoad(TConstArrayView<FVestigeSaveSlotRead> Slots);
@@ -75,15 +76,8 @@ public:
 	static int32 GetSlotToWrite(int32 NewestSlot);
 
 	/**
-	 * Brings a save from an older version up to UVestigeSaveGame::CurrentVersion one step at a time. Returns false, leaving the
-	 * save unusable, for a version it has no upgrade for. GridWidth is the width of the grid the save will be loaded into:
-	 * version 0 stored tiles in grid order.
-	 */
-	static bool UpgradeToCurrentVersion(UVestigeSaveGame& Save, int32 GridWidth);
-
-	/**
 	 * Deletes both save slots and opens the map again, starting the farm from day 1. This is the player's explicit choice,
-	 * so it also replaces a save that couldn't be loaded. Backups of upgraded saves are kept.
+	 * so it also replaces a save that couldn't be loaded.
 	 */
 	void StartNewGame();
 
@@ -108,9 +102,6 @@ private:
 
 	/** Turns saving off for the rest of the session and tells the player why. */
 	void RefuseToSave(const FText& Reason);
-
-	/** Copies the save file in Slot, byte for byte, before an upgraded save can replace it. Done once per version. */
-	void BackUpBeforeUpgrade(int32 Slot, int32 Version) const;
 
 	UFarmingComponent* GetPlayerFarming() const;
 	UVestigeInventoryComponent* GetPlayerInventory() const;

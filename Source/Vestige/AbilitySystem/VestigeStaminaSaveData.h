@@ -12,7 +12,7 @@ struct FVestigeStaminaSaveData
 {
 	GENERATED_BODY()
 
-	/** False in saves made before stamina existed (before save version 3). The player starts those with full stamina. */
+	/** False if the player had no stamina set when saving. The player then keeps the stamina it starts with. */
 	UPROPERTY()
 	bool bHasStamina = false;
 

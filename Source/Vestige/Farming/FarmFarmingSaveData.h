@@ -18,13 +18,4 @@ struct FFarmFarmingSaveData
 	/** ContentId of the tool in hand (Base.Hoe). */
 	UPROPERTY()
 	FName CurrentToolId;
-
-	// The counts version 1 saves kept here, before seeds and harvests became inventory items. Only the upgrade to version 2
-	// reads them; nothing writes them any more.
-
-	UPROPERTY()
-	int32 Seeds = 0;
-
-	UPROPERTY()
-	int32 HarvestedCrops = 0;
 };

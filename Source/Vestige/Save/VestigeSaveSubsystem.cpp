@@ -24,90 +24,6 @@
 
 #define LOCTEXT_NAMESPACE "VestigeSaveSubsystem"
 
-namespace VestigeSaveUpgrade
-{
-	/** Version 0 saves could only plant the seed crop, and the seed crop was always the turnip. */
-	const FName Version0CropId(TEXT("Base.Turnip"));
-
-	/** The ContentId of the tool in hand in a version 0 save, which may only have the old tool enum. */
-	FName GetVersion0ToolId(const UVestigeSaveGame& Save)
-	{
-		if (!Save.CurrentToolId.IsNone())
-		{
-			return Save.CurrentToolId;
-		}
-
-		switch (Save.CurrentTool)
-		{
-		case EFarmTool::Hoe:
-			return TEXT("Base.Hoe");
-		case EFarmTool::Seeds:
-			return TEXT("Base.Seeds");
-		case EFarmTool::WateringCan:
-			return TEXT("Base.WateringCan");
-		case EFarmTool::Hand:
-			return TEXT("Base.Hand");
-		}
-		return NAME_None;
-	}
-
-	/** Moves the flat version 0 fields into the owners' structs and gives tiles their coordinates and crop. */
-	bool UpgradeFromVersion0(UVestigeSaveGame& Save, int32 GridWidth)
-	{
-		if (GridWidth <= 0)
-		{
-			return false;
-		}
-
-		Save.Clock.Day = Save.Day;
-		Save.Clock.TimeOfDay = Save.TimeOfDay;
-		Save.Farming.Seeds = Save.Seeds;
-		Save.Farming.HarvestedCrops = Save.HarvestedCrops;
-		Save.Farming.CurrentToolId = GetVersion0ToolId(Save);
-
-		// Version 0 wrote every tile in grid order, row by row, into a grid of the same width.
-		for (int32 Index = 0; Index < Save.Tiles.Num(); ++Index)
-		{
-			FFarmTileSaveData& Tile = Save.Tiles[Index];
-			Tile.Coordinates = FIntPoint(Index % GridWidth, Index / GridWidth);
-			Tile.CropId = Tile.State == EFarmTileState::Planted ? Version0CropId : NAME_None;
-		}
-		Save.SaveVersion = 1;
-		return true;
-	}
-
-	/** Version 1 counted seeds and harvested crops, and the turnip was the only seed and crop. */
-	const FName Version1SeedItemId(TEXT("Base.TurnipSeeds"));
-	const FName Version1HarvestItemId(TEXT("Base.Turnip"));
-
-	/** Turns the seed and harvest counts into stacks in the first two inventory slots. */
-	void UpgradeFromVersion1(UVestigeSaveGame& Save)
-	{
-		const TPair<FName, int32> Stacks[] = {
-			{Version1SeedItemId, Save.Farming.Seeds}, {Version1HarvestItemId, Save.Farming.HarvestedCrops}};
-		for (const TPair<FName, int32>& Stack : Stacks)
-		{
-			if (Stack.Value > 0)
-			{
-				Save.Inventory.Slots.Add({Save.Inventory.Slots.Num(), Stack.Key, Stack.Value});
-			}
-		}
-		Save.SaveVersion = 2;
-	}
-
-	/** Version 2 had no stamina. Its Stamina part reads as unsaved, so the player starts with full stamina. */
-	void UpgradeFromVersion2(UVestigeSaveGame& Save)
-	{
-		Save.SaveVersion = 3;
-	}
-
-	/** Version 3 had no exhaustion. Its Rest part reads as not exhausted. */
-	void UpgradeFromVersion3(UVestigeSaveGame& Save)
-	{
-		Save.SaveVersion = 4;
-	}
-}
-
 namespace VestigeSaveSlots
 {
 	FVestigeSaveSlotRead ReadSlot(const TCHAR* SlotName)
@@ -166,6 +82,11 @@ FVestigeLoadDecision UVestigeSaveSubsystem::DecideLoad(TConstArrayView<FVestigeS
 		{
 			return {EVestigeLoadOutcome::RefuseNewer, Slot};
 		}
+		// There are no upgrades before the first public build, so an older save is as unreadable as a corrupt one.
+		if (Read.Save->SaveVersion < UVestigeSaveGame::CurrentVersion)
+		{
+			continue;
+		}
 		if (Decision.Slot == INDEX_NONE || Read.Save->SaveSequence > Slots[Decision.Slot].Save->SaveSequence)
 		{
 			Decision = {EVestigeLoadOutcome::Load, Slot};
@@ -182,27 +103,6 @@ FVestigeLoadDecision UVestigeSaveSubsystem::DecideLoad(TConstArrayView<FVestigeS
 int32 UVestigeSaveSubsystem::GetSlotToWrite(int32 NewestSlot)
 {
 	return NewestSlot == 0 ? 1 : 0;
-}
-
-bool UVestigeSaveSubsystem::UpgradeToCurrentVersion(UVestigeSaveGame& Save, int32 GridWidth)
-{
-	if (Save.SaveVersion == 0 && !VestigeSaveUpgrade::UpgradeFromVersion0(Save, GridWidth))
-	{
-		return false;
-	}
-	if (Save.SaveVersion == 1)
-	{
-		VestigeSaveUpgrade::UpgradeFromVersion1(Save);
-	}
-	if (Save.SaveVersion == 2)
-	{
-		VestigeSaveUpgrade::UpgradeFromVersion2(Save);
-	}
-	if (Save.SaveVersion == 3)
-	{
-		VestigeSaveUpgrade::UpgradeFromVersion3(Save);
-	}
-	return Save.SaveVersion == UVestigeSaveGame::CurrentVersion;
 }
 
 bool UVestigeSaveSubsystem::DoesSupportWorldType(const EWorldType::Type WorldType) const
@@ -329,6 +229,12 @@ void UVestigeSaveSubsystem::LoadFarm()
 			VESTIGE_LOG(
 				this, LogVestigeSave, Warning, "Save slot {Slot} couldn't be read as a farm save.", UVestigeSaveGame::SlotNames[Slot]);
 		}
+		else if (Slots[Slot].Save && Slots[Slot].Save->SaveVersion < UVestigeSaveGame::CurrentVersion)
+		{
+			VESTIGE_LOG(this, LogVestigeSave, Warning,
+				"Save slot {Slot} holds an older save, version {Version}. This build only loads version {CurrentVersion}.",
+				UVestigeSaveGame::SlotNames[Slot], Slots[Slot].Save->SaveVersion, UVestigeSaveGame::CurrentVersion);
+		}
 	}
 
 	const FVestigeLoadDecision Decision = DecideLoad(Slots);
@@ -355,23 +261,9 @@ void UVestigeSaveSubsystem::LoadFarm()
 		break;
 	}
 
-	UVestigeSaveGame& Save = *Slots[Decision.Slot].Save;
-	const int32 SavedVersion = Save.SaveVersion;
-	if (SavedVersion < UVestigeSaveGame::CurrentVersion)
-	{
-		BackUpBeforeUpgrade(Decision.Slot, SavedVersion);
-		if (!UpgradeToCurrentVersion(Save, Grid->GetWidth()))
-		{
-			VESTIGE_LOG(this, LogVestigeSave, Error, "The save in slot {Slot} (version {Version}) couldn't be upgraded. Saving is off.",
-				UVestigeSaveGame::SlotNames[Decision.Slot], SavedVersion);
-			RefuseToSave(LOCTEXT(
-				"SaveNotUpgraded", "The save couldn't be read. It is kept as it is, and the game won't save until you start a new game."));
-			return;
-		}
-	}
-
+	const UVestigeSaveGame& Save = *Slots[Decision.Slot].Save;
 	VESTIGE_LOG(this, LogVestigeSave, Log, "Loading day {Day} from save slot {Slot} (version {Version}, save {Sequence}).", Save.Clock.Day,
-		UVestigeSaveGame::SlotNames[Decision.Slot], SavedVersion, Save.SaveSequence);
+		UVestigeSaveGame::SlotNames[Decision.Slot], Save.SaveVersion, Save.SaveSequence);
 	NewestSlot = Decision.Slot;
 	NewestSequence = Save.SaveSequence;
 	if (ApplySave(Save, *Farming, *Inventory) > 0)
@@ -408,26 +300,6 @@ void UVestigeSaveSubsystem::RefuseToSave(const FText& Reason)
 {
 	bSavingAllowed = false;
 	UVestigeFeedbackSubsystem::Notify(GetWorld(), Reason);
-}
-
-void UVestigeSaveSubsystem::BackUpBeforeUpgrade(int32 Slot, int32 Version) const
-{
-	const FString BackupSlot = FString::Printf(TEXT("%s_Version%d"), UVestigeSaveGame::SlotNames[Slot], Version);
-	if (UGameplayStatics::DoesSaveGameExist(BackupSlot, UVestigeSaveGame::UserIndex))
-	{
-		return;
-	}
-
-	TArray<uint8> Bytes;
-	if (!UGameplayStatics::LoadDataFromSlot(Bytes, UVestigeSaveGame::SlotNames[Slot], UVestigeSaveGame::UserIndex)
-		|| !UGameplayStatics::SaveDataToSlot(Bytes, BackupSlot, UVestigeSaveGame::UserIndex))
-	{
-		VESTIGE_LOG(this, LogVestigeSave, Warning, "Couldn't back up the version {Version} save in slot {Slot} before upgrading it.",
-			Version, UVestigeSaveGame::SlotNames[Slot]);
-		return;
-	}
-	VESTIGE_LOG(this, LogVestigeSave, Log, "Backed up the version {Version} save in slot {Slot} to {Backup} before upgrading it.", Version,
-		UVestigeSaveGame::SlotNames[Slot], BackupSlot);
 }
 
 UFarmingComponent* UVestigeSaveSubsystem::GetPlayerFarming() const

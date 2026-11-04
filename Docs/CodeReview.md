@@ -72,6 +72,8 @@ There are five save versions, an upgrade chain, byte-for-byte backups, legacy fi
 
 **Fix.** Delete the upgrades, the legacy fields, `EFarmTool` and `UFarmSaveGame`, restart at version 1, and delete the development saves. Turn compatibility on at the first public build ([Roadmap.md, section 6](Roadmap.md#6-before-a-public-release)). Keep the two alternating slots and the refusal to load or overwrite a save from a newer build; those are right.
 
+**Status: Resolved (2026-11-04).** The upgrades and their backups, the version 0 fields, `EFarmTool`, the version 1 counts, `UFarmSaveGame` and the `[CoreRedirects]` only old saves needed are deleted, and `CurrentVersion` is 1. A save of an older version is refused like a corrupt file and left untouched. Deleting the development saves is a manual step in [PlayTest.md](PlayTest.md#2-pending-checks).
+
 ### H5 — F9 deletes both saves with one key in a shipped build
 
 F9 (new game: delete both slots and reopen the map) and N (skip the day) are in the normal mapping context with no Shipping guard. A playtester who presses F9 loses everything with no confirmation, and F9 already clashes with the editor's screenshot key ([Roadmap.md, Open problems](Roadmap.md#open-problems)). Moving them to a cheat manager is planned for section 6, which is too late for a key that destroys data.
