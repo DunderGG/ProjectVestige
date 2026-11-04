@@ -148,7 +148,9 @@ Quick wins:
 - [ ] Finish the baseline: run `BenchmarkField 8 Base.Turnip` in the same build to see what the tiles cost the render thread (for [C2](CodeReview.md#c2--one-actor-per-tile-each-with-two-meshes-and-two-dynamic-materials)), measure video memory and set the memory limit, find the 266 ms GPU stall two seconds after the new day, repeat the run that was disturbed, measure the shadow depths again now that the sun turns in steps (0.93 ms before), and measure on target-class hardware if any becomes available ([H8](CodeReview.md#h8--rendering-is-unreals-maximum-feature-set-unmeasured-on-the-target))
 - [x] Move the sun in small steps (for example every 0.25 degrees) instead of every frame, so virtual shadow maps keep their cache ([H8](CodeReview.md#h8--rendering-is-unreals-maximum-feature-set-unmeasured-on-the-target))
    - Done 2026-11-04: the day cycle turns the sun only once the clock has moved it `SunStepDegrees` (0.25, under **Lighting**), while its brightness, colour and the night exposure still change every frame, since only the light's direction resets the cached shadows. At 40 real seconds per game hour that is a turn every 0.4 to 2 seconds instead of every frame
-- [ ] Turn off `r.RayTracing` unless the Epic tier is a product goal, then decide from the baseline whether High uses Lumen *(decide)* ([H8](CodeReview.md#h8--rendering-is-unreals-maximum-feature-set-unmeasured-on-the-target))
+- [x] Turn off `r.RayTracing` unless the Epic tier is a product goal, then decide from the baseline whether High uses Lumen *(decide)* ([H8](CodeReview.md#h8--rendering-is-unreals-maximum-feature-set-unmeasured-on-the-target))
+   - Done 2026-11-04, decided by David: hardware ray tracing is off for the whole project while the game is being developed, so Epic uses software Lumen too, and High keeps Lumen, which cost about 0.6 ms of the 6.0 ms GPU frame in the baseline. Reasons in the [decision log](Architecture.md#16-decision-log)
+- [ ] Look at the volumetric clouds at High, the costliest GPU pass in the baseline (1.4 ms of 6.0 ms, so roughly 4 ms on the target): lower their quality at High or use a cheaper sky, and compare how mornings and evenings look ([H8](CodeReview.md#h8--rendering-is-unreals-maximum-feature-set-unmeasured-on-the-target))
 
 Before 4.2:
 
@@ -437,6 +439,7 @@ Roughly in the order from [GameDesign.md section 13](GameDesign.md#13-scope-and-
 ## 6. Before a public release
 
 - [ ] Realistic art direction: Lumen, Nanite and Megascans for the world, custom Blender work for robots, machines and crops. Replace the low-poly placeholders
+- [ ] Decide with the final art whether Epic gets hardware ray tracing back (`r.RayTracing`, off since 2026-11-04 while the game is developed). It costs about 50 MB of shaders and longer cooks; measure Epic on the target and on a high-end PC first ([Architecture.md, decision log](Architecture.md#16-decision-log))
 - [ ] Replace the Epic template code and content (character, animations, input) with our own
 - [ ] Main menu, settings and save slots. Its New game asks for confirmation before it replaces a save ([CodeReview.md, H5](CodeReview.md#h5--f9-deletes-both-saves-with-one-key-in-a-shipped-build))
 - Moving the test keys F9 and N into a cheat manager: moved to [4.0](#40-structure-from-the-code-review), because F9 deletes the saves (code review, 2026-11-04)

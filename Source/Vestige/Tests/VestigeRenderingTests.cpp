@@ -4,7 +4,7 @@
 #if WITH_DEV_AUTOMATION_TESTS
 
 #include "CQTest.h"
-#include "Misc/ConfigCacheIni.h"
+#include "HAL/IConsoleManager.h"
 
 // A namespace keeps the fixture's short name from hiding other declarations in unity builds.
 namespace VestigeRenderingTests
@@ -12,21 +12,11 @@ namespace VestigeRenderingTests
 	/** Checks the rendering settings for the target PC (Architecture.md, section 10), as the engine reads them. */
 	TEST_CLASS(Rendering, "Vestige")
 	{
-		static int32 GetHardwareRayTracing(const TCHAR* Level)
+		TEST_METHOD(HardwareRayTracingIsOff)
 		{
-			int32 Value = INDEX_NONE;
-			GConfig->GetInt(
-				*FString::Printf(TEXT("GlobalIlluminationQuality@%s"), Level), TEXT("r.Lumen.HardwareRayTracing"), Value, GScalabilityIni);
-			return Value;
-		}
-
-		TEST_METHOD(HardwareRayTracingIsOnlyOnAtEpicAndCinematic)
-		{
-			ASSERT_THAT(IsTrue(GetHardwareRayTracing(TEXT("0")) == 0));
-			ASSERT_THAT(IsTrue(GetHardwareRayTracing(TEXT("1")) == 0));
-			ASSERT_THAT(IsTrue(GetHardwareRayTracing(TEXT("2")) == 0));
-			ASSERT_THAT(IsTrue(GetHardwareRayTracing(TEXT("3")) == 1));
-			ASSERT_THAT(IsTrue(GetHardwareRayTracing(TEXT("Cine")) == 1));
+			const IConsoleVariable* RayTracing = IConsoleManager::Get().FindConsoleVariable(TEXT("r.RayTracing"));
+			ASSERT_THAT(IsNotNull(RayTracing));
+			ASSERT_THAT(IsTrue(RayTracing->GetInt() == 0));
 		}
 	};
 }

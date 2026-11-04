@@ -37,7 +37,7 @@ Every path needs a C++ compiler: the project has its own C++ module, and the lau
 ### Hardware
 
 - **Windows 10 or 11, 64-bit.** The project is developed and built on Windows only.
-- **A DirectX 12 graphics card that supports Shader Model 6**, with current drivers. The project renders with DirectX 12 and SM6 (`Config/DefaultEngine.ini`). The *Epic* scalability level also uses hardware ray tracing, which needs a ray-tracing card; *High*, the default, doesn't.
+- **A DirectX 12 graphics card that supports Shader Model 6**, with current drivers. The project renders with DirectX 12 and SM6 (`Config/DefaultEngine.ini`).
 - **RAM:** Epic recommends 32 GB for Unreal Engine 5. 16 GB works for this small project, with slower builds.
 - **Disk:** an SSD with **at least 100 GB free**. The engine takes about 35 GB, Visual Studio about 17 GB plus shared Windows components, and the project folder grows to around 10 GB once it has build files and the shader cache. Engine debug symbols (optional, [step 4](#4-unreal-engine-58)) add a lot more.
 

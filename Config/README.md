@@ -11,7 +11,6 @@ This folder contains Project Vestige's Unreal Engine project configuration. The 
 | `DefaultEditor.ini` | Editor-only behavior, such as Blueprint editing and compilation options. |
 | `DefaultInput.ini` | Project-wide input settings, including axis behavior and Enhanced Input classes. |
 | `DefaultGameplayTags.ini` | Gameplay tags registered from configuration, such as the season tags. |
-| `DefaultScalability.ini` | Project adjustments to Unreal's graphics-quality levels, including when hardware ray tracing is used. |
 | `DefaultGameUserSettings.ini` | Initial player graphics-quality defaults. Unreal stores a player's chosen settings separately, and the first-run hardware benchmark can replace these defaults. |
 
 `Layouts/` is reserved for editor layout configuration files; it is currently empty.
