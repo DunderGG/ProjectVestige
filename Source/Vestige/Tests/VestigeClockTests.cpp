@@ -7,6 +7,7 @@
 #include "CQTest.h"
 #include "Tests/VestigeTestEventRecorder.h"
 #include "Time/VestigeClockSaveData.h"
+#include "Time/VestigeClockSettings.h"
 #include "Time/VestigeClockSubsystem.h"
 #include "UObject/StrongObjectPtr.h"
 
@@ -58,6 +59,14 @@ namespace VestigeClockTests
 			ASSERT_THAT(IsTrue(GameClock->IsTickable()));
 			ASSERT_THAT(IsTrue(GameClock->GetCurrentDay() == 1));
 			ASSERT_THAT(IsTrue(GameClock->GetTimeOfDay() == GameClock->GetDayStartHour()));
+		}
+
+		TEST_METHOD(SunriseAndSunsetComeFromTheProjectSettings)
+		{
+			const UVestigeClockSettings& Settings = UVestigeClockSettings::Get();
+			ASSERT_THAT(IsTrue(GameClock->GetSunriseHour() == Settings.GetSunriseHour()));
+			ASSERT_THAT(IsTrue(GameClock->GetSunsetHour() == Settings.GetSunsetHour()));
+			ASSERT_THAT(IsTrue(GameClock->GetSunsetHour() > GameClock->GetSunriseHour()));
 		}
 
 		TEST_METHOD(StartingTheNextDayAdvancesTheDayAndResetsTheClock)

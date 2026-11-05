@@ -14,12 +14,15 @@ namespace VestigeClockLimits
 
 	/** The shortest day the settings allow, in game hours from the start of the day to its end. */
 	constexpr float ShortestDayHours = 1.f;
+
+	/** The least time the settings allow between sunrise and sunset, in game hours. */
+	constexpr float ShortestDaylightHours = 1.f;
 }
 
 /**
- * How the game's clock runs: its speed and when each day starts and ends. One clock for the whole game, whichever map is
- * open, so these are project settings rather than a level's. Project Settings > Game > Vestige Clock, stored in
- * Config/DefaultGame.ini. UVestigeClockSubsystem reads it once when the game starts.
+ * How the game's clock runs: its speed, when each day starts and ends, and when the sun rises and sets. One clock for the
+ * whole game, whichever map is open, so these are project settings rather than a level's. Project Settings > Game >
+ * Vestige Clock, stored in Config/DefaultGame.ini. UVestigeClockSubsystem reads it once when the game starts.
  */
 UCLASS(Config = Game, DefaultConfig, meta = (DisplayName = "Vestige Clock"))
 class UVestigeClockSettings : public UDeveloperSettings
@@ -37,6 +40,11 @@ public:
 	/** The hour the day ends, at least VestigeClockLimits::ShortestDayHours after GetDayStartHour. */
 	float GetDayEndHour() const { return FMath::Max(DayEndHour, DayStartHour + VestigeClockLimits::ShortestDayHours); }
 
+	float GetSunriseHour() const { return SunriseHour; }
+
+	/** The hour the sun sets, at least VestigeClockLimits::ShortestDaylightHours after GetSunriseHour. */
+	float GetSunsetHour() const { return FMath::Max(SunsetHour, SunriseHour + VestigeClockLimits::ShortestDaylightHours); }
+
 private:
 	/** Real seconds per in-game hour. */
 	UPROPERTY(Config, EditAnywhere, Category = "Time", meta = (AllowPrivateAccess = "true", ClampMin = 0.1))
@@ -52,4 +60,12 @@ private:
 	 */
 	UPROPERTY(Config, EditAnywhere, Category = "Time", meta = (AllowPrivateAccess = "true", ClampMin = 1, ClampMax = 30))
 	float DayEndHour = 30.f;
+
+	/** Hour the sun rises above the horizon, the same on every map. Before it, the moon lights the sky. */
+	UPROPERTY(Config, EditAnywhere, Category = "Sun", meta = (AllowPrivateAccess = "true", ClampMin = 0, ClampMax = 23))
+	float SunriseHour = 6.f;
+
+	/** Hour the sun sets. Later than SunriseHour. */
+	UPROPERTY(Config, EditAnywhere, Category = "Sun", meta = (AllowPrivateAccess = "true", ClampMin = 1, ClampMax = 24))
+	float SunsetHour = 20.f;
 };

@@ -59,6 +59,17 @@ namespace VestigeSkyLightingMath
 		Position.Arc = FMath::Sin(Position.Progress * PI);
 		return Position;
 	}
+
+	/** Where the sun or moon is at the clock's time, or at the start of the day without a clock (outside a game). */
+	FSkyPosition GetSkyPosition(const UVestigeClockSubsystem* Clock)
+	{
+		if (!Clock)
+		{
+			const UVestigeClockSettings& Settings = UVestigeClockSettings::Get();
+			return GetSkyPosition(Settings.GetDayStartHour(), Settings.GetSunriseHour(), Settings.GetSunsetHour());
+		}
+		return GetSkyPosition(Clock->GetTimeOfDay(), Clock->GetSunriseHour(), Clock->GetSunsetHour());
+	}
 }
 
 AVestigeSkyLighting::AVestigeSkyLighting()
@@ -86,12 +97,6 @@ void AVestigeSkyLighting::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 	UpdateLighting();
-}
-
-float AVestigeSkyLighting::GetTimeOfDay() const
-{
-	const UVestigeClockSubsystem* CurrentClock = Clock.Get();
-	return CurrentClock ? CurrentClock->GetTimeOfDay() : UVestigeClockSettings::Get().GetDayStartHour();
 }
 
 void AVestigeSkyLighting::FindLights()
@@ -137,7 +142,7 @@ void AVestigeSkyLighting::UpdateLighting()
 	TurnSunInSteps();
 
 	// Light fades in after sunrise and out before sunset, warm near the horizon.
-	const FSkyPosition Sky = GetSkyPosition(GetTimeOfDay(), SunriseHour, SunsetHour);
+	const FSkyPosition Sky = GetSkyPosition(Clock.Get());
 	const float Daylight = Sky.bDaytime ? FadeIn(Sky.Arc, DaylightFadeRate) : 0.f;
 	const float Brightness = FMath::Lerp(NightLightFraction, 1.f, Daylight);
 	ULightComponent* SunLight = Sun->GetLightComponent();
@@ -170,7 +175,7 @@ FRotator AVestigeSkyLighting::GetSunRotation() const
 {
 	using namespace VestigeSkyLightingMath;
 
-	const FSkyPosition Sky = GetSkyPosition(GetTimeOfDay(), SunriseHour, SunsetHour);
+	const FSkyPosition Sky = GetSkyPosition(Clock.Get());
 	const float Elevation = FMath::Lerp(MinSunElevation, MaxSunElevation, Sky.Arc);
 	return FRotator(-Elevation, SunYaw + Sky.Progress * SunArcYaw, 0.f);
 }

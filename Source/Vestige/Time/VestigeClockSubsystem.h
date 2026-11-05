@@ -18,7 +18,7 @@ DECLARE_MULTICAST_DELEGATE_OneParam(FOnVestigeHourStarted, int32 /* Hour */);
  * The game's time: the day counter and the clock, the one owner of game time (Systems.md, section 4). A game-instance
  * subsystem, so the clock keeps its time across map changes and runs in whichever game map is open. It advances with that
  * world's time, so pausing stops it and time dilation (slomo) speeds it up, and it stands still while a map loads. Its
- * speed and hours come from UVestigeClockSettings. Presentation (the sun, the HUD) reads it; nothing else keeps a clock.
+ * speed and hours, and the hours of sunrise and sunset, come from UVestigeClockSettings. Presentation (the sun, the HUD) reads it; nothing else keeps a clock.
  */
 UCLASS(BlueprintType, meta = (DisplayName = "Vestige Clock"))
 class UVestigeClockSubsystem : public UGameInstanceSubsystem, public FTickableGameObject
@@ -62,6 +62,12 @@ public:
 	float GetDayEndHour() const { return DayEndHour; }
 
 	float GetRealSecondsPerGameHour() const { return RealSecondsPerGameHour; }
+
+	/** Hour the sun rises, the same on every map. The sky lighting follows it; game rules may ask whether it is day. */
+	float GetSunriseHour() const { return SunriseHour; }
+
+	/** Hour the sun sets, later than GetSunriseHour. */
+	float GetSunsetHour() const { return SunsetHour; }
 
 	/** False once the clock has stopped at the end of the day, until the next day starts. */
 	bool IsRunning() const { return !bDayEndReached; }
@@ -113,6 +119,8 @@ private:
 	float RealSecondsPerGameHour = 40.f;
 	float DayStartHour = 6.f;
 	float DayEndHour = 30.f;
+	float SunriseHour = 6.f;
+	float SunsetHour = 20.f;
 
 	int32 CurrentDay = 1;
 	float TimeOfDay = 6.f;

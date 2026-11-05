@@ -14,7 +14,7 @@ class UVestigeClockSubsystem;
 
 /**
  * The lighting of a level whose sky follows the time of day: turns the sun (the moon at night), dims the sky light and
- * darkens the exposure at night, to match the game's clock (UVestigeClockSubsystem). Presentation only: it reads the clock
+ * darkens the exposure at night, to match the game's clock (UVestigeClockSubsystem) and its hours of sunrise and sunset. Presentation only: it reads the clock
  * and never changes it. Place one in each such level; a level without one (an interior) keeps its lights as placed. The sky
  * atmosphere and clouds are ordinary placed actors that follow the sun on their own.
  */
@@ -40,22 +40,11 @@ protected:
 	virtual void Tick(float DeltaSeconds) override;
 
 private:
-	/** The clock's time of day, or the day's start hour without a clock (outside a game). */
-	float GetTimeOfDay() const;
-
 	void FindLights();
 	void UpdateLighting();
 
 	/** Turns the sun to GetSunRotation once it is at least SunStepDegrees away from it. */
 	void TurnSunInSteps();
-
-	/** Hour the sun rises above the horizon. Before it, the moon lights the farm. */
-	UPROPERTY(EditAnywhere, Category = "Time", meta = (AllowPrivateAccess = "true", ClampMin = 0, ClampMax = 23))
-	float SunriseHour = 6.f;
-
-	/** Hour the sun sets. Must be later than SunriseHour. */
-	UPROPERTY(EditAnywhere, Category = "Time", meta = (AllowPrivateAccess = "true", ClampMin = 1, ClampMax = 24))
-	float SunsetHour = 20.f;
 
 	/** Light moved with the time of day. Left empty, the first DirectionalLight in the level is used. */
 	UPROPERTY(EditAnywhere, Category = "Lighting", meta = (AllowPrivateAccess = "true"))

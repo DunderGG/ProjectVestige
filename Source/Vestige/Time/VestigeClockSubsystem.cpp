@@ -28,6 +28,8 @@ void UVestigeClockSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 	RealSecondsPerGameHour = Settings.GetRealSecondsPerGameHour();
 	DayStartHour = Settings.GetDayStartHour();
 	DayEndHour = Settings.GetDayEndHour();
+	SunriseHour = Settings.GetSunriseHour();
+	SunsetHour = Settings.GetSunsetHour();
 	StartNewGame();
 
 	// IsTickable decides each frame whether the clock runs.

@@ -124,6 +124,8 @@ Slate is the engine's own UI layer; game HUDs are normally UMG widgets, with Com
 
 **Fix.** The clock moves to the C1 subsystem; a separate sky actor in each level listens to it and owns the lights.
 
+**Status: Resolved (2026-11-05).** The clock moved with C1 (2026-11-04), and the static `Get` went with it. The actor that is left is renamed `AVestigeSkyLighting` for its job, with a class redirect for `L_Farm`, and the hours of sunrise and sunset moved to the clock's settings, so every map's sky follows the same day. Reasons in [Architecture.md, decision log](Architecture.md#16-decision-log).
+
 ### M2 — A pawn component ends the world's day
 
 `UVestigeRestComponent`, on the player's pawn, handles `OnDayEndReached` and calls `StartNextDay`. If there is no pawn at 06:00 (a cutscene, a knock-out respawn, a menu, later co-op), the clock stops and the day never ends. It also sits in `Farming/`, though it has nothing to do with farming (M3).

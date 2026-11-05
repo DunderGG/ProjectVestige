@@ -107,12 +107,12 @@ Contents
 
 **Rules:**
 
-- One owner of game time (`UVestigeClockSubsystem`), in the game instance so it keeps time across maps; its speed and hours are project settings (`UVestigeClockSettings`), never a level's. Everything else reads it or listens to its events (`OnNewDay`, `OnNewDayFinished`, `OnHourStarted`, `OnDayEndReached`). Nothing keeps its own clock: something that happens at a time of day listens to `OnHourStarted`, which carries the hour since the start of the day's midnight (22 for 22:00, 24 for the next midnight), rather than watching the clock or running a timer of its own.
+- One owner of game time (`UVestigeClockSubsystem`), in the game instance so it keeps time across maps; its speed and hours, sunrise and sunset included, are project settings (`UVestigeClockSettings`), never a level's. Everything else reads it or listens to its events (`OnNewDay`, `OnNewDayFinished`, `OnHourStarted`, `OnDayEndReached`). Nothing keeps its own clock: something that happens at a time of day listens to `OnHourStarted`, which carries the hour since the start of the day's midnight (22 for 22:00, 24 for the next midnight), rather than watching the clock or running a timer of its own.
 - Blueprints, and so mods, hear of a new day through `On New Day` (`OnNewDayBlueprint`), the extension point broadcast after `OnNewDay` and before the save ([Architecture.md, section 12](Architecture.md#extension-points-today)). A Blueprint finds the clock with **Get Vestige Clock**.
 - Game time is separate from real time and from `UWorld::GetTimeSeconds`. Pausing and menus stop game time: the clock ticks with the open world, so pause stops it and time dilation (`slomo`) speeds it.
 - Daily changes happen in `OnNewDay` listeners that finish synchronously ([Architecture.md, section 15](Architecture.md#15-the-day-flow)).
 - Seasons are gameplay tags and change on a day event; weather is chosen once per day from data (per-season weights), so it's saved as a value, not re-rolled on load.
-- Lighting, fog and sky react to time and weather through the day cycle, which reads the clock and never changes it; nothing else moves the sun. The sun turns in small steps, not every frame, so virtual shadow maps keep its cached shadows between them; brightness and colour may change every frame.
+- Lighting, fog and sky react to time and weather through the sky lighting actor (`AVestigeSkyLighting`, one per outdoor level), which reads the clock and its sunrise and sunset hours and never changes them; nothing else moves the sun. The sun turns in small steps, not every frame, so virtual shadow maps keep its cached shadows between them; brightness and colour may change every frame.
 
 **Pitfalls:**
 

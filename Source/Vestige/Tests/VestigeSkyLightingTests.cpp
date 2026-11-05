@@ -6,6 +6,7 @@
 #include "Components/ActorTestSpawner.h"
 #include "CQTest.h"
 #include "Engine/DirectionalLight.h"
+#include "Time/VestigeClockSaveData.h"
 #include "UObject/CoreRedirects.h"
 #include "Time/VestigeClockSubsystem.h"
 #include "Time/VestigeSkyLighting.h"
@@ -99,6 +100,36 @@ namespace VestigeSkyLightingTests
 			PassHours(Sky, 0.f);
 
 			ASSERT_THAT(IsTrue(DegreesBetween(Sun->GetActorQuat(), Sky.GetSunRotation().Quaternion()) < RoundingDegrees));
+		}
+
+		/** Degrees above the horizon that Sky puts the sun at Hour on the clock. */
+		float SunElevationAt(const AVestigeSkyLighting& Sky, float Hour)
+		{
+			FVestigeClockSaveData Time;
+			Time.Day = Clock->GetCurrentDay();
+			Time.TimeOfDay = Hour;
+			Clock->RestoreFromSaveData(Time);
+			return -Sky.GetSunRotation().Pitch;
+		}
+
+		TEST_METHOD(SunRisesAndSetsAtTheClocksHours)
+		{
+			ADirectionalLight* Sun = nullptr;
+			const AVestigeSkyLighting& Sky = SpawnSkyLightingWithSun(Sun);
+			const float Sunrise = Clock->GetSunriseHour();
+			const float Sunset = Clock->GetSunsetHour();
+			const float Midday = (Sunrise + Sunset) / 2.f;
+			const float JustAfterSunrise = Sunrise + 0.5f;
+			const float JustBeforeSunset = Sunset - 0.5f;
+
+			// The sun climbs from its lowest at sunrise to its highest halfway to sunset, then sinks again.
+			const float AtMidday = SunElevationAt(Sky, Midday);
+			ASSERT_THAT(IsTrue(SunElevationAt(Sky, Sunrise) < SunElevationAt(Sky, JustAfterSunrise)));
+			ASSERT_THAT(IsTrue(SunElevationAt(Sky, JustAfterSunrise) < AtMidday));
+			ASSERT_THAT(IsTrue(SunElevationAt(Sky, Midday - 1.f) < AtMidday));
+			ASSERT_THAT(IsTrue(SunElevationAt(Sky, Midday + 1.f) < AtMidday));
+			ASSERT_THAT(IsTrue(SunElevationAt(Sky, JustBeforeSunset) < AtMidday));
+			ASSERT_THAT(IsTrue(SunElevationAt(Sky, Sunset) < SunElevationAt(Sky, JustBeforeSunset)));
 		}
 
 		TEST_METHOD(OldClassNamesLoadAsTheSkyLighting)
