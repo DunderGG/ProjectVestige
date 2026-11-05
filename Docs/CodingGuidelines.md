@@ -58,7 +58,7 @@ Follow Epic's naming rules. The `.editorconfig` in the repo enforces the prefixe
 
 | Prefix | For | Example |
 |---|---|---|
-| `A` | Classes deriving from `AActor` | `AFarmTile` |
+| `A` | Classes deriving from `AActor` | `AFarmGrid` |
 | `U` | Classes deriving from `UObject` (components, subsystems, data assets) | `UFarmingComponent` |
 | `S` | Slate widgets | `SVestigeHudWidget` |
 | `F` | Structs and most other classes | `FFarmTileSaveData` |
@@ -72,7 +72,7 @@ Follow Epic's naming rules. The `.editorconfig` in the repo enforces the prefixe
 Like Lyra prefixes its classes with `Lyra` (`ALyraCharacter`, `ULyraHealthComponent`), every class, struct, enum, delegate and log category we add starts with a project prefix after the type prefix. This keeps our types apart from engine and plugin types in autocomplete and in the editor's class pickers. A bare name often isn't even possible: `APlayerState` is the engine's own class.
 
 - **`Vestige`** is the project prefix: `AVestigePlayerState`, `UVestigeInventoryComponent`, `FOnVestigeInventoryChanged`. It matches the module, `LogVestige` and the template classes.
-- **`Farm`** is for types about the farm itself: its tiles, grid, crops and the farming actions (`AFarmTile`, `AFarmGrid`, `UFarmCropData`, `UFarmingComponent`, `EFarmTileState`). The game is more than farming, so player, inventory, time, saving, UI and other general types never use it.
+- **`Farm`** is for types about the farm itself: its tiles, grid, crops and the farming actions (`AFarmGrid`, `UFarmField`, `UFarmCropData`, `UFarmingComponent`, `EFarmTileState`). The game is more than farming, so player, inventory, time, saving, UI and other general types never use it.
 - Types made before 2026-10-31 used `Farm` for everything. The general ones were renamed to `Vestige` on 2026-11-01 (`AFarmHUD` became `AVestigeHUD`, `AFarmerCharacter` became `AVestigePlayerCharacter`), with `[CoreRedirects]` in `Config/DefaultEngine.ini` so assets and saves that name the old types keep loading.
 - **Renaming a reflected type** that an asset, a level, a config file or a save names needs a redirect in `[CoreRedirects]` (`ClassRedirects`, `StructRedirects`, `EnumRedirects`) and a test that loads the old name. Redirects work for asset references and saved struct and enum names, but not for a save file's own class: loading a save finds its class by the name in the file's header without applying redirects, so once saves must stay compatible (from the first public build), a renamed save game class keeps its old name as an empty subclass.
 
@@ -86,7 +86,7 @@ The template classes (`AVestigeCharacter`, `AVestigeGameMode`, `AVestigePlayerCo
 - Names are **descriptive and unabbreviated**: `ReachDistance`, not `RchDst`; `HarvestedCrops`, not `NumHarv`. Common, well-known short forms are fine (`HUD`, `UI`, `Max`, `Min`, `Num`).
 - Functions that do something are **verbs**: `Till()`, `StartNextDay()`, `RefreshVisuals()`.
 - Functions that only **query state** and return a `bool` ask a **question**: `IsRipe()`, `AreTilesReady()`, `HasMessages()`.
-- Functions that **do something that can fail** keep their verb name and return `bool` for success: `AFarmTile::Till()` returns `false` when the tile isn't grass. Say in the `/** */` comment what `false` means. Don't rename them as questions (`DidTillSucceed()`) or add a `Try` prefix.
+- Functions that **do something that can fail** keep their verb name and return `bool` for success: `FFarmTileState::Till()` returns `false` when the tile isn't grass. Say in the `/** */` comment what `false` means. Don't rename them as questions (`DidTillSucceed()`) or add a `Try` prefix.
 - Getters use `Get`: `GetCurrentDay()`. `Find` returns `nullptr` when nothing exists; `Get` may create it, or returns a subsystem that always exists in a game (`AFarmGrid::Find`, `UVestigeClockSubsystem::Get`).
 - Delegates: the type is `FOn<Prefix><Event>` with the type's project prefix, the member is `On<Event>`: `FOnVestigeNewDay OnNewDay`. A Blueprint twin of a native delegate ([Architecture.md, section 4](Architecture.md#4-how-systems-talk-to-each-other)) adds `Blueprint` to both: `FOnVestigeNewDayBlueprint OnNewDayBlueprint`, shown to Blueprints with `DisplayName = "On New Day"`.
 - Event handlers are named for what they do, not when they run: `AdvanceTiles(int32 NewDay)`, `SaveFarm(int32 NewDay)`, not `HandleOnNewDay`.
@@ -122,14 +122,13 @@ The repo has a **`.clang-format`** file that encodes these rules, so formatting 
 - **Braces on their own line** (Allman style), for every block:
 
 ```cpp
-bool AFarmTile::Till()
+bool FFarmTileState::Till()
 {
 	if (State != EFarmTileState::Grass)
 	{
 		return false;
 	}
 	State = EFarmTileState::Tilled;
-	RefreshVisuals();
 	return true;
 }
 ```
@@ -138,9 +137,9 @@ bool AFarmTile::Till()
 - One-line function bodies are fine in headers for trivial getters: `int32 GetCurrentDay() const { return CurrentDay; }`.
 - `else if` stays on one line. Don't write `else` after a branch that returns.
 - A space after `if`, `for`, `while`, `switch` and around binary operators. No space between a function name and its `(`.
-- Pointer and reference symbols attach to the type: `AFarmTile* Tile`, `const FVector& WorldLocation`.
+- Pointer and reference symbols attach to the type: `AFarmGrid* Grid`, `const FVector& WorldLocation`.
 - Keep lines under 140 characters. Break long argument lists after a comma and indent one extra tab.
-- When a ternary breaks over lines, the `?` and `:` start the new lines (the formatter does this). Don't nest ternaries: write an `if` with early returns instead, as `AFarmTile::GetPlaceholderSoilColor` does.
+- When a ternary breaks over lines, the `?` and `:` start the new lines (the formatter does this). Don't nest ternaries: write an `if` with early returns instead, as `FarmTileLooks::GetLook` does for the soil's color.
 - Function bodies in `.cpp` files always go on their own lines, even one-liners.
 - One blank line between functions. Group related statements inside a function and separate groups with a blank line.
 
@@ -154,7 +153,7 @@ Code that changes the design must follow it, and update its Part B and decision 
 
 ### 5.1 One class per file pair
 
-Each class lives in `ClassName.h` and `ClassName.cpp`, named without the type prefix: `AFarmTile` in `FarmTile.h`. Small helper types tied to one class (an enum, a delegate, a save struct) can share its header.
+Each class lives in `ClassName.h` and `ClassName.cpp`, named without the type prefix: `AFarmGrid` in `FarmGrid.h`. Small helper types tied to one class (an enum, a delegate, a save struct) can share its header.
 
 ### 5.2 Header layout
 
@@ -216,12 +215,12 @@ private:
 - Getters and anything that doesn't change the object are `const`.
 - Pass non-trivial types (`FString`, `FVector`, `TArray`) by `const&`. Pass small types (`int32`, `float`, `bool`, enums, pointers) by value.
 - Use `const` for locals that never change after initialization.
-- Return `const` references to member containers rather than copies: `const TArray<TObjectPtr<AFarmTile>>& GetTiles() const`.
+- Return `const` references to member containers rather than copies: `const TArray<FFarmTileState>& GetTiles() const`.
 - Do not return `const` values by value (`const FString GetName()` blocks moves).
 
 ### 5.5 Encapsulation
 
-- **Runtime state is private.** Expose it through getters, and change it only through functions that keep the object consistent (`AFarmTile::Till` updates the state *and* the visuals).
+- **Runtime state is private.** Expose it through getters, and change it only through functions that keep the object consistent (`UFarmField::Till` changes the tile *and* broadcasts `OnTileChanged`, so its view redraws).
 - **Tunables** that designers edit are `UPROPERTY(EditAnywhere / EditDefaultsOnly)`. Prefer making them `protected` or `private` with `meta = (AllowPrivateAccess = "true")`, as Lyra does, and add a getter when other classes need to read them.
 - Public mutable data members are a smell. If another class needs to set a value, add a function with a name that says why (`RestoreFromSaveData`, `SelectToolbarSlot`).
 
@@ -326,7 +325,7 @@ VESTIGE_LOG(this, LogFarm, Warning, "No Tile Class is set, so the field is empty
   - `check(Condition)`: a programmer error that makes continuing pointless. Compiled out in shipping builds, so never put side effects inside.
   - `ensure(Condition)` / `ensureMsgf`: something is wrong but the game can carry on. Logs a callstack once.
   - Plain `if` with a graceful fallback for things that can legitimately happen at runtime or through level setup (a missing grid, a missing save).
-- Content mistakes a designer can make (a missing mesh, no grid in the level) must not crash. Fall back to a placeholder and warn, as `AFarmTile` does with its placeholder shapes.
+- Content mistakes a designer can make (a missing mesh, no grid in the level) must not crash. Fall back to a placeholder and warn, as the field's meshes component does with its placeholder shapes.
 - Failures the player should know about (a save that couldn't be written) must reach the player, but game code never calls the HUD to do it. The code that failed logs the failure, returns or broadcasts it, and raises a presentation-neutral feedback event; the HUD listens and displays it (see [Architecture.md, section 7](Architecture.md#7-presentation-ui-audio-and-effects)). The event is `UVestigeFeedbackSubsystem::Notify(World, Text)`, with the message written as `LOCTEXT`.
 
 ## 11. Comments and documentation
@@ -463,7 +462,7 @@ Source/Vestige/
 - **The test `Vestige.Architecture.IncludeDirection` enforces this.** It fails on a wrong-way include, on one of our headers included without its folder, and on a file in a folder that isn't a layer yet.
 - **A new file goes in the folder of its layer.** Decide the owner first ([section 1](#1-ownership-and-separation-of-concerns)), then the layer. If a class doesn't fit any folder, or would have to include upward, that's a design question: raise it rather than bending the rule. A new folder is added to the layer table in the test and in Architecture.md section 14 in the same commit.
 - **A save struct lives with its owner** (`FVestigeClockSaveData` in `Time/`), and `Save/` only gathers them, so saving never pulls a lower layer upward.
-- **Include our headers by their path from the module root**, own header included: `#include "Farming/FarmTile.h"`. The `"Vestige"` entry in `PublicIncludePaths` is what puts that root on the include path (a build without it fails), so keep it. Don't add the feature folders to the include path: bare includes like `"FarmTile.h"` hide where a file lives.
+- **Include our headers by their path from the module root**, own header included: `#include "Farming/FarmGrid.h"`. The `"Vestige"` entry in `PublicIncludePaths` is what puts that root on the include path (a build without it fails), so keep it. Don't add the feature folders to the include path: bare includes like `"FarmTile.h"` hide where a file lives.
 - **Folders, not modules.** Splitting the game into several modules is a separate decision ([Architecture.md, section 9](Architecture.md#9-modules-and-plugins) and the decision log). If another module ever needs our headers, give the module a `Public/` and `Private/` split and move only the headers meant for it into `Public/`.
 - Move files between folders in a commit of its own, with no other change. Unreal names classes by module and name, not by folder, so moving a file never affects Blueprints, levels or saves. Regenerate the Visual Studio project files afterwards (right-click `Vestige.uproject` > Generate Visual Studio project files).
 
@@ -476,7 +475,7 @@ Our assets live under `Content/Vestige/`, split by type. Leave the template's fo
 | Prefix | Asset type | Example |
 |---|---|---|
 | `L_` | Level / map | `L_Farm` |
-| `BP_` | Blueprint class | `BP_FarmTile` |
+| `BP_` | Blueprint class | `BP_FarmGrid` |
 | `WBP_` | Widget Blueprint | `WBP_Inventory` |
 | `ABP_` | Animation Blueprint | `ABP_Farmer` |
 | `DA_` | Data asset | `DA_Crop_Parsnip` |

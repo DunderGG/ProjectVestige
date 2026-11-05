@@ -16,9 +16,10 @@
 #include "Core/VestigeFeedbackSubsystem.h"
 #include "Engine/World.h"
 #include "Farming/FarmFarmingSaveData.h"
+#include "Farming/FarmField.h"
 #include "Farming/FarmGrid.h"
 #include "Farming/FarmLog.h"
-#include "Farming/FarmTile.h"
+#include "Farming/FarmTileState.h"
 #include "Farming/FarmTileTargeting.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/Pawn.h"
@@ -43,8 +44,8 @@ void UFarmingComponent::BeginPlay()
 	Grid = AFarmGrid::Find(GetWorld());
 	if (Grid)
 	{
-		// The grid spawns its tiles in its own BeginPlay, which may run after this one.
-		Grid->OnTilesReady.AddUObject(this, &UFarmingComponent::UpdateTargetTile);
+		// The grid finds its field in its own BeginPlay, which may run after this one.
+		Grid->OnFieldReady.AddUObject(this, &UFarmingComponent::UpdateTargetTile);
 
 		// Until the first movement input, aim where the owner faces.
 		const FIntPoint FacingStep = FarmTileTargeting::SnapToStep(Grid->ToGridDirection(GetOwner()->GetActorForwardVector()));
@@ -84,7 +85,7 @@ void UFarmingComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	if (Grid)
 	{
-		Grid->OnTilesReady.RemoveAll(this);
+		Grid->OnFieldReady.RemoveAll(this);
 	}
 	if (USceneComponent* Root = GetOwner() ? GetOwner()->GetRootComponent() : nullptr)
 	{
@@ -202,14 +203,15 @@ void UFarmingComponent::RepeatToolUse()
 		return;
 	}
 	const UVestigeToolData* Tool = GetCurrentTool();
-	const AFarmTile* Tile = FindTargetTile();
+	const TOptional<FIntPoint> Target = FindTargetTile();
+	const FFarmTileState* Tile = Target ? Grid->GetTile(*Target) : nullptr;
 	if (Tool && Tile && WouldToolChange(*Tool, *Tile))
 	{
 		UseTool();
 	}
 }
 
-bool UFarmingComponent::WouldToolChange(const UVestigeToolData& Tool, const AFarmTile& Tile) const
+bool UFarmingComponent::WouldToolChange(const UVestigeToolData& Tool, const FFarmTileState& Tile) const
 {
 	switch (Tool.GetAction())
 	{
@@ -262,8 +264,9 @@ void UFarmingComponent::FollowAbilitySystem(UAbilitySystemComponent* AbilitySyst
 
 bool UFarmingComponent::UseToolOnTarget()
 {
-	AFarmTile* Tile = FindTargetTile();
-	if (!Tile)
+	const TOptional<FIntPoint> Tile = FindTargetTile();
+	UFarmField* Field = Grid ? Grid->GetField() : nullptr;
+	if (!Tile || !Field)
 	{
 		Notify(LOCTEXT("NoTile", "Stand facing a farm tile."));
 		return false;
@@ -276,48 +279,48 @@ bool UFarmingComponent::UseToolOnTarget()
 		return false;
 	}
 
-	if (!ApplyTool(*Tool, *Tile))
+	if (!ApplyTool(*Tool, *Field, *Tile))
 	{
 		return false;
 	}
-	OnToolUsed.Broadcast(Tool, Tile);
+	OnToolUsed.Broadcast(Tool, *Tile);
 	return true;
 }
 
-bool UFarmingComponent::ApplyTool(const UVestigeToolData& Tool, AFarmTile& Tile)
+bool UFarmingComponent::ApplyTool(const UVestigeToolData& Tool, UFarmField& Field, const FIntPoint& Tile)
 {
 	switch (Tool.GetAction())
 	{
 	case EFarmToolAction::Till:
-		return Till(Tile);
+		return Till(Field, Tile);
 
 	case EFarmToolAction::Plant:
-		return Plant(Tile);
+		return Plant(Field, Tile);
 
 	case EFarmToolAction::Water:
-		return Water(Tile);
+		return Water(Field, Tile);
 
 	case EFarmToolAction::Harvest:
-		return Harvest(Tile);
+		return Harvest(Field, Tile);
 	}
 	return false;
 }
 
-bool UFarmingComponent::Till(AFarmTile& Tile) const
+bool UFarmingComponent::Till(UFarmField& Field, const FIntPoint& Tile) const
 {
-	const bool bTilled = Tile.Till();
+	const bool bTilled = Field.Till(Tile);
 	Notify(bTilled ? LOCTEXT("Tilled", "Tilled the soil.") : LOCTEXT("CantTill", "Only grass can be tilled."));
 	return bTilled;
 }
 
-bool UFarmingComponent::Plant(AFarmTile& Tile)
+bool UFarmingComponent::Plant(UFarmField& Field, const FIntPoint& Tile)
 {
 	if (!HasSeedToPlant())
 	{
 		Notify(LOCTEXT("OutOfSeeds", "Out of seeds."));
 		return false;
 	}
-	if (!Tile.Plant(SeedCrop))
+	if (!Field.Plant(Tile, SeedCrop))
 	{
 		Notify(LOCTEXT("CantPlant", "Seeds need empty tilled soil."));
 		return false;
@@ -327,17 +330,18 @@ bool UFarmingComponent::Plant(AFarmTile& Tile)
 	return true;
 }
 
-bool UFarmingComponent::Water(AFarmTile& Tile) const
+bool UFarmingComponent::Water(UFarmField& Field, const FIntPoint& Tile) const
 {
-	const bool bWatered = Tile.Water();
+	const bool bWatered = Field.Water(Tile);
 	Notify(bWatered ? LOCTEXT("Watered", "Watered.") : LOCTEXT("CantWater", "Nothing to water here."));
 	return bWatered;
 }
 
-bool UFarmingComponent::Harvest(AFarmTile& Tile)
+bool UFarmingComponent::Harvest(UFarmField& Field, const FIntPoint& Tile)
 {
-	const UFarmCropData* Crop = Tile.GetCrop();
-	if (!Crop || !Tile.IsRipe())
+	const FFarmTileState* State = Field.GetTile(Tile);
+	const UFarmCropData* Crop = State ? State->GetCrop() : nullptr;
+	if (!Crop || !State->IsRipe())
 	{
 		Notify(LOCTEXT("NothingRipe", "Nothing ripe here."));
 		return false;
@@ -349,13 +353,13 @@ bool UFarmingComponent::Harvest(AFarmTile& Tile)
 		Notify(LOCTEXT("BagFull", "No room in your bag."));
 		return false;
 	}
-	if (!Tile.Harvest())
+	if (!Field.Harvest(Tile))
 	{
 		return false;
 	}
 	GetInventory()->TryAddItem(Crop->GetHarvestItemId(), Crop->GetYield());
 	Notify(LOCTEXT("Harvested", "Harvested a crop!"));
-	OnCropHarvested.Broadcast(Crop, &Tile);
+	OnCropHarvested.Broadcast(Crop, Tile);
 	return true;
 }
 
@@ -400,20 +404,21 @@ FVector UFarmingComponent::GetAimDirection() const
 	return Grid ? Grid->ToWorldDirection(AimStep) : FVector::ZeroVector;
 }
 
-AFarmTile* UFarmingComponent::FindTargetTile() const
+TOptional<FIntPoint> UFarmingComponent::FindTargetTile() const
 {
 	const AActor* Owner = GetOwner();
 	if (!Grid || !Owner)
 	{
-		return nullptr;
+		return {};
 	}
-	return Grid->GetTileAt(FarmTileTargeting::GetNeighbour(Grid->GetCoordinatesAt(Owner->GetActorLocation()), AimStep));
+	const FIntPoint Neighbour = FarmTileTargeting::GetNeighbour(Grid->GetCoordinatesAt(Owner->GetActorLocation()), AimStep);
+	return Grid->GetTile(Neighbour) ? TOptional<FIntPoint>(Neighbour) : TOptional<FIntPoint>();
 }
 
 void UFarmingComponent::UpdateTargetTile()
 {
-	AFarmTile* NewTarget = FindTargetTile();
-	if (NewTarget == TargetTile.Get())
+	const TOptional<FIntPoint> NewTarget = FindTargetTile();
+	if (NewTarget == TargetTile)
 	{
 		return;
 	}

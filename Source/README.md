@@ -28,7 +28,7 @@ This folder contains the Unreal Build Tool target definitions and the C++ source
 | `Template/` | Unreal Third Person template classes retained for game-mode and player-controller setup. |
 | `Tests/` | CQTest automation tests and test-only helpers. |
 
-The layers are ordered from lower-level shared code toward player-facing systems. Keep dependencies pointing down the architecture: a lower layer must not include a higher one. Include project headers by their path from the module root, for example `#include "Farming/FarmTile.h"`.
+The layers are ordered from lower-level shared code toward player-facing systems. Keep dependencies pointing down the architecture: a lower layer must not include a higher one. Include project headers by their path from the module root, for example `#include "Farming/FarmGrid.h"`.
 
 For ownership, dependency rules, and the layer table, see [`Architecture.md`](../Docs/Architecture.md). 
 

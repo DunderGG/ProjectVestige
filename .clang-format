@@ -55,7 +55,7 @@ StatementMacros:
   - UINTERFACE
 
 # CQTest declares test fixtures with a macro. Without this, the formatter reads a reference parameter
-# in a fixture's helper function as a multiplication (AFarmTile & FarmTile).
+# in a fixture's helper function as a multiplication (AFarmGrid & Grid).
 Macros:
   - TEST_CLASS(Name, Directory)=class Name
 

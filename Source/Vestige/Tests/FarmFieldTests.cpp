@@ -7,9 +7,9 @@
 #include "Content/FarmCropData.h"
 #include "CQTest.h"
 #include "Farming/FarmField.h"
+#include "Farming/FarmFieldMeshesComponent.h"
 #include "Farming/FarmFieldSubsystem.h"
 #include "Farming/FarmGrid.h"
-#include "Farming/FarmTile.h"
 #include "Time/VestigeClockSubsystem.h"
 
 // A namespace keeps the fixture's short name from hiding other declarations in unity builds.
@@ -187,24 +187,15 @@ namespace FarmFieldTests
 			return Grid;
 		}
 
-		TEST_METHOD(AGridShowsItsFieldWithATilePerTile)
+		TEST_METHOD(AGridShowsItsFieldWithASoilInstancePerTile)
 		{
 			AFarmGrid& Grid = OpenGrid();
 
 			ASSERT_THAT(IsTrue(Grid.GetField() == Fields->FindField(FarmId)));
 			ASSERT_THAT(IsTrue(Grid.GetField()->GetSize() == FIntPoint(8, 8)));
-			ASSERT_THAT(IsTrue(Grid.GetTiles().Num() == 64));
-			ASSERT_THAT(IsTrue(Grid.GetTileAt(FIntPoint(5, 6))->GetCoordinates() == FIntPoint(5, 6)));
-		}
-
-		TEST_METHOD(ATileAsksItsFieldToChange)
-		{
-			AFarmGrid& Grid = OpenGrid();
-
-			ASSERT_THAT(IsTrue(Grid.GetTileAt(FIntPoint(1, 2))->Till()));
-
-			ASSERT_THAT(IsTrue(Grid.GetField()->GetTile(FIntPoint(1, 2))->GetState() == EFarmTileState::Tilled));
-			ASSERT_THAT(IsTrue(Grid.GetTileAt(FIntPoint(1, 2))->GetState() == EFarmTileState::Tilled));
+			ASSERT_THAT(IsTrue(Grid.GetMeshes()->GetTotalInstanceCount() == 64));
+			ASSERT_THAT(IsTrue(Grid.GetTile(FIntPoint(5, 6)) == Grid.GetField()->GetTile(FIntPoint(5, 6))));
+			ASSERT_THAT(IsNull(Grid.GetTile(FIntPoint(8, 0))));
 		}
 
 		TEST_METHOD(AFieldGrowsOnANewDayWithoutItsMap)
@@ -224,12 +215,12 @@ namespace FarmFieldTests
 		TEST_METHOD(AMapOpenedAgainShowsItsFieldAsItWas)
 		{
 			AFarmGrid& FirstVisit = OpenGrid();
-			FirstVisit.GetTileAt(FIntPoint(3, 4))->Till();
+			FirstVisit.GetField()->Till(FIntPoint(3, 4));
 			FirstVisit.Destroy();
 
 			const AFarmGrid& SecondVisit = OpenGrid();
 
-			ASSERT_THAT(IsTrue(SecondVisit.GetTileAt(FIntPoint(3, 4))->GetState() == EFarmTileState::Tilled));
+			ASSERT_THAT(IsTrue(SecondVisit.GetTile(FIntPoint(3, 4))->GetState() == EFarmTileState::Tilled));
 		}
 
 		TEST_METHOD(AFieldOfAnotherSizeTakesItsGridsSize)
@@ -241,7 +232,7 @@ namespace FarmFieldTests
 			const AFarmGrid& Grid = OpenGrid();
 
 			ASSERT_THAT(IsTrue(Field.GetSize() == FIntPoint(8, 8)));
-			ASSERT_THAT(IsTrue(Grid.GetTileAt(FIntPoint(1, 1))->GetState() == EFarmTileState::Tilled));
+			ASSERT_THAT(IsTrue(Grid.GetTile(FIntPoint(1, 1))->GetState() == EFarmTileState::Tilled));
 		}
 
 		TEST_METHOD(ANewGameDropsEveryField)

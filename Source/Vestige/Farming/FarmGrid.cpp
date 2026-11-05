@@ -7,10 +7,9 @@
 #include "Core/VestigeActorLookup.h"
 #include "Engine/World.h"
 #include "Farming/FarmField.h"
+#include "Farming/FarmFieldMeshesComponent.h"
 #include "Farming/FarmFieldSubsystem.h"
 #include "Farming/FarmLog.h"
-#include "Farming/FarmTile.h"
-#include "ProfilingDebugging/CpuProfilerTrace.h"
 
 namespace FarmGridEditor
 {
@@ -30,7 +29,8 @@ AFarmGrid::AFarmGrid()
 	Bounds->SetGenerateOverlapEvents(false);
 	Bounds->SetHiddenInGame(true);
 
-	TileClass = AFarmTile::StaticClass();
+	Meshes = CreateDefaultSubobject<UFarmFieldMeshesComponent>(TEXT("Meshes"));
+	Meshes->SetupAttachment(RootComponent);
 }
 
 void AFarmGrid::OnConstruction(const FTransform& Transform)
@@ -53,64 +53,34 @@ void AFarmGrid::BeginPlay()
 	if (UFarmFieldSubsystem* FarmFields = UFarmFieldSubsystem::Get(GetWorld()))
 	{
 		Field = &FarmFields->FindOrAddField(FieldId, FIntPoint(Width, Height));
-		Field->OnTileChanged.AddUObject(this, &AFarmGrid::RefreshTile);
-		Field->OnTilesChanged.AddUObject(this, &AFarmGrid::RefreshTiles);
+		Meshes->ShowField(*Field, TileSize);
 	}
 	else
 	{
 		VESTIGE_LOG(this, LogFarm, Warning, "There is no game instance with farm fields, so the field is empty.");
 	}
 
-	SpawnTiles();
-	bTilesReady = true;
-	OnTilesReady.Broadcast();
+	bFieldReady = true;
+	OnFieldReady.Broadcast();
 }
 
 void AFarmGrid::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	if (Field)
-	{
-		Field->OnTileChanged.RemoveAll(this);
-		Field->OnTilesChanged.RemoveAll(this);
-		Field = nullptr;
-	}
-
-	// When the grid alone goes (destroyed, or its sublevel streamed out), its tiles go with it. When the whole world
-	// ends, the world destroys them itself.
-	if (EndPlayReason == EEndPlayReason::Destroyed || EndPlayReason == EEndPlayReason::RemovedFromWorld)
-	{
-		DestroyTiles();
-	}
-	Tiles.Reset();
-	bTilesReady = false;
+	// The meshes component stops following the field in its own EndPlay.
+	Field = nullptr;
+	bFieldReady = false;
 	Super::EndPlay(EndPlayReason);
-}
-
-void AFarmGrid::DestroyTiles()
-{
-	TRACE_CPUPROFILER_EVENT_SCOPE(AFarmGrid::DestroyTiles);
-
-	for (AFarmTile* Tile : Tiles)
-	{
-		if (IsValid(Tile))
-		{
-			Tile->Destroy();
-		}
-	}
-	Tiles.Reset();
 }
 
 void AFarmGrid::Resize(const FIntPoint& NewSize)
 {
-	DestroyTiles();
 	Width = FMath::Max(NewSize.X, 1);
 	Height = FMath::Max(NewSize.Y, 1);
+	UpdateBounds();
 	if (Field)
 	{
 		Field->Resize(FIntPoint(Width, Height));
 	}
-	UpdateBounds();
-	SpawnTiles();
 }
 
 AFarmGrid* AFarmGrid::Find(const UWorld* World)
@@ -118,47 +88,20 @@ AFarmGrid* AFarmGrid::Find(const UWorld* World)
 	return Cast<AFarmGrid>(VestigeActorLookup::FindSingle(World, StaticClass()));
 }
 
-void AFarmGrid::SpawnTiles()
+const FFarmTileState* AFarmGrid::GetTile(const FIntPoint& Coordinates) const
 {
-	TRACE_CPUPROFILER_EVENT_SCOPE(AFarmGrid::SpawnTiles);
-
-	if (!Field)
-	{
-		return;
-	}
-	if (!TileClass)
-	{
-		VESTIGE_LOG(this, LogFarm, Warning, "No Tile Class is set, so the field isn't shown.");
-		return;
-	}
-
-	const FVector TileScale(TileSize / AFarmTile::UnscaledSize);
-	const FTransform GridTransform = GetActorTransform();
-
-	FActorSpawnParameters SpawnParams;
-	SpawnParams.Owner = this;
-	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-
-	Tiles.Reserve(Width * Height);
-	for (int32 Y = 0; Y < Height; ++Y)
-	{
-		for (int32 X = 0; X < Width; ++X)
-		{
-			const FVector LocalCenter((X + 0.5f) * TileSize, (Y + 0.5f) * TileSize, 0.f);
-			const FTransform TileTransform(GetActorRotation(), GridTransform.TransformPosition(LocalCenter), TileScale);
-			AFarmTile* Tile = GetWorld()->SpawnActor<AFarmTile>(TileClass, TileTransform, SpawnParams);
-			if (Tile)
-			{
-				Tile->ShowFieldTile(*Field, FIntPoint(X, Y));
-			}
-			Tiles.Add(Tile);
-		}
-	}
+	return Field ? Field->GetTile(Coordinates) : nullptr;
 }
 
-AFarmTile* AFarmGrid::GetTileAtLocation(const FVector& WorldLocation) const
+FVector AFarmGrid::GetLocalTileCenter(const FIntPoint& Coordinates, float InTileSize)
 {
-	return GetTileAt(GetCoordinatesAt(WorldLocation));
+	return FVector((Coordinates.X + 0.5f) * InTileSize, (Coordinates.Y + 0.5f) * InTileSize, 0.f);
+}
+
+FTransform AFarmGrid::GetTileTransform(const FIntPoint& Coordinates) const
+{
+	const FVector WorldCenter = GetActorTransform().TransformPosition(GetLocalTileCenter(Coordinates, TileSize));
+	return FTransform(GetActorQuat(), WorldCenter, FVector(TileSize / UnscaledTileSize));
 }
 
 FIntPoint AFarmGrid::GetCoordinatesAt(const FVector& WorldLocation) const
@@ -176,36 +119,4 @@ FVector2D AFarmGrid::ToGridDirection(const FVector& WorldDirection) const
 FVector AFarmGrid::ToWorldDirection(const FIntPoint& Step) const
 {
 	return GetActorTransform().TransformVectorNoScale(FVector(Step.X, Step.Y, 0.f)).GetSafeNormal();
-}
-
-AFarmTile* AFarmGrid::GetTileAt(const FIntPoint& Coordinates) const
-{
-	if (Coordinates.X < 0 || Coordinates.X >= Width || Coordinates.Y < 0 || Coordinates.Y >= Height)
-	{
-		return nullptr;
-	}
-
-	const int32 Index = Coordinates.Y * Width + Coordinates.X;
-	return Tiles.IsValidIndex(Index) ? Tiles[Index].Get() : nullptr;
-}
-
-void AFarmGrid::RefreshTile(const FIntPoint& Coordinates)
-{
-	if (AFarmTile* Tile = GetTileAt(Coordinates))
-	{
-		Tile->Refresh();
-	}
-}
-
-void AFarmGrid::RefreshTiles()
-{
-	TRACE_CPUPROFILER_EVENT_SCOPE(AFarmGrid::RefreshTiles);
-
-	for (AFarmTile* Tile : Tiles)
-	{
-		if (Tile)
-		{
-			Tile->Refresh();
-		}
-	}
 }

@@ -7,7 +7,6 @@
 
 #include "Content/FarmCropData.h"
 #include "Content/VestigeToolData.h"
-#include "Farming/FarmTile.h"
 
 namespace VestigeTestEventRecorder
 {
@@ -27,14 +26,14 @@ void UVestigeTestEventRecorder::RecordNewDay(int32 Day)
 	Record(FString::Printf(TEXT("NewDay %d"), Day));
 }
 
-void UVestigeTestEventRecorder::RecordCropHarvested(const UFarmCropData* Crop, const AFarmTile* Tile)
+void UVestigeTestEventRecorder::RecordCropHarvested(const UFarmCropData* Crop, FIntPoint Tile)
 {
-	Record(FString::Printf(TEXT("CropHarvested %s %s"), *VestigeTestEventRecorder::DescribeContent(Crop), *GetNameSafe(Tile)));
+	Record(FString::Printf(TEXT("CropHarvested %s %s"), *VestigeTestEventRecorder::DescribeContent(Crop), *Tile.ToString()));
 }
 
-void UVestigeTestEventRecorder::RecordToolUsed(const UVestigeToolData* Tool, const AFarmTile* Tile)
+void UVestigeTestEventRecorder::RecordToolUsed(const UVestigeToolData* Tool, FIntPoint Tile)
 {
-	Record(FString::Printf(TEXT("ToolUsed %s %s"), *VestigeTestEventRecorder::DescribeContent(Tool), *GetNameSafe(Tile)));
+	Record(FString::Printf(TEXT("ToolUsed %s %s"), *VestigeTestEventRecorder::DescribeContent(Tool), *Tile.ToString()));
 }
 
 #endif

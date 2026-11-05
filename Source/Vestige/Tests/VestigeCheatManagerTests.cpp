@@ -6,8 +6,9 @@
 #include "Components/ActorTestSpawner.h"
 #include "Content/FarmCropData.h"
 #include "CQTest.h"
+#include "Farming/FarmField.h"
+#include "Farming/FarmFieldMeshesComponent.h"
 #include "Farming/FarmGrid.h"
-#include "Farming/FarmTile.h"
 #include "Farming/VestigeRestComponent.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerController.h"
@@ -63,29 +64,32 @@ namespace VestigeCheatManagerTests
 		{
 			AFarmGrid& Grid = Spawner.SpawnActor<AFarmGrid>();
 			Grid.DispatchBeginPlay();
-			const AFarmTile* OldTile = Grid.GetTileAt(FIntPoint(0, 0));
 
 			SpawnCheats()->BenchmarkField(3, TEXT("Base.Turnip"));
 
-			ASSERT_THAT(IsTrue(Grid.GetTiles().Num() == 9));
-			ASSERT_THAT(IsFalse(IsValid(OldTile)));
-			ASSERT_THAT(IsNotNull(Grid.GetTileAt(FIntPoint(2, 2))));
-			ASSERT_THAT(IsNull(Grid.GetTileAt(FIntPoint(3, 0))));
-			for (const AFarmTile* Tile : Grid.GetTiles())
+			ASSERT_THAT(IsTrue(Grid.GetField()->GetSize() == FIntPoint(3, 3)));
+			ASSERT_THAT(IsNull(Grid.GetTile(FIntPoint(3, 0))));
+			for (int32 Y = 0; Y < 3; ++Y)
 			{
-				ASSERT_THAT(IsTrue(Tile && Tile->IsRipe() && Tile->GetCrop()->GetContentId() == TEXT("Base.Turnip")));
+				for (int32 X = 0; X < 3; ++X)
+				{
+					const FFarmTileState* Tile = Grid.GetTile(FIntPoint(X, Y));
+					ASSERT_THAT(IsTrue(Tile && Tile->IsRipe() && Tile->GetCrop()->GetContentId() == TEXT("Base.Turnip")));
+				}
 			}
+			// A soil and a crop instance per tile.
+			ASSERT_THAT(IsTrue(Grid.GetMeshes()->GetTotalInstanceCount() == 18));
 		}
 
 		TEST_METHOD(BenchmarkFieldWithAnUnknownCropLeavesTheFarmAlone)
 		{
 			AFarmGrid& Grid = Spawner.SpawnActor<AFarmGrid>();
 			Grid.DispatchBeginPlay();
-			const int32 TileCount = Grid.GetTiles().Num();
+			const FIntPoint Size = Grid.GetField()->GetSize();
 
 			SpawnCheats()->BenchmarkField(3, TEXT("Base.NoSuchCrop"));
 
-			ASSERT_THAT(IsTrue(Grid.GetTiles().Num() == TileCount));
+			ASSERT_THAT(IsTrue(Grid.GetField()->GetSize() == Size));
 		}
 	};
 }

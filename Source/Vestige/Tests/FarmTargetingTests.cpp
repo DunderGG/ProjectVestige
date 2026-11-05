@@ -8,7 +8,6 @@
 #include "Farming/FarmGrid.h"
 #include "Farming/FarmingComponent.h"
 #include "Farming/FarmTargetHighlightComponent.h"
-#include "Farming/FarmTile.h"
 #include "Materials/Material.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Materials/MaterialInterface.h"
@@ -36,11 +35,11 @@ namespace FarmTargetingTests
 			Farming = Farmer->FindComponentByClass<UFarmingComponent>();
 		}
 
-		/** The tile with grid coordinates X, Y in the default grid. */
-		const AFarmTile* TileAt(int32 X, int32 Y) const
+		/** The coordinates of the tile under the center of tile X, Y of the default grid, found by location. */
+		TOptional<FIntPoint> TileAt(int32 X, int32 Y) const
 		{
-			const float TileSize = AFarmTile::UnscaledSize;
-			return Grid->GetTileAtLocation(FVector((X + 0.5f) * TileSize, (Y + 0.5f) * TileSize, 0.f));
+			const float TileSize = AFarmGrid::UnscaledTileSize;
+			return Grid->GetCoordinatesAt(FVector((X + 0.5f) * TileSize, (Y + 0.5f) * TileSize, 0.f));
 		}
 
 		TEST_METHOD(TargetStartsOnTheNeighbourTheFarmerFaces)
@@ -83,7 +82,7 @@ namespace FarmTargetingTests
 
 			Farming->AimAt(FVector(-1.f, 0.f, 0.f));
 
-			ASSERT_THAT(IsNull(Farming->GetTargetTile()));
+			ASSERT_THAT(IsFalse(Farming->GetTargetTile().IsSet()));
 		}
 
 		TEST_METHOD(TargetChangeIsBroadcastOnlyWhenTheTileChanges)
@@ -91,7 +90,7 @@ namespace FarmTargetingTests
 			ASSERT_THAT(IsNotNull(Farming));
 			int32 Changes = 0;
 			Farming->OnTargetTileChanged.AddLambda(
-				[&Changes](const AFarmTile* Tile)
+				[&Changes](const TOptional<FIntPoint>& Tile)
 				{
 					++Changes;
 				});
@@ -102,7 +101,7 @@ namespace FarmTargetingTests
 
 			Farmer->SetActorLocation(FVector(-500.f, -500.f, 0.f));
 			ASSERT_THAT(IsTrue(Changes == 2));
-			ASSERT_THAT(IsNull(Farming->GetTargetTile()));
+			ASSERT_THAT(IsFalse(Farming->GetTargetTile().IsSet()));
 		}
 
 		TEST_METHOD(HighlightFramesTheTargetAndHidesWithoutOne)
@@ -112,7 +111,7 @@ namespace FarmTargetingTests
 
 			Farmer->SetActorLocationAndRotation(FVector(250.f, 50.f, 0.f), FRotator::ZeroRotator);
 			ASSERT_THAT(IsFalse(Highlight->bHiddenInGame));
-			ASSERT_THAT(IsTrue(Highlight->GetComponentLocation().Equals(TileAt(3, 0)->GetActorLocation())));
+			ASSERT_THAT(IsTrue(Highlight->GetComponentLocation().Equals(Grid->GetTileTransform(FIntPoint(3, 0)).GetLocation())));
 			ASSERT_THAT(IsTrue(Highlight->GetInstanceCount() == 4));
 
 			Farmer->SetActorLocation(FVector(-500.f, -500.f, 0.f));

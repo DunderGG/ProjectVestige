@@ -11,7 +11,6 @@
 #include "UObject/Object.h"
 #include "VestigeTestEventRecorder.generated.h"
 
-class AFarmTile;
 class UFarmCropData;
 class UVestigeToolData;
 
@@ -28,17 +27,17 @@ public:
 	/** Writes down an event a test hears some other way, such as through a native delegate, to check the order. */
 	void Record(const FString& Event);
 
-	/** Every event heard so far, oldest first, as "NewDay 2", "CropHarvested Base.Turnip <tile>", "ToolUsed Base.Hoe <tile>". */
+	/** Every event heard so far, oldest first, as "NewDay 2", "CropHarvested Base.Turnip X=3 Y=0", "ToolUsed Base.Hoe X=3 Y=0". */
 	const TArray<FString>& GetEvents() const { return Events; }
 
 	UFUNCTION()
 	void RecordNewDay(int32 Day);
 
 	UFUNCTION()
-	void RecordCropHarvested(const UFarmCropData* Crop, const AFarmTile* Tile);
+	void RecordCropHarvested(const UFarmCropData* Crop, FIntPoint Tile);
 
 	UFUNCTION()
-	void RecordToolUsed(const UVestigeToolData* Tool, const AFarmTile* Tile);
+	void RecordToolUsed(const UVestigeToolData* Tool, FIntPoint Tile);
 
 private:
 	TArray<FString> Events;

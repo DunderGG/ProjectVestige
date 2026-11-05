@@ -50,6 +50,8 @@ The clock is a placed actor (`AVestigeDayCycle`), the farm is a placed actor tha
 
 **Status: Measured (2026-11-05).** In the packaged build, 400 tile actors with a crop each cost the GPU about 0.4 ms more than 64 and the render thread nothing measurable; the first baseline's slow render thread was waiting for the GPU's occlusion results. As this finding predicted, a field this small doesn't show what thousands of tiles cost, so the fix stands on the reasons above. Numbers in [Architecture.md, section 10](Architecture.md#measuring).
 
+**Status: Resolved (2026-11-05).** Tiles are data drawn with instances: `UFarmFieldMeshesComponent` on the grid has one instanced static mesh component per mesh and material and puts the placeholder colour in per-instance custom data, with no actor, component or dynamic material per tile. Watered soil stays a separate instance set until 4.2 makes water an amount. Guide in [Systems.md, section 22](Systems.md#22-farm-fields-and-tiles), reasons in [Architecture.md, decision log](Architecture.md#16-decision-log).
+
 ## High findings
 
 ### H1 — The Gameplay Ability System gates tools but doesn't run them

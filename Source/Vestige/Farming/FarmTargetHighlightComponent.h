@@ -7,7 +7,6 @@
 #include "Components/InstancedStaticMeshComponent.h"
 #include "FarmTargetHighlightComponent.generated.h"
 
-class AFarmTile;
 class UFarmingComponent;
 class UMaterialInterface;
 
@@ -32,11 +31,14 @@ private:
 	/** Puts HighlightMaterial, tinted with HighlightColor, on the frame. Warns when no material is set. */
 	void ApplyHighlightMaterial();
 
-	/** Adds the four bars of the frame, around a tile of AFarmTile::UnscaledSize. */
+	/** Adds the four bars of the frame, around a tile of AFarmGrid::UnscaledTileSize. */
 	void BuildFrame();
 
-	/** Moves the frame onto Tile, or hides it when Tile is null. Bound to UFarmingComponent::OnTargetTileChanged. */
-	void ShowOn(const AFarmTile* Tile);
+	/**
+	 * Moves the frame onto the tile at Tile in the farming component's grid, or hides it when Tile is unset. Bound to
+	 * UFarmingComponent::OnTargetTileChanged.
+	 */
+	void ShowOn(const TOptional<FIntPoint>& Tile);
 
 	/**
 	 * Material for the frame: unlit, so the frame stays visible at night, with a vector parameter called Color.

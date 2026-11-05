@@ -228,7 +228,7 @@ The repository's **`.clang-format`** formats C++ to the project's rules. The **r
 3. From the command line, the same formatter is at:
 
    ```
-   "C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\Llvm\x64\bin\clang-format.exe" -i Source\Vestige\Farming\FarmTile.cpp
+   "C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\Llvm\x64\bin\clang-format.exe" -i Source\Vestige\Farming\FarmGrid.cpp
    ```
 
    It is installed by the *C++ Clang tools* component from `.vsconfig`. Check its version with `--version`. Visual Studio 2022 has its own, older copy under `Microsoft Visual Studio\2022\`; if you format with it, look out for changes outside the lines you edited, and undo them.

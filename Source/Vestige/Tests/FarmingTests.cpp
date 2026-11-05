@@ -18,7 +18,7 @@
 #include "Farming/FarmField.h"
 #include "Farming/FarmGrid.h"
 #include "Farming/FarmingComponent.h"
-#include "Farming/FarmTile.h"
+#include "Farming/FarmTileState.h"
 #include "Farming/VestigeGameplayAbility_UseTool.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Inventory/VestigeInventoryComponent.h"
@@ -120,12 +120,15 @@ namespace FarmingTests
 			return Spec && Spec->IsActive();
 		}
 
-		AFarmTile* TargetTile() const { return Grid->GetTileAt(FIntPoint(3, 0)); }
+		/** The tile the farmer faces at the start. */
+		static inline const FIntPoint TargetCoordinates = FIntPoint(3, 0);
+
+		const FFarmTileState* TargetTile() const { return Grid->GetTile(TargetCoordinates); }
 
 		/** Plants a seed in the target tile and grows it until it is ripe. */
 		const UFarmCropData* GrowRipeCrop()
 		{
-			TargetTile()->Till();
+			Grid->GetField()->Till(TargetCoordinates);
 			Hold(TEXT("Base.Seeds"), 1);
 			UseToolAndFinish();
 			const UFarmCropData* Crop = TargetTile()->GetCrop();
@@ -133,7 +136,7 @@ namespace FarmingTests
 			{
 				for (int32 Day = 0; Day < Crop->GetDaysToMature(); ++Day)
 				{
-					TargetTile()->Water();
+					Grid->GetField()->Water(TargetCoordinates);
 					Grid->GetField()->AdvanceDay();
 				}
 			}
@@ -151,7 +154,7 @@ namespace FarmingTests
 
 		TEST_METHOD(PlantingUsesASeed)
 		{
-			TargetTile()->Till();
+			Grid->GetField()->Till(TargetCoordinates);
 			Hold(TEXT("Base.Seeds"), 5);
 
 			UseToolAndFinish();
@@ -162,7 +165,7 @@ namespace FarmingTests
 
 		TEST_METHOD(TheSeedItemPlantsTheCropItsFragmentNames)
 		{
-			TargetTile()->Till();
+			Grid->GetField()->Till(TargetCoordinates);
 			Hold(TEXT("Base.Seeds"), 1);
 
 			UseToolAndFinish();
@@ -173,7 +176,7 @@ namespace FarmingTests
 
 		TEST_METHOD(WithoutSeedsNothingIsPlanted)
 		{
-			TargetTile()->Till();
+			Grid->GetField()->Till(TargetCoordinates);
 			Hold(TEXT("Base.Seeds"), 0);
 
 			UseToolAndFinish();
@@ -184,7 +187,7 @@ namespace FarmingTests
 
 		TEST_METHOD(WithoutAPlayerStateNothingIsPlanted)
 		{
-			TargetTile()->Till();
+			Grid->GetField()->Till(TargetCoordinates);
 			Hold(TEXT("Base.Seeds"), 5);
 			Farmer->SetPlayerState(nullptr);
 
@@ -274,7 +277,7 @@ namespace FarmingTests
 
 			// One tile on, so the hoe faces grass again.
 			Farmer->SetActorLocation(FVector(350.f, 50.f, 0.f));
-			AFarmTile* NextTile = Grid->GetTileAt(FIntPoint(4, 0));
+			const FFarmTileState* NextTile = Grid->GetTile(FIntPoint(4, 0));
 			ASSERT_THAT(IsNotNull(NextTile));
 			FarmingComponent->UseTool();
 			ASSERT_THAT(IsTrue(NextTile->GetState() == EFarmTileState::Grass));
@@ -314,7 +317,7 @@ namespace FarmingTests
 
 			UseToolAndFinish();
 
-			const TArray<FString> Expected = {FString::Printf(TEXT("ToolUsed Base.Hoe %s"), *GetNameSafe(TargetTile()))};
+			const TArray<FString> Expected = {FString::Printf(TEXT("ToolUsed Base.Hoe %s"), *TargetCoordinates.ToString())};
 			ASSERT_THAT(IsTrue(Recorder->GetEvents() == Expected));
 		}
 
@@ -327,7 +330,7 @@ namespace FarmingTests
 
 			UseToolAndFinish();
 
-			const FString Tile = GetNameSafe(TargetTile());
+			const FString Tile = TargetCoordinates.ToString();
 			const TArray<FString> Expected = {FString::Printf(TEXT("CropHarvested %s %s"), *Crop->GetContentId().ToString(), *Tile),
 				FString::Printf(TEXT("ToolUsed Base.Hand %s"), *Tile)};
 			ASSERT_THAT(IsTrue(Recorder->GetEvents() == Expected));
@@ -365,17 +368,17 @@ namespace FarmingTests
 		}
 
 		/** Moves the farmer one tile on along the row, so the target becomes tile (4, 0). */
-		AFarmTile* StepToNextTile()
+		const FFarmTileState* StepToNextTile()
 		{
 			Farmer->SetActorLocation(FVector(350.f, 50.f, 0.f));
-			return Grid->GetTileAt(FIntPoint(4, 0));
+			return Grid->GetTile(FIntPoint(4, 0));
 		}
 
 		TEST_METHOD(HoldingTheUseKeyWorksTheNextTileOnceTheUseHasFinished)
 		{
 			Hold(TEXT("Base.Hoe"), 0);
 			FarmingComponent->StartUsingTool();
-			AFarmTile* NextTile = StepToNextTile();
+			const FFarmTileState* NextTile = StepToNextTile();
 			ASSERT_THAT(IsNotNull(NextTile));
 			ASSERT_THAT(IsTrue(NextTile->GetState() == EFarmTileState::Grass));
 
@@ -391,7 +394,7 @@ namespace FarmingTests
 			FarmingComponent->StartUsingTool();
 			AbilitySystem->CancelAllAbilities();
 
-			AFarmTile* NextTile = StepToNextTile();
+			const FFarmTileState* NextTile = StepToNextTile();
 
 			ASSERT_THAT(IsNotNull(NextTile));
 			ASSERT_THAT(IsTrue(NextTile->GetState() == EFarmTileState::Tilled));
@@ -416,14 +419,14 @@ namespace FarmingTests
 		TEST_METHOD(ThePressSaysWhyAUseChangesNothingAndTheRepeatWaitsForTheNextTile)
 		{
 			Hold(TEXT("Base.Hoe"), 0);
-			TargetTile()->Till();
+			Grid->GetField()->Till(TargetCoordinates);
 			TArray<FString> Messages;
 			ListenToFeedback(Messages);
 
 			FarmingComponent->StartUsingTool();
 			ASSERT_THAT(IsTrue(Messages.Num() == 1));
 
-			AFarmTile* NextTile = StepToNextTile();
+			const FFarmTileState* NextTile = StepToNextTile();
 			ASSERT_THAT(IsNotNull(NextTile));
 			ASSERT_THAT(IsTrue(NextTile->GetState() == EFarmTileState::Tilled));
 			AbilitySystem->CancelAllAbilities();
@@ -461,7 +464,7 @@ namespace FarmingTests
 			FarmingComponent->StopUsingTool();
 			AbilitySystem->CancelAllAbilities();
 
-			AFarmTile* NextTile = StepToNextTile();
+			const FFarmTileState* NextTile = StepToNextTile();
 
 			ASSERT_THAT(IsNotNull(NextTile));
 			ASSERT_THAT(IsTrue(NextTile->GetState() == EFarmTileState::Grass));

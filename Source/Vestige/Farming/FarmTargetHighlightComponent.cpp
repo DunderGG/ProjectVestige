@@ -5,8 +5,8 @@
 
 #include "Engine/StaticMesh.h"
 #include "Farming/FarmLog.h"
+#include "Farming/FarmGrid.h"
 #include "Farming/FarmingComponent.h"
-#include "Farming/FarmTile.h"
 #include "GameFramework/Actor.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Materials/MaterialInterface.h"
@@ -84,10 +84,10 @@ void UFarmTargetHighlightComponent::ApplyHighlightMaterial()
 void UFarmTargetHighlightComponent::BuildFrame()
 {
 	using namespace FarmTargetHighlight;
-	const float Half = AFarmTile::UnscaledSize * 0.5f;
-	const float BarCenter = Half - BarWidth * 0.5f;
-	const FVector AlongX(AFarmTile::UnscaledSize / CubeSize, BarWidth / CubeSize, BarHeight / CubeSize);
-	const FVector AlongY(BarWidth / CubeSize, (AFarmTile::UnscaledSize - 2.f * BarWidth) / CubeSize, BarHeight / CubeSize);
+	const float TileSize = AFarmGrid::UnscaledTileSize;
+	const float BarCenter = TileSize * 0.5f - BarWidth * 0.5f;
+	const FVector AlongX(TileSize / CubeSize, BarWidth / CubeSize, BarHeight / CubeSize);
+	const FVector AlongY(BarWidth / CubeSize, (TileSize - 2.f * BarWidth) / CubeSize, BarHeight / CubeSize);
 
 	ClearInstances();
 	AddInstance(FTransform(FRotator::ZeroRotator, FVector(0.f, BarCenter, FrameHeight), AlongX));
@@ -96,11 +96,14 @@ void UFarmTargetHighlightComponent::BuildFrame()
 	AddInstance(FTransform(FRotator::ZeroRotator, FVector(-BarCenter, 0.f, FrameHeight), AlongY));
 }
 
-void UFarmTargetHighlightComponent::ShowOn(const AFarmTile* Tile)
+void UFarmTargetHighlightComponent::ShowOn(const TOptional<FIntPoint>& Tile)
 {
-	SetHiddenInGame(!Tile);
-	if (Tile)
+	const UFarmingComponent* OwnerFarming = Farming.Get();
+	const AFarmGrid* Grid = OwnerFarming ? OwnerFarming->GetGrid() : nullptr;
+	const bool bShown = Tile.IsSet() && Grid;
+	SetHiddenInGame(!bShown);
+	if (bShown)
 	{
-		SetWorldTransform(Tile->GetActorTransform());
+		SetWorldTransform(Grid->GetTileTransform(*Tile));
 	}
 }

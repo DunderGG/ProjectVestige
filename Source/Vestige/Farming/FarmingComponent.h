@@ -9,19 +9,20 @@
 #include "FarmingComponent.generated.h"
 
 class AFarmGrid;
-class AFarmTile;
 class UFarmCropData;
+class UFarmField;
 class UVestigeToolData;
 class UAbilitySystemComponent;
 class UVestigeInventoryComponent;
 struct FAbilityEndedData;
 struct FFarmFarmingSaveData;
+struct FFarmTileState;
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnFarmToolChanged, const UVestigeToolData* /* Tool */);
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnFarmTargetTileChanged, const AFarmTile* /* Tile */);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnFarmTargetTileChanged, const TOptional<FIntPoint>& /* Tile */);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnFarmToolUseHeldChanged, bool /* bHeld */);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnFarmCropHarvested, const UFarmCropData*, Crop, const AFarmTile*, Tile);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnFarmToolUsed, const UVestigeToolData*, Tool, const AFarmTile*, Tile);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnFarmCropHarvested, const UFarmCropData*, Crop, FIntPoint, Tile);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnFarmToolUsed, const UVestigeToolData*, Tool, FIntPoint, Tile);
 
 /**
  * Gives its owner, a pawn, farming tools. Works on the tile next to the owner's in the direction the owner aims, takes
@@ -93,30 +94,34 @@ public:
 	FVector GetAimDirection() const;
 
 	/**
-	 * The target tile: the neighbour of the owner's tile in the aimed direction, never the tile the owner stands on.
-	 * nullptr when that neighbour is outside the grid.
+	 * The target tile's coordinates in the grid's field: the neighbour of the owner's tile in the aimed direction, never the
+	 * tile the owner stands on. Unset when that neighbour is outside the field.
 	 */
-	const AFarmTile* GetTargetTile() const { return TargetTile.Get(); }
+	const TOptional<FIntPoint>& GetTargetTile() const { return TargetTile; }
+
+	/** The level's farm grid, found at BeginPlay, or nullptr if the level has none. */
+	const AFarmGrid* GetGrid() const { return Grid; }
 
 	/** Broadcast whenever the current tool changes, including when a save is loaded. */
 	FOnFarmToolChanged OnToolChanged;
 
-	/** Broadcast when the target tile changes, with nullptr when there stops being one. */
+	/** Broadcast when the target tile changes, unset when there stops being one. */
 	FOnFarmTargetTileChanged OnTargetTileChanged;
 
 	/** Broadcast when the use key is pressed or released, with whether it is now held. The farmer walks slower meanwhile. */
 	FOnFarmToolUseHeldChanged OnToolUseHeldChanged;
 
 	/**
-	 * Extension point: broadcast when the owner harvests Crop from Tile, once the harvest is in the bag and the tile is
-	 * tilled soil again. Before OnToolUsed for the same use.
+	 * Extension point: broadcast when the owner harvests Crop from the tile at the coordinates Tile (column X, row Y) of the
+	 * grid's field, once the harvest is in the bag and the tile is tilled soil again. Before OnToolUsed for the same use.
 	 */
 	UPROPERTY(BlueprintAssignable, Category = "Farming")
 	FOnFarmCropHarvested OnCropHarvested;
 
 	/**
-	 * Extension point: broadcast when a use of Tool changed the farm at Tile, after the change. A use that changes
-	 * nothing (no target, nothing to water, out of seeds, a full bag) isn't broadcast, as it costs nothing.
+	 * Extension point: broadcast when a use of Tool changed the tile at the coordinates Tile (column X, row Y) of the grid's
+	 * field, after the change. A use that changes nothing (no target, nothing to water, out of seeds, a full bag) isn't
+	 * broadcast, as it costs nothing.
 	 */
 	UPROPERTY(BlueprintAssignable, Category = "Farming")
 	FOnFarmToolUsed OnToolUsed;
@@ -132,8 +137,8 @@ private:
 	/** Puts the tool with this ContentId in hand. Returns false, with the first slot in hand, if no slot holds it. */
 	bool RestoreCurrentTool(FName ToolContentId);
 
-	/** The neighbour of the owner's tile one AimStep away, or nullptr if it is outside the grid. */
-	AFarmTile* FindTargetTile() const;
+	/** The neighbour of the owner's tile one AimStep away, or unset if it is outside the field. */
+	TOptional<FIntPoint> FindTargetTile() const;
 
 	/** Finds the target tile again and broadcasts OnTargetTileChanged if it changed. */
 	void UpdateTargetTile();
@@ -157,7 +162,7 @@ private:
 	void RepeatToolUse();
 
 	/** Whether Tool's action would change Tile now, asking the same rules ApplyTool follows, but changing nothing. */
-	bool WouldToolChange(const UVestigeToolData& Tool, const AFarmTile& Tile) const;
+	bool WouldToolChange(const UVestigeToolData& Tool, const FFarmTileState& Tile) const;
 
 	/** Repeats the tool use once a use-tool ability has ended. Bound to the owner's ability system's OnAbilityEnded. */
 	void ContinueAfterUse(const FAbilityEndedData& EndedData);
@@ -169,12 +174,12 @@ private:
 	/** Listens for the end of uses on AbilitySystem, and stops listening to the one before. */
 	void FollowAbilitySystem(UAbilitySystemComponent* AbilitySystem);
 
-	/** Applies Tool's action to Tile. Each of these returns whether the tile changed. */
-	bool ApplyTool(const UVestigeToolData& Tool, AFarmTile& Tile);
-	bool Till(AFarmTile& Tile) const;
-	bool Plant(AFarmTile& Tile);
-	bool Water(AFarmTile& Tile) const;
-	bool Harvest(AFarmTile& Tile);
+	/** Applies Tool's action to the tile at Tile in Field. Each of these returns whether the tile changed. */
+	bool ApplyTool(const UVestigeToolData& Tool, UFarmField& Field, const FIntPoint& Tile);
+	bool Till(UFarmField& Field, const FIntPoint& Tile) const;
+	bool Plant(UFarmField& Field, const FIntPoint& Tile);
+	bool Water(UFarmField& Field, const FIntPoint& Tile) const;
+	bool Harvest(UFarmField& Field, const FIntPoint& Tile);
 
 	/** Tells the player what happened, through UVestigeFeedbackSubsystem. */
 	void Notify(const FText& Message) const;
@@ -182,7 +187,7 @@ private:
 	UPROPERTY()
 	TObjectPtr<AFarmGrid> Grid;
 
-	TWeakObjectPtr<AFarmTile> TargetTile;
+	TOptional<FIntPoint> TargetTile;
 
 	/** The grid step from the owner's tile to the target: X and Y each -1, 0 or 1, never both 0. */
 	FIntPoint AimStep = FIntPoint(1, 0);
