@@ -101,7 +101,7 @@ Contents
 
 ## 4. Time, days and seasons
 
-**Status:** day and clock built (`UVestigeClockSubsystem`, a game-instance subsystem, with `UVestigeClockSettings`; 2026-11-04), and the lighting that follows it (`AVestigeDayCycle`). Seasons and weather are milestone 2 and 3.
+**Status:** day and clock built (`UVestigeClockSubsystem`, a game-instance subsystem, with `UVestigeClockSettings`; 2026-11-04), and the lighting that follows it (`AVestigeSkyLighting`). Seasons and weather are milestone 2 and 3.
 
 **References:** no single Epic system; the rules here follow [Architecture.md, sections 15 and 18](Architecture.md#15-the-day-flow). Lighting follows Epic's "Sky Atmosphere", "Exponential Height Fog" and "Lumen" pages.
 

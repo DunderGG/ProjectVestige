@@ -19,7 +19,7 @@ This folder contains the Unreal Build Tool target definitions and the C++ source
 | `AbilitySystem/` | Gameplay Ability System setup for stamina, abilities, effects, and native tags. |
 | `Interaction/` | Interactable interface, interaction component, and interaction ability. |
 | `Content/` | Content data definitions and the Asset Manager. |
-| `Time/` | Day cycle and its save data. |
+| `Time/` | The clock, its settings and save data, and the sky lighting that follows it. |
 | `Inventory/` | Inventory slots, stack rules, component, and save data. |
 | `Farming/` | Farm tiles and grid, farming and rest behavior, tools, toolbar, bed, and related save data. |
 | `Save/` | Save-game data gathering and the save subsystem. |

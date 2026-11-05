@@ -5,7 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "VestigeDayCycle.generated.h"
+#include "VestigeSkyLighting.generated.h"
 
 class ADirectionalLight;
 class ASkyLight;
@@ -13,17 +13,18 @@ class UPostProcessComponent;
 class UVestigeClockSubsystem;
 
 /**
- * Moves the sun, sky light and exposure to match the time on the game's clock (UVestigeClockSubsystem). Presentation only:
- * it reads the clock and never changes it. Place one in each level whose sky follows the time of day; a level without one
- * keeps its lights as placed.
+ * The lighting of a level whose sky follows the time of day: turns the sun (the moon at night), dims the sky light and
+ * darkens the exposure at night, to match the game's clock (UVestigeClockSubsystem). Presentation only: it reads the clock
+ * and never changes it. Place one in each such level; a level without one (an interior) keeps its lights as placed. The sky
+ * atmosphere and clouds are ordinary placed actors that follow the sun on their own.
  */
 UCLASS()
-class AVestigeDayCycle : public AActor
+class AVestigeSkyLighting : public AActor
 {
 	GENERATED_BODY()
 
 public:
-	AVestigeDayCycle();
+	AVestigeSkyLighting();
 
 	/**
 	 * Where the clock puts the sun now, or the moon at night. The sun itself turns to it in steps of SunStepDegrees, so

@@ -238,7 +238,7 @@ The frame's material, `M_TileHighlight`, is now set on `BP_PlayerCharacter`'s hi
 
 The general types' settings moved out of the `Farming` categories into ones named for their topic; the farm types (tiles, grid, crops, the farming component and the highlight) keep `Farming`. Only display names changed, so nothing needs saving. The commit is the one titled "Name the general types' Details categories by topic".
 
-- [ ] **Day cycle**: the `VestigeDayCycle` in `L_Farm` shows its settings under **Time** and **Lighting** (Night Post Process too).
+- [ ] **Day cycle**: the `VestigeSkyLighting` (until 2026-11-05 `VestigeDayCycle`) in `L_Farm` shows its settings under **Time** and **Lighting** (Night Post Process too).
 - [ ] **Player Blueprint**: in `BP_PlayerCharacter`, Move Ramp Seconds is under **Input** with the template's input actions, the **Rest** component's hours and drain under **Rest**, and the **CharacterMovement** component's Tool Use Speed Scale under **Movement**.
 - [ ] **Assets**: a tool data asset shows **Content**, **Tool** and **Visuals**; an item shows **Content**, **Item** and **Economy**; a crop shows **Content** and **Farming** with Growth, Harvest and Visuals.
 - [ ] **Blueprint menus**: in any Blueprint's graph, right-click and search: Get Vestige Clock is there (it replaced Get Day Cycle on 2026-11-04), Get Content Id under **Content**. In Add Component, the Vestige Rest component is listed under **Rest**.
@@ -307,6 +307,12 @@ The clock and the farm moved out of the level into the game instance; the grid, 
 - [ ] **New game**: after a few days, `NewGame` reopens the map on day 1 at 06:00 with grass everywhere.
 - [ ] **Benchmark field**: `BenchmarkField 20 Base.Turnip` still makes a 20 by 20 field of ripe turnips.
 
+### Sky lighting, 2026-11-05
+
+The day cycle actor is renamed `VestigeSkyLighting` for its one job, the lighting. `L_Farm` still names the old class until it is saved, and a redirect in `Config/DefaultEngine.ini` loads it as the new one; a test checks the redirect. The commit is the one titled "Rename the day cycle to sky lighting".
+
+- [ ] **Level**: regenerate the project files (right-click `Vestige.uproject` > Generate Visual Studio project files) so the solution lists `Time/VestigeSkyLighting.h`. Open `L_Farm`. The Outliner still shows the actor as `FarmDayCycle` (its label), and selecting it shows class `VestigeSkyLighting` in the Details panel, with Sun Step Degrees and the other **Lighting** settings as before. The Output Log has no "can't find class" or "Failed to load" lines for it. Play: the sun, the night and the morning look as before. Save `L_Farm` (Ctrl+S) so it stores the new name, and commit the level.
+
 ### Editor chores
 
 Changes only the editor can make safely. The steps are in [Roadmap.md, Housekeeping](Roadmap.md#3-housekeeping): re-saving the template Blueprints and `L_Farm`, moving `BP_FarmTile` and the materials with redirectors fixed, and regenerating the Android File Server token if it was ever used. After each one, run the [smoke test](#3-smoke-test).
@@ -321,7 +327,7 @@ About five minutes in `L_Farm`, in Play in Editor at High. Run it before pushing
 4. **Day and night:** let the clock run through an evening (it moves about one hour every 40 seconds unless Project Settings > Game > Vestige Clock is set faster). The sun sets with warm light, the night is properly dark with faint moonlight, and at 02:00 the farmer passes out into the next day.
 5. **Saving:** sleep in the bed ("Game saved."), stop the game and play again. The day, the bag, the tool in hand and every tile, crops included, come back.
 6. **Highlight:** walk along the field edge and turn. The frame is bright yellow, by day and at night, follows the tile in front of you and disappears off the field.
-7. **Performance:** in the console, `stat fps` and `stat unit`. In a busy part of the farm, by day and by night, the frame stays under 16.6 ms (60 fps), and sleeping shows no visible hitch ([Architecture.md, section 10](Architecture.md#10-performance-by-design)). Play in Editor adds its own cost, so check a doubtful number in Standalone Game. For a hitch on the new day, start the game with `-trace=default` and open the trace in Unreal Insights (`Engine\Binaries\Win64\UnrealInsights.exe`): `AVestigeDayCycle::StartNextDay` shows the whole new day, with the tiles, the save and the load inside it.
+7. **Performance:** in the console, `stat fps` and `stat unit`. In a busy part of the farm, by day and by night, the frame stays under 16.6 ms (60 fps), and sleeping shows no visible hitch ([Architecture.md, section 10](Architecture.md#10-performance-by-design)). Play in Editor adds its own cost, so check a doubtful number in Standalone Game. For a hitch on the new day, start the game with `-trace=default` and open the trace in Unreal Insights (`Engine\Binaries\Win64\UnrealInsights.exe`): `UVestigeClockSubsystem::StartNextDay` shows the whole new day, with the tiles, the save and the load inside it.
 
 Put the save folder back afterwards if you want your farm as it was.
 

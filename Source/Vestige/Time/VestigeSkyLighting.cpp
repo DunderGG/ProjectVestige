@@ -1,7 +1,7 @@
 // Copyright (C) 2026 David Bennehag and the Project Vestige contributors.
 // SPDX-License-Identifier: GPL-3.0-or-later WITH AdditionRef-Vestige-Unreal-Exception
 
-#include "Time/VestigeDayCycle.h"
+#include "Time/VestigeSkyLighting.h"
 
 #include "Components/LightComponent.h"
 #include "Components/PostProcessComponent.h"
@@ -13,7 +13,7 @@
 #include "Time/VestigeClockSettings.h"
 #include "Time/VestigeClockSubsystem.h"
 
-namespace VestigeDayCycleLighting
+namespace VestigeSkyLightingMath
 {
 	constexpr float HoursPerDay = 24.f;
 
@@ -61,7 +61,7 @@ namespace VestigeDayCycleLighting
 	}
 }
 
-AVestigeDayCycle::AVestigeDayCycle()
+AVestigeSkyLighting::AVestigeSkyLighting()
 {
 	// Ticks to follow the clock: brightness, colour and exposure change every frame, the sun turns in steps.
 	PrimaryActorTick.bCanEverTick = true;
@@ -73,7 +73,7 @@ AVestigeDayCycle::AVestigeDayCycle()
 	NightPostProcess->Settings.AutoExposureBias = 0.f;
 }
 
-void AVestigeDayCycle::BeginPlay()
+void AVestigeSkyLighting::BeginPlay()
 {
 	Super::BeginPlay();
 
@@ -82,19 +82,19 @@ void AVestigeDayCycle::BeginPlay()
 	UpdateLighting();
 }
 
-void AVestigeDayCycle::Tick(float DeltaSeconds)
+void AVestigeSkyLighting::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 	UpdateLighting();
 }
 
-float AVestigeDayCycle::GetTimeOfDay() const
+float AVestigeSkyLighting::GetTimeOfDay() const
 {
 	const UVestigeClockSubsystem* CurrentClock = Clock.Get();
 	return CurrentClock ? CurrentClock->GetTimeOfDay() : UVestigeClockSettings::Get().GetDayStartHour();
 }
 
-void AVestigeDayCycle::FindLights()
+void AVestigeSkyLighting::FindLights()
 {
 	if (!Sun)
 	{
@@ -125,14 +125,14 @@ void AVestigeDayCycle::FindLights()
 	}
 }
 
-void AVestigeDayCycle::UpdateLighting()
+void AVestigeSkyLighting::UpdateLighting()
 {
 	if (!Sun)
 	{
 		return;
 	}
 
-	using namespace VestigeDayCycleLighting;
+	using namespace VestigeSkyLightingMath;
 
 	TurnSunInSteps();
 
@@ -155,7 +155,7 @@ void AVestigeDayCycle::UpdateLighting()
 	NightPostProcess->Settings.AutoExposureBias = NightExposureBias * Darkness;
 }
 
-void AVestigeDayCycle::TurnSunInSteps()
+void AVestigeSkyLighting::TurnSunInSteps()
 {
 	// After a jump in the clock (a new day, a loaded save) the sun is usually far behind, so it follows on the next frame.
 	const FQuat Target = GetSunRotation().Quaternion();
@@ -166,9 +166,9 @@ void AVestigeDayCycle::TurnSunInSteps()
 	}
 }
 
-FRotator AVestigeDayCycle::GetSunRotation() const
+FRotator AVestigeSkyLighting::GetSunRotation() const
 {
-	using namespace VestigeDayCycleLighting;
+	using namespace VestigeSkyLightingMath;
 
 	const FSkyPosition Sky = GetSkyPosition(GetTimeOfDay(), SunriseHour, SunsetHour);
 	const float Elevation = FMath::Lerp(MinSunElevation, MaxSunElevation, Sky.Arc);

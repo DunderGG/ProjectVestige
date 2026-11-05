@@ -46,7 +46,7 @@ Before adding a component, property, timer or `Tick` logic to an existing class,
 - If yes, add it there.
 - If no, put it on the class that does own it, or create a new actor, component or subsystem for it. Say so explicitly in the commit message and add it to the ownership table.
 
-A real example from this project: night post-processing and sun control were first put on `AFarmGrid` because the grid was already in the level. They were moved to a dedicated `AVestigeDayCycle`, which is auto-spawned if the level doesn't have one. That is the pattern to follow.
+A real example from this project: night post-processing and sun control were first put on `AFarmGrid` because the grid was already in the level. They were moved to a dedicated day cycle actor, and later the clock moved on into its own subsystem, leaving the actor only the lighting (`AVestigeSkyLighting`). That is the pattern to follow.
 
 The current ownership table is in [Architecture.md, section 13](Architecture.md#13-systems-and-ownership). How to choose the right kind of owner (actor, component, subsystem, data asset) is in [section 2](Architecture.md#2-unreals-gameplay-framework-where-things-go) and how owners communicate is in [section 4](Architecture.md#4-how-systems-talk-to-each-other).
 
@@ -163,7 +163,7 @@ Each class lives in `ClassName.h` and `ClassName.cpp`, named without the type pr
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "VestigeDayCycle.generated.h"   // Always the last include
+#include "VestigeSkyLighting.generated.h"   // Always the last include
 
 class ADirectionalLight;              // Forward declarations instead of includes
 class UPostProcessComponent;
@@ -172,7 +172,7 @@ DECLARE_MULTICAST_DELEGATE_OneParam(FOnVestigeNewDay, int32 /* Day */);
 
 /** What this class is for, in one or two sentences. */
 UCLASS()
-class AVestigeDayCycle : public AActor
+class AVestigeSkyLighting : public AActor
 {
 	GENERATED_BODY()
 
@@ -204,7 +204,7 @@ private:
 #include "Core/VestigeFeedbackSubsystem.h"
 #include "Engine/GameViewportClient.h"
 #include "Engine/World.h"
-#include "Time/VestigeDayCycle.h"
+#include "Time/VestigeClockSubsystem.h"
 #include "UI/VestigeHudWidget.h"
 ```
 
@@ -358,7 +358,7 @@ There are two kinds of performance rule:
 ### 12.1 Ticking
 
 - Ticking is **off by default**: `PrimaryActorTick.bCanEverTick = false` in actors, `PrimaryComponentTick.bCanEverTick = false` in components.
-- A class that ticks says why in a comment next to `bCanEverTick = true` (`AVestigeDayCycle` moves the sun). If it doesn't need every frame, it sets `TickInterval`, and it turns its tick off while it has nothing to do (`SetActorTickEnabled(false)`, `SetComponentTickEnabled(false)`).
+- A class that ticks says why in a comment next to `bCanEverTick = true` (`AVestigeSkyLighting` moves the sun). If it doesn't need every frame, it sets `TickInterval`, and it turns its tick off while it has nothing to do (`SetActorTickEnabled(false)`, `SetComponentTickEnabled(false)`).
 - **Never poll another object's state in `Tick`.** Ask its owner for an event and bind to it (rule 12 in `AGENTS.md`).
 - **No Event Tick in Blueprints.** Per-frame Blueprint logic is slow and invisible in code review; if something really needs it, it moves to C++.
 - Work that has to happen often but not every frame uses a timer (`FTimerManager`) at the rate it needs.
