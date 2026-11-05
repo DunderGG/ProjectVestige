@@ -48,6 +48,8 @@ The clock is a placed actor (`AVestigeDayCycle`), the farm is a placed actor tha
 
 **Fix.** The grid (or the C1 subsystem) owns a `TArray<FFarmTileState>`. Tiles are drawn with one instanced static mesh component per mesh (soil states, crop growth stages), and colour or wetness goes into per-instance custom data instead of dynamic materials. Actors are spawned only for things that need to be actors, such as a placed sprinkler. `FFarmTileState` already keeps the rules apart from the visuals, so the rules and their tests survive unchanged.
 
+**Status: Measured (2026-11-05).** In the packaged build, 400 tile actors with a crop each cost the GPU about 0.4 ms more than 64 and the render thread nothing measurable; the first baseline's slow render thread was waiting for the GPU's occlusion results. As this finding predicted, a field this small doesn't show what thousands of tiles cost, so the fix stands on the reasons above. Numbers in [Architecture.md, section 10](Architecture.md#measuring).
+
 ## High findings
 
 ### H1 — The Gameplay Ability System gates tools but doesn't run them
@@ -111,6 +113,8 @@ Slate is the engine's own UI layer; game HUDs are normally UMG widgets, with Com
 **Status: Ray tracing off, Lumen kept at High (2026-11-04).** David decided hardware ray tracing isn't needed while the game is being developed: `r.RayTracing` is off for the whole project and Lumen runs in software at every level. The baseline showed ray tracing cost nothing measurable at runtime at High (0 ms, 0.2 MB of geometry), so the gain is in shader compiles, cook time and package size, not frame time. High keeps Lumen, about 0.6 ms of the 6.0 ms GPU frame; the volumetric clouds (1.4 ms) are the next GPU item in [Roadmap.md, 4.0](Roadmap.md#40-structure-from-the-code-review). Whether Epic gets it back is decided with the final art ([Roadmap.md, section 6](Roadmap.md#6-before-a-public-release)). Reasons in [Architecture.md, decision log](Architecture.md#16-decision-log).
 
 **Status: Clouds cheaper below Epic (2026-11-04).** The engine's scalability levels don't touch volumetric clouds, so they cost the same at every level. `Config/DefaultScalability.ini` now caps their samples at High (48 along the view ray and 5 toward the sun, against the engine's 96 and 10), and lower at Medium and Low; Epic is unchanged. In the packaged build, off screen, the cloud pass fell from 0.83 ms to 0.31 ms at High, and screenshots of mornings and evenings show the same clouds with slightly grainier edges. The level's clouds stay volumetric. The windowed baseline measured them at 1.37 ms, so the next windowed run in [Roadmap.md, 4.0](Roadmap.md#40-structure-from-the-code-review) measures them again. Reasons in [Architecture.md, decision log](Architecture.md#16-decision-log).
+
+**Status: Baseline finished (2026-11-05).** A second set of runs of the same scene, now off screen at 1920x1080 High: the frame is 6.65 ms and waits on the GPU (6.0 ms), not on the render thread as the first reading said. The clouds cost 0.74 ms at High (1.37 before; the off-screen runs had rendered at 1280x720), and the sun's steps cut the shadow depths from 0.92 to 0.68 ms at the real clock speed. The 266 ms stall after the new day didn't come back. Video memory is 2.6 GB, and the budget now sets 4 GB of video memory and 8 GB of memory. Measuring on target-class hardware is still open ([Roadmap.md, section 6](Roadmap.md#6-before-a-public-release)). Numbers in [Architecture.md, section 10](Architecture.md#measuring).
 
 ## Medium
 
