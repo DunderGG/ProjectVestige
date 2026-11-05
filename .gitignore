@@ -2,6 +2,8 @@ Binaries/
 Intermediate/
 Saved/
 DerivedDataCache/
+# Written by every packaging run (the order files were opened in while cooking).
+Build/Windows/FileOpenOrder/
 .vs/
 .idea/
 *.sln
