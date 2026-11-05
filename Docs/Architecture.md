@@ -289,6 +289,14 @@ Since 2026-11-05 the capture runs off screen, so no game window opens on the des
 - **Video memory is 2.6 GB** at 1920x1080 High (the CSV's `GPUMem/LocalUsedMB`), the same with 64 tiles as with 400; the working set is 1.5 GB and the committed memory 4.0 GB. Both are well inside the limits set in the [budget](#budget) from these numbers.
 - **Some frames take 25 to 37 ms with neither thread nor the GPU busy,** one or two a second, which puts the 99th percentile at 12 to 15 ms where the windowed baseline had 8.2 ms. Nothing in the frame's own work explains them, and a windowed run of the same build doesn't have them after its first few seconds (7.0 ms mean, 7.4 ms p99), so they come from the off-screen mode, not from the game. Read hitches and the 99th percentile from windowed runs, and the means and GPU passes from either. That windowed run looked at a different part of the scene (its clouds took 0.01 ms), probably because the window had the mouse, so its GPU passes aren't comparable.
 
+**What the instanced tiles changed (2026-11-05).** Two runs each of the packaged build before and after "Draw the farm tiles with instanced meshes", off screen at 1920x1080 High as above, with `BenchmarkField 60 Base.Turnip`: 3,600 tiles with a ripe turnip each.
+
+- **The frame is the same:** 5.1 ms mean, the GPU 4.6 ms, about 100 draw calls and 181,000 primitives before and after. Nanite already drew the tile actors' meshes together, so on this PC drawing them as instances changes nothing per frame.
+- **Making the field is ten times faster:** the frame that builds it took 237 to 270 ms of game thread with an actor, two mesh components and two dynamic materials per tile, and 23 to 33 ms with instances. Opening a farm map pays the same cost, so this is the loading time a real farm saves.
+- **Memory is the same:** video memory 2.58 GB, working set about 1.55 GB.
+- **The new day is slower, still well inside its budget:** its frame took 10.2 to 11.0 ms of game thread before and 12.6 to 13.5 ms after, because the meshes component rebuilds every instance on `OnTilesChanged`, where the actors only changed their components. That is about 13 ms of the 100 ms new-day budget for 3,600 tiles. If a bigger farm needs it, the new day can update the tiles that kept their set in place instead of rebuilding them; measure first.
+- Packaging deletes `Saved/StagedBuilds/` with every CSV capture in it, so copy the captures out before packaging again. The 2026-11-04 and 2026-11-05 baseline captures were lost that way; their numbers are above.
+
 ## 11. Patterns borrowed from Lyra
 
 Lyra is Epic's reference for a well-structured UE5 game. It is built for a large team and multiplayer, so **we adopt a Lyra pattern when we have a concrete need for it, not before.** When we do, we follow how Lyra and Epic's documentation build it, as written down per system in [Systems.md](Systems.md).
