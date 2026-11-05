@@ -68,8 +68,8 @@ namespace VestigeDayCycleTests
 			const double Step = Cycle.GetSunStepDegrees();
 			ASSERT_THAT(IsTrue(Step > 0.0));
 
-			// Fifteen game seconds per frame keep each frame's movement well under a step, day and night.
-			constexpr int32 FramesPerGameHour = 240;
+			// One and a half game seconds per frame keep each frame's movement well under a step, day and night.
+			constexpr int32 FramesPerGameHour = 2400;
 			const int32 Frames = FMath::FloorToInt32((Clock->GetDayEndHour() - Clock->GetDayStartHour()) * FramesPerGameHour);
 			int32 Turns = 0;
 			for (int32 Frame = 0; Frame < Frames; ++Frame)

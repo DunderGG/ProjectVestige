@@ -72,9 +72,10 @@ private:
 	 * Smallest turn of the sun or moon, in degrees: it waits until the clock has moved it this far. Virtual shadow maps
 	 * keep the sun's shadows cached until its direction changes, then draw them all again, so a sun that turns every
 	 * frame redraws them every frame. Brightness, color and exposure still change smoothly. 0 turns it every frame.
+	 * 0.05 was tuned by eye at 40 real seconds per game hour: 0.1 and 0.25 show as small jumps of the shadows.
 	 */
 	UPROPERTY(EditAnywhere, Category = "Lighting", meta = (AllowPrivateAccess = "true", ClampMin = 0, ClampMax = 5))
-	float SunStepDegrees = 0.25f;
+	float SunStepDegrees = 0.05f;
 
 	/** Share of the daytime light intensity left at night, for moonlight. */
 	UPROPERTY(EditAnywhere, Category = "Lighting", meta = (AllowPrivateAccess = "true", ClampMin = 0, ClampMax = 1))

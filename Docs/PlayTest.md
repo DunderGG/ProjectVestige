@@ -274,7 +274,7 @@ The sun (and the moon at night) now turns in quarter-degree steps instead of eve
 `L_Farm`'s day cycle runs a game hour in about 1.5 seconds, which turns the sun every few frames anyway. To see the steps at the normal pace, select the `VestigeDayCycle` in `L_Farm` and set **Real Seconds Per Game Hour** (Details panel, **Time**) to 40 for these checks, then set it back without saving the level, or tell me if 40 should stay.
 
 - [ ] **Midday shadows**: press Play and watch the farmer's and the crops' shadows for a game hour around midday. They creep along as before, with no visible jumps or flicker.
-- [ ] **Sunrise, sunset and moonlight**: watch the long shadows just after 06:00, before 20:00, and the moon's shadows after 20:00. They move in small hops about every half second. Say whether the hops are noticeable; if they are, lower **Sun Step Degrees** on the `VestigeDayCycle` (Details panel, **Lighting**) and tell me which value looks smooth.
+- [x] **Sunrise, sunset and moonlight** (2026-11-05: David saw small jumps at 0.25 and 0.1 degrees with the clock at 40 seconds per game hour; 0.05 looks smooth and is now the default): watch the long shadows just after 06:00, before 20:00, and the moon's shadows after 20:00. They move in small hops about every half second. Say whether the hops are noticeable; if they are, lower **Sun Step Degrees** on the `VestigeDayCycle` (Details panel, **Lighting**) and tell me which value looks smooth.
 - [ ] **Smooth fades**: the warm sunrise colour, the evening dimming and the darkening into night still fade without steps.
 - [ ] **New day**: sleep in the bed. The morning starts with the sun at its sunrise position at once, not turning there over a few seconds.
 
