@@ -363,6 +363,7 @@ The code changes that the slice's content depends on. Doing them first means add
 - [x] A project material for the tile highlight frame (`M_TileHighlight`, unlit), replacing the engine material it uses today
    - Done 2026-10-31, earlier than planned: in 5.8 the engine material drew as the default grey material (Architecture.md, decision log)
 - [ ] Meshes for the new crops, the sprinkler, the shipping bin, the water source and the bed
+- [ ] A sun and a moon instead of one light that is both: at sunset today `AVestigeSkyLighting` jumps the one directional light from the western horizon to the eastern one and from warm to blue in a single frame, so the shadows and the sky snap at 20:00 (seen by David, 2026-11-06). Instead the sun carries on below the horizon for a real dusk in the sky atmosphere, and a second, dim directional light for the moon (the atmosphere's second sun light) fades in as the sun goes and crosses the sky through the night. Only the brighter of the two casts shadows, so the frame costs about what it does now; measure it against the baseline ([Architecture.md, section 10](Architecture.md#measuring)). Needs a moon light placed in `L_Farm` and tests of the fading
 
 ## 5. Milestone 3 and later
 
