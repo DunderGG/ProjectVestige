@@ -232,40 +232,40 @@ After David found that jumping got round the slower walk: tools don't work while
 The frame's material, `M_TileHighlight`, is now set on `BP_PlayerCharacter`'s highlight component (by script) instead of in C++. The test checks the Blueprint has it; these checks are for how it looks. The commit is the one titled "Set the tile highlight material on the player Blueprint".
 
 - [x] **Asset**: open `Content/Vestige/Blueprints/BP_PlayerCharacter`, select its **TargetHighlight** component: Highlight Material is `M_TileHighlight` (Details panel, Farming > Visuals). The Blueprint doesn't ask to be saved when you close it.
-- [ ] **Frame**: in Play in Editor the thin yellow frame around the target tile (the tile itself doesn't change color) is a flat, bright yellow, in daylight, in shadow and at night alike: its material is unlit, so light and shadow don't darken it, and the Output Log has no "No Highlight Material" warning and no "missing usage flag".
+- [x] **Frame**: in Play in Editor the thin yellow frame around the target tile (the tile itself doesn't change color) is a flat, bright yellow, in daylight, in shadow and at night alike: its material is unlit, so light and shadow don't darken it, and the Output Log has no "No Highlight Material" warning and no "missing usage flag".
 
 ### Details categories, 2026-11-03
 
 The general types' settings moved out of the `Farming` categories into ones named for their topic; the farm types (tiles, grid, crops, the farming component and the highlight) keep `Farming`. Only display names changed, so nothing needs saving. The commit is the one titled "Name the general types' Details categories by topic".
 
-- [ ] **Sky lighting**: the `VestigeSkyLighting` (until 2026-11-05 `VestigeDayCycle`) in `L_Farm` shows its settings under **Lighting** only (Night Post Process too). It had a **Time** category for the sunrise and sunset hours until they moved to the clock settings on 2026-11-05.
-- [ ] **Player Blueprint**: in `BP_PlayerCharacter`, Move Ramp Seconds is under **Input** with the template's input actions, the **Rest** component's hours and drain under **Rest**, and the **CharacterMovement** component's Tool Use Speed Scale under **Movement**.
-- [ ] **Assets**: a tool data asset shows **Content**, **Tool** and **Visuals**; an item shows **Content**, **Item** and **Economy**; a crop shows **Content** and **Farming** with Growth, Harvest and Visuals.
-- [ ] **Blueprint menus**: in any Blueprint's graph, right-click and search: Get Vestige Clock is there (it replaced Get Day Cycle on 2026-11-04), Get Content Id under **Content**. In Add Component, the Vestige Rest component is listed under **Rest**.
+- [x] **Sky lighting**: the `VestigeSkyLighting` (until 2026-11-05 `VestigeDayCycle`) in `L_Farm` shows its settings under **Lighting** only (Night Post Process too). It had a **Time** category for the sunrise and sunset hours until they moved to the clock settings on 2026-11-05.
+- [x] **Player Blueprint**: in `BP_PlayerCharacter`, Move Ramp Seconds is under **Input** with the template's input actions, the **Rest** component's hours and drain under **Rest**, and the **CharacterMovement** component's Tool Use Speed Scale under **Movement**.
+- [x] **Assets**: a tool data asset shows **Content**, **Tool** and **Visuals**; an item shows **Content**, **Item** and **Economy**; a crop shows **Content** and **Farming** with Growth, Harvest and Visuals.
+- [x] **Blueprint menus**: in any Blueprint's graph, right-click and search: Get Vestige Clock is there (it replaced Get Day Cycle on 2026-11-04), Get Content Id under **Content**. In Add Component, the Vestige Rest component is listed under **Rest**.
 
 ### Test keys as console commands, 2026-11-04
 
 F9 (new game) and N (skip day) are no longer keys: they are the console commands `NewGame` and `SkipDay`, which only development builds have. The tests check the commands exist on the game's player controller and that `SkipDay` starts the next day; these checks are for the console and the keys. The commit is the one titled "Move the test keys F9 and N into a cheat manager".
 
-- [ ] **Key hints**: the bottom line ends "... | E Use tool | F Interact", with no N or F9. Pressing N or F9 in the game does nothing (F9 may still take an editor screenshot).
-- [ ] **SkipDay**: open the console ([Before you test](#1-before-you-test)), type `SkipDay` and press Enter. The next day starts as it does in the bed: "You slept. Day 2 begins." and "Game saved." The console's suggestions should list `SkipDay` and `NewGame` as you type them.
-- [ ] **NewGame**: back up `Saved/SaveGames/` first. Type `NewGame`: the map reopens on day 1 at 06:00 with the starting bag.
+- [x] **Key hints**: the bottom line ends "... | E Use tool | F Interact", with no N or F9. Pressing N or F9 in the game does nothing (F9 may still take an editor screenshot).
+- [x] **SkipDay**: open the console ([Before you test](#1-before-you-test)), type `SkipDay` and press Enter. The next day starts as it does in the bed: "You slept. Day 2 begins." and "Game saved." The console's suggestions should list `SkipDay` and `NewGame` as you type them.
+- [x] **NewGame**: back up `Saved/SaveGames/` first. Type `NewGame`: the map reopens on day 1 at 06:00 with the starting bag.
 
 ### Save versions restart, 2026-11-04
 
 The save upgrades are gone and the save version starts again at 1, so your current farm (a version 4 save) can't be loaded any more. The tests cover what loading decides; these checks are for the real files. The commit is the one titled "Delete the old save versions and their upgrades".
 
-- [ ] **Old save refused**: before deleting anything, press Play. The game says "The save is from a newer version of the game. It is kept as it is, and the game won't save until you start a new game." and the Output Log has a `LogVestigeSave` error naming slot `Farm` and version 4. Sleeping doesn't save.
-- [ ] **Delete the development saves**: run the console command `NewGame` (it deletes `Farm.sav` and `Farm2.sav`), then stop the game and delete the old upgrade backups `Farm_Version0.sav`, `Farm_Version2.sav` and `Farm_Version3.sav` from `Saved/SaveGames/` by hand. Nothing makes backups any more.
-- [ ] **New save round trip**: play from day 1, plant and water a tile, sleep ("Game saved."), stop and play again: "Welcome back. Day 2." with the bag, the tool in hand, the stamina and the tile as you left them. `Saved/SaveGames/` holds only `Farm.sav` (and `Farm2.sav` after a second night).
+- [x] **Old save refused**: before deleting anything, press Play. The game says "The save is from a newer version of the game. It is kept as it is, and the game won't save until you start a new game." and the Output Log has a `LogVestigeSave` error naming slot `Farm` and version 4. Sleeping doesn't save.
+- [x] **Delete the development saves**: run the console command `NewGame` (it deletes `Farm.sav` and `Farm2.sav`), then stop the game and delete the old upgrade backups `Farm_Version0.sav`, `Farm_Version2.sav` and `Farm_Version3.sav` from `Saved/SaveGames/` by hand. Nothing makes backups any more.
+- [x] **New save round trip**: play from day 1, plant and water a tile, sleep ("Game saved."), stop and play again: "Welcome back. Day 2." with the bag, the tool in hand, the stamina and the tile as you left them. `Saved/SaveGames/` holds only `Farm.sav` (and `Farm2.sav` after a second night).
 
 ### Benchmark field, 2026-11-04
 
 The console command `BenchmarkField` makes the farm a field of ripe crops for the performance baseline. The tests cover that every tile gets a ripe crop and that an unknown crop changes nothing; these checks are for how it looks and plays. The commit is the one titled "Measure the first performance baseline".
 
-- [ ] **Field**: back up `Saved/SaveGames/` first. Press Play, open the console and type `BenchmarkField 20 Base.Turnip`. The 8 by 8 field becomes a 20 by 20 field of ripe turnips with the same corner, and the frame around the targeted tile follows you across it.
-- [ ] **Harvest**: the hand tool harvests the ripe turnips, and the bag fills as usual.
-- [ ] **Back to normal**: type `NewGame`. The map reopens on day 1 with the normal 8 by 8 grass field.
+- [x] **Field**: back up `Saved/SaveGames/` first. Press Play, open the console and type `BenchmarkField 20 Base.Turnip`. The 8 by 8 field becomes a 20 by 20 field of ripe turnips with the same corner, and the frame around the targeted tile follows you across it.
+- [x] **Harvest**: the hand tool harvests the ripe turnips, and the bag fills as usual.
+- [x] **Back to normal**: type `NewGame`. The map reopens on day 1 with the normal 8 by 8 grass field.
 
 ### Sun in steps, 2026-11-04
 
@@ -273,39 +273,39 @@ The sun (and the moon at night) now turns in quarter-degree steps instead of eve
 
 `L_Farm`'s day cycle runs a game hour in about 1.5 seconds, which turns the sun every few frames anyway. To see the steps at the normal pace, select the `VestigeDayCycle` in `L_Farm` and set **Real Seconds Per Game Hour** (Details panel, **Time**) to 40 for these checks, then set it back without saving the level, or tell me if 40 should stay.
 
-- [ ] **Midday shadows**: press Play and watch the farmer's and the crops' shadows for a game hour around midday. They creep along as before, with no visible jumps or flicker.
+- [x] **Midday shadows**: press Play and watch the farmer's and the crops' shadows for a game hour around midday. They creep along as before, with no visible jumps or flicker.
 - [x] **Sunrise, sunset and moonlight** (2026-11-05: David saw small jumps at 0.25 and 0.1 degrees with the clock at 40 seconds per game hour; 0.05 looks smooth and is now the default): watch the long shadows just after 06:00, before 20:00, and the moon's shadows after 20:00. They move in small hops about every half second. Say whether the hops are noticeable; if they are, lower **Sun Step Degrees** on the `VestigeDayCycle` (Details panel, **Lighting**) and tell me which value looks smooth.
-- [ ] **Smooth fades**: the warm sunrise colour, the evening dimming and the darkening into night still fade without steps.
-- [ ] **New day**: sleep in the bed. The morning starts with the sun at its sunrise position at once, not turning there over a few seconds.
+- [x] **Smooth fades**: the warm sunrise colour, the evening dimming and the darkening into night still fade without steps.
+- [x] **New day**: sleep in the bed. The morning starts with the sun at its sunrise position at once, not turning there over a few seconds.
 
 ### No hardware ray tracing, 2026-11-04
 
 Hardware ray tracing is off for the whole project, so Epic now lights the farm with software Lumen like High does. The test `Vestige.Rendering.HardwareRayTracingIsOff` covers the setting; these checks are for how it looks. The commit is the one titled "Turn off hardware ray tracing".
 
-- [ ] **Editor start**: the first time you open the editor after this change it recompiles shaders, which can take a while (the count is at the bottom right). After that, the Output Log has no warnings about ray tracing.
-- [ ] **High**: press Play, open the console and type `scalability 2`. A day and a night look as before, and the nights are still properly dark.
-- [ ] **Epic**: type `scalability 3` and look at a day and a night again. Epic may look a little different from before, mostly in shadowed corners and reflections, since it no longer uses hardware ray tracing. Say if anything looks worse than High or clearly worse than it used to.
+- [x] **Editor start**: the first time you open the editor after this change it recompiles shaders, which can take a while (the count is at the bottom right). After that, the Output Log has no warnings about ray tracing.
+- [x] **High**: press Play, open the console and type `scalability 2`. A day and a night look as before, and the nights are still properly dark.
+- [x] **Epic**: type `scalability 3` and look at a day and a night again. Epic may look a little different from before, mostly in shadowed corners and reflections, since it no longer uses hardware ray tracing. Say if anything looks worse than High or clearly worse than it used to.
 
 ### Cheaper clouds below Epic, 2026-11-04
 
 The volumetric clouds take fewer samples at High, Medium and Low, set in `Config/DefaultScalability.ini`. The tests cover the settings for each level; these checks are for how the clouds look while they move, which screenshots can't show. The commit is the one titled "Make the volumetric clouds cheaper below Epic".
 
-- [ ] **High**: press Play, open the console and type `scalability 2`. Watch the clouds through a morning and an evening, turning the camera now and then. They look as before, perhaps a little grainier at the edges, with no flicker, crawling noise or smearing when the camera turns. Say if it bothers you; High can take more samples.
-- [ ] **Medium and Low**: type `scalability 1`, then `scalability 0`, and look again. The edges are grainier; the clouds shouldn't flicker or break up.
-- [ ] **Back to Epic**: after Low, type `scalability 3`. The clouds are smooth again, as before this change.
+- [x] **High**: press Play, open the console and type `scalability 2`. Watch the clouds through a morning and an evening, turning the camera now and then. They look as before, perhaps a little grainier at the edges, with no flicker, crawling noise or smearing when the camera turns. Say if it bothers you; High can take more samples.
+- [x] **Medium and Low**: type `scalability 1`, then `scalability 0`, and look again. The edges are grainier; the clouds shouldn't flicker or break up.
+- [x] **Back to Epic**: after Low, type `scalability 3`. The clouds are smooth again, as before this change.
 
 ### Clock and fields in the game instance, 2026-11-04
 
 The clock and the farm moved out of the level into the game instance; the grid, its tiles and the day cycle's lighting now only show them. The rules are covered by tests; these checks are for the editor and play. The commit is the one titled "Move the clock and the farm data into the game instance".
 
 - [x] **Leftover nodes** (done by David, 2026-11-05): open `BP_PlayerCharacter`. It shows compile errors from the Print String nodes left from the extension point checks (Get Day Cycle, Bind Event to On New Day, Print String in the Event Graph). Delete those nodes, compile and save. This also finishes the housekeeping item in [Roadmap.md, section 3](Roadmap.md#3-housekeeping). Until then the test `Vestige.Farming.AFullBagLeavesTheCropInTheGround`, the first to load the Blueprint, fails on the compile errors.
-- [ ] **Old save refused**: press Play. The HUD says the save couldn't be read and saving is off (the save version is now 2). Type `NewGame` in the console; the map reopens on day 1.
-- [ ] **Clock settings**: Project Settings > Game > **Vestige Clock** shows Real Seconds Per Game Hour (40), Day Start Hour (6) and Day End Hour (30). The sky lighting actor in `L_Farm` (`VestigeDayCycle` until 2026-11-05) shows only **Lighting**; since 2026-11-05 the sunrise and sunset hours are in the clock settings (see Sky lighting, 2026-11-05). The clock now runs at 40 seconds per game hour; `slomo 20` in the console speeds it up for testing. Tell me if L_Farm's old fast clock should come back as the project setting.
-- [ ] **Grid**: the `FarmGrid` in `L_Farm` shows **Field Id** `Base.Farm` under **Farming**.
-- [ ] **A day of farming**: till, plant and water a few tiles, sleep, and check that the watered crops grew and the soil dried, as before. Stop, press Play again: the field, the day and the time come back from the save.
-- [ ] **Pause**: with the clock running, open the pause or console with the game paused (`pause` in the console). The clock on the HUD stops, and runs again after `pause` once more.
-- [ ] **New game**: after a few days, `NewGame` reopens the map on day 1 at 06:00 with grass everywhere.
-- [ ] **Benchmark field**: `BenchmarkField 20 Base.Turnip` still makes a 20 by 20 field of ripe turnips.
+- [x] **Old save refused**: press Play. The HUD says the save couldn't be read and saving is off (the save version is now 2). Type `NewGame` in the console; the map reopens on day 1.
+- [x] **Clock settings**: Project Settings > Game > **Vestige Clock** shows Real Seconds Per Game Hour (40), Day Start Hour (6) and Day End Hour (30). The sky lighting actor in `L_Farm` (`VestigeDayCycle` until 2026-11-05) shows only **Lighting**; since 2026-11-05 the sunrise and sunset hours are in the clock settings (see Sky lighting, 2026-11-05). The clock now runs at 40 seconds per game hour; `slomo 20` in the console speeds it up for testing. Tell me if L_Farm's old fast clock should come back as the project setting.
+- [x] **Grid**: the `FarmGrid` in `L_Farm` shows **Field Id** `Base.Farm` under **Farming**.
+- [x] **A day of farming**: till, plant and water a few tiles, sleep, and check that the watered crops grew and the soil dried, as before. Stop, press Play again: the field, the day and the time come back from the save.
+- [x] **Pause**: with the clock running, open the pause or console with the game paused (`pause` in the console). The clock on the HUD stops, and runs again after `pause` once more.
+- [x] **New game**: after a few days, `NewGame` reopens the map on day 1 at 06:00 with grass everywhere.
+- [x] **Benchmark field**: `BenchmarkField 20 Base.Turnip` still makes a 20 by 20 field of ripe turnips.
 
 ### Sky lighting, 2026-11-05
 
@@ -318,20 +318,20 @@ The day cycle actor is renamed `VestigeSkyLighting` for its one job, the lightin
 
 The tile actors are gone: the grid's new meshes component draws the whole field with instanced meshes, and `L_Farm` now places `BP_FarmGrid` instead of the C++ grid with `BP_FarmTile` (commit "Draw the farm tiles with instanced meshes"). The rules and the instance counts are covered by tests; these checks are for how it looks.
 
-- [ ] **Level**: regenerate the project files (right-click `Vestige.uproject` > Generate Visual Studio project files), since `FarmTile.h` is gone and `FarmFieldMeshesComponent.h` and `FarmTileLooks.h` are new. Open `L_Farm`. The Outliner shows the grid as a `BP_FarmGrid` in the same place, with **Field Id** `Base.Farm` and the same width and height under **Farming**, and the Output Log has no warning about `BP_FarmTile` or a missing `FarmTile` class.
-- [ ] **The art**: open `BP_FarmGrid` (`Content/Vestige/Blueprints`), select its **Meshes** component: **Farming > Visuals** shows `SM_Soil_Tilled`, `M_Soil_Watered`, a soil surface height of 6 and `M_FarmPlaceholder`.
-- [ ] **Looks as before**: press Play. Grass tiles are green slabs with small gaps; the hoe shows the Blender soil, watering darkens it, the seeds plant a turnip sprout standing on the soil, and it grows a stage each watered day until it is ripe. No tile or crop is grey (a grey tile means a material is missing **Used with Instanced Static Meshes**; the Output Log then says "missing usage flag"). Shadows look as they did.
-- [ ] **Frame**: the yellow frame still sits on the tile in front of the farmer and follows him, and hides at the field's edge.
+- [x] **Level**: regenerate the project files (right-click `Vestige.uproject` > Generate Visual Studio project files), since `FarmTile.h` is gone and `FarmFieldMeshesComponent.h` and `FarmTileLooks.h` are new. Open `L_Farm`. The Outliner shows the grid as a `BP_FarmGrid` in the same place, with **Field Id** `Base.Farm` and the same width and height under **Farming**, and the Output Log has no warning about `BP_FarmTile` or a missing `FarmTile` class.
+- [x] **The art**: open `BP_FarmGrid` (`Content/Vestige/Blueprints`), select its **Meshes** component: **Farming > Visuals** shows `SM_Soil_Tilled`, `M_Soil_Watered`, a soil surface height of 6 and `M_FarmPlaceholder`.
+- [x] **Looks as before**: press Play. Grass tiles are green slabs with small gaps; the hoe shows the Blender soil, watering darkens it, the seeds plant a turnip sprout standing on the soil, and it grows a stage each watered day until it is ripe. No tile or crop is grey (a grey tile means a material is missing **Used with Instanced Static Meshes**; the Output Log then says "missing usage flag"). Shadows look as they did.
+- [x] **Frame**: the yellow frame still sits on the tile in front of the farmer and follows him, and hides at the field's edge.
 - [ ] **Placeholder colors** (optional): select the grid in `L_Farm`, then its **Meshes** component, and clear **Tilled Soil Mesh** on this instance. In Play, tilled soil is a brown slab and watered soil a dark one. Reset the property with its yellow arrow afterwards, and don't save the level with it cleared.
-- [ ] **`On Tool Used` in `BP_PlayerCharacter`**: the Blueprint compiles. Its **On Tool Used** event's **Tile** pin is now an Int Point (the tile's coordinates) instead of a tile; if anything was wired to the old pin, the Blueprint shows an error there.
-- [ ] **Big field**: in Play, `BenchmarkField 60 Base.Turnip` makes a 60 by 60 field of ripe turnips at once, without a long freeze.
+- [x] **`On Tool Used` in `BP_PlayerCharacter`**: the Blueprint compiles. Its **On Tool Used** event's **Tile** pin is now an Int Point (the tile's coordinates) instead of a tile; if anything was wired to the old pin, the Blueprint shows an error there.
+- [x] **Big field**: in Play, `BenchmarkField 60 Base.Turnip` makes a 60 by 60 field of ripe turnips at once, without a long freeze.
 
 ### Jump to a time, 2026-11-06
 
 The console command `SkipToTime` runs the clock forward to a time today, for checks at a time of day. The tests cover reading the time, after midnight, refusing earlier or unreadable times, and that the hours passed are broadcast; these checks are for the console. The commit is the one titled "Add a console command to jump to a time of day".
 
-- [ ] **Evening**: press Play, open the console and type `SkipToTime 1930`. The HUD clock shows 19:30 and the light turns warm and dims toward 20:00. `SkipToTime 1800` afterwards does nothing and the Output Log says the clock only runs forward.
-- [ ] **Late night**: type `SkipToTime 2359`. The 22:00 warning shows; a minute later the midnight warning shows and stamina starts to drain. `SkipToTime 559` takes you to just before 06:00, where the day ends as if you had stayed up.
+- [x] **Evening**: press Play, open the console and type `SkipToTime 1930`. The HUD clock shows 19:30 and the light turns warm and dims toward 20:00. `SkipToTime 1800` afterwards does nothing and the Output Log says the clock only runs forward.
+- [x] **Late night**: type `SkipToTime 2359`. The 22:00 warning shows; a minute later the midnight warning shows and stamina starts to drain. `SkipToTime 559` takes you to just before 06:00, where the day ends as if you had stayed up.
 
 ### Editor chores
 
