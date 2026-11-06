@@ -238,7 +238,7 @@ The frame's material, `M_TileHighlight`, is now set on `BP_PlayerCharacter`'s hi
 
 The general types' settings moved out of the `Farming` categories into ones named for their topic; the farm types (tiles, grid, crops, the farming component and the highlight) keep `Farming`. Only display names changed, so nothing needs saving. The commit is the one titled "Name the general types' Details categories by topic".
 
-- [ ] **Day cycle**: the `VestigeSkyLighting` (until 2026-11-05 `VestigeDayCycle`) in `L_Farm` shows its settings under **Time** and **Lighting** (Night Post Process too).
+- [ ] **Sky lighting**: the `VestigeSkyLighting` (until 2026-11-05 `VestigeDayCycle`) in `L_Farm` shows its settings under **Lighting** only (Night Post Process too). It had a **Time** category for the sunrise and sunset hours until they moved to the clock settings on 2026-11-05.
 - [ ] **Player Blueprint**: in `BP_PlayerCharacter`, Move Ramp Seconds is under **Input** with the template's input actions, the **Rest** component's hours and drain under **Rest**, and the **CharacterMovement** component's Tool Use Speed Scale under **Movement**.
 - [ ] **Assets**: a tool data asset shows **Content**, **Tool** and **Visuals**; an item shows **Content**, **Item** and **Economy**; a crop shows **Content** and **Farming** with Growth, Harvest and Visuals.
 - [ ] **Blueprint menus**: in any Blueprint's graph, right-click and search: Get Vestige Clock is there (it replaced Get Day Cycle on 2026-11-04), Get Content Id under **Content**. In Add Component, the Vestige Rest component is listed under **Rest**.
