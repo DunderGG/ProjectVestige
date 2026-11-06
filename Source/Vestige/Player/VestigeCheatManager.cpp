@@ -12,8 +12,8 @@
 #include "Farming/FarmGrid.h"
 #include "Farming/FarmTileState.h"
 #include "Farming/VestigeRestComponent.h"
-#include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerController.h"
+#include "GameFramework/PlayerState.h"
 #include "ProfilingDebugging/CpuProfilerTrace.h"
 #include "Save/VestigeSaveSubsystem.h"
 #include "Time/VestigeClockSubsystem.h"
@@ -71,11 +71,10 @@ void UVestigeCheatManager::NewGame()
 
 void UVestigeCheatManager::SkipDay()
 {
-	const APawn* Pawn = GetOuterAPlayerController()->GetPawn();
-	UVestigeRestComponent* Rest = Pawn ? Pawn->FindComponentByClass<UVestigeRestComponent>() : nullptr;
+	UVestigeRestComponent* Rest = UVestigeRestComponent::Find(GetOuterAPlayerController()->PlayerState);
 	if (!Rest)
 	{
-		VESTIGE_LOG(this, LogVestige, Warning, "The player has no pawn with a rest component to sleep.");
+		VESTIGE_LOG(this, LogVestige, Warning, "The player has no rest component to sleep.");
 		return;
 	}
 	Rest->Sleep();

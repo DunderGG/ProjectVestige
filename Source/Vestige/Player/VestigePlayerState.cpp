@@ -8,6 +8,7 @@
 #include "AttributeSet.h"
 #include "Core/VestigeSaveRegistry.h"
 #include "Core/VestigeSaveable.h"
+#include "Farming/VestigeRestComponent.h"
 #include "GameFramework/Pawn.h"
 #include "Inventory/VestigeInventoryComponent.h"
 
@@ -18,6 +19,8 @@ AVestigePlayerState::AVestigePlayerState()
 	// Single-player: nothing is predicted or sent to other machines, so the leanest replication mode is enough.
 	AbilitySystem = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("AbilitySystem"));
 	AbilitySystem->SetReplicationMode(EGameplayEffectReplicationMode::Minimal);
+
+	Rest = CreateDefaultSubobject<UVestigeRestComponent>(TEXT("Rest"));
 }
 
 void AVestigePlayerState::PostInitializeComponents()

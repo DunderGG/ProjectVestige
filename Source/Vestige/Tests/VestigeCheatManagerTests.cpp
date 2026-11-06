@@ -11,8 +11,8 @@
 #include "Farming/FarmGrid.h"
 #include "Farming/VestigeRestComponent.h"
 #include "Game/VestigeGameMode.h"
-#include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerController.h"
+#include "GameFramework/PlayerState.h"
 #include "Player/VestigeCheatManager.h"
 #include "Time/VestigeClockSubsystem.h"
 
@@ -42,12 +42,12 @@ namespace VestigeCheatManagerTests
 			const UVestigeClockSubsystem* Clock = UVestigeClockSubsystem::Get(&Spawner.GetWorld());
 			ASSERT_THAT(IsNotNull(Clock));
 			Spawner.SpawnActor<AVestigeGameMode>().DispatchBeginPlay();
-			APawn& Pawn = Spawner.SpawnActor<APawn>();
-			UVestigeRestComponent* Rest = NewObject<UVestigeRestComponent>(&Pawn);
+			APlayerState& PlayerState = Spawner.SpawnActor<APlayerState>();
+			UVestigeRestComponent* Rest = NewObject<UVestigeRestComponent>(&PlayerState);
 			Rest->RegisterComponent();
-			Pawn.DispatchBeginPlay();
+			PlayerState.DispatchBeginPlay();
 			APlayerController& Controller = Spawner.SpawnActor<APlayerController>();
-			Controller.Possess(&Pawn);
+			Controller.PlayerState = &PlayerState;
 			UVestigeCheatManager* Cheats = NewObject<UVestigeCheatManager>(&Controller);
 
 			Cheats->SkipDay();

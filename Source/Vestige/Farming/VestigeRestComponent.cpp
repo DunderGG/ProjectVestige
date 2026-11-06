@@ -14,6 +14,8 @@
 #include "Core/VestigeSaveRegistry.h"
 #include "Engine/World.h"
 #include "Farming/VestigeRestSaveData.h"
+#include "GameFramework/Pawn.h"
+#include "GameFramework/PlayerState.h"
 #include "Time/VestigeClockSubsystem.h"
 
 #define LOCTEXT_NAMESPACE "VestigeRestComponent"
@@ -30,6 +32,21 @@ namespace VestigeRest
 UVestigeRestComponent::UVestigeRestComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
+}
+
+UVestigeRestComponent* UVestigeRestComponent::Find(const AActor* PlayerActor)
+{
+	if (!PlayerActor)
+	{
+		return nullptr;
+	}
+	if (UVestigeRestComponent* Own = PlayerActor->FindComponentByClass<UVestigeRestComponent>())
+	{
+		return Own;
+	}
+	const APawn* Pawn = Cast<APawn>(PlayerActor);
+	const APlayerState* PlayerState = Pawn ? Pawn->GetPlayerState() : nullptr;
+	return PlayerState ? PlayerState->FindComponentByClass<UVestigeRestComponent>() : nullptr;
 }
 
 void UVestigeRestComponent::BeginPlay()
@@ -56,7 +73,7 @@ void UVestigeRestComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	UVestigeSaveRegistry::UnregisterWorldOwner(GetWorld(), *this);
 
-	// The drain lives on the player state's ability system, which outlives this pawn.
+	// The drain runs on the ability system, which may outlive this component.
 	StopLateNightDrain();
 	if (Clock)
 	{

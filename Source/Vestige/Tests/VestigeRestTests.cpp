@@ -52,9 +52,10 @@ namespace VestigeRestTests
 			AVestigePlayerState& PlayerState = Spawner.SpawnActor<AVestigePlayerState>(FActorSpawnParameters(), PlayerStateClass);
 			AVestigePlayerCharacter& Character = Spawner.SpawnActor<AVestigePlayerCharacter>(FActorSpawnParameters(), CharacterClass);
 			Character.SetPlayerState(&PlayerState);
+			PlayerState.DispatchBeginPlay();
 			Character.DispatchBeginPlay();
 			Player.AbilitySystem = PlayerState.GetAbilitySystemComponent();
-			Player.RestComponent = Character.FindComponentByClass<UVestigeRestComponent>();
+			Player.RestComponent = PlayerState.FindComponentByClass<UVestigeRestComponent>();
 			ASSERT_THAT(IsNotNull(Player.AbilitySystem));
 			ASSERT_THAT(IsNotNull(Player.RestComponent));
 		}
@@ -190,20 +191,43 @@ namespace VestigeRestTests
 
 		TEST_METHOD(APlayerArrivingAfterMidnightDrainsStamina)
 		{
-			// A map opened after midnight: the new body never hears the hour the drain starts at.
+			// A map opened after midnight: the new map's player state never hears the hour the drain starts at.
+			SetClock(*Player.Clock, 25.f);
+			UClass* PlayerStateClass =
+				LoadClass<AVestigePlayerState>(nullptr, TEXT("/Game/Vestige/Blueprints/BP_PlayerState.BP_PlayerState_C"));
+			AVestigePlayerState& NewPlayer = Spawner.SpawnActor<AVestigePlayerState>(FActorSpawnParameters(), PlayerStateClass);
+
+			NewPlayer.DispatchBeginPlay();
+
+			ASSERT_THAT(IsTrue(NewPlayer.FindComponentByClass<UVestigeRestComponent>()->IsDrainingStamina()));
+		}
+
+		TEST_METHOD(ANightWithoutABodyStillRefillsStaminaAndSetsExhaustion)
+		{
 			const FPlayerSetup& Setup = Player;
-			SetClock(*Setup.Clock, 25.f);
-			APawn* OldBody = Cast<APawn>(Setup.RestComponent->GetOwner());
-			APlayerState* PlayerState = OldBody->GetPlayerState();
-			OldBody->Destroy();
-			UClass* CharacterClass =
-				LoadClass<AVestigePlayerCharacter>(nullptr, TEXT("/Game/Vestige/Blueprints/BP_PlayerCharacter.BP_PlayerCharacter_C"));
-			AVestigePlayerCharacter& NewBody = Spawner.SpawnActor<AVestigePlayerCharacter>(FActorSpawnParameters(), CharacterClass);
-			NewBody.SetPlayerState(PlayerState);
+			SpendAllStamina(Setup);
+			APlayerState* PlayerState = Cast<APlayerState>(Setup.RestComponent->GetOwner());
+			ASSERT_THAT(IsNotNull(PlayerState));
+			APawn* Body = PlayerState->GetPawn();
+			ASSERT_THAT(IsNotNull(Body));
+			Body->Destroy();
 
-			NewBody.DispatchBeginPlay();
+			SetClock(*Setup.Clock, Setup.Clock->GetDayEndHour());
+			PassHours(*Setup.Clock, 0.1f);
 
-			ASSERT_THAT(IsTrue(NewBody.FindComponentByClass<UVestigeRestComponent>()->IsDrainingStamina()));
+			ASSERT_THAT(IsTrue(Setup.Clock->GetCurrentDay() == 2));
+			ASSERT_THAT(IsTrue(Setup.RestComponent->IsExhausted()));
+			ASSERT_THAT(IsTrue(FMath::IsNearlyEqual(GetStamina(Setup), 0.75f * GetMaxStamina(Setup))));
+		}
+
+		TEST_METHOD(TheRestComponentIsFoundThroughThePlayersBody)
+		{
+			const APlayerState* PlayerState = Cast<APlayerState>(Player.RestComponent->GetOwner());
+			ASSERT_THAT(IsNotNull(PlayerState));
+
+			ASSERT_THAT(IsTrue(UVestigeRestComponent::Find(PlayerState->GetPawn()) == Player.RestComponent));
+			ASSERT_THAT(IsTrue(UVestigeRestComponent::Find(PlayerState) == Player.RestComponent));
+			ASSERT_THAT(IsNull(UVestigeRestComponent::Find(nullptr)));
 		}
 
 		TEST_METHOD(TheDrainTakesItsRatePerGameHourWhateverTheClockSpeed)

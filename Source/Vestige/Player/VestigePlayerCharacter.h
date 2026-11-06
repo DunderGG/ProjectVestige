@@ -12,7 +12,6 @@ class UAbilitySystemComponent;
 class UEnhancedInputLocalPlayerSubsystem;
 class UFarmingComponent;
 class UVestigeInteractionComponent;
-class UVestigeRestComponent;
 class UFarmTargetHighlightComponent;
 class UVestigeToolData;
 class UInputAction;
@@ -102,9 +101,6 @@ private:
 
 	UPROPERTY(VisibleAnywhere, Category = "Farming")
 	TObjectPtr<UFarmingComponent> Farming;
-
-	UPROPERTY(VisibleAnywhere, Category = "Rest")
-	TObjectPtr<UVestigeRestComponent> Rest;
 
 	UPROPERTY(VisibleAnywhere, Category = "Interaction")
 	TObjectPtr<UVestigeInteractionComponent> Interaction;

@@ -51,7 +51,7 @@ AVestigeBed::AVestigeBed()
 
 void AVestigeBed::GetInteractionOptions_Implementation(AActor* Interactor, TArray<FVestigeInteractionOption>& OutOptions) const
 {
-	if (Interactor && Interactor->FindComponentByClass<UVestigeRestComponent>())
+	if (UVestigeRestComponent::Find(Interactor))
 	{
 		FVestigeInteractionOption& SleepOption = OutOptions.AddDefaulted_GetRef();
 		SleepOption.Text = LOCTEXT("Sleep", "Sleep");
@@ -65,7 +65,7 @@ void AVestigeBed::Interact_Implementation(AActor* Interactor, const FVestigeInte
 	{
 		return;
 	}
-	if (UVestigeRestComponent* Rest = Interactor ? Interactor->FindComponentByClass<UVestigeRestComponent>() : nullptr)
+	if (UVestigeRestComponent* Rest = UVestigeRestComponent::Find(Interactor))
 	{
 		Rest->Sleep();
 	}

@@ -266,7 +266,7 @@ namespace VestigeSaveRegistryTests
 			const UAbilitySystemComponent* NewAbilitySystem = After.PlayerState->GetAbilitySystemComponent();
 			ASSERT_THAT(IsTrue(After.PlayerState->GetInventory()->GetItemCount(SeedId) == Seeds));
 			ASSERT_THAT(IsTrue(NewAbilitySystem->GetNumericAttributeBase(UVestigeStaminaSet::GetStaminaAttribute()) == 37.f));
-			ASSERT_THAT(IsTrue(After.Character->FindComponentByClass<UVestigeRestComponent>()->IsExhausted()));
+			ASSERT_THAT(IsTrue(After.PlayerState->FindComponentByClass<UVestigeRestComponent>()->IsExhausted()));
 			ASSERT_THAT(IsTrue(After.Character->FindComponentByClass<UFarmingComponent>()->GetCurrentTool() == Tool));
 		}
 	};

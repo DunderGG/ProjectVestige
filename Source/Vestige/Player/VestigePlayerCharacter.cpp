@@ -14,7 +14,6 @@
 #include "EnhancedPlayerInput.h"
 #include "Farming/FarmingComponent.h"
 #include "Farming/FarmTargetHighlightComponent.h"
-#include "Farming/VestigeRestComponent.h"
 #include "GameFramework/Controller.h"
 #include "GameFramework/PlayerController.h"
 #include "Interaction/VestigeInteractionComponent.h"
@@ -44,7 +43,6 @@ AVestigePlayerCharacter::AVestigePlayerCharacter(const FObjectInitializer& Objec
 	GetCharacterMovement()->RotationRate = FRotator(0.f, VestigeMovement::TurnDegreesPerSecond, 0.f);
 
 	Farming = CreateDefaultSubobject<UFarmingComponent>(TEXT("Farming"));
-	Rest = CreateDefaultSubobject<UVestigeRestComponent>(TEXT("Rest"));
 	Interaction = CreateDefaultSubobject<UVestigeInteractionComponent>(TEXT("Interaction"));
 	TargetHighlight = CreateDefaultSubobject<UFarmTargetHighlightComponent>(TEXT("TargetHighlight"));
 	TargetHighlight->SetupAttachment(GetRootComponent());

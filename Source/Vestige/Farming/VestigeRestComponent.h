@@ -20,7 +20,8 @@ struct FVestigeRestSaveData;
  * LateNightHour until the day ends, and waking up. A day that ends at LateNightHour or later (staying up until the
  * day's end included) starts the next day exhausted, with stamina refilled to ExhaustedRefillFraction of the maximum; an
  * earlier one refills it fully and clears exhaustion. Starting the next day is the game mode's job (AVestigeGameMode).
- * Lives on the player's pawn and changes stamina through gameplay effects on the owner's ability system.
+ * Lives on the player state, so the night happens with or without a body, and changes stamina through gameplay
+ * effects on the owner's ability system.
  * Saves whether the player is exhausted under Base.Rest through UVestigeSaveRegistry while it is in play.
  */
 UCLASS(ClassGroup = (Rest), meta = (BlueprintSpawnableComponent))
@@ -30,6 +31,9 @@ class UVestigeRestComponent : public UActorComponent, public IVestigeSaveable
 
 public:
 	UVestigeRestComponent();
+
+	/** The rest component of PlayerActor: its own, or its player state's if it is a pawn. Nullptr if it has none. */
+	static UVestigeRestComponent* Find(const AActor* PlayerActor);
 
 	/**
 	 * Goes to bed: asks the clock to end the day now. The game mode then starts the next day, and the player wakes
@@ -89,7 +93,7 @@ private:
 	void StartLateNightDrain();
 	void StopLateNightDrain();
 
-	/** The ability system of the player who owns this pawn, or nullptr. */
+	/** The ability system of the player state this component is on, or nullptr. */
 	UAbilitySystemComponent* GetAbilitySystem() const;
 
 	/** Hour of the "getting late" warning, from midnight at the start of the day. */

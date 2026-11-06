@@ -136,7 +136,7 @@ Slate is the engine's own UI layer; game HUDs are normally UMG widgets, with Com
 
 **Fix.** The day transition is a world rule, so the game mode (or the clock subsystem) owns it. The rest component asks for sleep and applies the stamina effects.
 
-**Status: Resolved (2026-11-06).** The clock says when a day has ended (`OnDayEnded`, at 06:00 or early through `EndDay`) and keeps how it ended; `AVestigeGameMode` starts the next day, with or without a pawn (test `Vestige.GameMode.TheNextDayStartsAtTheDayEndWithoutAPlayer`). The rest component goes to bed through `EndDay` and wakes the player on `OnNewDay`. Without a pawn the night's stamina refill is still skipped, because the rest component is on the pawn; moving it to the player state is its own item in [Roadmap.md, 4.0](Roadmap.md#40-structure-from-the-code-review). Reasons in [Architecture.md, decision log](Architecture.md#16-decision-log).
+**Status: Resolved (2026-11-06).** The clock says when a day has ended (`OnDayEnded`, at 06:00 or early through `EndDay`) and keeps how it ended; `AVestigeGameMode` starts the next day, with or without a pawn (test `Vestige.GameMode.TheNextDayStartsAtTheDayEndWithoutAPlayer`). The rest component goes to bed through `EndDay` and wakes the player on `OnNewDay`. The rest component then moved to the player state, so a night without a pawn still refills stamina and sets exhaustion (test `Vestige.Rest.ANightWithoutABodyStillRefillsStaminaAndSetsExhaustion`). Reasons in [Architecture.md, decision log](Architecture.md#16-decision-log).
 
 ### M3 — The strict linear layer order is the wrong shape
 

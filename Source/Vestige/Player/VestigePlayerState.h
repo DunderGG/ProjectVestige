@@ -11,11 +11,13 @@
 class UAbilitySystemComponent;
 class UVestigeAbilitySet;
 class UVestigeInventoryComponent;
+class UVestigeRestComponent;
 
 /**
- * The player's data that outlives the pawn: the inventory, and the ability system with its abilities and stamina.
+ * The player's data that outlives the pawn: the inventory, the ability system with its abilities and stamina, and the
+ * rest component, whose night refills the stamina and sets exhaustion with or without a body.
  * BP_PlayerState sets its values (the starting items, the ability sets), and the game mode names it. Code below the
- * player layer doesn't know this class: it finds the inventory with FindComponentByClass on the player's APlayerState,
+ * player layer doesn't know this class: it finds the inventory and the rest component by class on the player's APlayerState,
  * and the ability system through the pawn's IAbilitySystemInterface.
  * Registers the ability system's saved attribute sets (the stamina) with UVestigeSaveRegistry while it is in play, since
  * the sets have no BeginPlay or EndPlay of their own; the inventory registers itself.
@@ -52,6 +54,9 @@ private:
 
 	UPROPERTY(VisibleAnywhere, Category = "Abilities", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UAbilitySystemComponent> AbilitySystem;
+
+	UPROPERTY(VisibleAnywhere, Category = "Rest", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UVestigeRestComponent> Rest;
 
 	/** What the player can do and the attributes they have from the start (DA_AbilitySet_Player). */
 	UPROPERTY(EditDefaultsOnly, Category = "Abilities", meta = (AllowPrivateAccess = "true"))
