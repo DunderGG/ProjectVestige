@@ -231,8 +231,8 @@ After David found that jumping got round the slower walk: tools don't work while
 
 The frame's material, `M_TileHighlight`, is now set on `BP_PlayerCharacter`'s highlight component (by script) instead of in C++. The test checks the Blueprint has it; these checks are for how it looks. The commit is the one titled "Set the tile highlight material on the player Blueprint".
 
-- [ ] **Asset**: open `Content/Vestige/Blueprints/BP_PlayerCharacter`, select its **TargetHighlight** component: Highlight Material is `M_TileHighlight` (Details panel, Farming > Visuals). The Blueprint doesn't ask to be saved when you close it.
-- [ ] **Frame**: in Play in Editor the frame around the target tile is yellow and unlit as before, also at night, and the Output Log has no "No Highlight Material" warning and no "missing usage flag".
+- [x] **Asset**: open `Content/Vestige/Blueprints/BP_PlayerCharacter`, select its **TargetHighlight** component: Highlight Material is `M_TileHighlight` (Details panel, Farming > Visuals). The Blueprint doesn't ask to be saved when you close it.
+- [ ] **Frame**: in Play in Editor the thin yellow frame around the target tile (the tile itself doesn't change color) is a flat, bright yellow, in daylight, in shadow and at night alike: its material is unlit, so light and shadow don't darken it, and the Output Log has no "No Highlight Material" warning and no "missing usage flag".
 
 ### Details categories, 2026-11-03
 
