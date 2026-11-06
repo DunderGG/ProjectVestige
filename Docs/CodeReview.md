@@ -136,6 +136,8 @@ Slate is the engine's own UI layer; game HUDs are normally UMG widgets, with Com
 
 **Fix.** The day transition is a world rule, so the game mode (or the clock subsystem) owns it. The rest component asks for sleep and applies the stamina effects.
 
+**Status: Resolved (2026-11-06).** The clock says when a day has ended (`OnDayEnded`, at 06:00 or early through `EndDay`) and keeps how it ended; `AVestigeGameMode` starts the next day, with or without a pawn (test `Vestige.GameMode.TheNextDayStartsAtTheDayEndWithoutAPlayer`). The rest component goes to bed through `EndDay` and wakes the player on `OnNewDay`. Without a pawn the night's stamina refill is still skipped, because the rest component is on the pawn; moving it to the player state is its own item in [Roadmap.md, 4.0](Roadmap.md#40-structure-from-the-code-review). Reasons in [Architecture.md, decision log](Architecture.md#16-decision-log).
+
 ### M3 — The strict linear layer order is the wrong shape
 
 Ten folders in one fixed order ([Architecture.md, section 14](Architecture.md#14-dependencies)) mean every folder may use everything below it and nothing above it. That forces odd placements: rest in `Farming/` because it needs `Time/`, interaction below content, and saving above everything, which is why it has to know every system (H3). Real dependencies form a tree, not a line. The source-reading test `Vestige.Architecture.IncludeDirection` is clever, but it rebuilds, weakly, what Unreal modules give for free, and it only checks includes.
@@ -159,6 +161,8 @@ The farming component posts "Tilled the soil." and "Watered." on every successfu
 `AVestigeGameMode` (which sets the HUD and the player state) and `AVestigeCharacter` (the player's base class, with Epic's camera, style and mobile touch controls) live in `Template/` under Epic's licence terms. M2 needs a game mode of our own anyway.
 
 **Fix.** Our own game mode and player controller in a `Game/` folder now; reparent the character to `ACharacter` when the template animations are replaced.
+
+**Status: Game mode and player controller done (2026-11-06).** `AVestigeGameMode` and `AVestigePlayerController` are ours, in `Game/`, with new Blueprints `BP_GameMode` and `BP_PlayerController`; the template's game mode and controller code, their Blueprints and `Content/ThirdPerson/` are deleted, and the touch controls are gone. `AVestigeCharacter` stays in `Template/` until the template animations are replaced.
 
 ### M7 — Game-time events run on real time
 

@@ -225,8 +225,7 @@ namespace VestigeInventoryTests
 		/** Catches a missing editor step: the game mode must name a player state whose inventory starts with seeds. */
 		TEST_METHOD(ThePlayerStartsWithTurnipSeeds)
 		{
-			UClass* GameModeClass =
-				LoadClass<AGameModeBase>(nullptr, TEXT("/Game/ThirdPerson/Blueprints/BP_ThirdPersonGameMode.BP_ThirdPersonGameMode_C"));
+			UClass* GameModeClass = LoadClass<AGameModeBase>(nullptr, TEXT("/Game/Vestige/Blueprints/BP_GameMode.BP_GameMode_C"));
 			ASSERT_THAT(IsNotNull(GameModeClass));
 			const TSubclassOf<APlayerState> PlayerStateClass = GameModeClass->GetDefaultObject<AGameModeBase>()->PlayerStateClass;
 			ASSERT_THAT(IsNotNull(PlayerStateClass.Get()));

@@ -3,6 +3,7 @@
 
 #include "Time/VestigeClockSubsystem.h"
 
+#include "Core/VestigeLog.h"
 #include "Core/VestigeSaveRegistry.h"
 #include "Engine/GameInstance.h"
 #include "Engine/World.h"
@@ -10,6 +11,7 @@
 #include "Stats/Stats.h"
 #include "Time/VestigeClockSaveData.h"
 #include "Time/VestigeClockSettings.h"
+#include "Time/VestigeTimeLog.h"
 
 UVestigeClockSubsystem::UVestigeClockSubsystem() : FTickableGameObject(ETickableTickType::Never)
 {
@@ -57,10 +59,24 @@ void UVestigeClockSubsystem::Deinitialize()
 	Super::Deinitialize();
 }
 
+bool UVestigeClockSubsystem::EndDay()
+{
+	if (bDayEndReached)
+	{
+		return false;
+	}
+	EndDayNow();
+	return true;
+}
+
 void UVestigeClockSubsystem::StartNextDay()
 {
 	TRACE_CPUPROFILER_EVENT_SCOPE(UVestigeClockSubsystem::StartNextDay);
 
+	if (!bDayEndReached)
+	{
+		RecordDayEnd();
+	}
 	++CurrentDay;
 	TimeOfDay = DayStartHour;
 	bDayEndReached = false;
@@ -74,6 +90,7 @@ void UVestigeClockSubsystem::StartNewGame()
 	CurrentDay = 1;
 	TimeOfDay = DayStartHour;
 	bDayEndReached = false;
+	LastDayEnd = FVestigeDayEnd();
 }
 
 FName UVestigeClockSubsystem::GetSaveKey() const
@@ -116,7 +133,7 @@ void UVestigeClockSubsystem::RestoreFromSaveData(const FVestigeClockSaveData& Da
 	CurrentDay = FMath::Max(1, Data.Day);
 	TimeOfDay = FMath::Clamp(Data.TimeOfDay, DayStartHour, DayEndHour);
 
-	// A clock restored at the day's end reaches it on the next tick, so OnDayEndReached isn't lost.
+	// A clock restored at the day's end reaches it on the next tick, so OnDayEnded isn't lost.
 	bDayEndReached = false;
 }
 
@@ -139,16 +156,39 @@ void UVestigeClockSubsystem::RunTo(float NewTimeOfDay)
 {
 	const float PreviousTimeOfDay = TimeOfDay;
 	TimeOfDay = FMath::Min(NewTimeOfDay, DayEndHour);
+	const int32 Day = CurrentDay;
 	BroadcastHoursStartedSince(PreviousTimeOfDay);
-	if (TimeOfDay < DayEndHour || bDayEndReached)
+
+	// An hour's listener may have ended the day, and the game mode may already have started the next one.
+	if (CurrentDay != Day || bDayEndReached || TimeOfDay < DayEndHour)
 	{
 		return;
 	}
+	EndDayNow();
+}
 
-	// The clock stops at the day's end until the next day starts. Stop first, so a listener that starts the next day
-	// starts the clock again.
+void UVestigeClockSubsystem::EndDayNow()
+{
+	// Stop first, so the listener that starts the next day starts the clock again.
 	bDayEndReached = true;
-	OnDayEndReached.Broadcast(CurrentDay);
+	RecordDayEnd();
+	OnDayEnded.Broadcast(LastDayEnd);
+
+	// The game mode starts the next day at once. When it waits (a sleep fade), this check moves to it.
+	if (bDayEndReached && CurrentDay == LastDayEnd.Day)
+	{
+		VESTIGE_LOG(this, LogVestigeTime, Warning,
+			"Day {Day} ended, but nothing starts the next one: the world's game mode isn't AVestigeGameMode, so the clock stays "
+			"stopped.",
+			CurrentDay);
+	}
+}
+
+void UVestigeClockSubsystem::RecordDayEnd()
+{
+	LastDayEnd.Day = CurrentDay;
+	LastDayEnd.TimeOfDay = TimeOfDay;
+	LastDayEnd.bEndedEarly = TimeOfDay < DayEndHour;
 }
 
 bool UVestigeClockSubsystem::IsTickable() const
@@ -170,9 +210,14 @@ TStatId UVestigeClockSubsystem::GetStatId() const
 
 void UVestigeClockSubsystem::BroadcastHoursStartedSince(float PreviousTimeOfDay)
 {
+	const int32 Day = CurrentDay;
 	const int32 LastHour = FMath::FloorToInt32(TimeOfDay);
 	for (int32 Hour = FMath::FloorToInt32(PreviousTimeOfDay) + 1; Hour <= LastHour; ++Hour)
 	{
 		OnHourStarted.Broadcast(Hour);
+		if (bDayEndReached || CurrentDay != Day)
+		{
+			return;
+		}
 	}
 }

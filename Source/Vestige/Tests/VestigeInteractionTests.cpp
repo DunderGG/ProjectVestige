@@ -8,6 +8,7 @@
 #include "Engine/CollisionProfile.h"
 #include "Farming/VestigeBed.h"
 #include "Farming/VestigeRestComponent.h"
+#include "Game/VestigeGameMode.h"
 #include "Interaction/VestigeInteractable.h"
 #include "Interaction/VestigeInteractionComponent.h"
 #include "Player/VestigePlayerCharacter.h"
@@ -161,6 +162,7 @@ namespace VestigeInteractionTests
 			Spawner.InitializeGameSubsystems();
 			const UVestigeClockSubsystem* Clock = UVestigeClockSubsystem::Get(&Spawner.GetWorld());
 			ASSERT_THAT(IsNotNull(Clock));
+			Spawner.SpawnActor<AVestigeGameMode>().DispatchBeginPlay();
 			UVestigeInteractionComponent& Interaction = MakeInteractor();
 			AActor& Interactor = *Interaction.GetOwner();
 			UVestigeRestComponent* Rest = NewObject<UVestigeRestComponent>(&Interactor);

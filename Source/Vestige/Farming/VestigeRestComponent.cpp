@@ -40,7 +40,8 @@ void UVestigeRestComponent::BeginPlay()
 	if (Clock)
 	{
 		Clock->OnHourStarted.AddUObject(this, &UVestigeRestComponent::ReactToHour);
-		Clock->OnDayEndReached.AddUObject(this, &UVestigeRestComponent::StayUpAllNight);
+		Clock->OnDayEnded.AddUObject(this, &UVestigeRestComponent::EndNight);
+		Clock->OnNewDay.AddUObject(this, &UVestigeRestComponent::WakeUp);
 
 		// A map opened after midnight never hears the hour the drain starts at, so it starts here.
 		if (Clock->GetTimeOfDay() >= LateNightHour)
@@ -60,7 +61,8 @@ void UVestigeRestComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	if (Clock)
 	{
 		Clock->OnHourStarted.RemoveAll(this);
-		Clock->OnDayEndReached.RemoveAll(this);
+		Clock->OnDayEnded.RemoveAll(this);
+		Clock->OnNewDay.RemoveAll(this);
 		Clock = nullptr;
 	}
 	Super::EndPlay(EndPlayReason);
@@ -68,7 +70,10 @@ void UVestigeRestComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 void UVestigeRestComponent::Sleep()
 {
-	StartNextDay(LOCTEXT("Slept", "You slept. Day {Day} begins."));
+	if (Clock)
+	{
+		Clock->EndDay();
+	}
 }
 
 bool UVestigeRestComponent::IsExhausted() const
@@ -144,36 +149,29 @@ void UVestigeRestComponent::ReactToHour(int32 Hour)
 	}
 }
 
-void UVestigeRestComponent::StayUpAllNight(int32 EndedDay)
+void UVestigeRestComponent::EndNight(const FVestigeDayEnd& DayEnd)
 {
-	StartNextDay(LOCTEXT("StayedUp", "You stayed up all night. Day {Day} begins."));
+	StopLateNightDrain();
 }
 
-void UVestigeRestComponent::StartNextDay(const FText& MessageFormat)
+void UVestigeRestComponent::WakeUp(int32 NewDay)
 {
-	if (!Clock)
+	// Also stopped here, for a day started without ending first.
+	StopLateNightDrain();
+	UAbilitySystemComponent* AbilitySystem = GetAbilitySystem();
+	if (!Clock || !AbilitySystem)
 	{
 		return;
 	}
-
-	// Raised first, so messages from anything reacting to the new day, like saving, follow it.
-	UVestigeFeedbackSubsystem::Notify(GetWorld(), FText::FormatNamed(MessageFormat, TEXT("Day"), Clock->GetCurrentDay() + 1));
-
-	// Before the new day starts, so the save made at its start holds the new stamina and exhaustion.
-	StopLateNightDrain();
-	if (UAbilitySystemComponent* AbilitySystem = GetAbilitySystem())
+	const bool bLateNight = Clock->GetLastDayEnd().TimeOfDay >= LateNightHour;
+	if (bLateNight)
 	{
-		const bool bLateNight = Clock->GetTimeOfDay() >= LateNightHour;
-		if (bLateNight)
-		{
-			WakeExhausted(*AbilitySystem);
-		}
-		else
-		{
-			WakeRested(*AbilitySystem);
-		}
+		WakeExhausted(*AbilitySystem);
 	}
-	Clock->StartNextDay();
+	else
+	{
+		WakeRested(*AbilitySystem);
+	}
 }
 
 void UVestigeRestComponent::WakeExhausted(UAbilitySystemComponent& AbilitySystem)

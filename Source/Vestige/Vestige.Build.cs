@@ -22,10 +22,10 @@ public class Vestige : ModuleRules
 			"AssetRegistry",
 			"Slate",
 			"DeveloperSettings",
+			"EngineSettings",
 			"GameplayAbilities",
 			"GameplayTasks",
-			"SlateCore",
-			"UMG"
+			"SlateCore"
 		});
 
 		// CQTest is a developer module, so it is only available to builds with developer tools (never shipping).

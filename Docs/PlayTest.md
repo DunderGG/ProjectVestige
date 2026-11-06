@@ -343,6 +343,16 @@ Every owner now saves its own part under a key through the save registry, the sa
 - [x] **Exhaustion and the late night cross a map change**: go to bed after midnight (`SkipToTime 0030`, then the bed) so the next day starts exhausted, then type `open L_Farm`: the HUD still shows "Exhausted". Then `SkipToTime 0030` and `open L_Farm` again: stamina keeps draining in the reopened map.
 - [x] **No reload on a new game**: type `NewGame`, play until the first night and sleep: "Game saved." shows and `Saved/SaveGames/` gets a new `Farm.sav`.
 
+### Game mode and player controller, 2026-11-06
+
+The game mode and the player controller are ours now (`Game/` in the source, `BP_GameMode` and `BP_PlayerController` in `Content/Vestige/Blueprints`), and the template's Blueprints and `Content/ThirdPerson/` are gone. The game mode starts the next day when the clock says the day has ended; the bed only asks the clock to end it. The tests cover the day's end with and without a body, the messages, exhaustion and the save; these checks are for the editor, input and a packaged build. The commit is the one titled "Give the game its own game mode and player controller".
+
+- [ ] **Editor start**: regenerate the project files (right-click `Vestige.uproject` > Generate Visual Studio project files), since `Game/` is new and the template's game mode and controller files are gone. Open the editor: the Output Log has no "Failed to load" or "can't find" line for `BP_ThirdPersonGameMode` or `BP_ThirdPersonPlayerController`. Project Settings > Maps & Modes shows **Default GameMode** `BP_GameMode`, and its **Selected GameMode** shows **Player Controller Class** `BP_PlayerController`, **HUD Class** `VestigeHUD`, **Player State Class** `BP_PlayerState` and **Default Pawn Class** `BP_PlayerCharacter`. `L_Farm`'s World Settings have no **GameMode Override**.
+- [ ] **Controls**: press Play. Walking, the mouse turning the camera, jumping, the farming keys (1 to 9, E) and F all work as before (the moving and looking keys now come from `BP_PlayerController`'s **Default Mapping Contexts**, `IMC_Default` and `IMC_MouseLook`). The HUD shows as before. Typing `SkipDay` in the console still works.
+- [ ] **Going to bed**: in the evening, use the bed: "You slept. Day 2 begins." and "Game saved.", stamina full. After midnight (`SkipToTime 0030`, then the bed): "You slept. Day 3 begins.", then "You went to bed late and wake up exhausted.", then "Game saved.", stamina at 75%.
+- [ ] **Staying up**: `SkipToTime 559` and wait a moment: at 06:00 "You stayed up all night. Day N begins." and the exhausted message, and the clock runs again from 06:00.
+- [ ] **Packaged build**: package a Development build (as for the benchmark) and start it: it opens `L_Farm` with the HUD, the farmer and working controls, so the packaged game uses `BP_GameMode`.
+
 ### Editor chores
 
 Changes only the editor can make safely. The steps are in [Roadmap.md, Housekeeping](Roadmap.md#3-housekeeping): re-saving the template Blueprints and `L_Farm`, moving `BP_FarmTile` and the materials with redirectors fixed, and regenerating the Android File Server token if it was ever used. After each one, run the [smoke test](#3-smoke-test).

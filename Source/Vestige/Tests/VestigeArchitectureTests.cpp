@@ -17,15 +17,15 @@ namespace VestigeArchitectureTests
 	 * added here, in its layer, before files go in it.
 	 */
 	const TCHAR* const LayerOrder[] = {TEXT("Core"), TEXT("AbilitySystem"), TEXT("Interaction"), TEXT("Content"), TEXT("Time"),
-		TEXT("Inventory"), TEXT("Farming"), TEXT("Save"), TEXT("Player"), TEXT("UI")};
+		TEXT("Inventory"), TEXT("Farming"), TEXT("Save"), TEXT("Player"), TEXT("UI"), TEXT("Game")};
 
 	/** Tests may include anything, and nothing may include a test. Their files aren't checked. */
 	const TCHAR* const TestsFolder = TEXT("Tests");
 
 	/**
-	 * Epic's template code, which isn't maintained to the guide (CodingGuidelines.md, section 2.2). It sits outside the
-	 * layers as app-level wiring: its files may include any layer (the game mode names the HUD class), so only the layer
-	 * that derives from it and the layers above may include it.
+	 * Epic's template code, which isn't maintained to the guide (CodingGuidelines.md, section 2.2): the character the
+	 * player's body derives from. It sits outside the layers, so its files may include any layer, and only the layer that
+	 * derives from it and the layers above may include it.
 	 */
 	const TCHAR* const TemplateFolder = TEXT("Template");
 	const TCHAR* const LowestLayerThatMayIncludeTemplate = TEXT("Player");

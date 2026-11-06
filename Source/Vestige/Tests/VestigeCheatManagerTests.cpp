@@ -10,6 +10,7 @@
 #include "Farming/FarmFieldMeshesComponent.h"
 #include "Farming/FarmGrid.h"
 #include "Farming/VestigeRestComponent.h"
+#include "Game/VestigeGameMode.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerController.h"
 #include "Player/VestigeCheatManager.h"
@@ -27,8 +28,8 @@ namespace VestigeCheatManagerTests
 
 		TEST_METHOD(TheGamesPlayerControllerUsesTheVestigeCheatManager)
 		{
-			const UClass* ControllerClass = LoadClass<APlayerController>(
-				nullptr, TEXT("/Game/ThirdPerson/Blueprints/BP_ThirdPersonPlayerController.BP_ThirdPersonPlayerController_C"));
+			const UClass* ControllerClass =
+				LoadClass<APlayerController>(nullptr, TEXT("/Game/Vestige/Blueprints/BP_PlayerController.BP_PlayerController_C"));
 			ASSERT_THAT(IsNotNull(ControllerClass));
 
 			const APlayerController* Controller = GetDefault<APlayerController>(ControllerClass);
@@ -40,6 +41,7 @@ namespace VestigeCheatManagerTests
 		{
 			const UVestigeClockSubsystem* Clock = UVestigeClockSubsystem::Get(&Spawner.GetWorld());
 			ASSERT_THAT(IsNotNull(Clock));
+			Spawner.SpawnActor<AVestigeGameMode>().DispatchBeginPlay();
 			APawn& Pawn = Spawner.SpawnActor<APawn>();
 			UVestigeRestComponent* Rest = NewObject<UVestigeRestComponent>(&Pawn);
 			Rest->RegisterComponent();

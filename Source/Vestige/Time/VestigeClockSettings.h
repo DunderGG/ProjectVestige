@@ -55,7 +55,7 @@ private:
 	float DayStartHour = 6.f;
 
 	/**
-	 * Hour the day ends and the clock stops: OnDayEndReached is broadcast. 30 is 06:00 the next morning, so a player who
+	 * Hour the day ends and the clock stops: OnDayEnded is broadcast. 30 is 06:00 the next morning, so a player who
 	 * never sleeps stays up the whole night and the next day starts at sunrise.
 	 */
 	UPROPERTY(Config, EditAnywhere, Category = "Time", meta = (AllowPrivateAccess = "true", ClampMin = 1, ClampMax = 30))

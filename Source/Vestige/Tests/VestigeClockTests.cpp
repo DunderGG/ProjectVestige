@@ -42,6 +42,20 @@ namespace VestigeClockTests
 				});
 		}
 
+		/** Counts every broadcast of the clock's OnDayEnded into Count, and remembers the last one in LastDayEnd. */
+		void CountDayEnds(int32& Count, FVestigeDayEnd* LastDayEnd = nullptr)
+		{
+			GameClock->OnDayEnded.AddLambda(
+				[&Count, LastDayEnd](const FVestigeDayEnd& DayEnd)
+				{
+					++Count;
+					if (LastDayEnd)
+					{
+						*LastDayEnd = DayEnd;
+					}
+				});
+		}
+
 		static FVestigeClockSaveData MakeClock(int32 Day, float TimeOfDay)
 		{
 			FVestigeClockSaveData Data;
@@ -118,7 +132,7 @@ namespace VestigeClockTests
 		TEST_METHOD(DayEndIsBroadcastOnceWhenTheClockReachesIt)
 		{
 			int32 Broadcasts = 0;
-			CountBroadcasts(GameClock->OnDayEndReached, Broadcasts);
+			CountDayEnds(Broadcasts);
 
 			PassHours(GameClock->GetDayEndHour() - GameClock->GetDayStartHour() - 1.f);
 			ASSERT_THAT(IsTrue(Broadcasts == 0));
@@ -131,7 +145,7 @@ namespace VestigeClockTests
 		TEST_METHOD(DayEndIsBroadcastAgainTheNextDay)
 		{
 			int32 Broadcasts = 0;
-			CountBroadcasts(GameClock->OnDayEndReached, Broadcasts);
+			CountDayEnds(Broadcasts);
 			PassHours(GameClock->GetDayEndHour());
 
 			GameClock->StartNextDay();
@@ -146,7 +160,7 @@ namespace VestigeClockTests
 			int32 Broadcasts = 0;
 			CountBroadcasts(GameClock->OnNewDay, Broadcasts);
 			CountBroadcasts(GameClock->OnNewDayFinished, Broadcasts);
-			CountBroadcasts(GameClock->OnDayEndReached, Broadcasts);
+			CountDayEnds(Broadcasts);
 			CountBroadcasts(GameClock->OnHourStarted, Broadcasts);
 
 			GameClock->RestoreFromSaveData(MakeClock(0, GameClock->GetDayEndHour() + 5.f));
@@ -159,7 +173,7 @@ namespace VestigeClockTests
 		TEST_METHOD(ClockRestoredAtTheDayEndStillEndsTheDay)
 		{
 			int32 Broadcasts = 0;
-			CountBroadcasts(GameClock->OnDayEndReached, Broadcasts);
+			CountDayEnds(Broadcasts);
 
 			GameClock->RestoreFromSaveData(MakeClock(3, GameClock->GetDayEndHour()));
 			PassHours(0.1f);
@@ -272,7 +286,7 @@ namespace VestigeClockTests
 		TEST_METHOD(AdvancingPastTheDayEndStopsTheClockThere)
 		{
 			int32 DayEnds = 0;
-			CountBroadcasts(GameClock->OnDayEndReached, DayEnds);
+			CountDayEnds(DayEnds);
 
 			ASSERT_THAT(IsTrue(GameClock->AdvanceTo(GameClock->GetDayEndHour() + 5.f)));
 
@@ -280,6 +294,99 @@ namespace VestigeClockTests
 			ASSERT_THAT(IsTrue(DayEnds == 1));
 			ASSERT_THAT(IsFalse(GameClock->IsRunning()));
 			ASSERT_THAT(IsFalse(GameClock->AdvanceTo(GameClock->GetDayEndHour() + 6.f)));
+		}
+
+		TEST_METHOD(EndingTheDayEarlyStopsTheClockWhereItIs)
+		{
+			int32 DayEnds = 0;
+			FVestigeDayEnd DayEnd;
+			CountDayEnds(DayEnds, &DayEnd);
+			GameClock->RestoreFromSaveData(MakeClock(4, 22.5f));
+
+			ASSERT_THAT(IsTrue(GameClock->EndDay()));
+
+			ASSERT_THAT(IsFalse(GameClock->IsRunning()));
+			ASSERT_THAT(IsTrue(GameClock->GetTimeOfDay() == 22.5f));
+			ASSERT_THAT(IsTrue(DayEnds == 1));
+			ASSERT_THAT(IsTrue(DayEnd.Day == 4));
+			ASSERT_THAT(IsTrue(DayEnd.TimeOfDay == 22.5f));
+			ASSERT_THAT(IsTrue(DayEnd.bEndedEarly));
+			ASSERT_THAT(IsTrue(GameClock->GetLastDayEnd().Day == 4));
+		}
+
+		TEST_METHOD(ADayEndsOnlyOnce)
+		{
+			int32 DayEnds = 0;
+			CountDayEnds(DayEnds);
+			ASSERT_THAT(IsTrue(GameClock->EndDay()));
+
+			ASSERT_THAT(IsFalse(GameClock->EndDay()));
+			ASSERT_THAT(IsFalse(GameClock->AdvanceTo(GameClock->GetTimeOfDay() + 1.f)));
+			PassHours(GameClock->GetDayEndHour());
+
+			ASSERT_THAT(IsTrue(DayEnds == 1));
+		}
+
+		TEST_METHOD(ReachingTheDayEndIsNotEndingItEarly)
+		{
+			int32 DayEnds = 0;
+			FVestigeDayEnd DayEnd;
+			CountDayEnds(DayEnds, &DayEnd);
+
+			PassHours(GameClock->GetDayEndHour());
+
+			ASSERT_THAT(IsTrue(DayEnds == 1));
+			ASSERT_THAT(IsFalse(DayEnd.bEndedEarly));
+			ASSERT_THAT(IsTrue(DayEnd.TimeOfDay == GameClock->GetDayEndHour()));
+		}
+
+		TEST_METHOD(TheNewDayKnowsHowTheLastOneEnded)
+		{
+			float EndedAt = 0.f;
+			GameClock->OnDayEnded.AddLambda(
+				[this](const FVestigeDayEnd& DayEnd)
+				{
+					GameClock->StartNextDay();
+				});
+			GameClock->OnNewDay.AddLambda(
+				[this, &EndedAt](int32 Day)
+				{
+					EndedAt = GameClock->GetLastDayEnd().TimeOfDay;
+				});
+			GameClock->RestoreFromSaveData(MakeClock(1, 25.f));
+
+			GameClock->EndDay();
+
+			ASSERT_THAT(IsTrue(GameClock->GetCurrentDay() == 2));
+			ASSERT_THAT(IsTrue(EndedAt == 25.f));
+		}
+
+		TEST_METHOD(AnHourThatEndsTheDayIsTheLastHourBroadcast)
+		{
+			// A rule that ends the day at an hour, with the next day started at once as the game mode does.
+			TArray<int32> Hours;
+			GameClock->OnHourStarted.AddLambda(
+				[this, &Hours](int32 Hour)
+				{
+					Hours.Add(Hour);
+					if (Hour == 25)
+					{
+						GameClock->EndDay();
+					}
+				});
+			GameClock->OnDayEnded.AddLambda(
+				[this](const FVestigeDayEnd& DayEnd)
+				{
+					GameClock->StartNextDay();
+				});
+			GameClock->RestoreFromSaveData(MakeClock(1, 24.5f));
+
+			PassHours(3.f);
+
+			const TArray<int32> Expected = {25};
+			ASSERT_THAT(IsTrue(Hours == Expected));
+			ASSERT_THAT(IsTrue(GameClock->GetCurrentDay() == 2));
+			ASSERT_THAT(IsTrue(GameClock->GetTimeOfDay() == GameClock->GetDayStartHour()));
 		}
 	};
 }

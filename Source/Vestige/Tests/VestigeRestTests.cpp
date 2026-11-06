@@ -13,6 +13,7 @@
 #include "CQTest.h"
 #include "Farming/VestigeRestComponent.h"
 #include "Farming/VestigeRestSaveData.h"
+#include "Game/VestigeGameMode.h"
 #include "Player/VestigePlayerCharacter.h"
 #include "Player/VestigePlayerState.h"
 #include "Time/VestigeClockSaveData.h"
@@ -40,6 +41,8 @@ namespace VestigeRestTests
 			Spawner.InitializeGameSubsystems();
 			Player.Clock = UVestigeClockSubsystem::Get(&Spawner.GetWorld());
 			ASSERT_THAT(IsNotNull(Player.Clock));
+			// The game mode starts the next day once the day has ended.
+			Spawner.SpawnActor<AVestigeGameMode>().DispatchBeginPlay();
 			UClass* PlayerStateClass =
 				LoadClass<AVestigePlayerState>(nullptr, TEXT("/Game/Vestige/Blueprints/BP_PlayerState.BP_PlayerState_C"));
 			UClass* CharacterClass =
@@ -270,6 +273,25 @@ namespace VestigeRestTests
 
 			ASSERT_THAT(IsTrue(Data.bExhausted));
 			ASSERT_THAT(IsTrue(Setup.RestComponent->IsExhausted()));
+		}
+
+		TEST_METHOD(TheNewDaysSaveHoldsTheNightsStaminaAndExhaustion)
+		{
+			const FPlayerSetup& Setup = Player;
+			SpendAllStamina(Setup);
+			bool bSavedExhausted = false;
+			float SavedStamina = 0.f;
+			Setup.Clock->OnNewDayFinished.AddLambda(
+				[&Setup, &bSavedExhausted, &SavedStamina](int32 Day)
+				{
+					bSavedExhausted = Setup.RestComponent->GetSaveData().bExhausted;
+					SavedStamina = GetStamina(Setup);
+				});
+
+			SleepAt(Setup, 25.f);
+
+			ASSERT_THAT(IsTrue(bSavedExhausted));
+			ASSERT_THAT(IsTrue(FMath::IsNearlyEqual(SavedStamina, 0.75f * GetMaxStamina(Setup))));
 		}
 
 		TEST_METHOD(RestoringExhaustionChangesNoStamina)

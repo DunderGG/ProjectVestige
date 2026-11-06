@@ -16,6 +16,21 @@ DECLARE_MULTICAST_DELEGATE_OneParam(FOnVestigeNewDay, int32 /* Day */);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnVestigeNewDayBlueprint, int32, Day);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnVestigeHourStarted, int32 /* Hour */);
 
+/** How the last day ended, kept by UVestigeClockSubsystem from that day's end until the next day ends. */
+struct FVestigeDayEnd
+{
+	/** The day that ended. */
+	int32 Day = 0;
+
+	/** When it ended, in GetTimeOfDay's hours (25 is 01:00 after midnight). */
+	float TimeOfDay = 0.f;
+
+	/** True when it ended before the day's end hour, because the player went to bed; false when the clock reached it. */
+	bool bEndedEarly = false;
+};
+
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnVestigeDayEnded, const FVestigeDayEnd& /* DayEnd */);
+
 /**
  * The game's time: the day counter and the clock, the one owner of game time (Systems.md, section 4). A game-instance
  * subsystem, so the clock keeps its time across map changes and runs in whichever game map is open. It advances with that
@@ -38,7 +53,16 @@ public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;
 
-	/** Ends the current day and sets the clock to the next morning, then broadcasts OnNewDay, OnNewDayBlueprint and OnNewDayFinished. */
+	/**
+	 * Ends the day now, before its end hour, as when the player goes to bed: the clock stops where it is and OnDayEnded is
+	 * broadcast, as when the clock reaches the day's end. Returns false, and changes nothing, when the day has already ended.
+	 */
+	bool EndDay();
+
+	/**
+	 * Sets the clock to the next morning, then broadcasts OnNewDay, OnNewDayBlueprint and OnNewDayFinished. The game mode
+	 * calls it once the day has ended (OnDayEnded); a day that hasn't ended counts as ended now, without OnDayEnded.
+	 */
 	void StartNextDay();
 
 	/** Puts the clock back to the morning of day 1 for a new game, without broadcasting anything. */
@@ -54,13 +78,13 @@ public:
 
 	/**
 	 * Sets the day and clock from a save without broadcasting anything. The day becomes at least 1 and the clock is
-	 * clamped between the day's start and end; a clock at the day's end still broadcasts OnDayEndReached on its next tick.
+	 * clamped between the day's start and end; a clock at the day's end still broadcasts OnDayEnded on its next tick.
 	 */
 	void RestoreFromSaveData(const FVestigeClockSaveData& Data);
 
 	/**
 	 * Runs the clock forward to NewTimeOfDay at once, as if the time had passed: OnHourStarted is broadcast for every whole
-	 * hour on the way, and OnDayEndReached if it reaches the day's end, where it stops. For developer commands.
+	 * hour on the way, and OnDayEnded if it reaches the day's end, where it stops. For developer commands.
 	 * NewTimeOfDay is in GetTimeOfDay's hours (25 is 01:00 after midnight). Returns false, and changes nothing, when
 	 * NewTimeOfDay isn't later than the clock or the clock has stopped at the day's end.
 	 */
@@ -85,8 +109,14 @@ public:
 	/** Hour the sun sets, later than GetSunriseHour. */
 	float GetSunsetHour() const { return SunsetHour; }
 
-	/** False once the clock has stopped at the end of the day, until the next day starts. */
+	/** False once the day has ended and the clock has stopped, until the next day starts. */
 	bool IsRunning() const { return !bDayEndReached; }
+
+	/**
+	 * How the last day ended: its number, when, and whether the player went to bed early. Read on OnNewDay to know how
+	 * the night before went. Day is 0 before any day has ended in this run of the game.
+	 */
+	const FVestigeDayEnd& GetLastDayEnd() const { return LastDayEnd; }
 
 	/** Runs the clock forward by DeltaSeconds of the world's time. The engine calls it every frame while IsTickable. */
 	virtual void Tick(float DeltaSeconds) override;
@@ -115,10 +145,12 @@ public:
 	FOnVestigeNewDay OnNewDayFinished;
 
 	/**
-	 * Broadcast once per day, with the day's number, when the clock reaches the day's end. The clock then stops until
-	 * StartNextDay. Whoever owns the end of the player's day (UVestigeRestComponent) reacts here.
+	 * Broadcast once per day when the day ends: when the clock reaches the day's end, or earlier through EndDay (the player
+	 * went to bed). The clock then stops until StartNextDay. AVestigeGameMode starts the next day from here, so a listener
+	 * after it may already be in the new day: react to the night on OnNewDay with GetLastDayEnd instead. In a world whose
+	 * game mode isn't ours nothing starts the next day, so the clock stays stopped (logged as a warning).
 	 */
-	FOnVestigeNewDay OnDayEndReached;
+	FOnVestigeDayEnded OnDayEnded;
 
 	/**
 	 * Broadcast each time the running clock reaches a whole hour, with the hour since midnight at the start of the day: 22
@@ -131,8 +163,17 @@ private:
 	/** Sets the clock to NewTimeOfDay, no later than the day's end, and broadcasts the hours passed and the day's end. */
 	void RunTo(float NewTimeOfDay);
 
-	/** Broadcasts OnHourStarted for every whole hour after PreviousTimeOfDay, up to and including TimeOfDay. */
+	/**
+	 * Broadcasts OnHourStarted for every whole hour after PreviousTimeOfDay, up to and including TimeOfDay. Stops early
+	 * when a listener ends the day, so the new day never hears the old day's hours.
+	 */
 	void BroadcastHoursStartedSince(float PreviousTimeOfDay);
+
+	/** Stops the clock at the current time, keeps how the day ended in LastDayEnd, and broadcasts OnDayEnded. */
+	void EndDayNow();
+
+	/** Keeps the current day and time in LastDayEnd, as the day that ended. */
+	void RecordDayEnd();
 
 	UPROPERTY()
 	TObjectPtr<UVestigeSaveRegistry> SaveRegistry;
@@ -147,6 +188,9 @@ private:
 	int32 CurrentDay = 1;
 	float TimeOfDay = 6.f;
 
-	/** Set when OnDayEndReached is broadcast, so it is broadcast once per day and the clock stops. */
+	/** Set when the day ends, so OnDayEnded is broadcast once per day and the clock stops. */
 	bool bDayEndReached = false;
+
+	/** How the last day ended. Not saved: the next day starts in the same frame the day ends. */
+	FVestigeDayEnd LastDayEnd;
 };

@@ -11,13 +11,15 @@
 
 class UAbilitySystemComponent;
 class UVestigeClockSubsystem;
+struct FVestigeDayEnd;
 struct FVestigeRestSaveData;
 
 /**
- * Owns the end of the player's day and the late-night rules (GameDesign.md, section 5): going to sleep, staying up
- * until the day ends, the warnings at LateWarningHour and LateNightHour, the stamina drain from LateNightHour until the
- * next day, and exhaustion. A night that ends at LateNightHour or later starts the next day exhausted, with stamina
- * refilled to ExhaustedRefillFraction of the maximum; an earlier night refills it fully and clears exhaustion.
+ * Owns the player's side of the end of the day and the late-night rules (GameDesign.md, section 5): asking the clock to
+ * end the day when going to sleep, the warnings at LateWarningHour and LateNightHour, the stamina drain from
+ * LateNightHour until the day ends, and waking up. A day that ends at LateNightHour or later (staying up until the
+ * day's end included) starts the next day exhausted, with stamina refilled to ExhaustedRefillFraction of the maximum; an
+ * earlier one refills it fully and clears exhaustion. Starting the next day is the game mode's job (AVestigeGameMode).
  * Lives on the player's pawn and changes stamina through gameplay effects on the owner's ability system.
  * Saves whether the player is exhausted under Base.Rest through UVestigeSaveRegistry while it is in play.
  */
@@ -29,7 +31,10 @@ class UVestigeRestComponent : public UActorComponent, public IVestigeSaveable
 public:
 	UVestigeRestComponent();
 
-	/** Ends the day and starts the next one, exhausted if it is LateNightHour or later. Does nothing without a clock. */
+	/**
+	 * Goes to bed: asks the clock to end the day now. The game mode then starts the next day, and the player wakes
+	 * exhausted if it was LateNightHour or later. Does nothing without a clock or once the day has ended.
+	 */
 	void Sleep();
 
 	/** Whether the owner is exhausted from a late night. False without an ability system. */
@@ -63,14 +68,14 @@ private:
 	/** Warns at LateWarningHour, and warns and starts the drain at LateNightHour. Bound to UVestigeClockSubsystem::OnHourStarted. */
 	void ReactToHour(int32 Hour);
 
-	/** Starts the next day when the clock reaches the end of the day. Bound to UVestigeClockSubsystem::OnDayEndReached. */
-	void StayUpAllNight(int32 EndedDay);
+	/** Stops the late-night drain once the day is over, in bed or not. Bound to UVestigeClockSubsystem::OnDayEnded. */
+	void EndNight(const FVestigeDayEnd& DayEnd);
 
 	/**
-	 * Stops the drain, refills stamina and sets or clears exhaustion by how late it is, then starts the next day, and
-	 * tells the player, with MessageFormat's {Day} set to the new day.
+	 * Refills stamina and sets or clears exhaustion by how late the last day ended (the clock's GetLastDayEnd). Bound to
+	 * UVestigeClockSubsystem::OnNewDay, so the save made at the new day's end of work holds the new stamina.
 	 */
-	void StartNextDay(const FText& MessageFormat);
+	void WakeUp(int32 NewDay);
 
 	/** Makes the owner exhausted, once, and refills stamina to ExhaustedRefillFraction, telling the player. */
 	void WakeExhausted(UAbilitySystemComponent& AbilitySystem);

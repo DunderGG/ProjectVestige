@@ -127,7 +127,8 @@ Contents
 
 **Rules:**
 
-- One owner of game time (`UVestigeClockSubsystem`), in the game instance so it keeps time across maps; its speed and hours, sunrise and sunset included, are project settings (`UVestigeClockSettings`), never a level's. Everything else reads it or listens to its events (`OnNewDay`, `OnNewDayFinished`, `OnHourStarted`, `OnDayEndReached`). Nothing keeps its own clock: something that happens at a time of day listens to `OnHourStarted`, which carries the hour since the start of the day's midnight (22 for 22:00, 24 for the next midnight), rather than watching the clock or running a timer of its own.
+- One owner of game time (`UVestigeClockSubsystem`), in the game instance so it keeps time across maps; its speed and hours, sunrise and sunset included, are project settings (`UVestigeClockSettings`), never a level's. Everything else reads it or listens to its events (`OnNewDay`, `OnNewDayFinished`, `OnHourStarted`, `OnDayEnded`). Nothing keeps its own clock: something that happens at a time of day listens to `OnHourStarted`, which carries the hour since the start of the day's midnight (22 for 22:00, 24 for the next midnight), rather than watching the clock or running a timer of its own.
+- The game mode (`AVestigeGameMode`) owns the end of the day. The clock says when a day has ended (`OnDayEnded`: it reached the day's end, or something such as going to bed asked for it with `EndDay`) and stops; the game mode starts the next day. Whatever reacts to how the night went (the rest component's exhaustion) does it on `OnNewDay`, reading the clock's `GetLastDayEnd`, so the save made after it holds the result. Nothing but the game mode starts a day from `OnDayEnded`: a listener after it may already be in the new day.
 - Blueprints, and so mods, hear of a new day through `On New Day` (`OnNewDayBlueprint`), the extension point broadcast after `OnNewDay` and before the save ([Architecture.md, section 12](Architecture.md#extension-points-today)). A Blueprint finds the clock with **Get Vestige Clock**.
 - Game time is separate from real time and from `UWorld::GetTimeSeconds`. Pausing and menus stop game time: the clock ticks with the open world, so pause stops it and time dilation (`slomo`) speeds it.
 - Daily changes happen in `OnNewDay` listeners that finish synchronously ([Architecture.md, section 15](Architecture.md#15-the-day-flow)).
@@ -506,7 +507,7 @@ Built differently from the approved design, decided on 2026-11-01 (decision log)
 **Rules:**
 
 - The farm, the town and the wasteland are separate maps opened with `OpenLevel` (decision log, 2026-11-04), not streamed sublevels or World Partition. What must go on while its map is closed lives in a game-instance subsystem; a level only shows it.
-- A main menu is its own small map with its own game mode, so it loads nothing from the farm.
+- A main menu is its own small map with its own game mode, set in its World Settings, so it loads nothing from the farm: `BP_GameMode`, the default for every map, hard-references the player's Blueprints.
 - A loading screen covers map changes and stays up until the systems that load content at start (the toolbar, crops, the save) report ready, as Lyra's loading screen waits on its "loading processors".
 - A main menu loads the chosen save with an explicit Continue (or starts a New game), instead of the save subsystem loading when the first map is initialised; the save is already read into the game instance, so travelling between maps never loads it again ([section 1](#1-saving-and-loading), [Architecture.md, section 6](Architecture.md#6-saving)).
 
