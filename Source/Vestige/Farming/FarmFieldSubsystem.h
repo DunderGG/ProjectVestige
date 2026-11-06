@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Core/VestigeSaveable.h"
 #include "Farming/FarmFieldSaveData.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "FarmFieldSubsystem.generated.h"
@@ -11,14 +12,16 @@
 class UFarmCropData;
 class UFarmField;
 class UVestigeClockSubsystem;
+class UVestigeSaveRegistry;
 
 /**
  * The farm data of every map: one UFarmField per field, by its ID, kept for the whole run of the game. A game-instance
  * subsystem, so a field outlives its map: every field grows on the clock's new day, loaded or not, and a map opened again
  * finds its field as it was. Levels only show fields; AFarmGrid asks for its field here when it begins play.
+ * Saves every field under Base.Fields through UVestigeSaveRegistry, loading the crops a save names when it restores.
  */
 UCLASS()
-class UFarmFieldSubsystem : public UGameInstanceSubsystem
+class UFarmFieldSubsystem : public UGameInstanceSubsystem, public IVestigeSaveable
 {
 	GENERATED_BODY()
 
@@ -49,10 +52,17 @@ public:
 	int32 RestoreFromSaveData(const TArray<FFarmFieldSaveData>& SavedFields, const TMap<FName, const UFarmCropData*>& Crops);
 
 	/**
-	 * Drops every field, for a new game. Call it just before the map is opened again: grids still showing an old field
-	 * stop following the farm until their level is replaced.
+	 * Drops every field, for a new game or before a save is restored. Grids still showing an old field stop following the
+	 * farm until their level is replaced, so this happens before a map is opened or begins play.
 	 */
-	void StartNewGame();
+	virtual void StartNewGame() override;
+
+	virtual FName GetSaveKey() const override;
+	virtual int32 GetSaveVersion() const override;
+	virtual FVestigeSaveRecord WriteSaveRecord() const override;
+
+	/** Replaces every field with the saved ones, loading the crops their tiles name (a wait, as at play start). */
+	virtual bool ReadSaveRecord(const FVestigeSaveRecord& Record, int32& OutLeftOutCount) override;
 
 private:
 	UFarmField& AddField(FName FieldId, const FIntPoint& Size);
@@ -65,4 +75,7 @@ private:
 
 	UPROPERTY()
 	TObjectPtr<UVestigeClockSubsystem> Clock;
+
+	UPROPERTY()
+	TObjectPtr<UVestigeSaveRegistry> SaveRegistry;
 };

@@ -8,8 +8,8 @@
 #include "FarmFieldSaveData.generated.h"
 
 /**
- * One field's part of a save: its ID, its size and every tile, as plain values and content IDs. UFarmFieldSubsystem fills
- * one per field, each UFarmField fills its tiles, and UVestigeSaveGame holds the list.
+ * One field in a save: its ID, its size and every tile, as plain values and content IDs. UFarmFieldSubsystem fills one
+ * per field and each UFarmField fills its tiles.
  */
 USTRUCT()
 struct FFarmFieldSaveData
@@ -27,4 +27,17 @@ struct FFarmFieldSaveData
 	/** Every tile, found again by its coordinates. */
 	UPROPERTY()
 	TArray<FFarmTileSaveData> Tiles;
+};
+
+/** UFarmFieldSubsystem's part of a save, under Base.Fields: every field of every map. */
+USTRUCT()
+struct FFarmFieldsSaveData
+{
+	GENERATED_BODY()
+
+	/** This layout's version (Systems.md, section 1). Raise it when a change would load older parts wrong. */
+	static constexpr int32 Version = 1;
+
+	UPROPERTY()
+	TArray<FFarmFieldSaveData> Fields;
 };

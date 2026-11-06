@@ -14,6 +14,7 @@
 #include "Content/VestigeItemData.h"
 #include "Content/VestigeToolData.h"
 #include "Core/VestigeFeedbackSubsystem.h"
+#include "Core/VestigeSaveRegistry.h"
 #include "Engine/World.h"
 #include "Farming/FarmFarmingSaveData.h"
 #include "Farming/FarmField.h"
@@ -41,6 +42,10 @@ void UFarmingComponent::BeginPlay()
 
 	LoadSeedCrop();
 	LoadToolbar();
+
+	// After the toolbar loads, since restoring the tool in hand looks for it there.
+	UVestigeSaveRegistry::RegisterWorldOwner(GetWorld(), *this);
+
 	Grid = AFarmGrid::Find(GetWorld());
 	if (Grid)
 	{
@@ -83,6 +88,7 @@ void UFarmingComponent::BeginPlay()
 
 void UFarmingComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
+	UVestigeSaveRegistry::UnregisterWorldOwner(GetWorld(), *this);
 	if (Grid)
 	{
 		Grid->OnFieldReady.RemoveAll(this);
@@ -171,6 +177,41 @@ FFarmFarmingSaveData UFarmingComponent::GetSaveData() const
 bool UFarmingComponent::RestoreFromSaveData(const FFarmFarmingSaveData& Data)
 {
 	return RestoreCurrentTool(Data.CurrentToolId);
+}
+
+FName UFarmingComponent::GetSaveKey() const
+{
+	static const FName Key(TEXT("Base.Farming"));
+	return Key;
+}
+
+int32 UFarmingComponent::GetSaveVersion() const
+{
+	return FFarmFarmingSaveData::Version;
+}
+
+FVestigeSaveRecord UFarmingComponent::WriteSaveRecord() const
+{
+	return FVestigeSaveRecord::Write(GetSaveData());
+}
+
+bool UFarmingComponent::ReadSaveRecord(const FVestigeSaveRecord& Record, int32& OutLeftOutCount)
+{
+	FFarmFarmingSaveData Data;
+	if (!Record.Read(Data))
+	{
+		return false;
+	}
+	if (!RestoreFromSaveData(Data))
+	{
+		++OutLeftOutCount;
+	}
+	return true;
+}
+
+void UFarmingComponent::StartNewGame()
+{
+	SelectToolbarSlot(0);
 }
 
 void UFarmingComponent::UseTool()

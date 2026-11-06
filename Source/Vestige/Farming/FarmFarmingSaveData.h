@@ -7,13 +7,16 @@
 #include "FarmFarmingSaveData.generated.h"
 
 /**
- * UFarmingComponent's part of a save: plain values and content IDs only. UVestigeSaveGame holds it; the farming component
- * fills it and restores from it.
+ * UFarmingComponent's part of a save, under Base.Farming: plain values and content IDs only. The farming component fills
+ * it and restores from it.
  */
 USTRUCT()
 struct FFarmFarmingSaveData
 {
 	GENERATED_BODY()
+
+	/** This layout's version (Systems.md, section 1). Raise it when a change would load older parts wrong. */
+	static constexpr int32 Version = 1;
 
 	/** ContentId of the tool in hand (Base.Hoe). */
 	UPROPERTY()

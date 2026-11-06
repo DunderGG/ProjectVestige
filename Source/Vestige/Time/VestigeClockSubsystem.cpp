@@ -3,6 +3,7 @@
 
 #include "Time/VestigeClockSubsystem.h"
 
+#include "Core/VestigeSaveRegistry.h"
 #include "Engine/GameInstance.h"
 #include "Engine/World.h"
 #include "ProfilingDebugging/CpuProfilerTrace.h"
@@ -30,7 +31,17 @@ void UVestigeClockSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 	DayEndHour = Settings.GetDayEndHour();
 	SunriseHour = Settings.GetSunriseHour();
 	SunsetHour = Settings.GetSunsetHour();
-	StartNewGame();
+
+	// Registering restores the saved day and clock, or starts day 1.
+	SaveRegistry = Collection.InitializeDependency<UVestigeSaveRegistry>();
+	if (SaveRegistry)
+	{
+		SaveRegistry->RegisterGameOwner(*this);
+	}
+	else
+	{
+		StartNewGame();
+	}
 
 	// IsTickable decides each frame whether the clock runs.
 	SetTickableTickType(ETickableTickType::Conditional);
@@ -39,6 +50,10 @@ void UVestigeClockSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 void UVestigeClockSubsystem::Deinitialize()
 {
 	SetTickableTickType(ETickableTickType::Never);
+	if (SaveRegistry)
+	{
+		SaveRegistry->UnregisterGameOwner(*this);
+	}
 	Super::Deinitialize();
 }
 
@@ -59,6 +74,33 @@ void UVestigeClockSubsystem::StartNewGame()
 	CurrentDay = 1;
 	TimeOfDay = DayStartHour;
 	bDayEndReached = false;
+}
+
+FName UVestigeClockSubsystem::GetSaveKey() const
+{
+	static const FName Key(TEXT("Base.Clock"));
+	return Key;
+}
+
+int32 UVestigeClockSubsystem::GetSaveVersion() const
+{
+	return FVestigeClockSaveData::Version;
+}
+
+FVestigeSaveRecord UVestigeClockSubsystem::WriteSaveRecord() const
+{
+	return FVestigeSaveRecord::Write(GetSaveData());
+}
+
+bool UVestigeClockSubsystem::ReadSaveRecord(const FVestigeSaveRecord& Record, int32& OutLeftOutCount)
+{
+	FVestigeClockSaveData Data;
+	if (!Record.Read(Data))
+	{
+		return false;
+	}
+	RestoreFromSaveData(Data);
+	return true;
 }
 
 FVestigeClockSaveData UVestigeClockSubsystem::GetSaveData() const

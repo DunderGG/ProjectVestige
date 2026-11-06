@@ -4,11 +4,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Core/VestigeSaveable.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "Tickable.h"
 #include "VestigeClockSubsystem.generated.h"
 
 struct FVestigeClockSaveData;
+class UVestigeSaveRegistry;
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnVestigeNewDay, int32 /* Day */);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnVestigeNewDayBlueprint, int32, Day);
@@ -19,9 +21,10 @@ DECLARE_MULTICAST_DELEGATE_OneParam(FOnVestigeHourStarted, int32 /* Hour */);
  * subsystem, so the clock keeps its time across map changes and runs in whichever game map is open. It advances with that
  * world's time, so pausing stops it and time dilation (slomo) speeds it up, and it stands still while a map loads. Its
  * speed and hours, and the hours of sunrise and sunset, come from UVestigeClockSettings. Presentation (the sun, the HUD) reads it; nothing else keeps a clock.
+ * Saves the day and the clock under Base.Clock through UVestigeSaveRegistry, for the whole game.
  */
 UCLASS(BlueprintType, meta = (DisplayName = "Vestige Clock"))
-class UVestigeClockSubsystem : public UGameInstanceSubsystem, public FTickableGameObject
+class UVestigeClockSubsystem : public UGameInstanceSubsystem, public FTickableGameObject, public IVestigeSaveable
 {
 	GENERATED_BODY()
 
@@ -39,7 +42,12 @@ public:
 	void StartNextDay();
 
 	/** Puts the clock back to the morning of day 1 for a new game, without broadcasting anything. */
-	void StartNewGame();
+	virtual void StartNewGame() override;
+
+	virtual FName GetSaveKey() const override;
+	virtual int32 GetSaveVersion() const override;
+	virtual FVestigeSaveRecord WriteSaveRecord() const override;
+	virtual bool ReadSaveRecord(const FVestigeSaveRecord& Record, int32& OutLeftOutCount) override;
 
 	/** The day and clock, for saving. */
 	FVestigeClockSaveData GetSaveData() const;
@@ -125,6 +133,9 @@ private:
 
 	/** Broadcasts OnHourStarted for every whole hour after PreviousTimeOfDay, up to and including TimeOfDay. */
 	void BroadcastHoursStartedSince(float PreviousTimeOfDay);
+
+	UPROPERTY()
+	TObjectPtr<UVestigeSaveRegistry> SaveRegistry;
 
 	// Read from UVestigeClockSettings in Initialize and kept for the game instance's lifetime.
 	float RealSecondsPerGameHour = 40.f;

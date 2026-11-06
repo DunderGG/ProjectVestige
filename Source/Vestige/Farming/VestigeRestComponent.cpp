@@ -11,6 +11,7 @@
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemGlobals.h"
 #include "Core/VestigeFeedbackSubsystem.h"
+#include "Core/VestigeSaveRegistry.h"
 #include "Engine/World.h"
 #include "Farming/VestigeRestSaveData.h"
 #include "Time/VestigeClockSubsystem.h"
@@ -40,11 +41,20 @@ void UVestigeRestComponent::BeginPlay()
 	{
 		Clock->OnHourStarted.AddUObject(this, &UVestigeRestComponent::ReactToHour);
 		Clock->OnDayEndReached.AddUObject(this, &UVestigeRestComponent::StayUpAllNight);
+
+		// A map opened after midnight never hears the hour the drain starts at, so it starts here.
+		if (Clock->GetTimeOfDay() >= LateNightHour)
+		{
+			StartLateNightDrain();
+		}
 	}
+	UVestigeSaveRegistry::RegisterWorldOwner(GetWorld(), *this);
 }
 
 void UVestigeRestComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
+	UVestigeSaveRegistry::UnregisterWorldOwner(GetWorld(), *this);
+
 	// The drain lives on the player state's ability system, which outlives this pawn.
 	StopLateNightDrain();
 	if (Clock)
@@ -83,6 +93,41 @@ void UVestigeRestComponent::RestoreFromSaveData(const FVestigeRestSaveData& Data
 	}
 	AbilitySystem->ApplyGameplayEffectToSelf(
 		GetDefault<UVestigeExhaustedEffect>(), VestigeRest::EffectLevel, AbilitySystem->MakeEffectContext());
+}
+
+FName UVestigeRestComponent::GetSaveKey() const
+{
+	static const FName Key(TEXT("Base.Rest"));
+	return Key;
+}
+
+int32 UVestigeRestComponent::GetSaveVersion() const
+{
+	return FVestigeRestSaveData::Version;
+}
+
+FVestigeSaveRecord UVestigeRestComponent::WriteSaveRecord() const
+{
+	return FVestigeSaveRecord::Write(GetSaveData());
+}
+
+bool UVestigeRestComponent::ReadSaveRecord(const FVestigeSaveRecord& Record, int32& OutLeftOutCount)
+{
+	FVestigeRestSaveData Data;
+	if (!Record.Read(Data))
+	{
+		return false;
+	}
+	RestoreFromSaveData(Data);
+	return true;
+}
+
+void UVestigeRestComponent::StartNewGame()
+{
+	if (UAbilitySystemComponent* AbilitySystem = GetAbilitySystem())
+	{
+		AbilitySystem->RemoveActiveGameplayEffectBySourceEffect(UVestigeExhaustedEffect::StaticClass(), nullptr);
+	}
 }
 
 void UVestigeRestComponent::ReactToHour(int32 Hour)

@@ -5,6 +5,9 @@
 
 #include "AbilitySystem/VestigeAbilitySet.h"
 #include "AbilitySystemComponent.h"
+#include "AttributeSet.h"
+#include "Core/VestigeSaveRegistry.h"
+#include "Core/VestigeSaveable.h"
 #include "GameFramework/Pawn.h"
 #include "Inventory/VestigeInventoryComponent.h"
 
@@ -29,6 +32,31 @@ void AVestigePlayerState::PostInitializeComponents()
 		}
 	}
 	OnPawnSet.AddDynamic(this, &AVestigePlayerState::FollowPawn);
+}
+
+void AVestigePlayerState::BeginPlay()
+{
+	Super::BeginPlay();
+
+	for (UAttributeSet* AttributeSet : AbilitySystem->GetSpawnedAttributes())
+	{
+		if (IVestigeSaveable* Saveable = Cast<IVestigeSaveable>(AttributeSet))
+		{
+			UVestigeSaveRegistry::RegisterWorldOwner(GetWorld(), *Saveable);
+		}
+	}
+}
+
+void AVestigePlayerState::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	for (UAttributeSet* AttributeSet : AbilitySystem->GetSpawnedAttributes())
+	{
+		if (IVestigeSaveable* Saveable = Cast<IVestigeSaveable>(AttributeSet))
+		{
+			UVestigeSaveRegistry::UnregisterWorldOwner(GetWorld(), *Saveable);
+		}
+	}
+	Super::EndPlay(EndPlayReason);
 }
 
 void AVestigePlayerState::FollowPawn(APlayerState* Player, APawn* NewPawn, APawn* OldPawn)

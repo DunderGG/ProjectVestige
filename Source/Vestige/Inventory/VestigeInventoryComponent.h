@@ -5,6 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Core/VestigeSaveable.h"
 #include "Inventory/VestigeInventory.h"
 #include "VestigeInventoryComponent.generated.h"
 
@@ -34,9 +35,11 @@ struct FVestigeItemStack
  * The items the player carries: a fixed number of slots, each empty or holding a stack of one item. Lives on the player
  * state, so it outlives the pawn. Loads every item definition at BeginPlay, so adding an item during play never waits on
  * a load, and broadcasts OnInventoryChanged after every change. The stacking rules are in FVestigeInventory.
+ * Saves its slots under Base.Inventory through UVestigeSaveRegistry while it is in play, so the player's bag crosses a map
+ * change; it is the player's inventory, and a second inventory (a chest) will need a key of its own.
  */
 UCLASS(ClassGroup = (Inventory), meta = (BlueprintSpawnableComponent))
-class UVestigeInventoryComponent : public UActorComponent
+class UVestigeInventoryComponent : public UActorComponent, public IVestigeSaveable
 {
 	GENERATED_BODY()
 
@@ -67,6 +70,14 @@ public:
 	 */
 	int32 RestoreFromSaveData(const FVestigeInventorySaveData& Data);
 
+	/** Empties the slots and adds the starting items, then broadcasts OnInventoryChanged. */
+	virtual void StartNewGame() override;
+
+	virtual FName GetSaveKey() const override;
+	virtual int32 GetSaveVersion() const override;
+	virtual FVestigeSaveRecord WriteSaveRecord() const override;
+	virtual bool ReadSaveRecord(const FVestigeSaveRecord& Record, int32& OutLeftOutCount) override;
+
 	/** Broadcast after every change, including when a save is loaded. */
 	FOnVestigeInventoryChanged OnInventoryChanged;
 
@@ -76,7 +87,11 @@ public:
 #endif
 
 protected:
+	/** Loads the item definitions, then takes its saved slots, or the starting items when there are none. */
 	virtual void BeginPlay() override;
+
+	/** Keeps its slots for the next map before it goes. */
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 private:
 	/** Loads every item definition the Asset Manager knows into Items. */

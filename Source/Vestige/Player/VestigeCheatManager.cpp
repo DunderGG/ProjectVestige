@@ -60,7 +60,7 @@ namespace VestigeCheats
 
 void UVestigeCheatManager::NewGame()
 {
-	UVestigeSaveSubsystem* Saves = GetWorld() ? GetWorld()->GetSubsystem<UVestigeSaveSubsystem>() : nullptr;
+	UVestigeSaveSubsystem* Saves = UVestigeSaveSubsystem::Get(GetWorld());
 	if (!Saves)
 	{
 		VESTIGE_LOG(this, LogVestige, Warning, "There is no save subsystem to start a new game with.");

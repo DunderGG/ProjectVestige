@@ -6,6 +6,7 @@
 #include "CoreMinimal.h"
 #include "ActiveGameplayEffectHandle.h"
 #include "Components/ActorComponent.h"
+#include "Core/VestigeSaveable.h"
 #include "VestigeRestComponent.generated.h"
 
 class UAbilitySystemComponent;
@@ -18,9 +19,10 @@ struct FVestigeRestSaveData;
  * next day, and exhaustion. A night that ends at LateNightHour or later starts the next day exhausted, with stamina
  * refilled to ExhaustedRefillFraction of the maximum; an earlier night refills it fully and clears exhaustion.
  * Lives on the player's pawn and changes stamina through gameplay effects on the owner's ability system.
+ * Saves whether the player is exhausted under Base.Rest through UVestigeSaveRegistry while it is in play.
  */
 UCLASS(ClassGroup = (Rest), meta = (BlueprintSpawnableComponent))
-class UVestigeRestComponent : public UActorComponent
+class UVestigeRestComponent : public UActorComponent, public IVestigeSaveable
 {
 	GENERATED_BODY()
 
@@ -42,8 +44,19 @@ public:
 	/** Makes the owner exhausted again if the save says so, without refilling or draining anything. */
 	void RestoreFromSaveData(const FVestigeRestSaveData& Data);
 
+	virtual FName GetSaveKey() const override;
+	virtual int32 GetSaveVersion() const override;
+	virtual FVestigeSaveRecord WriteSaveRecord() const override;
+	virtual bool ReadSaveRecord(const FVestigeSaveRecord& Record, int32& OutLeftOutCount) override;
+
+	/** Clears exhaustion, without a message, as a new player starts rested. */
+	virtual void StartNewGame() override;
+
 protected:
+	/** Follows the clock, starts the drain if the late night has already begun, then takes its saved part. */
 	virtual void BeginPlay() override;
+
+	/** Keeps its saved part for the next map, then stops the late-night drain and the clock. */
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 private:

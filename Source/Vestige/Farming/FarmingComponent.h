@@ -5,6 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Core/VestigeSaveable.h"
 #include "Farming/FarmToolbar.h"
 #include "FarmingComponent.generated.h"
 
@@ -28,9 +29,10 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnFarmToolUsed, const UVestigeTool
  * Gives its owner, a pawn, farming tools. Works on the tile next to the owner's in the direction the owner aims, takes
  * seeds from and puts harvests into the inventory on the owner's player state, and tells the player what happened
  * through UVestigeFeedbackSubsystem.
+ * Saves the tool in hand under Base.Farming through UVestigeSaveRegistry while it is in play.
  */
 UCLASS(ClassGroup = (Farming), meta = (BlueprintSpawnableComponent))
-class UFarmingComponent : public UActorComponent
+class UFarmingComponent : public UActorComponent, public IVestigeSaveable
 {
 	GENERATED_BODY()
 
@@ -83,6 +85,14 @@ public:
 	 */
 	bool RestoreFromSaveData(const FFarmFarmingSaveData& Data);
 
+	virtual FName GetSaveKey() const override;
+	virtual int32 GetSaveVersion() const override;
+	virtual FVestigeSaveRecord WriteSaveRecord() const override;
+	virtual bool ReadSaveRecord(const FVestigeSaveRecord& Record, int32& OutLeftOutCount) override;
+
+	/** Puts the first toolbar slot's tool in hand and broadcasts OnToolChanged. */
+	virtual void StartNewGame() override;
+
 	/**
 	 * Aims at the neighbouring tile in WorldDirection, snapped to one of the eight grid directions (diagonals included).
 	 * The owner's input calls it with the movement direction every frame it is held. A zero direction keeps the current aim,
@@ -127,7 +137,10 @@ public:
 	FOnFarmToolUsed OnToolUsed;
 
 protected:
+	/** Loads the seed crop and the toolbar, takes its saved tool in hand, then finds the grid and aims. */
 	virtual void BeginPlay() override;
+
+	/** Keeps the tool in hand for the next map, then stops following the grid, the owner and the ability system. */
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 private:

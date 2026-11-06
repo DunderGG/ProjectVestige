@@ -4,16 +4,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Subsystems/WorldSubsystem.h"
+#include "Engine/World.h"
+#include "Subsystems/GameInstanceSubsystem.h"
 #include "VestigeSaveSubsystem.generated.h"
 
-class UAbilitySystemComponent;
-class UFarmFieldSubsystem;
-class UFarmingComponent;
 class UVestigeClockSubsystem;
 class UVestigeSaveGame;
-class UVestigeInventoryComponent;
-class UVestigeRestComponent;
+class UVestigeSaveRegistry;
 
 /** What reading one save slot found. */
 struct FVestigeSaveSlotRead
@@ -51,21 +48,23 @@ struct FVestigeLoadDecision
 };
 
 /**
- * Saves the game every time a new day starts and loads it when play begins, following the rules in Architecture.md,
- * section 6. Each owner writes and restores its own part of the save; this subsystem collects, versions and writes them:
- * the clock (UVestigeClockSubsystem) and every map's fields (UFarmFieldSubsystem) from the game instance, the player's
- * data from the world. Saves alternate between two slots, so a failed write keeps the last good save. A save that can't be
- * loaded is left untouched, and saving stays off for the session, until the player starts a new game.
- * A world subsystem because the player's data lives in the world, and a fresh one comes with every new world. It loads the
- * save each time a world begins play, which is right while the game has one map; the save registry moves loading to the
- * game instance before there is travel between maps (Roadmap.md, 4.0).
+ * The save files, following the rules in Architecture.md, section 6 and Systems.md, section 1. Reads the save once per
+ * game, when the game's first map is initialised and before any of its actors begins play, and hands its records to
+ * UVestigeSaveRegistry, which gives each owner its part; tells the player how loading went once that map has begun play.
+ * Writes every record the registry holds each time a new day starts. Saves alternate between two slots, so a failed write
+ * keeps the last good save. A save that can't be loaded is left untouched, and saving stays off until the player starts a
+ * new game. Knows no owner of saved state.
+ * A game-instance subsystem, so the save is read once and travelling to another map doesn't load it again.
  */
 UCLASS()
-class UVestigeSaveSubsystem : public UWorldSubsystem
+class UVestigeSaveSubsystem : public UGameInstanceSubsystem
 {
 	GENERATED_BODY()
 
 public:
+	/** The save subsystem of World's game instance, or nullptr in a world without one (editor and preview worlds). */
+	static UVestigeSaveSubsystem* Get(const UWorld* World);
+
 	/**
 	 * Decides what loading does with what each slot holds: refuse if any slot holds a newer version, load the readable save of
 	 * the current version with the highest sequence number, refuse if files exist but none of them is that, or start a new game.
@@ -77,50 +76,54 @@ public:
 	/** The slot the next save goes to: whichever doesn't hold the newest good save (NewestSlot, or INDEX_NONE for none). */
 	static int32 GetSlotToWrite(int32 NewestSlot);
 
+	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
+	virtual void Deinitialize() override;
+
 	/**
-	 * Deletes both save slots, puts the clock back to day 1, drops every field and opens the map again. This is the player's
-	 * explicit choice, so it also replaces a save that couldn't be loaded.
+	 * Deletes both save slots, starts a new game in every saved owner and opens the map again. This is the player's
+	 * explicit choice, so it also replaces a save that couldn't be loaded, and saving is allowed again.
 	 */
 	void StartNewGame();
 
 	/** False once a save couldn't be loaded, so no new day can overwrite it. */
 	bool IsSavingAllowed() const { return bSavingAllowed; }
 
-	virtual void OnWorldBeginPlay(UWorld& InWorld) override;
-
-protected:
-	virtual bool DoesSupportWorldType(const EWorldType::Type WorldType) const override;
-	virtual void Deinitialize() override;
-
 private:
-	/** Binds to the new day and loads the save. Bound to UWorld::OnWorldBeginPlay, which follows every actor's BeginPlay. */
-	void BindAndLoad();
+	/** Loads the save when the game's first map is initialised. Bound to FWorldDelegates::OnPostWorldInitialization. */
+	void LoadOnFirstMap(UWorld* World, const UWorld::InitializationValues InitializationValues);
 
-	void SaveFarm(int32 NewDay);
-	void LoadFarm();
+	/** Reads the slots and hands the newest good save to the registry, or turns saving off if it can't be loaded. */
+	void LoadGame();
 
-	/** Hands each owner its part of Save. Returns how many saved entries named content that no longer exists. */
-	int32 ApplySave(const UVestigeSaveGame& Save, UFarmingComponent& Farming, UVestigeInventoryComponent& Inventory);
+	/** Tells the player how loading went. Bound to the first map's OnWorldBeginPlay, once the HUD listens. */
+	void TellPlayerAboutLoad();
 
-	/** Turns saving off for the rest of the session and tells the player why. */
+	/** Writes every record to the slot that doesn't hold the newest good save. Bound to the clock's OnNewDayFinished. */
+	void SaveGame(int32 NewDay);
+
+	/** Turns saving off for the rest of the session and keeps Reason to tell the player. */
 	void RefuseToSave(const FText& Reason);
 
-	UFarmingComponent* GetPlayerFarming() const;
-	UVestigeInventoryComponent* GetPlayerInventory() const;
+	/** Raises Message for the player in the open map. */
+	void Notify(const FText& Message) const;
 
-	/** The rest component on the player's pawn, which saves whether the player is exhausted. nullptr if there is none. */
-	UVestigeRestComponent* GetPlayerRest() const;
-
-	/** The ability system on the player's player state, which holds the stamina. nullptr if there is none. */
-	UAbilitySystemComponent* GetPlayerAbilitySystem() const;
+	UPROPERTY()
+	TObjectPtr<UVestigeSaveRegistry> Registry;
 
 	UPROPERTY()
 	TObjectPtr<UVestigeClockSubsystem> Clock;
 
-	UPROPERTY()
-	TObjectPtr<UFarmFieldSubsystem> FarmFields;
+	/** The first map, until the player has been told how loading went. */
+	TWeakObjectPtr<UWorld> LoadedWorld;
 
+	FDelegateHandle WorldInitializedHandle;
 	FDelegateHandle WorldBeginPlayHandle;
+
+	/** What the player is told once the first map has begun play. */
+	TArray<FText> MessagesForPlayer;
+
+	/** True once the save has been loaded, or a new game started. Nothing is saved before. */
+	bool bGameStarted = false;
 
 	bool bSavingAllowed = true;
 

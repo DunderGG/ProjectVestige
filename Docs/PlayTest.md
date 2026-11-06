@@ -333,6 +333,16 @@ The console command `SkipToTime` runs the clock forward to a time today, for che
 - [x] **Evening**: press Play, open the console and type `SkipToTime 1930`. The HUD clock shows 19:30 and the light turns warm and dims toward 20:00. `SkipToTime 1800` afterwards does nothing and the Output Log says the clock only runs forward.
 - [x] **Late night**: type `SkipToTime 2359`. The 22:00 warning shows; a minute later the midnight warning shows and stamina starts to drain. `SkipToTime 559` takes you to just before 06:00, where the day ends as if you had stayed up.
 
+### Save registry, 2026-11-06
+
+Every owner now saves its own part under a key through the save registry, the save is read once per game, and the player's data crosses a map change. The tests cover the registry's rules, an outdated or newer part, unknown parts being kept, a new game, and the player's bag, stamina, exhaustion and tool surviving the map being reopened; these checks are for the real files and a real map change. The commit is the one titled "Save the game through a registry of owners".
+
+- [ ] **Old save refused once**: press Play with your current save (version 2). The game says "The save couldn't be read. It is kept as it is, and the game won't save until you start a new game." and the Output Log has a `LogVestigeSave` warning that slot `Farm` holds an older save, version 2. Then type `NewGame` in the console: the map reopens on day 1 with the starting bag.
+- [ ] **Round trip**: plant and water a tile, choose the watering can, use some stamina, and sleep ("Game saved."). Stop and press Play again: "Welcome back. Day 2." with the bag, the watering can in hand, the stamina and the tile as you left them, and no "Some saved things..." message. The Output Log has a `LogVestigeSave` line "Loaded day 2 from save slot ... 6 parts".
+- [ ] **Reopening the map keeps the day**: mid-morning, after tilling a few tiles and changing the bag, type `open L_Farm` in the console. The map reopens at the same time of day (it doesn't jump back to the morning's save), the tiles you tilled since the morning are still tilled, and the bag, stamina and tool in hand are as they were. You start at the player start, which is expected.
+- [ ] **Exhaustion and the late night cross a map change**: go to bed after midnight (`SkipToTime 0030`, then the bed) so the next day starts exhausted, then type `open L_Farm`: the HUD still shows "Exhausted". Then `SkipToTime 0030` and `open L_Farm` again: stamina keeps draining in the reopened map.
+- [ ] **No reload on a new game**: type `NewGame`, play until the first night and sleep: "Game saved." shows and `Saved/SaveGames/` gets a new `Farm.sav`.
+
 ### Editor chores
 
 Changes only the editor can make safely. The steps are in [Roadmap.md, Housekeeping](Roadmap.md#3-housekeeping): re-saving the template Blueprints and `L_Farm`, moving `BP_FarmTile` and the materials with redirectors fixed, and regenerating the Android File Server token if it was ever used. After each one, run the [smoke test](#3-smoke-test).

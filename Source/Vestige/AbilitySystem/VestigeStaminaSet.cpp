@@ -44,6 +44,49 @@ void UVestigeStaminaSet::RestoreFromSaveData(UAbilitySystemComponent& AbilitySys
 	AbilitySystem.SetNumericAttributeBase(GetStaminaAttribute(), Data.Stamina);
 }
 
+FName UVestigeStaminaSet::GetSaveKey() const
+{
+	static const FName Key(TEXT("Base.Stamina"));
+	return Key;
+}
+
+int32 UVestigeStaminaSet::GetSaveVersion() const
+{
+	return FVestigeStaminaSaveData::Version;
+}
+
+FVestigeSaveRecord UVestigeStaminaSet::WriteSaveRecord() const
+{
+	FVestigeStaminaSaveData Data;
+	if (const UAbilitySystemComponent* AbilitySystem = GetOwningAbilitySystemComponent())
+	{
+		Data = GetSaveData(*AbilitySystem);
+	}
+	return FVestigeSaveRecord::Write(Data);
+}
+
+bool UVestigeStaminaSet::ReadSaveRecord(const FVestigeSaveRecord& Record, int32& OutLeftOutCount)
+{
+	FVestigeStaminaSaveData Data;
+	if (!Record.Read(Data))
+	{
+		return false;
+	}
+	if (UAbilitySystemComponent* AbilitySystem = GetOwningAbilitySystemComponent())
+	{
+		RestoreFromSaveData(*AbilitySystem, Data);
+	}
+	return true;
+}
+
+void UVestigeStaminaSet::StartNewGame()
+{
+	if (UAbilitySystemComponent* AbilitySystem = GetOwningAbilitySystemComponent())
+	{
+		AbilitySystem->SetNumericAttributeBase(GetStaminaAttribute(), GetMaxStamina());
+	}
+}
+
 void UVestigeStaminaSet::PreAttributeBaseChange(const FGameplayAttribute& Attribute, float& NewValue) const
 {
 	Super::PreAttributeBaseChange(Attribute, NewValue);

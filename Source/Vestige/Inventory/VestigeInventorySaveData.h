@@ -25,13 +25,16 @@ struct FVestigeInventorySlotSaveData
 };
 
 /**
- * UVestigeInventoryComponent's part of a save: plain values and content IDs only. UVestigeSaveGame holds it; the inventory
- * fills it and restores from it.
+ * UVestigeInventoryComponent's part of a save, under Base.Inventory: plain values and content IDs only. The inventory fills
+ * it and restores from it.
  */
 USTRUCT()
 struct FVestigeInventorySaveData
 {
 	GENERATED_BODY()
+
+	/** This layout's version (Systems.md, section 1). Raise it when a change would load older parts wrong. */
+	static constexpr int32 Version = 1;
 
 	/** The non-empty slots, in slot order. */
 	UPROPERTY()

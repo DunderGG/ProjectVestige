@@ -5,6 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "AttributeSet.h"
+#include "Core/VestigeSaveable.h"
 #include "VestigeStaminaSet.generated.h"
 
 class UAbilitySystemComponent;
@@ -15,9 +16,11 @@ struct FVestigeStaminaSaveData;
  * gameplay effects (UVestigeStaminaCostEffect, UVestigeStaminaRefillEffect), and this set keeps them in range. While
  * Stamina is 0 it holds Vestige.State.OutOfStamina on its ability system, and it tells the player when stamina runs out.
  * Granted by an ability set (DA_AbilitySet_Player on BP_PlayerState).
+ * Saves the stamina under Base.Stamina; the actor that holds its ability system registers it with UVestigeSaveRegistry,
+ * since an attribute set has no BeginPlay or EndPlay of its own.
  */
 UCLASS()
-class UVestigeStaminaSet : public UAttributeSet
+class UVestigeStaminaSet : public UAttributeSet, public IVestigeSaveable
 {
 	GENERATED_BODY()
 
@@ -37,6 +40,14 @@ public:
 	 * Does nothing for a save without stamina, or if AbilitySystem has no stamina set.
 	 */
 	static void RestoreFromSaveData(UAbilitySystemComponent& AbilitySystem, const FVestigeStaminaSaveData& Data);
+
+	virtual FName GetSaveKey() const override;
+	virtual int32 GetSaveVersion() const override;
+	virtual FVestigeSaveRecord WriteSaveRecord() const override;
+	virtual bool ReadSaveRecord(const FVestigeSaveRecord& Record, int32& OutLeftOutCount) override;
+
+	/** Fills Stamina up to MaxStamina, as a new player starts. */
+	virtual void StartNewGame() override;
 
 protected:
 	virtual void PreAttributeBaseChange(const FGameplayAttribute& Attribute, float& NewValue) const override;

@@ -17,6 +17,8 @@ class UVestigeInventoryComponent;
  * BP_PlayerState sets its values (the starting items, the ability sets), and the game mode names it. Code below the
  * player layer doesn't know this class: it finds the inventory with FindComponentByClass on the player's APlayerState,
  * and the ability system through the pawn's IAbilitySystemInterface.
+ * Registers the ability system's saved attribute sets (the stamina) with UVestigeSaveRegistry while it is in play, since
+ * the sets have no BeginPlay or EndPlay of their own; the inventory registers itself.
  */
 UCLASS()
 class AVestigePlayerState : public APlayerState, public IAbilitySystemInterface
@@ -33,6 +35,12 @@ public:
 protected:
 	/** Grants the ability sets, so the stamina set exists before any actor begins play and reads it. */
 	virtual void PostInitializeComponents() override;
+
+	/** Hands each saved attribute set its part of the save. */
+	virtual void BeginPlay() override;
+
+	/** Keeps each saved attribute set's part for the next map. */
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 private:
 	/** Makes the new pawn the ability system's avatar, the body its abilities act through. Bound to OnPawnSet. */

@@ -4,22 +4,16 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "AbilitySystem/VestigeStaminaSaveData.h"
-#include "Farming/VestigeRestSaveData.h"
-#include "Farming/FarmFarmingSaveData.h"
-#include "Farming/FarmFieldSaveData.h"
+#include "Core/VestigeSaveRecord.h"
 #include "GameFramework/SaveGame.h"
-#include "Inventory/VestigeInventorySaveData.h"
-#include "Time/VestigeClockSaveData.h"
 #include "VestigeSaveGame.generated.h"
 
 /**
- * The saved data layout: everything needed to pick the game back up, as plain values and content IDs.
- * A data container with no logic, so its members are public like a struct's. Each owner writes and restores its own
- * part: the clock (UVestigeClockSubsystem), the tool in hand (UFarmingComponent), the inventory (UVestigeInventoryComponent),
- * the stamina (UVestigeStaminaSet), the rest (UVestigeRestComponent) and every map's fields (UFarmFieldSubsystem).
- * Until the first public build there are no upgrades: raise CurrentVersion when a change makes older saves load wrong, and
- * older saves are then refused (Architecture.md, section 6). A new field whose default suits older saves needs no new version.
+ * The save file's layout: its format version, its place in the order of saves, and every owner's part as a record by
+ * key (Systems.md, section 1). A data container with no logic, so its members are public like a struct's. It names no
+ * owner: each owner writes and reads its own record through UVestigeSaveRegistry, with its own version.
+ * Until the first public build there are no upgrades: raise CurrentVersion only when this file's own layout changes, and
+ * older files are then refused (Architecture.md, section 6).
  */
 UCLASS()
 class UVestigeSaveGame : public USaveGame
@@ -28,16 +22,16 @@ class UVestigeSaveGame : public USaveGame
 
 public:
 	/**
-	 * The layout this build writes. Restarted at 1 on 2026-11-04, when the development saves were deleted, and 2 since the
-	 * same day, when the tiles moved into one entry per field.
+	 * The file layout this build writes. Restarted at 1 on 2026-11-04, when the development saves were deleted; 2 when the
+	 * tiles moved into one entry per field, and 3 since 2026-11-06, when every owner's part became a record by key.
 	 */
-	static constexpr int32 CurrentVersion = 2;
+	static constexpr int32 CurrentVersion = 3;
 
 	/** The two slots saves alternate between, so writing a save never touches the newest good one. */
 	static constexpr const TCHAR* SlotNames[] = {TEXT("Farm"), TEXT("Farm2")};
 	static constexpr int32 UserIndex = 0;
 
-	/** The layout version this save was written with. 0 in a file that has none. */
+	/** The file layout version this save was written with. 0 in a file that has none. */
 	UPROPERTY()
 	int32 SaveVersion = 0;
 
@@ -45,22 +39,7 @@ public:
 	UPROPERTY()
 	int32 SaveSequence = 0;
 
+	/** Every owner's part by its key (Base.Clock), including parts no owner in this build reads, which are kept. */
 	UPROPERTY()
-	FVestigeClockSaveData Clock;
-
-	UPROPERTY()
-	FFarmFarmingSaveData Farming;
-
-	UPROPERTY()
-	FVestigeInventorySaveData Inventory;
-
-	UPROPERTY()
-	FVestigeStaminaSaveData Stamina;
-
-	UPROPERTY()
-	FVestigeRestSaveData Rest;
-
-	/** Every field of every map, found again by its FieldId, each with its tiles by coordinates. */
-	UPROPERTY()
-	TArray<FFarmFieldSaveData> Fields;
+	TMap<FName, FVestigeSaveRecord> Records;
 };

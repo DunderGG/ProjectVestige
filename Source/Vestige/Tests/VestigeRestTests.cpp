@@ -185,6 +185,24 @@ namespace VestigeRestTests
 			ASSERT_THAT(IsTrue(Setup.RestComponent->IsDrainingStamina()));
 		}
 
+		TEST_METHOD(APlayerArrivingAfterMidnightDrainsStamina)
+		{
+			// A map opened after midnight: the new body never hears the hour the drain starts at.
+			const FPlayerSetup& Setup = Player;
+			SetClock(*Setup.Clock, 25.f);
+			APawn* OldBody = Cast<APawn>(Setup.RestComponent->GetOwner());
+			APlayerState* PlayerState = OldBody->GetPlayerState();
+			OldBody->Destroy();
+			UClass* CharacterClass =
+				LoadClass<AVestigePlayerCharacter>(nullptr, TEXT("/Game/Vestige/Blueprints/BP_PlayerCharacter.BP_PlayerCharacter_C"));
+			AVestigePlayerCharacter& NewBody = Spawner.SpawnActor<AVestigePlayerCharacter>(FActorSpawnParameters(), CharacterClass);
+			NewBody.SetPlayerState(PlayerState);
+
+			NewBody.DispatchBeginPlay();
+
+			ASSERT_THAT(IsTrue(NewBody.FindComponentByClass<UVestigeRestComponent>()->IsDrainingStamina()));
+		}
+
 		TEST_METHOD(TheDrainTakesItsRatePerGameHourWhateverTheClockSpeed)
 		{
 			const FPlayerSetup& Setup = Player;

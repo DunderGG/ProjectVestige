@@ -3,24 +3,13 @@
 
 #include "Save/VestigeSaveSubsystem.h"
 
-#include "AbilitySystem/VestigeStaminaSet.h"
-#include "AbilitySystemComponent.h"
-#include "AbilitySystemGlobals.h"
-#include "Content/FarmCropData.h"
-#include "Content/VestigeContentData.h"
 #include "Core/VestigeFeedbackSubsystem.h"
-#include "Engine/World.h"
-#include "Farming/FarmFieldSaveData.h"
-#include "Farming/FarmFieldSubsystem.h"
-#include "Farming/FarmingComponent.h"
-#include "Farming/VestigeRestComponent.h"
-#include "GameFramework/Pawn.h"
-#include "GameFramework/PlayerState.h"
-#include "Inventory/VestigeInventoryComponent.h"
+#include "Core/VestigeSaveLog.h"
+#include "Core/VestigeSaveRegistry.h"
+#include "Engine/GameInstance.h"
 #include "Kismet/GameplayStatics.h"
 #include "ProfilingDebugging/CpuProfilerTrace.h"
 #include "Save/VestigeSaveGame.h"
-#include "Core/VestigeSaveLog.h"
 #include "Time/VestigeClockSubsystem.h"
 
 #define LOCTEXT_NAMESPACE "VestigeSaveSubsystem"
@@ -37,35 +26,12 @@ namespace VestigeSaveSlots
 		}
 		return Read;
 	}
+}
 
-	/** Loads each crop the saved fields' tiles name, once, with its meshes. Crops that no longer exist are left out. */
-	TMap<FName, const UFarmCropData*> LoadSavedCrops(const TArray<FFarmFieldSaveData>& SavedFields)
-	{
-		TMap<FName, const UFarmCropData*> Crops;
-		TSet<FName> Missing;
-		for (const FFarmFieldSaveData& Field : SavedFields)
-		{
-			for (const FFarmTileSaveData& Tile : Field.Tiles)
-			{
-				if (Tile.CropId.IsNone() || Crops.Contains(Tile.CropId) || Missing.Contains(Tile.CropId))
-				{
-					continue;
-				}
-
-				// Loading at play start, before the player can act, is when waiting for a load is allowed.
-				const FPrimaryAssetId CropAssetId(UFarmCropData::AssetType, Tile.CropId);
-				if (const UFarmCropData* Crop = Cast<UFarmCropData>(UVestigeContentData::LoadWithVisuals(CropAssetId)))
-				{
-					Crops.Add(Tile.CropId, Crop);
-				}
-				else
-				{
-					Missing.Add(Tile.CropId);
-				}
-			}
-		}
-		return Crops;
-	}
+UVestigeSaveSubsystem* UVestigeSaveSubsystem::Get(const UWorld* World)
+{
+	const UGameInstance* GameInstance = World ? World->GetGameInstance() : nullptr;
+	return GameInstance ? GameInstance->GetSubsystem<UVestigeSaveSubsystem>() : nullptr;
 }
 
 FVestigeLoadDecision UVestigeSaveSubsystem::DecideLoad(TConstArrayView<FVestigeSaveSlotRead> Slots)
@@ -109,23 +75,27 @@ int32 UVestigeSaveSubsystem::GetSlotToWrite(int32 NewestSlot)
 	return NewestSlot == 0 ? 1 : 0;
 }
 
-bool UVestigeSaveSubsystem::DoesSupportWorldType(const EWorldType::Type WorldType) const
+void UVestigeSaveSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
-	return WorldType == EWorldType::Game || WorldType == EWorldType::PIE;
-}
+	Super::Initialize(Collection);
 
-void UVestigeSaveSubsystem::OnWorldBeginPlay(UWorld& InWorld)
-{
-	Super::OnWorldBeginPlay(InWorld);
+	Registry = Collection.InitializeDependency<UVestigeSaveRegistry>();
+	Clock = Collection.InitializeDependency<UVestigeClockSubsystem>();
+	if (Clock)
+	{
+		Clock->OnNewDayFinished.AddUObject(this, &UVestigeSaveSubsystem::SaveGame);
+	}
 
-	// This runs before the actors' BeginPlay. The world broadcasts OnWorldBeginPlay once all of them have run, so the
-	// grid has its field and the farmer's toolbar is ready by then.
-	WorldBeginPlayHandle = InWorld.OnWorldBeginPlay.AddUObject(this, &UVestigeSaveSubsystem::BindAndLoad);
+	// The game's first map is initialised after the game instance, and before any of its actors begins play. A test's
+	// game instance is made for a map that already exists, so it never loads the player's save. Once there is a main
+	// menu, the menu's Continue loads instead (Systems.md, section 1).
+	WorldInitializedHandle = FWorldDelegates::OnPostWorldInitialization.AddUObject(this, &UVestigeSaveSubsystem::LoadOnFirstMap);
 }
 
 void UVestigeSaveSubsystem::Deinitialize()
 {
-	if (UWorld* World = GetWorld())
+	FWorldDelegates::OnPostWorldInitialization.Remove(WorldInitializedHandle);
+	if (UWorld* World = LoadedWorld.Get())
 	{
 		World->OnWorldBeginPlay.Remove(WorldBeginPlayHandle);
 	}
@@ -143,90 +113,49 @@ void UVestigeSaveSubsystem::StartNewGame()
 		UGameplayStatics::DeleteGameInSlot(SlotName, UVestigeSaveGame::UserIndex);
 	}
 
-	// The clock and the fields belong to the game instance, which survives opening the map.
-	if (UVestigeClockSubsystem* GameClock = UVestigeClockSubsystem::Get(GetWorld()))
+	if (Registry)
 	{
-		GameClock->StartNewGame();
+		Registry->StartNewGame();
 	}
-	if (UFarmFieldSubsystem* GameFields = UFarmFieldSubsystem::Get(GetWorld()))
-	{
-		GameFields->StartNewGame();
-	}
-	UGameplayStatics::OpenLevel(GetWorld(), FName(*UGameplayStatics::GetCurrentLevelName(GetWorld())));
+	bGameStarted = true;
+	bSavingAllowed = true;
+	NewestSlot = INDEX_NONE;
+	NewestSequence = 0;
+
+	const UWorld* World = GetGameInstance()->GetWorld();
+	UGameplayStatics::OpenLevel(World, FName(*UGameplayStatics::GetCurrentLevelName(World)));
 }
 
-void UVestigeSaveSubsystem::BindAndLoad()
+void UVestigeSaveSubsystem::LoadOnFirstMap(UWorld* World, const UWorld::InitializationValues InitializationValues)
 {
-	GetWorld()->OnWorldBeginPlay.Remove(WorldBeginPlayHandle);
-
-	Clock = UVestigeClockSubsystem::Get(GetWorld());
-	FarmFields = UFarmFieldSubsystem::Get(GetWorld());
-	if (!Clock || !FarmFields)
+	if (bGameStarted || !World || !World->IsGameWorld() || World->GetGameInstance() != GetGameInstance())
 	{
-		VESTIGE_LOG(this, LogVestigeSave, Warning, "Saving is off in {Level}: it has no game instance with a clock and farm fields.",
-			GetWorld()->GetMapName());
 		return;
 	}
 
-	Clock->OnNewDayFinished.AddUObject(this, &UVestigeSaveSubsystem::SaveFarm);
-	LoadFarm();
+	// A test that plays a map gets a real game instance; it must neither read nor overwrite the player's save. Without a
+	// load the game never starts here, so nothing is saved either.
+	if (GIsAutomationTesting)
+	{
+		VESTIGE_LOG(this, LogVestigeSave, Log, "Automation tests are running, so the save isn't loaded and nothing is saved.");
+		return;
+	}
+
+	FWorldDelegates::OnPostWorldInitialization.Remove(WorldInitializedHandle);
+	LoadGame();
+	LoadedWorld = World;
+	WorldBeginPlayHandle = World->OnWorldBeginPlay.AddUObject(this, &UVestigeSaveSubsystem::TellPlayerAboutLoad);
 }
 
-void UVestigeSaveSubsystem::SaveFarm(int32 NewDay)
+void UVestigeSaveSubsystem::LoadGame()
 {
-	TRACE_CPUPROFILER_EVENT_SCOPE(UVestigeSaveSubsystem::SaveFarm);
+	TRACE_CPUPROFILER_EVENT_SCOPE(UVestigeSaveSubsystem::LoadGame);
 
-	const UFarmingComponent* Farming = GetPlayerFarming();
-	const UVestigeInventoryComponent* Inventory = GetPlayerInventory();
-	if (!Farming || !Inventory)
+	bGameStarted = true;
+	if (!Registry || !Clock)
 	{
-		return;
-	}
-	if (!bSavingAllowed)
-	{
-		VESTIGE_LOG(this, LogVestigeSave, Warning, "Not saving day {Day}: the save couldn't be loaded, so it is kept as it is.", NewDay);
-		return;
-	}
-
-	UVestigeSaveGame* Save = Cast<UVestigeSaveGame>(UGameplayStatics::CreateSaveGameObject(UVestigeSaveGame::StaticClass()));
-	Save->SaveVersion = UVestigeSaveGame::CurrentVersion;
-	Save->SaveSequence = NewestSequence + 1;
-	Save->Clock = Clock->GetSaveData();
-	Save->Farming = Farming->GetSaveData();
-	Save->Inventory = Inventory->GetSaveData();
-	if (const UAbilitySystemComponent* AbilitySystem = GetPlayerAbilitySystem())
-	{
-		Save->Stamina = UVestigeStaminaSet::GetSaveData(*AbilitySystem);
-	}
-	if (const UVestigeRestComponent* Rest = GetPlayerRest())
-	{
-		Save->Rest = Rest->GetSaveData();
-	}
-	Save->Fields = FarmFields->GetSaveData();
-
-	const int32 Slot = GetSlotToWrite(NewestSlot);
-	if (!UGameplayStatics::SaveGameToSlot(Save, UVestigeSaveGame::SlotNames[Slot], UVestigeSaveGame::UserIndex))
-	{
-		VESTIGE_LOG(this, LogVestigeSave, Error, "Couldn't write the save to slot {Slot}. The previous save is kept.",
-			UVestigeSaveGame::SlotNames[Slot]);
-		UVestigeFeedbackSubsystem::Notify(GetWorld(), LOCTEXT("SaveFailed", "Couldn't save the game. The previous save is kept."));
-		return;
-	}
-
-	NewestSlot = Slot;
-	NewestSequence = Save->SaveSequence;
-	UVestigeFeedbackSubsystem::Notify(GetWorld(), LOCTEXT("Saved", "Game saved."));
-}
-
-void UVestigeSaveSubsystem::LoadFarm()
-{
-	TRACE_CPUPROFILER_EVENT_SCOPE(UVestigeSaveSubsystem::LoadFarm);
-
-	UFarmingComponent* Farming = GetPlayerFarming();
-	UVestigeInventoryComponent* Inventory = GetPlayerInventory();
-	if (!Farming || !Inventory)
-	{
-		VESTIGE_LOG(this, LogVestigeSave, Warning, "Not loading the save: the player has no farming component or no inventory.");
+		VESTIGE_LOG(this, LogVestigeSave, Warning, "Saving is off: the game instance has no save registry or no clock.");
+		bSavingAllowed = false;
 		return;
 	}
 
@@ -276,67 +205,83 @@ void UVestigeSaveSubsystem::LoadFarm()
 	}
 
 	const UVestigeSaveGame& Save = *Slots[Decision.Slot].Save;
-	VESTIGE_LOG(this, LogVestigeSave, Log, "Loading day {Day} from save slot {Slot} (version {Version}, save {Sequence}).", Save.Clock.Day,
-		UVestigeSaveGame::SlotNames[Decision.Slot], Save.SaveVersion, Save.SaveSequence);
 	NewestSlot = Decision.Slot;
 	NewestSequence = Save.SaveSequence;
-	if (ApplySave(Save, *Farming, *Inventory) > 0)
-	{
-		UVestigeFeedbackSubsystem::Notify(
-			GetWorld(), LOCTEXT("ContentMissing", "Some saved things no longer exist in the game and were left out."));
-	}
-	UVestigeFeedbackSubsystem::Notify(
-		GetWorld(), FText::FormatNamed(LOCTEXT("Loaded", "Welcome back. Day {Day}."), TEXT("Day"), Save.Clock.Day));
+	Registry->Load(Save.Records);
+	VESTIGE_LOG(this, LogVestigeSave, Log, "Loaded day {Day} from save slot {Slot} (version {Version}, save {Sequence}, {Count} parts).",
+		Clock->GetCurrentDay(), UVestigeSaveGame::SlotNames[Decision.Slot], Save.SaveVersion, Save.SaveSequence, Save.Records.Num());
+	MessagesForPlayer.Add(FText::FormatNamed(LOCTEXT("Loaded", "Welcome back. Day {Day}."), TEXT("Day"), Clock->GetCurrentDay()));
 }
 
-int32 UVestigeSaveSubsystem::ApplySave(const UVestigeSaveGame& Save, UFarmingComponent& Farming, UVestigeInventoryComponent& Inventory)
+void UVestigeSaveSubsystem::TellPlayerAboutLoad()
 {
-	int32 SkippedCount = 0;
-	Clock->RestoreFromSaveData(Save.Clock);
-	if (!Farming.RestoreFromSaveData(Save.Farming))
+	if (UWorld* World = LoadedWorld.Get())
 	{
-		++SkippedCount;
+		World->OnWorldBeginPlay.Remove(WorldBeginPlayHandle);
 	}
-	SkippedCount += Inventory.RestoreFromSaveData(Save.Inventory);
-	if (UAbilitySystemComponent* AbilitySystem = GetPlayerAbilitySystem())
+	LoadedWorld.Reset();
+
+	// The map's owners have read their parts in their BeginPlay by now, so the registry knows what was left out.
+	if (Registry && Registry->GetLeftOutCount() > 0)
 	{
-		UVestigeStaminaSet::RestoreFromSaveData(*AbilitySystem, Save.Stamina);
+		Notify(LOCTEXT("ContentMissing", "Some saved things no longer exist in the game and were left out."));
 	}
-	if (UVestigeRestComponent* Rest = GetPlayerRest())
+	if (Registry && Registry->HasNewerParts() && bSavingAllowed)
 	{
-		Rest->RestoreFromSaveData(Save.Rest);
+		RefuseToSave(LOCTEXT("PartTooNew",
+			"Part of the save is from a newer version of the game. It is kept as it is, and the game won't save until you start a new "
+			"game."));
 	}
-	SkippedCount += FarmFields->RestoreFromSaveData(Save.Fields, VestigeSaveSlots::LoadSavedCrops(Save.Fields));
-	return SkippedCount;
+	for (const FText& Message : MessagesForPlayer)
+	{
+		Notify(Message);
+	}
+	MessagesForPlayer.Reset();
+}
+
+void UVestigeSaveSubsystem::SaveGame(int32 NewDay)
+{
+	TRACE_CPUPROFILER_EVENT_SCOPE(UVestigeSaveSubsystem::SaveGame);
+
+	// A game instance whose first map was never initialised (a test's) has no save to keep, and must not touch the files.
+	if (!bGameStarted || !Registry)
+	{
+		return;
+	}
+	if (!bSavingAllowed || Registry->HasNewerParts())
+	{
+		VESTIGE_LOG(this, LogVestigeSave, Warning, "Not saving day {Day}: the save couldn't be loaded, so it is kept as it is.", NewDay);
+		return;
+	}
+
+	UVestigeSaveGame* Save = Cast<UVestigeSaveGame>(UGameplayStatics::CreateSaveGameObject(UVestigeSaveGame::StaticClass()));
+	Save->SaveVersion = UVestigeSaveGame::CurrentVersion;
+	Save->SaveSequence = NewestSequence + 1;
+	Save->Records = Registry->CollectRecords();
+
+	const int32 Slot = GetSlotToWrite(NewestSlot);
+	if (!UGameplayStatics::SaveGameToSlot(Save, UVestigeSaveGame::SlotNames[Slot], UVestigeSaveGame::UserIndex))
+	{
+		VESTIGE_LOG(this, LogVestigeSave, Error, "Couldn't write the save to slot {Slot}. The previous save is kept.",
+			UVestigeSaveGame::SlotNames[Slot]);
+		Notify(LOCTEXT("SaveFailed", "Couldn't save the game. The previous save is kept."));
+		return;
+	}
+
+	NewestSlot = Slot;
+	NewestSequence = Save->SaveSequence;
+	Notify(LOCTEXT("Saved", "Game saved."));
 }
 
 void UVestigeSaveSubsystem::RefuseToSave(const FText& Reason)
 {
 	bSavingAllowed = false;
-	UVestigeFeedbackSubsystem::Notify(GetWorld(), Reason);
+	MessagesForPlayer.Add(Reason);
 }
 
-UFarmingComponent* UVestigeSaveSubsystem::GetPlayerFarming() const
+void UVestigeSaveSubsystem::Notify(const FText& Message) const
 {
-	const APawn* Pawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
-	return Pawn ? Pawn->FindComponentByClass<UFarmingComponent>() : nullptr;
-}
-
-UVestigeInventoryComponent* UVestigeSaveSubsystem::GetPlayerInventory() const
-{
-	const APlayerState* PlayerState = UGameplayStatics::GetPlayerState(GetWorld(), 0);
-	return PlayerState ? PlayerState->FindComponentByClass<UVestigeInventoryComponent>() : nullptr;
-}
-
-UVestigeRestComponent* UVestigeSaveSubsystem::GetPlayerRest() const
-{
-	const APawn* Pawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
-	return Pawn ? Pawn->FindComponentByClass<UVestigeRestComponent>() : nullptr;
-}
-
-UAbilitySystemComponent* UVestigeSaveSubsystem::GetPlayerAbilitySystem() const
-{
-	return UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(UGameplayStatics::GetPlayerState(GetWorld(), 0));
+	UVestigeFeedbackSubsystem::Notify(GetGameInstance()->GetWorld(), Message);
 }
 
 #undef LOCTEXT_NAMESPACE

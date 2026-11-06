@@ -4,7 +4,9 @@
 #include "Inventory/VestigeInventoryComponent.h"
 
 #include "Content/VestigeItemData.h"
+#include "Core/VestigeSaveRegistry.h"
 #include "Engine/AssetManager.h"
+#include "Engine/World.h"
 #include "Inventory/VestigeInventoryLog.h"
 #include "Inventory/VestigeInventorySaveData.h"
 #include "ProfilingDebugging/CpuProfilerTrace.h"
@@ -20,8 +22,49 @@ void UVestigeInventoryComponent::BeginPlay()
 
 	Inventory.Reset(SlotCount);
 	LoadItems();
+
+	// After the items load, since restoring the saved slots looks them up.
+	UVestigeSaveRegistry::RegisterWorldOwner(GetWorld(), *this);
+}
+
+void UVestigeInventoryComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	UVestigeSaveRegistry::UnregisterWorldOwner(GetWorld(), *this);
+	Super::EndPlay(EndPlayReason);
+}
+
+void UVestigeInventoryComponent::StartNewGame()
+{
+	Inventory.Reset(SlotCount);
 	AddStartingItems();
 	OnInventoryChanged.Broadcast();
+}
+
+FName UVestigeInventoryComponent::GetSaveKey() const
+{
+	static const FName Key(TEXT("Base.Inventory"));
+	return Key;
+}
+
+int32 UVestigeInventoryComponent::GetSaveVersion() const
+{
+	return FVestigeInventorySaveData::Version;
+}
+
+FVestigeSaveRecord UVestigeInventoryComponent::WriteSaveRecord() const
+{
+	return FVestigeSaveRecord::Write(GetSaveData());
+}
+
+bool UVestigeInventoryComponent::ReadSaveRecord(const FVestigeSaveRecord& Record, int32& OutLeftOutCount)
+{
+	FVestigeInventorySaveData Data;
+	if (!Record.Read(Data))
+	{
+		return false;
+	}
+	OutLeftOutCount += RestoreFromSaveData(Data);
+	return true;
 }
 
 void UVestigeInventoryComponent::LoadItems()

@@ -444,14 +444,14 @@ The game is one module, `Vestige`, split into folders. **The folders are the arc
 ```
 Source/Vestige/
     Vestige.Build.cs
-    Core/           Shared services that know no game rules: VestigeActorLookup, UVestigeFeedbackSubsystem, the module, VESTIGE_LOG and the shared log categories
+    Core/           Shared services that know no game rules: VestigeActorLookup, UVestigeFeedbackSubsystem, the save registry (UVestigeSaveRegistry, IVestigeSaveable), the module, VESTIGE_LOG and the shared log categories
     AbilitySystem/  Gameplay Ability System parts that know no farm: the stamina set and effects, ability sets, native tags
     Interaction/    The interactable interface, the interaction component and the interact ability
     Content/        Content definitions: UVestigeContentData and its subclasses, UVestigeAssetManager
     Time/           The clock, its settings and save struct, and the day cycle's lighting
     Inventory/      The inventory component, its slot rules and save struct
     Farming/        Tiles and tile state, the grid, the farming, rest and highlight components, the bed, the use-tool ability, the toolbar, their save structs
-    Save/           UVestigeSaveGame and UVestigeSaveSubsystem
+    Save/           UVestigeSaveGame and UVestigeSaveSubsystem: the save files
     Player/         The player character, its movement component, the player state and the cheat manager
     UI/             The HUD and its widgets
     Template/       Epic's template classes (character, game mode, player controller); not maintained to this guide
@@ -461,7 +461,7 @@ Source/Vestige/
 - **A folder includes only from its own layer and the layers below it.** `Farming/` may include `Time/`, `Content/` and `Core/`, never `Save/`, `Player/` or `UI/`. When a lower layer needs to tell a higher one something, it broadcasts an event and the higher one listens ([Architecture.md, section 4](Architecture.md#4-how-systems-talk-to-each-other)). `Tests/` may include anything, and nothing includes `Tests/`. `Template/` isn't maintained to this guide, but its includes are checked: it is app-level wiring that may include any layer (the game mode names the HUD class), so only `Player/` and `UI/` may include it.
 - **The test `Vestige.Architecture.IncludeDirection` enforces this.** It fails on a wrong-way include, on one of our headers included without its folder, and on a file in a folder that isn't a layer yet.
 - **A new file goes in the folder of its layer.** Decide the owner first ([section 1](#1-ownership-and-separation-of-concerns)), then the layer. If a class doesn't fit any folder, or would have to include upward, that's a design question: raise it rather than bending the rule. A new folder is added to the layer table in the test and in Architecture.md section 14 in the same commit.
-- **A save struct lives with its owner** (`FVestigeClockSaveData` in `Time/`), and `Save/` only gathers them, so saving never pulls a lower layer upward.
+- **A save struct lives with its owner** (`FVestigeClockSaveData` in `Time/`), and the owner registers with the save registry in `Core/`, so saving never pulls a lower layer upward and `Save/` names no owner.
 - **Include our headers by their path from the module root**, own header included: `#include "Farming/FarmGrid.h"`. The `"Vestige"` entry in `PublicIncludePaths` is what puts that root on the include path (a build without it fails), so keep it. Don't add the feature folders to the include path: bare includes like `"FarmTile.h"` hide where a file lives.
 - **Folders, not modules.** Splitting the game into several modules is a separate decision ([Architecture.md, section 9](Architecture.md#9-modules-and-plugins) and the decision log). If another module ever needs our headers, give the module a `Public/` and `Private/` split and move only the headers meant for it into `Public/`.
 - Move files between folders in a commit of its own, with no other change. Unreal names classes by module and name, not by folder, so moving a file never affects Blueprints, levels or saves. Regenerate the Visual Studio project files afterwards (right-click `Vestige.uproject` > Generate Visual Studio project files).
