@@ -27,6 +27,14 @@ public:
 	void SkipDay();
 
 	/**
+	 * Console: SkipToTime <Time>, for example SkipToTime 19:30 or SkipToTime 19.5. Runs the clock forward to Time today, as
+	 * if the hours had passed, so the hourly rules (the late-night warnings and drain) still happen. A time before the
+	 * day's start hour means after midnight (01:00). The clock only runs forward; to start a day again, use SkipDay.
+	 */
+	UFUNCTION(Exec)
+	void SkipToTime(const FString& Time);
+
+	/**
 	 * Console: BenchmarkField <Size> <CropId>, for example BenchmarkField 20 Base.Turnip. Makes the farm a Size x Size field
 	 * with a ripe CropId on every tile, the busy farm the performance baseline measures (Architecture.md, section 10).
 	 * The next save keeps that field, so use it in a build made for measuring.

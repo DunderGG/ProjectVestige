@@ -50,6 +50,14 @@ public:
 	 */
 	void RestoreFromSaveData(const FVestigeClockSaveData& Data);
 
+	/**
+	 * Runs the clock forward to NewTimeOfDay at once, as if the time had passed: OnHourStarted is broadcast for every whole
+	 * hour on the way, and OnDayEndReached if it reaches the day's end, where it stops. For developer commands.
+	 * NewTimeOfDay is in GetTimeOfDay's hours (25 is 01:00 after midnight). Returns false, and changes nothing, when
+	 * NewTimeOfDay isn't later than the clock or the clock has stopped at the day's end.
+	 */
+	bool AdvanceTo(float NewTimeOfDay);
+
 	int32 GetCurrentDay() const { return CurrentDay; }
 
 	/** Hours since midnight at the start of the current day. Goes past 24 after midnight, up to GetDayEndHour. */
@@ -112,6 +120,9 @@ public:
 	FOnVestigeHourStarted OnHourStarted;
 
 private:
+	/** Sets the clock to NewTimeOfDay, no later than the day's end, and broadcasts the hours passed and the day's end. */
+	void RunTo(float NewTimeOfDay);
+
 	/** Broadcasts OnHourStarted for every whole hour after PreviousTimeOfDay, up to and including TimeOfDay. */
 	void BroadcastHoursStartedSince(float PreviousTimeOfDay);
 

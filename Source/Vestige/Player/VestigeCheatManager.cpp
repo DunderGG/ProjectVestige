@@ -15,11 +15,31 @@
 #include "GameFramework/PlayerController.h"
 #include "ProfilingDebugging/CpuProfilerTrace.h"
 #include "Save/VestigeSaveSubsystem.h"
+#include "Time/VestigeClockSubsystem.h"
 
 namespace VestigeCheats
 {
 	/** The largest benchmark field side, so a typo can't spawn a million tiles. */
 	constexpr int32 MaxBenchmarkFieldSize = 100;
+
+	constexpr float HoursPerDay = 24.f;
+	constexpr float MinutesPerHour = 60.f;
+
+	/** Reads "19:30" or "19.5" as hours since midnight, from 0 up to 24. Returns false for anything else. */
+	bool ParseClockTime(const FString& Text, float& OutHours)
+	{
+		FString HoursText = Text;
+		FString MinutesText;
+		const bool bHasMinutes = Text.Split(TEXT(":"), &HoursText, &MinutesText);
+		if (!HoursText.IsNumeric() || (bHasMinutes && !MinutesText.IsNumeric()))
+		{
+			return false;
+		}
+
+		const float Minutes = bHasMinutes ? FCString::Atof(*MinutesText) : 0.f;
+		OutHours = FCString::Atof(*HoursText) + Minutes / MinutesPerHour;
+		return Minutes >= 0.f && Minutes < MinutesPerHour && OutHours >= 0.f && OutHours <= HoursPerDay;
+	}
 }
 
 void UVestigeCheatManager::NewGame()
@@ -43,6 +63,30 @@ void UVestigeCheatManager::SkipDay()
 		return;
 	}
 	Rest->Sleep();
+}
+
+void UVestigeCheatManager::SkipToTime(const FString& Time)
+{
+	UVestigeClockSubsystem* Clock = UVestigeClockSubsystem::Get(GetWorld());
+	if (!Clock)
+	{
+		VESTIGE_LOG(this, LogVestige, Warning, "There is no clock to run forward.");
+		return;
+	}
+
+	float Hours = 0.f;
+	if (!VestigeCheats::ParseClockTime(Time, Hours))
+	{
+		VESTIGE_LOG(this, LogVestige, Warning, "Give the time as 19:30 or 19.5, not {Time}.", Time);
+		return;
+	}
+
+	// The clock counts on past midnight (25 is 01:00), and the day starts in the morning, so earlier hours are tonight's.
+	const float TimeOfDay = Hours < Clock->GetDayStartHour() ? Hours + VestigeCheats::HoursPerDay : Hours;
+	if (!Clock->AdvanceTo(TimeOfDay))
+	{
+		VESTIGE_LOG(this, LogVestige, Warning, "The clock only runs forward and stops at the day's end; {Time} isn't later today.", Time);
+	}
 }
 
 void UVestigeCheatManager::BenchmarkField(int32 FieldSize, FName CropId)

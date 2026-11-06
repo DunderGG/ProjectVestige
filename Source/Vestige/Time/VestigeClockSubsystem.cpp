@@ -78,10 +78,25 @@ void UVestigeClockSubsystem::RestoreFromSaveData(const FVestigeClockSaveData& Da
 	bDayEndReached = false;
 }
 
+bool UVestigeClockSubsystem::AdvanceTo(float NewTimeOfDay)
+{
+	if (bDayEndReached || NewTimeOfDay <= TimeOfDay)
+	{
+		return false;
+	}
+	RunTo(NewTimeOfDay);
+	return true;
+}
+
 void UVestigeClockSubsystem::Tick(float DeltaSeconds)
 {
+	RunTo(TimeOfDay + DeltaSeconds / RealSecondsPerGameHour);
+}
+
+void UVestigeClockSubsystem::RunTo(float NewTimeOfDay)
+{
 	const float PreviousTimeOfDay = TimeOfDay;
-	TimeOfDay = FMath::Min(TimeOfDay + DeltaSeconds / RealSecondsPerGameHour, DayEndHour);
+	TimeOfDay = FMath::Min(NewTimeOfDay, DayEndHour);
 	BroadcastHoursStartedSince(PreviousTimeOfDay);
 	if (TimeOfDay < DayEndHour || bDayEndReached)
 	{

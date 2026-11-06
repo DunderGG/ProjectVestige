@@ -239,6 +239,48 @@ namespace VestigeClockTests
 
 			ASSERT_THAT(IsTrue(Broadcasts == 0));
 		}
+
+		TEST_METHOD(AdvancingTheClockBroadcastsEachHourItPasses)
+		{
+			TArray<int32> Hours;
+			GameClock->OnHourStarted.AddLambda(
+				[&Hours](int32 Hour)
+				{
+					Hours.Add(Hour);
+				});
+
+			ASSERT_THAT(IsTrue(GameClock->AdvanceTo(22.f)));
+
+			ASSERT_THAT(IsTrue(GameClock->GetTimeOfDay() == 22.f));
+			ASSERT_THAT(IsTrue(Hours.Num() == 22 - FMath::FloorToInt32(GameClock->GetDayStartHour())));
+			ASSERT_THAT(IsTrue(Hours.Last() == 22));
+		}
+
+		TEST_METHOD(TheClockOnlyAdvancesForward)
+		{
+			GameClock->AdvanceTo(20.f);
+			int32 Broadcasts = 0;
+			CountBroadcasts(GameClock->OnHourStarted, Broadcasts);
+
+			ASSERT_THAT(IsFalse(GameClock->AdvanceTo(19.f)));
+			ASSERT_THAT(IsFalse(GameClock->AdvanceTo(20.f)));
+
+			ASSERT_THAT(IsTrue(GameClock->GetTimeOfDay() == 20.f));
+			ASSERT_THAT(IsTrue(Broadcasts == 0));
+		}
+
+		TEST_METHOD(AdvancingPastTheDayEndStopsTheClockThere)
+		{
+			int32 DayEnds = 0;
+			CountBroadcasts(GameClock->OnDayEndReached, DayEnds);
+
+			ASSERT_THAT(IsTrue(GameClock->AdvanceTo(GameClock->GetDayEndHour() + 5.f)));
+
+			ASSERT_THAT(IsTrue(GameClock->GetTimeOfDay() == GameClock->GetDayEndHour()));
+			ASSERT_THAT(IsTrue(DayEnds == 1));
+			ASSERT_THAT(IsFalse(GameClock->IsRunning()));
+			ASSERT_THAT(IsFalse(GameClock->AdvanceTo(GameClock->GetDayEndHour() + 6.f)));
+		}
 	};
 }
 

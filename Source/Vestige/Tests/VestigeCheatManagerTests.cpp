@@ -91,6 +91,47 @@ namespace VestigeCheatManagerTests
 
 			ASSERT_THAT(IsTrue(Grid.GetField()->GetSize() == Size));
 		}
+
+		/** The test game instance's clock, which SkipToTime runs forward. */
+		UVestigeClockSubsystem& GetClock()
+		{
+			UVestigeClockSubsystem* Clock = UVestigeClockSubsystem::Get(&Spawner.GetWorld());
+			check(Clock);
+			return *Clock;
+		}
+
+		TEST_METHOD(SkipToTimeTakesHoursAndMinutesOrDecimalHours)
+		{
+			UVestigeCheatManager* Cheats = SpawnCheats();
+
+			Cheats->SkipToTime(TEXT("19:30"));
+			ASSERT_THAT(IsTrue(GetClock().GetTimeOfDay() == 19.5f));
+
+			Cheats->SkipToTime(TEXT("20.25"));
+			ASSERT_THAT(IsTrue(GetClock().GetTimeOfDay() == 20.25f));
+		}
+
+		TEST_METHOD(SkipToTimeBeforeTheDayStartIsAfterMidnight)
+		{
+			const float DayStart = GetClock().GetDayStartHour();
+			ASSERT_THAT(IsTrue(DayStart > 1.f));
+
+			SpawnCheats()->SkipToTime(TEXT("01:00"));
+
+			ASSERT_THAT(IsTrue(GetClock().GetTimeOfDay() == 25.f));
+		}
+
+		TEST_METHOD(SkipToTimeIgnoresEarlierAndUnreadableTimes)
+		{
+			UVestigeCheatManager* Cheats = SpawnCheats();
+			Cheats->SkipToTime(TEXT("20:00"));
+
+			for (const TCHAR* Time : {TEXT("19:00"), TEXT(""), TEXT("evening"), TEXT("21:75"), TEXT("25"), TEXT("21:-5")})
+			{
+				Cheats->SkipToTime(Time);
+				ASSERT_THAT(IsTrue(GetClock().GetTimeOfDay() == 20.f));
+			}
+		}
 	};
 }
 
