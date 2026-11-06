@@ -4,6 +4,9 @@ Saved/
 DerivedDataCache/
 # Written by every packaging run (the order files were opened in while cooking).
 Build/Windows/FileOpenOrder/
+# A packaged game, when the editor's Package Project is pointed at the project folder. Only the root one, since
+# Config/Windows/ would hold platform settings.
+/Windows/
 .vs/
 .idea/
 *.sln
