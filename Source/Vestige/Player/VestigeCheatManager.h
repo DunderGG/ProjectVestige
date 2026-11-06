@@ -27,9 +27,10 @@ public:
 	void SkipDay();
 
 	/**
-	 * Console: SkipToTime <Time>, for example SkipToTime 19:30 or SkipToTime 19.5. Runs the clock forward to Time today, as
-	 * if the hours had passed, so the hourly rules (the late-night warnings and drain) still happen. A time before the
-	 * day's start hour means after midnight (01:00). The clock only runs forward; to start a day again, use SkipDay.
+	 * Console: SkipToTime <Time>, with the time as digits: SkipToTime 1930 for 19:30, SkipToTime 19 for 19:00. Runs the
+	 * clock forward to Time today, as if the hours had passed, so the hourly rules (the late-night warnings and drain)
+	 * still happen. A time before the day's start hour means after midnight (100 is 01:00). The clock only runs forward;
+	 * to start a day again, use SkipDay.
 	 */
 	UFUNCTION(Exec)
 	void SkipToTime(const FString& Time);

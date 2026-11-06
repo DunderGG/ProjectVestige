@@ -5,6 +5,7 @@
 
 #include "Content/FarmCropData.h"
 #include "Content/VestigeContentData.h"
+#include "Algo/AllOf.h"
 #include "Core/VestigeLog.h"
 #include "Engine/World.h"
 #include "Farming/FarmField.h"
@@ -22,23 +23,38 @@ namespace VestigeCheats
 	/** The largest benchmark field side, so a typo can't spawn a million tiles. */
 	constexpr int32 MaxBenchmarkFieldSize = 100;
 
-	constexpr float HoursPerDay = 24.f;
-	constexpr float MinutesPerHour = 60.f;
+	constexpr int32 HoursPerDay = 24;
+	constexpr int32 MinutesPerHour = 60;
 
-	/** Reads "19:30" or "19.5" as hours since midnight, from 0 up to 24. Returns false for anything else. */
+	/** A clock time typed as digits: up to two are the hour (19), three or four the hour and minutes (930, 1930). */
+	constexpr int32 MaxHourDigits = 2;
+	constexpr int32 MaxTimeDigits = 4;
+	constexpr int32 HourMinuteSplit = 100;
+
+	/** Reads "1930" (19:30), "930" (09:30) or "19" (19:00) as hours since midnight, up to 24:00. False for anything else. */
 	bool ParseClockTime(const FString& Text, float& OutHours)
 	{
-		FString HoursText = Text;
-		FString MinutesText;
-		const bool bHasMinutes = Text.Split(TEXT(":"), &HoursText, &MinutesText);
-		if (!HoursText.IsNumeric() || (bHasMinutes && !MinutesText.IsNumeric()))
+		const bool bAllDigits = Algo::AllOf(Text,
+			[](TCHAR Character)
+			{
+				return FChar::IsDigit(Character);
+			});
+		if (Text.IsEmpty() || Text.Len() > MaxTimeDigits || !bAllDigits)
 		{
 			return false;
 		}
 
-		const float Minutes = bHasMinutes ? FCString::Atof(*MinutesText) : 0.f;
-		OutHours = FCString::Atof(*HoursText) + Minutes / MinutesPerHour;
-		return Minutes >= 0.f && Minutes < MinutesPerHour && OutHours >= 0.f && OutHours <= HoursPerDay;
+		const int32 Number = FCString::Atoi(*Text);
+		const bool bHasMinutes = Text.Len() > MaxHourDigits;
+		const int32 Hours = bHasMinutes ? Number / HourMinuteSplit : Number;
+		const int32 Minutes = bHasMinutes ? Number % HourMinuteSplit : 0;
+		const int32 TotalMinutes = Hours * MinutesPerHour + Minutes;
+		if (Minutes >= MinutesPerHour || TotalMinutes > HoursPerDay * MinutesPerHour)
+		{
+			return false;
+		}
+		OutHours = static_cast<float>(TotalMinutes) / MinutesPerHour;
+		return true;
 	}
 }
 
@@ -77,7 +93,7 @@ void UVestigeCheatManager::SkipToTime(const FString& Time)
 	float Hours = 0.f;
 	if (!VestigeCheats::ParseClockTime(Time, Hours))
 	{
-		VESTIGE_LOG(this, LogVestige, Warning, "Give the time as 19:30 or 19.5, not {Time}.", Time);
+		VESTIGE_LOG(this, LogVestige, Warning, "Give the time as digits, 1930 for 19:30, not {Time}.", Time);
 		return;
 	}
 

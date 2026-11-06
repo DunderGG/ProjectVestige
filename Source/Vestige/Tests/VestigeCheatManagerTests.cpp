@@ -100,15 +100,18 @@ namespace VestigeCheatManagerTests
 			return *Clock;
 		}
 
-		TEST_METHOD(SkipToTimeTakesHoursAndMinutesOrDecimalHours)
+		TEST_METHOD(SkipToTimeTakesTheTimeAsDigits)
 		{
 			UVestigeCheatManager* Cheats = SpawnCheats();
 
-			Cheats->SkipToTime(TEXT("19:30"));
+			Cheats->SkipToTime(TEXT("945"));
+			ASSERT_THAT(IsTrue(GetClock().GetTimeOfDay() == 9.75f));
+
+			Cheats->SkipToTime(TEXT("1930"));
 			ASSERT_THAT(IsTrue(GetClock().GetTimeOfDay() == 19.5f));
 
-			Cheats->SkipToTime(TEXT("20.25"));
-			ASSERT_THAT(IsTrue(GetClock().GetTimeOfDay() == 20.25f));
+			Cheats->SkipToTime(TEXT("21"));
+			ASSERT_THAT(IsTrue(GetClock().GetTimeOfDay() == 21.f));
 		}
 
 		TEST_METHOD(SkipToTimeBeforeTheDayStartIsAfterMidnight)
@@ -116,7 +119,7 @@ namespace VestigeCheatManagerTests
 			const float DayStart = GetClock().GetDayStartHour();
 			ASSERT_THAT(IsTrue(DayStart > 1.f));
 
-			SpawnCheats()->SkipToTime(TEXT("01:00"));
+			SpawnCheats()->SkipToTime(TEXT("0100"));
 
 			ASSERT_THAT(IsTrue(GetClock().GetTimeOfDay() == 25.f));
 		}
@@ -124,9 +127,10 @@ namespace VestigeCheatManagerTests
 		TEST_METHOD(SkipToTimeIgnoresEarlierAndUnreadableTimes)
 		{
 			UVestigeCheatManager* Cheats = SpawnCheats();
-			Cheats->SkipToTime(TEXT("20:00"));
+			Cheats->SkipToTime(TEXT("2000"));
 
-			for (const TCHAR* Time : {TEXT("19:00"), TEXT(""), TEXT("evening"), TEXT("21:75"), TEXT("25"), TEXT("21:-5")})
+			for (const TCHAR* Time : {TEXT("1900"), TEXT(""), TEXT("evening"), TEXT("2175"), TEXT("25"), TEXT("2401"), TEXT("21:30"),
+					 TEXT("-2100"), TEXT("21000")})
 			{
 				Cheats->SkipToTime(Time);
 				ASSERT_THAT(IsTrue(GetClock().GetTimeOfDay() == 20.f));
