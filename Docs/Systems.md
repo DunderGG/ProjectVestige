@@ -520,7 +520,7 @@ Built differently from the approved design, decided on 2026-11-01 (decision log)
   | `LogVestigeTime` | The clock and the day cycle | `Time/VestigeTimeLog.h` |
   | `LogVestigeInventory` | Items and the inventory | `Inventory/VestigeInventoryLog.h` |
   | `LogFarm` | The farm: grid, tiles, crops, tools | `Farming/FarmLog.h` |
-  | `LogVestigeSave` | Saving and loading | `Save/VestigeSaveLog.h` |
+  | `LogVestigeSave` | Saving and loading | `Core/VestigeSaveLog.h` |
 
 - **Names follow the type prefixes** (AGENTS rule 2): `LogVestige<System>`, and `LogFarm` for the farm, which is one system today (`LogFarm<System>` if it ever needs splitting). A new system gets its category with its first line (`LogVestigeInteraction`, `LogVestigeRest`, `LogVestigeHud`), not before, in the folder of the code that uses it, and this table gets a row.
 - **Declared in the layer's own log header,** `<Layer>/<Prefix><System>Log.h` with `DECLARE_LOG_CATEGORY_EXTERN(LogVestigeSave, Log, All);`, and defined in the matching `.cpp` with `DEFINE_LOG_CATEGORY`. The layer's log header includes `Core/VestigeLog.h`, so a file includes only its own layer's log header to get both its category and the macro, and the include direction test keeps holding. `Core/Vestige.h` keeps including `Core/VestigeLog.h`, so the template code compiles unchanged.

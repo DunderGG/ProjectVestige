@@ -20,7 +20,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "ProfilingDebugging/CpuProfilerTrace.h"
 #include "Save/VestigeSaveGame.h"
-#include "Save/VestigeSaveLog.h"
+#include "Core/VestigeSaveLog.h"
 #include "Time/VestigeClockSubsystem.h"
 
 #define LOCTEXT_NAMESPACE "VestigeSaveSubsystem"
