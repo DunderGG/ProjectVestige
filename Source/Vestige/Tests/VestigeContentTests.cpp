@@ -5,8 +5,11 @@
 
 #include "Components/ActorTestSpawner.h"
 #include "Content/FarmCropData.h"
+#include "Content/FarmSeedFragment.h"
 #include "Content/VestigeAssetManager.h"
+#include "Content/VestigeItemData.h"
 #include "Content/VestigeToolData.h"
+#include "Content/VestigeToolFragment.h"
 #include "CQTest.h"
 #include "Engine/AssetManager.h"
 #include "Farming/VestigeGameplayAbility_UseTool.h"
@@ -88,6 +91,24 @@ namespace VestigeContentTests
 				ASSERT_THAT(IsNotNull(Ability, *ToolId.ToString()));
 				ASSERT_THAT(IsTrue(Ability->IsChildOf<UVestigeGameplayAbility_UseTool>(), *ToolId.ToString()));
 				ASSERT_THAT(IsFalse(Ability->HasAnyClassFlags(CLASS_Abstract), *ToolId.ToString()));
+			}
+		}
+
+		/** A seed without a tool fragment would harvest instead of plant when held. */
+		TEST_METHOD(EverySeedItemNamesATool)
+		{
+			TArray<FPrimaryAssetId> ItemIds;
+			UAssetManager::Get().GetPrimaryAssetIdList(UVestigeItemData::AssetType, ItemIds);
+			ASSERT_THAT(IsFalse(ItemIds.IsEmpty()));
+
+			for (const FPrimaryAssetId& ItemId : ItemIds)
+			{
+				const UVestigeItemData* Item = Cast<UVestigeItemData>(UAssetManager::Get().GetPrimaryAssetPath(ItemId).TryLoad());
+				ASSERT_THAT(IsNotNull(Item, *ItemId.ToString()));
+				if (Item->FindFragment<UFarmSeedFragment>())
+				{
+					ASSERT_THAT(IsNotNull(Item->FindFragment<UVestigeToolFragment>(), *ItemId.ToString()));
+				}
 			}
 		}
 	};

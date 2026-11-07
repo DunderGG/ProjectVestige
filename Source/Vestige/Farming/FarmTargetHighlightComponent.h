@@ -7,12 +7,12 @@
 #include "Components/InstancedStaticMeshComponent.h"
 #include "FarmTargetHighlightComponent.generated.h"
 
-class UFarmingComponent;
+class UFarmTargetingComponent;
 class UMaterialInterface;
 
 /**
  * Draws a frame around the tile the farmer is facing. Presentation only: it follows its owner's
- * UFarmingComponent::OnTargetTileChanged and never ticks. Unlike debug drawing, it shows in shipping builds.
+ * UFarmTargetingComponent::OnTargetTileChanged and never ticks. Unlike debug drawing, it shows in shipping builds.
  * The frame is four thin bars of one instanced mesh, placed in the tile's own space so it scales with the grid.
  */
 UCLASS(ClassGroup = (Farming), meta = (BlueprintSpawnableComponent))
@@ -35,8 +35,8 @@ private:
 	void BuildFrame();
 
 	/**
-	 * Moves the frame onto the tile at Tile in the farming component's grid, or hides it when Tile is unset. Bound to
-	 * UFarmingComponent::OnTargetTileChanged.
+	 * Moves the frame onto the tile at Tile in the targeting component's grid, or hides it when Tile is unset. Bound to
+	 * UFarmTargetingComponent::OnTargetTileChanged.
 	 */
 	void ShowOn(const TOptional<FIntPoint>& Tile);
 
@@ -61,5 +61,5 @@ private:
 	float FrameHeight = 8.f;
 
 	UPROPERTY()
-	TWeakObjectPtr<UFarmingComponent> Farming;
+	TWeakObjectPtr<UFarmTargetingComponent> Targeting;
 };

@@ -20,7 +20,7 @@ void UVestigeInventoryComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	Inventory.Reset(SlotCount);
+	ResetSlots();
 	LoadItems();
 
 	// After the items load, since restoring the saved slots looks them up.
@@ -35,9 +35,9 @@ void UVestigeInventoryComponent::EndPlay(const EEndPlayReason::Type EndPlayReaso
 
 void UVestigeInventoryComponent::StartNewGame()
 {
-	Inventory.Reset(SlotCount);
+	ResetSlots();
 	AddStartingItems();
-	OnInventoryChanged.Broadcast();
+	BroadcastChanges();
 }
 
 FName UVestigeInventoryComponent::GetSaveKey() const
@@ -132,7 +132,7 @@ bool UVestigeInventoryComponent::TryAddItem(const FPrimaryAssetId& ItemId, int32
 	{
 		return false;
 	}
-	OnInventoryChanged.Broadcast();
+	BroadcastChanges();
 	return true;
 }
 
@@ -143,7 +143,17 @@ bool UVestigeInventoryComponent::TryRemoveItem(const FPrimaryAssetId& ItemId, in
 	{
 		return false;
 	}
-	OnInventoryChanged.Broadcast();
+	BroadcastChanges();
+	return true;
+}
+
+bool UVestigeInventoryComponent::TryRemoveItemFromSlot(int32 Slot, int32 Count)
+{
+	if (!Inventory.TryRemoveFromSlot(Slot, Count))
+	{
+		return false;
+	}
+	BroadcastChanges();
 	return true;
 }
 
@@ -164,12 +174,13 @@ FVestigeInventorySaveData UVestigeInventoryComponent::GetSaveData() const
 			Data.Slots.Add({Index, Slots[Index].Item->GetContentId(), Slots[Index].Count});
 		}
 	}
+	Data.SelectedHotbarSlot = FMath::Max(SelectedHotbarSlot, 0);
 	return Data;
 }
 
 int32 UVestigeInventoryComponent::RestoreFromSaveData(const FVestigeInventorySaveData& Data)
 {
-	Inventory.Reset(SlotCount);
+	ResetSlots();
 	int32 SkippedCount = 0;
 
 	// Every stack goes back in its own slot first, so the leftovers can't take a slot another stack was saved in.
@@ -204,19 +215,82 @@ int32 UVestigeInventoryComponent::RestoreFromSaveData(const FVestigeInventorySav
 		}
 	}
 
-	OnInventoryChanged.Broadcast();
+	if (!SelectHotbarSlotSilently(Data.SelectedHotbarSlot) && GetHotbarSlotCount() > 0)
+	{
+		VESTIGE_LOG(this, LogVestigeInventory, Warning, "The saved hotbar slot {Slot} isn't on the hotbar, so the first slot is in hand.",
+			Data.SelectedHotbarSlot);
+	}
+
+	BroadcastChanges();
 	return SkippedCount;
 }
 
+int32 UVestigeInventoryComponent::GetHotbarSlotCount() const
+{
+	return FMath::Clamp(HotbarSlotCount, 0, Inventory.GetSlots().Num());
+}
+
+bool UVestigeInventoryComponent::SelectHotbarSlot(int32 Slot)
+{
+	if (!SelectHotbarSlotSilently(Slot))
+	{
+		return false;
+	}
+	BroadcastItemInHandIfChanged();
+	return true;
+}
+
+const UVestigeItemData* UVestigeInventoryComponent::GetItemInHand() const
+{
+	const TArray<FVestigeInventorySlot>& Slots = Inventory.GetSlots();
+	return Slots.IsValidIndex(SelectedHotbarSlot) ? Slots[SelectedHotbarSlot].Item.Get() : nullptr;
+}
+
+bool UVestigeInventoryComponent::SelectHotbarSlotSilently(int32 Slot)
+{
+	if (Slot < 0 || Slot >= GetHotbarSlotCount())
+	{
+		return false;
+	}
+	SelectedHotbarSlot = Slot;
+	return true;
+}
+
+void UVestigeInventoryComponent::ResetSlots()
+{
+	Inventory.Reset(SlotCount);
+	SelectedHotbarSlot = GetHotbarSlotCount() > 0 ? 0 : INDEX_NONE;
+}
+
+void UVestigeInventoryComponent::BroadcastChanges()
+{
+	OnInventoryChanged.Broadcast();
+	BroadcastItemInHandIfChanged();
+}
+
+void UVestigeInventoryComponent::BroadcastItemInHandIfChanged()
+{
+	const UVestigeItemData* ItemInHand = GetItemInHand();
+	if (SelectedHotbarSlot == BroadcastHotbarSlot && ItemInHand == BroadcastItemInHand.Get())
+	{
+		return;
+	}
+
+	// Remembered first, so a listener that changes the inventory again is compared against the latest state.
+	BroadcastHotbarSlot = SelectedHotbarSlot;
+	BroadcastItemInHand = ItemInHand;
+	OnItemInHandChanged.Broadcast();
+}
 #if WITH_DEV_AUTOMATION_TESTS
 void UVestigeInventoryComponent::ResetForTests(int32 InSlotCount, TConstArrayView<const UVestigeItemData*> InItems)
 {
 	SlotCount = InSlotCount;
-	Inventory.Reset(SlotCount);
+	ResetSlots();
 	Items.Reset();
 	for (const UVestigeItemData* Item : InItems)
 	{
 		Items.Add(Item->GetPrimaryAssetId(), Item);
 	}
+	BroadcastItemInHandIfChanged();
 }
 #endif

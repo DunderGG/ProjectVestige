@@ -6,7 +6,7 @@
 #include "Engine/StaticMesh.h"
 #include "Farming/FarmLog.h"
 #include "Farming/FarmGrid.h"
-#include "Farming/FarmingComponent.h"
+#include "Farming/FarmTargetingComponent.h"
 #include "GameFramework/Actor.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Materials/MaterialInterface.h"
@@ -50,19 +50,19 @@ void UFarmTargetHighlightComponent::BeginPlay()
 	ApplyHighlightMaterial();
 	BuildFrame();
 
-	Farming = GetOwner() ? GetOwner()->FindComponentByClass<UFarmingComponent>() : nullptr;
-	if (UFarmingComponent* OwnerFarming = Farming.Get())
+	Targeting = GetOwner() ? GetOwner()->FindComponentByClass<UFarmTargetingComponent>() : nullptr;
+	if (UFarmTargetingComponent* OwnerTargeting = Targeting.Get())
 	{
-		OwnerFarming->OnTargetTileChanged.AddUObject(this, &UFarmTargetHighlightComponent::ShowOn);
-		ShowOn(OwnerFarming->GetTargetTile());
+		OwnerTargeting->OnTargetTileChanged.AddUObject(this, &UFarmTargetHighlightComponent::ShowOn);
+		ShowOn(OwnerTargeting->GetTargetTile());
 	}
 }
 
 void UFarmTargetHighlightComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	if (UFarmingComponent* OwnerFarming = Farming.Get())
+	if (UFarmTargetingComponent* OwnerTargeting = Targeting.Get())
 	{
-		OwnerFarming->OnTargetTileChanged.RemoveAll(this);
+		OwnerTargeting->OnTargetTileChanged.RemoveAll(this);
 	}
 	Super::EndPlay(EndPlayReason);
 }
@@ -98,8 +98,8 @@ void UFarmTargetHighlightComponent::BuildFrame()
 
 void UFarmTargetHighlightComponent::ShowOn(const TOptional<FIntPoint>& Tile)
 {
-	const UFarmingComponent* OwnerFarming = Farming.Get();
-	const AFarmGrid* Grid = OwnerFarming ? OwnerFarming->GetGrid() : nullptr;
+	const UFarmTargetingComponent* OwnerTargeting = Targeting.Get();
+	const AFarmGrid* Grid = OwnerTargeting ? OwnerTargeting->GetGrid() : nullptr;
 	const bool bShown = Tile.IsSet() && Grid;
 	SetHiddenInGame(!bShown);
 	if (bShown)

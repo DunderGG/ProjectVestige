@@ -81,6 +81,21 @@ bool FVestigeInventory::TryRemove(const UVestigeItemData& Item, int32 Count)
 	return true;
 }
 
+bool FVestigeInventory::TryRemoveFromSlot(int32 SlotIndex, int32 Count)
+{
+	if (Count <= 0 || !Slots.IsValidIndex(SlotIndex) || Slots[SlotIndex].Count < Count)
+	{
+		return false;
+	}
+	FVestigeInventorySlot& Slot = Slots[SlotIndex];
+	Slot.Count -= Count;
+	if (Slot.Count == 0)
+	{
+		Slot.Item = nullptr;
+	}
+	return true;
+}
+
 int32 FVestigeInventory::PlaceInSlot(int32 SlotIndex, const UVestigeItemData& Item, int32 Count)
 {
 	if (!Slots.IsValidIndex(SlotIndex) || !Slots[SlotIndex].IsEmpty() || Count <= 0)

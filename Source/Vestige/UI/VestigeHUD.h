@@ -12,16 +12,14 @@ class AVestigePlayerCharacter;
 class APawn;
 class SVestigeHudWidget;
 class UAbilitySystemComponent;
-class UFarmingComponent;
 class UVestigeClockSubsystem;
-class UVestigeToolData;
 class UVestigeInteractionComponent;
 class UVestigeInventoryComponent;
 struct FGameplayTag;
 
 /**
- * Shows the farming HUD for its player: the day and time from the game's UVestigeClockSubsystem, the tool from the pawn's
- * UFarmingComponent, the items from the inventory and the stamina from the ability system on the player state, the
+ * Shows the farming HUD for its player: the day and time from the game's UVestigeClockSubsystem, the item in hand and the
+ * items from the inventory and the stamina from the ability system on the player state, the
  * farmer's key hints, the prompt for the interactable the pawn's UVestigeInteractionComponent focuses, and the feedback
  * messages UVestigeFeedbackSubsystem carries.
  * It only displays. It builds each text when an event says what it shows has changed, so the widget's per-frame
@@ -34,8 +32,8 @@ class AVestigeHUD : public AHUD
 
 public:
 	/**
-	 * "Day 3   18:40   |   Hoe". Read every frame for the clock, but only rebuilt when the day, the shown time or
-	 * the tool changes.
+	 * "Day 3   18:40   |   Hoe", with the item in hand or "Empty hand". Read every frame for the clock, but only rebuilt
+	 * when the day, the shown time or the item in hand changes.
 	 */
 	FText GetStatusText() const;
 
@@ -51,7 +49,7 @@ public:
 	/** "F Sleep": the interact key and what it would do while an interactable is focused, else empty. Rebuilt when the focus changes. */
 	const FText& GetInteractionText() const { return InteractionText; }
 
-	/** The key hints, built from the farmer's input mappings. Rebuilt when the toolbar or the pawn changes. */
+	/** The key hints, built from the farmer's input mappings and the hotbar's items. Rebuilt when the inventory or the pawn changes. */
 	const FText& GetControlsText() const { return ControlsText; }
 
 	/** The feedback messages showing now, oldest first, each in its own box. Changes only when a message arrives or expires. */
@@ -68,14 +66,14 @@ protected:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 private:
-	/** Follows the new pawn's farming and interaction components and key hints. Bound to the controller's OnPossessedPawnChanged. */
+	/** Follows the new pawn's interaction component and key hints. Bound to the controller's OnPossessedPawnChanged. */
 	UFUNCTION()
 	void FollowPawn(APawn* OldPawn, APawn* NewPawn);
 
 	void StopFollowingPawn();
 
-	/** Rebuilds the tool's name and the key hints, which name the toolbar's tools. Bound to OnToolChanged. */
-	void RefreshToolTexts(const UVestigeToolData* Tool);
+	/** Rebuilds the item in hand's name for the status line. Bound to the inventory's OnItemInHandChanged. */
+	void RefreshItemInHandTexts();
 
 	/** Bound to the interaction component's OnFocusChanged. */
 	void RefreshInteractionText();
@@ -83,7 +81,9 @@ private:
 	/** Follows the inventory on the player state, which outlives the pawn, so this happens once, at BeginPlay. */
 	void FollowInventory();
 
-	/** Bound to the inventory's OnInventoryChanged. */
+	/** Rebuilds the bag line and the key hints, which name the hotbar's items. Bound to the inventory's OnInventoryChanged. */
+	void RefreshInventoryTexts();
+
 	void RefreshInventoryText();
 
 	/** Follows the stamina on the player state's ability system, which outlives the pawn, so this happens once, at BeginPlay. */
@@ -111,13 +111,12 @@ private:
 	int32 MaxMessages = 0;
 
 	TWeakObjectPtr<const UVestigeClockSubsystem> Clock;
-	TWeakObjectPtr<UFarmingComponent> Farming;
 	TWeakObjectPtr<UVestigeInteractionComponent> Interaction;
 	TWeakObjectPtr<UVestigeInventoryComponent> Inventory;
 	TWeakObjectPtr<UAbilitySystemComponent> AbilitySystem;
 	TWeakObjectPtr<const AVestigePlayerCharacter> Farmer;
 
-	FText ToolText;
+	FText ItemInHandText;
 	FText StaminaText;
 	FText InventoryText;
 	FText ControlsText;

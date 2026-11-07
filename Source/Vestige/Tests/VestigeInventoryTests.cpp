@@ -222,8 +222,143 @@ namespace VestigeInventoryTests
 			ASSERT_THAT(IsTrue(Component.GetItemCount(Seeds.GetPrimaryAssetId()) == 10));
 		}
 
-		/** Catches a missing editor step: the game mode must name a player state whose inventory starts with seeds. */
-		TEST_METHOD(ThePlayerStartsWithTurnipSeeds)
+		TEST_METHOD(TheFirstHotbarSlotIsInHandAtTheStart)
+		{
+			const UVestigeItemData& Hoe = MakeItem(TEXT("Base.Hoe"), 1);
+			UVestigeInventoryComponent& Component = MakeComponent(12, {&Hoe});
+			ASSERT_THAT(IsTrue(Component.GetItemInHand() == nullptr));
+
+			ASSERT_THAT(IsTrue(Component.TryAddItem(Hoe.GetPrimaryAssetId(), 1)));
+
+			ASSERT_THAT(IsTrue(Component.GetSelectedHotbarSlot() == 0));
+			ASSERT_THAT(IsTrue(Component.GetItemInHand() == &Hoe));
+		}
+
+		TEST_METHOD(SelectingAHotbarSlotPutsItsItemInHand)
+		{
+			const UVestigeItemData& Hoe = MakeItem(TEXT("Base.Hoe"), 1);
+			const UVestigeItemData& Can = MakeItem(TEXT("Base.WateringCan"), 1);
+			UVestigeInventoryComponent& Component = MakeComponent(12, {&Hoe, &Can});
+			Component.RestoreFromSaveData(MakeSave({{0, Hoe.GetContentId(), 1}, {1, Can.GetContentId(), 1}}));
+
+			ASSERT_THAT(IsTrue(Component.SelectHotbarSlot(1)));
+
+			ASSERT_THAT(IsTrue(Component.GetSelectedHotbarSlot() == 1));
+			ASSERT_THAT(IsTrue(Component.GetItemInHand() == &Can));
+		}
+
+		TEST_METHOD(ASlotOutsideTheHotbarIsRefused)
+		{
+			UVestigeInventoryComponent& Component = MakeComponent(12, {});
+			ASSERT_THAT(IsTrue(Component.GetHotbarSlotCount() == 9));
+
+			ASSERT_THAT(IsFalse(Component.SelectHotbarSlot(9)));
+			ASSERT_THAT(IsFalse(Component.SelectHotbarSlot(-1)));
+			ASSERT_THAT(IsTrue(Component.GetSelectedHotbarSlot() == 0));
+		}
+
+		TEST_METHOD(TheHotbarIsNeverLargerThanTheInventory)
+		{
+			UVestigeInventoryComponent& Component = MakeComponent(4, {});
+
+			ASSERT_THAT(IsTrue(Component.GetHotbarSlotCount() == 4));
+			ASSERT_THAT(IsFalse(Component.SelectHotbarSlot(4)));
+			ASSERT_THAT(IsTrue(Component.SelectHotbarSlot(3)));
+		}
+
+		TEST_METHOD(TheHandChangesWhenItsSlotEmptiesOrFillsButNotWhenItsCountDoes)
+		{
+			const UVestigeItemData& Seeds = MakeItem(TEXT("Base.Seeds"), 10);
+			UVestigeInventoryComponent& Component = MakeComponent(4, {&Seeds});
+			int32 Changes = 0;
+			Component.OnItemInHandChanged.AddLambda(
+				[&Changes]()
+				{
+					++Changes;
+				});
+
+			ASSERT_THAT(IsTrue(Component.TryAddItem(Seeds.GetPrimaryAssetId(), 3)));
+			ASSERT_THAT(IsTrue(Changes == 1));
+			ASSERT_THAT(IsTrue(Component.TryAddItem(Seeds.GetPrimaryAssetId(), 2)));
+			ASSERT_THAT(IsTrue(Component.TryRemoveItemFromSlot(0, 1)));
+			ASSERT_THAT(IsTrue(Changes == 1));
+			ASSERT_THAT(IsTrue(Component.TryRemoveItemFromSlot(0, 4)));
+			ASSERT_THAT(IsTrue(Changes == 2));
+			ASSERT_THAT(IsTrue(Component.GetItemInHand() == nullptr));
+			ASSERT_THAT(IsTrue(Component.SelectHotbarSlot(1)));
+			ASSERT_THAT(IsTrue(Changes == 3));
+			ASSERT_THAT(IsTrue(Component.SelectHotbarSlot(1)));
+			ASSERT_THAT(IsTrue(Changes == 3));
+		}
+
+		TEST_METHOD(AHandlerThatSelectsAnotherSlotLeavesEveryListenerOnTheLatestHand)
+		{
+			const UVestigeItemData& Seeds = MakeItem(TEXT("Base.Seeds"), 10);
+			const UVestigeItemData& Hoe = MakeItem(TEXT("Base.Hoe"), 1);
+			UVestigeInventoryComponent& Component = MakeComponent(4, {&Seeds, &Hoe});
+			Component.RestoreFromSaveData(MakeSave({{0, Seeds.GetContentId(), 1}, {1, Hoe.GetContentId(), 1}}));
+
+			// One listener reads the hand each time it is called; the other picks the hoe when the hand empties.
+			int32 Calls = 0;
+			const UVestigeItemData* SeenInHand = &Seeds;
+			Component.OnItemInHandChanged.AddLambda(
+				[&Component, &Calls, &SeenInHand]()
+				{
+					++Calls;
+					SeenInHand = Component.GetItemInHand();
+				});
+			Component.OnItemInHandChanged.AddLambda(
+				[&Component]()
+				{
+					if (!Component.GetItemInHand())
+					{
+						Component.SelectHotbarSlot(1);
+					}
+				});
+
+			ASSERT_THAT(IsTrue(Component.TryRemoveItemFromSlot(0, 1)));
+
+			ASSERT_THAT(IsTrue(Component.GetItemInHand() == &Hoe));
+			ASSERT_THAT(IsTrue(SeenInHand == &Hoe));
+			ASSERT_THAT(IsTrue(Calls == 2));
+		}
+
+		TEST_METHOD(RemovingFromASlotTakesOnlyFromThatSlot)
+		{
+			const UVestigeItemData& Seeds = MakeItem(TEXT("Base.Seeds"), 10);
+			UVestigeInventoryComponent& Component = MakeComponent(4, {&Seeds});
+			Component.RestoreFromSaveData(MakeSave({{0, Seeds.GetContentId(), 3}, {2, Seeds.GetContentId(), 3}}));
+
+			ASSERT_THAT(IsTrue(Component.TryRemoveItemFromSlot(0, 2)));
+			ASSERT_THAT(IsFalse(Component.TryRemoveItemFromSlot(0, 5)));
+			ASSERT_THAT(IsFalse(Component.TryRemoveItemFromSlot(1, 1)));
+			ASSERT_THAT(IsFalse(Component.TryRemoveItemFromSlot(0, 0)));
+			ASSERT_THAT(IsFalse(Component.TryRemoveItemFromSlot(9, 1)));
+
+			ASSERT_THAT(IsTrue(Component.GetSlots()[0].Count == 1));
+			ASSERT_THAT(IsTrue(Component.GetSlots()[2].Count == 3));
+		}
+
+		TEST_METHOD(TheSelectedSlotIsSaved)
+		{
+			const UVestigeItemData& Hoe = MakeItem(TEXT("Base.Hoe"), 1);
+			UVestigeInventoryComponent& Component = MakeComponent(12, {&Hoe});
+			ASSERT_THAT(IsTrue(Component.SelectHotbarSlot(2)));
+			FVestigeInventorySaveData Data = Component.GetSaveData();
+			ASSERT_THAT(IsTrue(Data.SelectedHotbarSlot == 2));
+
+			UVestigeInventoryComponent& Loaded = MakeComponent(12, {&Hoe});
+			Loaded.RestoreFromSaveData(Data);
+			ASSERT_THAT(IsTrue(Loaded.GetSelectedHotbarSlot() == 2));
+
+			// A slot outside the hotbar puts the first in hand.
+			Data.SelectedHotbarSlot = 20;
+			Loaded.RestoreFromSaveData(Data);
+			ASSERT_THAT(IsTrue(Loaded.GetSelectedHotbarSlot() == 0));
+		}
+
+		/** Catches a missing editor step: the game mode must name a player state whose inventory starts with the tools and seeds. */
+		TEST_METHOD(ThePlayerStartsWithAHoeSeedsAndAWateringCan)
 		{
 			UClass* GameModeClass = LoadClass<AGameModeBase>(nullptr, TEXT("/Game/Vestige/Blueprints/BP_GameMode.BP_GameMode_C"));
 			ASSERT_THAT(IsNotNull(GameModeClass));
@@ -235,7 +370,12 @@ namespace VestigeInventoryTests
 			const UVestigeInventoryComponent* Component = PlayerState.FindComponentByClass<UVestigeInventoryComponent>();
 
 			ASSERT_THAT(IsNotNull(Component));
-			ASSERT_THAT(IsTrue(Component->GetItemCount(FPrimaryAssetId(UVestigeItemData::AssetType, TEXT("Base.TurnipSeeds"))) > 0));
+			const TArray<FVestigeInventorySlot>& Slots = Component->GetSlots();
+			ASSERT_THAT(IsTrue(Slots.Num() >= 3));
+			ASSERT_THAT(IsTrue(Slots[0].Item && Slots[0].Item->GetContentId() == TEXT("Base.Hoe")));
+			ASSERT_THAT(IsTrue(Slots[1].Item && Slots[1].Item->GetContentId() == TEXT("Base.TurnipSeeds") && Slots[1].Count > 0));
+			ASSERT_THAT(IsTrue(Slots[2].Item && Slots[2].Item->GetContentId() == TEXT("Base.WateringCan")));
+			ASSERT_THAT(IsTrue(Component->GetSelectedHotbarSlot() == 0));
 		}
 	};
 }

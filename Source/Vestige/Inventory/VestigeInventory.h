@@ -52,6 +52,12 @@ public:
 	bool TryRemove(const UVestigeItemData& Item, int32 Count);
 
 	/**
+	 * Removes Count from the slot at SlotIndex only, leaving other stacks of its item as they are. Returns false, changing
+	 * nothing, if the slot doesn't exist or holds fewer, or Count is below 1.
+	 */
+	bool TryRemoveFromSlot(int32 SlotIndex, int32 Count);
+
+	/**
 	 * Puts up to Count of Item into the slot at SlotIndex, if that slot exists and is empty, never above the item's stack size.
 	 * Returns how many it put there. For restoring a save, which keeps each stack in its slot.
 	 */

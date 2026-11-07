@@ -13,6 +13,7 @@
 #include "Farming/FarmField.h"
 #include "Farming/FarmGrid.h"
 #include "Farming/FarmingComponent.h"
+#include "Farming/FarmTargetingComponent.h"
 #include "GameFramework/Actor.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Inventory/VestigeInventoryComponent.h"
@@ -52,14 +53,16 @@ void UVestigeGameplayAbility_UseTool::ActivateAbility(const FGameplayAbilitySpec
 	// No call to the base class, which only runs a Blueprint's activation graph.
 	const AActor* Avatar = ActorInfo->AvatarActor.Get();
 	UFarmingComponent* FarmingComponent = Avatar ? Avatar->FindComponentByClass<UFarmingComponent>() : nullptr;
-	if (!FarmingComponent || !GetTool())
+	UFarmTargetingComponent* TargetingComponent = Avatar ? Avatar->FindComponentByClass<UFarmTargetingComponent>() : nullptr;
+	if (!FarmingComponent || !TargetingComponent || !GetTool())
 	{
 		EndUse();
 		return;
 	}
 	Farming = FarmingComponent;
+	Targeting = TargetingComponent;
 	TargetChangedHandle =
-		FarmingComponent->OnTargetTileChanged.AddUObject(this, &UVestigeGameplayAbility_UseTool::ContinueAfterTargetChange);
+		TargetingComponent->OnTargetTileChanged.AddUObject(this, &UVestigeGameplayAbility_UseTool::ContinueAfterTargetChange);
 	bFirstTry = true;
 	TryNextUse();
 }
@@ -68,11 +71,12 @@ void UVestigeGameplayAbility_UseTool::EndAbility(const FGameplayAbilitySpecHandl
 	const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
 {
 	// Before the base class, which may remove the spec this ability was granted with.
-	if (UFarmingComponent* FarmingComponent = Farming.Get())
+	if (UFarmTargetingComponent* TargetingComponent = Targeting.Get())
 	{
-		FarmingComponent->OnTargetTileChanged.Remove(TargetChangedHandle);
+		TargetingComponent->OnTargetTileChanged.Remove(TargetChangedHandle);
 	}
 	TargetChangedHandle.Reset();
+	Targeting.Reset();
 	Farming.Reset();
 	Step = EUseStep::Idle;
 	bFirstTry = false;
@@ -141,8 +145,8 @@ void UVestigeGameplayAbility_UseTool::TryNextUse()
 		return;
 	}
 
-	UFarmingComponent* FarmingComponent = Farming.Get();
-	const TOptional<FIntPoint> Target = FarmingComponent ? FarmingComponent->GetTargetTile() : TOptional<FIntPoint>();
+	const UFarmTargetingComponent* TargetingComponent = Targeting.Get();
+	const TOptional<FIntPoint> Target = TargetingComponent ? TargetingComponent->GetTargetTile() : TOptional<FIntPoint>();
 	if (!Target || !GetField())
 	{
 		if (bFirst)
@@ -262,8 +266,8 @@ const UVestigeToolData* UVestigeGameplayAbility_UseTool::GetTool() const
 
 UFarmField* UVestigeGameplayAbility_UseTool::GetField() const
 {
-	const UFarmingComponent* FarmingComponent = Farming.Get();
-	const AFarmGrid* Grid = FarmingComponent ? FarmingComponent->GetGrid() : nullptr;
+	const UFarmTargetingComponent* TargetingComponent = Targeting.Get();
+	const AFarmGrid* Grid = TargetingComponent ? TargetingComponent->GetGrid() : nullptr;
 	return Grid ? Grid->GetField() : nullptr;
 }
 

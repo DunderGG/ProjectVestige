@@ -5,49 +5,49 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "Core/VestigeSaveable.h"
-#include "Farming/FarmToolbar.h"
 #include "GameplayAbilitySpecHandle.h"
 #include "FarmingComponent.generated.h"
 
 class AController;
-class AFarmGrid;
 class APawn;
 class UAbilitySystemComponent;
 class UFarmCropData;
+class UVestigeInventoryComponent;
+class UVestigeItemData;
 class UVestigeToolData;
-struct FFarmFarmingSaveData;
 struct FGameplayAbilitySpec;
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnFarmToolChanged, const UVestigeToolData* /* Tool */);
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnFarmTargetTileChanged, const TOptional<FIntPoint>& /* Tile */);
+DECLARE_MULTICAST_DELEGATE(FOnFarmToolChanged);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnFarmToolUseHeldChanged, bool /* bHeld */);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnFarmCropHarvested, const UFarmCropData*, Crop, FIntPoint, Tile);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnFarmToolUsed, const UVestigeToolData*, Tool, FIntPoint, Tile);
 
 /**
- * Gives its owner, a pawn, farming tools: the toolbar and the tool in hand, the tile the owner aims at (the neighbour of
- * the owner's tile in the aimed direction), and the seed item the Seeds tool plants. What a tool does is its ability
- * (UVestigeToolData::GetAbility, a UVestigeGameplayAbility_UseTool subclass): this component grants the ability of the tool
- * in hand on the ability system the owner reaches (the player state's), with the tool asset as its source object, and
- * passes the use key's press and release to it. It never calls the abilities; they read the target and the seed item here
- * and report what they did, which this component broadcasts as the extension points OnCropHarvested and OnToolUsed.
- * Saves the tool in hand under Base.Farming through UVestigeSaveRegistry while it is in play.
+ * Lets its owner, a pawn, use what is in hand: the item in the selected hotbar slot of the inventory on the owner's player
+ * state. An item with a UVestigeToolFragment uses the tool it names; an empty slot or any other item uses the hand
+ * (HandToolId). What a tool does is its ability (UVestigeToolData::GetAbility, a UVestigeGameplayAbility_UseTool subclass):
+ * this component grants the ability of the tool in hand on the ability system the owner reaches (the player state's),
+ * with the tool asset as its source object, and passes the use key's press and release to it. It never calls the
+ * abilities; they read the target from UFarmTargetingComponent and the crops here, and report what they did, which this
+ * component broadcasts as the extension points OnCropHarvested and OnToolUsed. Loads every tool and crop at BeginPlay, so
+ * nothing in hand waits on a load. Systems.md, section 8.
  */
 UCLASS(ClassGroup = (Farming), meta = (BlueprintSpawnableComponent))
-class UFarmingComponent : public UActorComponent, public IVestigeSaveable
+class UFarmingComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
 public:
 	UFarmingComponent();
 
-	/** Puts the tool in a toolbar slot (0 is the first) in hand. Does nothing if the slot doesn't exist. */
-	void SelectToolbarSlot(int32 Slot);
+	/**
+	 * The tool in hand: the one the item in hand's tool fragment names, else the hand. Read from the inventory each time.
+	 * Nullptr while the owner reaches no inventory (it has no player state) or the hand tool isn't set.
+	 */
+	const UVestigeToolData* GetCurrentTool() const;
 
-	/** The tool in hand, or nullptr if its slot is empty. */
-	const UVestigeToolData* GetCurrentTool() const { return Toolbar.GetCurrentTool(); }
-	const FFarmToolbar& GetToolbar() const { return Toolbar; }
+	/** The loaded crop with this ID (FarmCrop:Base.Turnip), or nullptr if the Asset Manager knows none. */
+	const UFarmCropData* FindCrop(const FPrimaryAssetId& CropId) const;
 
 	/**
 	 * Uses the tool in hand once on the target tile, by activating its ability without pressing the use key: the ability
@@ -68,59 +68,17 @@ public:
 	/** Whether the use key is held. The farmer walks slower meanwhile. */
 	bool IsToolUseHeld() const { return bToolUseHeld; }
 
-	/** The item the Seeds tool plants (VestigeItem:Base.TurnipSeeds). */
-	const FPrimaryAssetId& GetSeedItemId() const { return SeedItemId; }
-
-	/** The crop the seed item grows, loaded with its meshes at BeginPlay, or nullptr if the seed item names none. */
-	const UFarmCropData* GetSeedCrop() const { return SeedCrop; }
-
 	/** A tool ability changed the tile at Tile with Tool: broadcasts OnToolUsed. Called by the tool abilities only. */
 	void ReportToolUsed(const UVestigeToolData& Tool, const FIntPoint& Tile);
 
 	/** A tool ability harvested Crop from the tile at Tile: broadcasts OnCropHarvested. Called by the tool abilities only. */
 	void ReportCropHarvested(const UFarmCropData& Crop, const FIntPoint& Tile);
 
-	/** The tool in hand, for saving. */
-	FFarmFarmingSaveData GetSaveData() const;
-
 	/**
-	 * Puts the saved tool back in hand, without replaying any action, and broadcasts OnToolChanged. Returns false if the
-	 * saved tool isn't on the toolbar: the first slot is in hand then, with a warning.
+	 * Broadcast when the tool in hand changes. It carries no value: a listener called during a nested broadcast may be called
+	 * for the newer change first, so listeners read GetCurrentTool when called.
 	 */
-	bool RestoreFromSaveData(const FFarmFarmingSaveData& Data);
-
-	virtual FName GetSaveKey() const override;
-	virtual int32 GetSaveVersion() const override;
-	virtual FVestigeSaveRecord WriteSaveRecord() const override;
-	virtual bool ReadSaveRecord(const FVestigeSaveRecord& Record, int32& OutLeftOutCount) override;
-
-	/** Puts the first toolbar slot's tool in hand and broadcasts OnToolChanged. */
-	virtual void StartNewGame() override;
-
-	/**
-	 * Aims at the neighbouring tile in WorldDirection, snapped to one of the eight grid directions (diagonals included).
-	 * The owner's input calls it with the movement direction every frame it is held. A zero direction keeps the current aim,
-	 * so the target stays put when the farmer stops. Broadcasts OnTargetTileChanged when the target changes.
-	 */
-	void AimAt(const FVector& WorldDirection);
-
-	/** The aim as a world direction on the ground, of length 1, for turning the owner to face it. Zero without a grid. */
-	FVector GetAimDirection() const;
-
-	/**
-	 * The target tile's coordinates in the grid's field: the neighbour of the owner's tile in the aimed direction, never the
-	 * tile the owner stands on. Unset when that neighbour is outside the field.
-	 */
-	const TOptional<FIntPoint>& GetTargetTile() const { return TargetTile; }
-
-	/** The level's farm grid, found at BeginPlay, or nullptr if the level has none. */
-	const AFarmGrid* GetGrid() const { return Grid; }
-
-	/** Broadcast whenever the current tool changes, including when a save is loaded. */
 	FOnFarmToolChanged OnToolChanged;
-
-	/** Broadcast when the target tile changes, unset when there stops being one. */
-	FOnFarmTargetTileChanged OnTargetTileChanged;
 
 	/** Broadcast when the use key is pressed or released, with whether it is now held. The farmer walks slower meanwhile. */
 	FOnFarmToolUseHeldChanged OnToolUseHeldChanged;
@@ -134,28 +92,39 @@ public:
 
 	/**
 	 * Extension point: broadcast when a use of Tool changed the tile at the coordinates Tile (column X, row Y) of the grid's
-	 * field, after the change. A use that changes nothing (no target, nothing to water, out of seeds, a full bag) isn't
+	 * field, after the change. A use that changes nothing (no target, nothing to water, nothing to plant, a full bag) isn't
 	 * broadcast, as it costs nothing.
 	 */
 	UPROPERTY(BlueprintAssignable, Category = "Farming")
 	FOnFarmToolUsed OnToolUsed;
 
+#if WITH_DEV_AUTOMATION_TESTS
+	/** For tests only: makes a crop the Asset Manager doesn't know (a transient one) plantable. */
+	void AddCropForTests(const UFarmCropData& Crop);
+#endif
+
 protected:
-	/** Loads the seed crop and the toolbar, takes its saved tool in hand, then finds the grid and aims. */
+	/** Loads the tools and crops, then follows the owner's controller and the inventory on its player state. */
 	virtual void BeginPlay() override;
 
-	/** Keeps the tool in hand for the next map, takes its ability back, then stops following the grid and the owner. */
+	/** Takes the tool's ability back, then stops following the owner and the inventory. */
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 private:
-	void LoadSeedCrop();
-	void LoadToolbar();
+	/** Loads every tool and crop the Asset Manager knows, with their visuals, in one batch. */
+	void LoadToolsAndCrops();
 
-	/** Puts the tool with this ContentId in hand. Returns false, with the first slot in hand, if no slot holds it. */
-	bool RestoreCurrentTool(FName ToolContentId);
+	/** The inventory on the owner's player state now, or nullptr without one. */
+	UVestigeInventoryComponent* FindInventory() const;
 
-	/** The tool in hand changed: grants its ability and broadcasts OnToolChanged. */
-	void HandleToolChanged();
+	/**
+	 * Listens to the inventory on the owner's player state now, if it isn't the one listened to already, then catches up
+	 * with the hand (HandleItemInHandChanged). Called at BeginPlay, when the controller changes and on each press.
+	 */
+	void FollowInventory();
+
+	/** The item in hand changed: grants the ability of the tool in hand, and broadcasts OnToolChanged if the tool changed. */
+	void HandleItemInHandChanged();
 
 	/**
 	 * Makes the granted ability match the tool in hand and the ability system the owner reaches now: takes back the old
@@ -165,7 +134,8 @@ private:
 
 	/**
 	 * Takes back the granted ability through the ability system it was granted on, which the owner may no longer reach. A
-	 * use under way is told the key is released and finishes its time before the ability goes, so a switch can't cut it short.
+	 * use under way is told the key is released and finishes its time before the ability goes, so a switch can't cut it
+	 * short. A grant still queued (made while the ability list was locked) is cleared.
 	 */
 	void ReleaseGrantedTool();
 
@@ -175,32 +145,9 @@ private:
 	/** The granted ability's spec on its ability system, or nullptr. Never kept: specs move when abilities are removed. */
 	FGameplayAbilitySpec* FindGrantedSpec() const;
 
-	/** The owner gained or lost its controller, and with it the player state's ability system. Bound to the owner's event. */
+	/** The owner gained or lost its controller, and with it the player state. Bound to the owner's event. */
 	UFUNCTION()
 	void FollowController(APawn* Pawn, AController* OldController, AController* NewController);
-
-	/** The neighbour of the owner's tile one AimStep away, or unset if it is outside the field. */
-	TOptional<FIntPoint> FindTargetTile() const;
-
-	/** Finds the target tile again and broadcasts OnTargetTileChanged if it changed. */
-	void UpdateTargetTile();
-
-	/** Bound to the owner's root component, so the target follows the owner from tile to tile without ticking. */
-	void FollowOwnerTransform(USceneComponent* UpdatedComponent, EUpdateTransformFlags UpdateTransformFlags, ETeleportType Teleport);
-
-	/** Tells the player what happened, through UVestigeFeedbackSubsystem. */
-	void Notify(const FText& Message) const;
-
-	UPROPERTY()
-	TObjectPtr<AFarmGrid> Grid;
-
-	TOptional<FIntPoint> TargetTile;
-
-	/** The grid step from the owner's tile to the target: X and Y each -1, 0 or 1, never both 0. */
-	FIntPoint AimStep = FIntPoint(1, 0);
-
-	/** The owner's tile when the target was last found, so moving within a tile does no work. */
-	FIntPoint OwnerCoordinates = FIntPoint::ZeroValue;
 
 	/** Set while the use key is held. Only for the walk speed: the tool's ability reads its spec's input instead. */
 	bool bToolUseHeld = false;
@@ -210,22 +157,21 @@ private:
 	TWeakObjectPtr<UAbilitySystemComponent> GrantedAbilitySystem;
 	FGameplayAbilitySpecHandle GrantedSpec;
 
-	/** The seed item the Seeds tool plants, by its ID (VestigeItem:Base.TurnipSeeds). Its seed fragment names the crop. */
-	UPROPERTY(EditDefaultsOnly, Category = "Farming", meta = (AllowPrivateAccess = "true", AllowedTypes = "VestigeItem"))
-	FPrimaryAssetId SeedItemId;
+	/** The tool at the last OnToolChanged, apart from GrantedTool, which is empty while there is no ability system. */
+	TWeakObjectPtr<const UVestigeToolData> BroadcastTool;
 
-	/** The crop the seed item grows, loaded with its meshes at BeginPlay. */
-	UPROPERTY()
-	TObjectPtr<const UFarmCropData> SeedCrop;
+	/** The inventory whose OnItemInHandChanged this component listens to. */
+	TWeakObjectPtr<UVestigeInventoryComponent> Inventory;
 
-	/**
-	 * Tool assets in the toolbar slots, in order (VestigeTool:Base.Hoe).
-	 * Keys 1 to 9 select the first nine; the first is in hand at the start.
-	 */
+	/** The tool used when the item in hand isn't a tool or the slot is empty (VestigeTool:Base.Hand). */
 	UPROPERTY(EditDefaultsOnly, Category = "Farming", meta = (AllowPrivateAccess = "true", AllowedTypes = "VestigeTool"))
-	TArray<FPrimaryAssetId> ToolbarIds;
+	FPrimaryAssetId HandToolId;
 
-	/** The tools loaded from ToolbarIds at BeginPlay, and the one in hand. */
+	/** Every tool, by its primary asset ID, loaded with its visuals at BeginPlay. */
 	UPROPERTY()
-	FFarmToolbar Toolbar;
+	TMap<FPrimaryAssetId, TObjectPtr<const UVestigeToolData>> Tools;
+
+	/** Every crop, by its primary asset ID, loaded with its visuals at BeginPlay. */
+	UPROPERTY()
+	TMap<FPrimaryAssetId, TObjectPtr<const UFarmCropData>> Crops;
 };

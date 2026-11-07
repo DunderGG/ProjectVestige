@@ -11,11 +11,13 @@
 class UAbilitySystemComponent;
 class UEnhancedInputLocalPlayerSubsystem;
 class UFarmingComponent;
+class UFarmTargetingComponent;
+class UVestigeInventoryComponent;
 class UVestigeInteractionComponent;
 class UFarmTargetHighlightComponent;
-class UVestigeToolData;
 class UInputAction;
 class UInputMappingContext;
+class UStaticMesh;
 class UStaticMeshComponent;
 
 /** A key the player can press and what it does, for on-screen hints. */
@@ -43,8 +45,8 @@ public:
 	/** The ability system on the player state, or nullptr while no player state is set. */
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
-	/** The toolbar keys in slot order, each named after the tool in its slot. Empty slots are left out. */
-	TArray<FVestigeKeyHint> GetToolbarKeyHints() const;
+	/** The hotbar keys in slot order, each named after the item in its slot of Inventory. Empty slots are left out. */
+	TArray<FVestigeKeyHint> GetHotbarKeyHints(const UVestigeInventoryComponent& Inventory) const;
 
 	/**
 	 * The other farming keys and what they do (use tool, interact), in the order they are mapped.
@@ -56,7 +58,7 @@ public:
 	FText GetInteractKey() const;
 
 	/**
-	 * Walks as the template does, and aims the farming component at the neighbouring tile in the movement direction. The
+	 * Walks as the template does, and aims the targeting component at the neighbouring tile in the movement direction. The
 	 * walk ramps in over MoveRampSeconds from a press, so a tap turns the farmer toward the tile with barely a step.
 	 */
 	virtual void DoMove(float Right, float Forward) override;
@@ -66,6 +68,11 @@ public:
 	 * to 1 after RampSeconds.
 	 */
 	static float GetMoveInputScale(float HeldSeconds, float RampSeconds);
+
+#if WITH_DEV_AUTOMATION_TESTS
+	/** For tests only: the mesh shown in the hand. */
+	UStaticMesh* GetHeldToolMeshForTests() const;
+#endif
 
 protected:
 	virtual void PostInitializeComponents() override;
@@ -89,8 +96,11 @@ private:
 	/** How long the move input has been held, in seconds, or the largest float when DoMove comes from on-screen controls. */
 	float GetMoveHeldSeconds() const;
 
-	/** Shows the tool's held mesh in the hand, or nothing for an empty slot or a tool without one. */
-	void ShowHeldTool(const UVestigeToolData* Tool);
+	/** Selects the hotbar slot Slot of the inventory on the player state. Does nothing without one. Bound to keys 1 to 9. */
+	void SelectHotbarSlot(int32 Slot);
+
+	/** Shows the held mesh of the tool in hand, or nothing for the hand or a tool without one. Bound to OnToolChanged. */
+	void ShowHeldTool();
 
 	/**
 	 * Seconds from a movement press until the farmer walks at full strength. A tap shorter than this moves him a few
@@ -102,10 +112,14 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Farming")
 	TObjectPtr<UFarmingComponent> Farming;
 
+	/** The tile the farmer aims at, which movement input steers. */
+	UPROPERTY(VisibleAnywhere, Category = "Farming")
+	TObjectPtr<UFarmTargetingComponent> Targeting;
+
 	UPROPERTY(VisibleAnywhere, Category = "Interaction")
 	TObjectPtr<UVestigeInteractionComponent> Interaction;
 
-	/** Frames the tile the farming component targets. */
+	/** Frames the tile the targeting component aims at. */
 	UPROPERTY(VisibleAnywhere, Category = "Farming")
 	TObjectPtr<UFarmTargetHighlightComponent> TargetHighlight;
 
@@ -123,7 +137,7 @@ private:
 	UPROPERTY(Transient)
 	TObjectPtr<UInputAction> InteractAction;
 
-	/** One action per number key; the index is the toolbar slot it selects. */
+	/** One action per number key; the index is the hotbar slot it selects. */
 	UPROPERTY(Transient)
-	TArray<TObjectPtr<UInputAction>> ToolbarSlotActions;
+	TArray<TObjectPtr<UInputAction>> HotbarSlotActions;
 };

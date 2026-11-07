@@ -8,11 +8,9 @@
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemGlobals.h"
 #include "Content/VestigeItemData.h"
-#include "Content/VestigeToolData.h"
 #include "Core/VestigeFeedbackSubsystem.h"
 #include "Engine/GameViewportClient.h"
 #include "Engine/World.h"
-#include "Farming/FarmingComponent.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/PlayerState.h"
@@ -98,6 +96,7 @@ void AVestigeHUD::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	if (UVestigeInventoryComponent* CurrentInventory = Inventory.Get())
 	{
 		CurrentInventory->OnInventoryChanged.RemoveAll(this);
+		CurrentInventory->OnItemInHandChanged.RemoveAll(this);
 	}
 	if (UAbilitySystemComponent* CurrentAbilitySystem = AbilitySystem.Get())
 	{
@@ -135,8 +134,8 @@ FText AVestigeHUD::GetStatusText() const
 	{
 		StatusDay = Day;
 		StatusClockMinutes = ClockMinutes;
-		StatusText = FText::FormatNamed(LOCTEXT("Status", "Day {Day}   {Clock}   |   {Tool}"), TEXT("Day"), Day, TEXT("Clock"),
-			VestigeHudClock::Format(ClockMinutes), TEXT("Tool"), ToolText);
+		StatusText = FText::FormatNamed(LOCTEXT("Status", "Day {Day}   {Clock}   |   {Item}"), TEXT("Day"), Day, TEXT("Clock"),
+			VestigeHudClock::Format(ClockMinutes), TEXT("Item"), ItemInHandText);
 	}
 	return StatusText;
 }
@@ -145,14 +144,7 @@ void AVestigeHUD::FollowPawn(APawn* OldPawn, APawn* NewPawn)
 {
 	StopFollowingPawn();
 	Farmer = Cast<AVestigePlayerCharacter>(NewPawn);
-	Farming = NewPawn ? NewPawn->FindComponentByClass<UFarmingComponent>() : nullptr;
-
-	UFarmingComponent* NewFarming = Farming.Get();
-	if (NewFarming)
-	{
-		NewFarming->OnToolChanged.AddUObject(this, &AVestigeHUD::RefreshToolTexts);
-	}
-	RefreshToolTexts(NewFarming ? NewFarming->GetCurrentTool() : nullptr);
+	RefreshControlsText();
 
 	Interaction = NewPawn ? NewPawn->FindComponentByClass<UVestigeInteractionComponent>() : nullptr;
 	if (UVestigeInteractionComponent* NewInteraction = Interaction.Get())
@@ -164,10 +156,6 @@ void AVestigeHUD::FollowPawn(APawn* OldPawn, APawn* NewPawn)
 
 void AVestigeHUD::StopFollowingPawn()
 {
-	if (UFarmingComponent* OldFarming = Farming.Get())
-	{
-		OldFarming->OnToolChanged.RemoveAll(this);
-	}
 	if (UVestigeInteractionComponent* OldInteraction = Interaction.Get())
 	{
 		OldInteraction->OnFocusChanged.RemoveAll(this);
@@ -192,9 +180,11 @@ void AVestigeHUD::FollowInventory()
 	Inventory = PlayerState ? PlayerState->FindComponentByClass<UVestigeInventoryComponent>() : nullptr;
 	if (UVestigeInventoryComponent* CurrentInventory = Inventory.Get())
 	{
-		CurrentInventory->OnInventoryChanged.AddUObject(this, &AVestigeHUD::RefreshInventoryText);
+		CurrentInventory->OnInventoryChanged.AddUObject(this, &AVestigeHUD::RefreshInventoryTexts);
+		CurrentInventory->OnItemInHandChanged.AddUObject(this, &AVestigeHUD::RefreshItemInHandTexts);
 	}
-	RefreshInventoryText();
+	RefreshInventoryTexts();
+	RefreshItemInHandTexts();
 }
 
 void AVestigeHUD::FollowAbilitySystem()
@@ -256,12 +246,22 @@ void AVestigeHUD::RefreshStaminaText()
 	}
 }
 
-void AVestigeHUD::RefreshToolTexts(const UVestigeToolData* Tool)
+void AVestigeHUD::RefreshItemInHandTexts()
 {
-	ToolText = Tool ? Tool->GetDisplayName() : LOCTEXT("NoTool", "No tool");
+	// Read now rather than passed, since a nested change may reach this handler out of order.
+	const UVestigeInventoryComponent* CurrentInventory = Inventory.Get();
+	const UVestigeItemData* Item = CurrentInventory ? CurrentInventory->GetItemInHand() : nullptr;
+	ItemInHandText = Item ? Item->GetDisplayName() : LOCTEXT("EmptyHand", "Empty hand");
 
-	// The status line shows the tool, so it is built again on its next read.
+	// The status line shows the item in hand, so it is built again on its next read.
 	StatusDay = INDEX_NONE;
+}
+
+void AVestigeHUD::RefreshInventoryTexts()
+{
+	RefreshInventoryText();
+
+	// The hotbar hints name the items in the hotbar slots.
 	RefreshControlsText();
 }
 
@@ -296,17 +296,20 @@ void AVestigeHUD::RefreshControlsText()
 		return;
 	}
 
-	TArray<FText> ToolbarHints;
-	for (const FVestigeKeyHint& Hint : CurrentFarmer->GetToolbarKeyHints())
+	TArray<FText> HotbarHints;
+	if (const UVestigeInventoryComponent* CurrentInventory = Inventory.Get())
 	{
-		ToolbarHints.Add(VestigeHudHints::Format(Hint));
+		for (const FVestigeKeyHint& Hint : CurrentFarmer->GetHotbarKeyHints(*CurrentInventory))
+		{
+			HotbarHints.Add(VestigeHudHints::Format(Hint));
+		}
 	}
 
-	// The toolbar hints belong together; the other hints are set apart from them and from each other.
+	// The hotbar hints belong together; the other hints are set apart from them and from each other.
 	TArray<FText> Groups;
-	if (!ToolbarHints.IsEmpty())
+	if (!HotbarHints.IsEmpty())
 	{
-		Groups.Add(FText::Join(FText::AsCultureInvariant(TEXT("   ")), ToolbarHints));
+		Groups.Add(FText::Join(FText::AsCultureInvariant(TEXT("   ")), HotbarHints));
 	}
 	for (const FVestigeKeyHint& Hint : CurrentFarmer->GetActionKeyHints())
 	{

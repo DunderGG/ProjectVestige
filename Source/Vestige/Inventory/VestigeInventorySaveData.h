@@ -33,10 +33,17 @@ struct FVestigeInventorySaveData
 {
 	GENERATED_BODY()
 
-	/** This layout's version (Systems.md, section 1). Raise it when a change would load older parts wrong. */
-	static constexpr int32 Version = 1;
+	/**
+	 * This layout's version (Systems.md, section 1). Raise it when a change would load older parts wrong. 2 since the tools
+	 * became items: a version 1 bag holds no hoe or watering can, so reading it would leave the player unable to farm.
+	 */
+	static constexpr int32 Version = 2;
 
 	/** The non-empty slots, in slot order. */
 	UPROPERTY()
 	TArray<FVestigeInventorySlotSaveData> Slots;
+
+	/** The selected hotbar slot, whose item is in hand. */
+	UPROPERTY()
+	int32 SelectedHotbarSlot = 0;
 };

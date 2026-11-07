@@ -6,25 +6,18 @@
 #include "Abilities/GameplayAbility.h"
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemGlobals.h"
-#include "Components/SceneComponent.h"
 #include "Content/FarmCropData.h"
-#include "Content/FarmSeedFragment.h"
 #include "Content/VestigeContentData.h"
 #include "Content/VestigeItemData.h"
 #include "Content/VestigeToolData.h"
-#include "Core/VestigeFeedbackSubsystem.h"
-#include "Core/VestigeSaveRegistry.h"
-#include "Engine/World.h"
-#include "Farming/FarmFarmingSaveData.h"
-#include "Farming/FarmGrid.h"
+#include "Content/VestigeToolFragment.h"
+#include "Engine/AssetManager.h"
 #include "Farming/FarmLog.h"
-#include "Farming/FarmTileTargeting.h"
 #include "GameFramework/Pawn.h"
+#include "GameFramework/PlayerState.h"
 #include "GameplayAbilitySpec.h"
+#include "Inventory/VestigeInventoryComponent.h"
 #include "ProfilingDebugging/CpuProfilerTrace.h"
-#include "TimerManager.h"
-
-#define LOCTEXT_NAMESPACE "FarmingComponent"
 
 UFarmingComponent::UFarmingComponent()
 {
@@ -35,67 +28,26 @@ void UFarmingComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	LoadSeedCrop();
-	LoadToolbar();
-
-	// After the toolbar loads, since restoring the tool in hand looks for it there.
-	UVestigeSaveRegistry::RegisterWorldOwner(GetWorld(), *this);
-
-	Grid = AFarmGrid::Find(GetWorld());
-	if (Grid)
-	{
-		// The grid finds its field in its own BeginPlay, which may run after this one.
-		Grid->OnFieldReady.AddUObject(this, &UFarmingComponent::UpdateTargetTile);
-
-		// Until the first movement input, aim where the owner faces.
-		const FIntPoint FacingStep = FarmTileTargeting::SnapToStep(Grid->ToGridDirection(GetOwner()->GetActorForwardVector()));
-		if (FacingStep != FIntPoint::ZeroValue)
-		{
-			AimStep = FacingStep;
-		}
-		OwnerCoordinates = Grid->GetCoordinatesAt(GetOwner()->GetActorLocation());
-	}
-	else
-	{
-		VESTIGE_LOG(this, LogFarm, Warning, "The level {Level} has no FarmGrid, so there is nothing to farm.", GetWorld()->GetMapName());
-
-		// The HUD may not be listening for feedback yet during BeginPlay.
-		GetWorld()->GetTimerManager().SetTimerForNextTick(
-			[WeakThis = TWeakObjectPtr<UFarmingComponent>(this)]()
-			{
-				if (const UFarmingComponent* Farming = WeakThis.Get())
-				{
-					Farming->Notify(LOCTEXT("NoGrid", "No FarmGrid in the level. Drag one in from the Place Actors panel."));
-				}
-			});
-	}
-
-	if (USceneComponent* Root = GetOwner() ? GetOwner()->GetRootComponent() : nullptr)
-	{
-		Root->TransformUpdated.AddUObject(this, &UFarmingComponent::FollowOwnerTransform);
-	}
+	LoadToolsAndCrops();
 	if (APawn* Pawn = Cast<APawn>(GetOwner()))
 	{
 		Pawn->ReceiveControllerChangedDelegate.AddDynamic(this, &UFarmingComponent::FollowController);
 	}
-	UpdateTargetTile();
+
+	// The pawn a map starts with is possessed before the world begins play, so its controller change has already happened.
+	FollowInventory();
 }
 
 void UFarmingComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	UVestigeSaveRegistry::UnregisterWorldOwner(GetWorld(), *this);
-
 	// By now the owner is unpossessed and reaches no ability system, so the grant goes through the one it was made on.
 	ReleaseGrantedTool();
 
-	if (Grid)
+	if (UVestigeInventoryComponent* OldInventory = Inventory.Get())
 	{
-		Grid->OnFieldReady.RemoveAll(this);
+		OldInventory->OnItemInHandChanged.RemoveAll(this);
 	}
-	if (USceneComponent* Root = GetOwner() ? GetOwner()->GetRootComponent() : nullptr)
-	{
-		Root->TransformUpdated.RemoveAll(this);
-	}
+	Inventory.Reset();
 	if (APawn* Pawn = Cast<APawn>(GetOwner()))
 	{
 		Pawn->ReceiveControllerChangedDelegate.RemoveDynamic(this, &UFarmingComponent::FollowController);
@@ -103,135 +55,135 @@ void UFarmingComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	Super::EndPlay(EndPlayReason);
 }
 
-void UFarmingComponent::LoadSeedCrop()
+void UFarmingComponent::LoadToolsAndCrops()
 {
-	TRACE_CPUPROFILER_EVENT_SCOPE(UFarmingComponent::LoadSeedCrop);
+	TRACE_CPUPROFILER_EVENT_SCOPE(UFarmingComponent::LoadToolsAndCrops);
 
-	// Waiting is fine at play start, and with the meshes loaded now, planting never stalls on a load.
-	const UVestigeItemData* SeedItem = Cast<UVestigeItemData>(UVestigeContentData::LoadWithVisuals(SeedItemId));
-	const UFarmSeedFragment* Seed = SeedItem ? SeedItem->FindFragment<UFarmSeedFragment>() : nullptr;
-	if (!Seed)
+	UAssetManager* AssetManager = UAssetManager::GetIfInitialized();
+	if (!AssetManager)
 	{
-		VESTIGE_LOG(this, LogFarm, Warning, "The Seed Item Id ({ItemId}) names no item with a seed fragment, so nothing can be planted.",
-			SeedItemId.ToString());
 		return;
 	}
-	SeedCrop = Cast<UFarmCropData>(UVestigeContentData::LoadWithVisuals(Seed->GetCropId()));
-}
 
-void UFarmingComponent::LoadToolbar()
-{
-	TRACE_CPUPROFILER_EVENT_SCOPE(UFarmingComponent::LoadToolbar);
+	TArray<FPrimaryAssetId> ToolIds;
+	AssetManager->GetPrimaryAssetIdList(UVestigeToolData::AssetType, ToolIds);
+	TArray<FPrimaryAssetId> CropIds;
+	AssetManager->GetPrimaryAssetIdList(UFarmCropData::AssetType, CropIds);
 
-	if (ToolbarIds.IsEmpty())
+	// Waiting is fine at play start, and with the meshes loaded now, holding or planting never stalls on a load. The asset
+	// manager keeps the handle, so a later pawn finds them in memory.
+	TArray<FPrimaryAssetId> AssetIds = ToolIds;
+	AssetIds.Append(CropIds);
+	if (const TSharedPtr<FStreamableHandle> Handle = AssetManager->LoadPrimaryAssets(AssetIds, {UVestigeContentData::VisualsBundle}))
 	{
-		VESTIGE_LOG(this, LogFarm, Warning, "No Toolbar Ids are set, so the farmer has no tools.");
+		Handle->WaitUntilComplete();
 	}
 
-	// A missing tool leaves its slot empty, so the other tools keep their keys.
-	TArray<TObjectPtr<const UVestigeToolData>> Tools;
-	for (const FPrimaryAssetId& ToolId : ToolbarIds)
+	for (const FPrimaryAssetId& ToolId : ToolIds)
 	{
-		const UVestigeToolData* Tool = Cast<UVestigeToolData>(UVestigeContentData::LoadWithVisuals(ToolId));
-		if (!Tool)
+		if (const UVestigeToolData* Tool = AssetManager->GetPrimaryAssetObject<UVestigeToolData>(ToolId))
 		{
-			VESTIGE_LOG(this, LogFarm, Warning, "Toolbar slot {Slot} ({ToolId}) names no tool asset, so the slot is empty.",
-				Tools.Num() + 1, ToolId.ToString());
+			if (!Tool->GetAbility())
+			{
+				VESTIGE_LOG(this, LogFarm, Warning, "The tool {ToolId} names no Ability, so it does nothing.", ToolId.ToString());
+			}
+			Tools.Add(ToolId, Tool);
 		}
-		else if (!Tool->GetAbility())
+	}
+	for (const FPrimaryAssetId& CropId : CropIds)
+	{
+		if (const UFarmCropData* Crop = AssetManager->GetPrimaryAssetObject<UFarmCropData>(CropId))
 		{
-			VESTIGE_LOG(this, LogFarm, Warning, "The tool {ToolId} names no Ability, so it does nothing.", ToolId.ToString());
+			Crops.Add(CropId, Crop);
 		}
-		Tools.Add(Tool);
 	}
-	Toolbar.SetTools(MoveTemp(Tools));
-	HandleToolChanged();
-}
-
-void UFarmingComponent::SelectToolbarSlot(int32 Slot)
-{
-	if (Toolbar.SelectSlot(Slot))
+	if (!Tools.Contains(HandToolId))
 	{
-		HandleToolChanged();
+		VESTIGE_LOG(
+			this, LogFarm, Warning, "The Hand Tool Id ({ToolId}) names no tool, so an empty hand does nothing.", HandToolId.ToString());
 	}
 }
 
-bool UFarmingComponent::RestoreCurrentTool(FName ToolContentId)
+const UVestigeToolData* UFarmingComponent::GetCurrentTool() const
 {
-	const bool bFound = Toolbar.SelectTool(ToolContentId);
-	if (!bFound)
+	const UVestigeInventoryComponent* CurrentInventory = FindInventory();
+	if (!CurrentInventory)
 	{
-		VESTIGE_LOG(this, LogFarm, Warning, "The saved tool {ToolId} isn't on the toolbar, so the first slot is in hand.", ToolContentId);
-		Toolbar.SelectSlot(0);
+		return nullptr;
 	}
-	HandleToolChanged();
-	return bFound;
+
+	const UVestigeItemData* Item = CurrentInventory->GetItemInHand();
+	const UVestigeToolFragment* ToolFragment = Item ? Item->FindFragment<UVestigeToolFragment>() : nullptr;
+	if (ToolFragment)
+	{
+		if (const TObjectPtr<const UVestigeToolData>* Tool = Tools.Find(ToolFragment->GetToolId()))
+		{
+			return *Tool;
+		}
+	}
+	const TObjectPtr<const UVestigeToolData>* HandTool = Tools.Find(HandToolId);
+	return HandTool ? HandTool->Get() : nullptr;
 }
 
-void UFarmingComponent::HandleToolChanged()
+const UFarmCropData* UFarmingComponent::FindCrop(const FPrimaryAssetId& CropId) const
 {
-	UpdateGrantedTool();
-	OnToolChanged.Broadcast(GetCurrentTool());
+	const TObjectPtr<const UFarmCropData>* Crop = Crops.Find(CropId);
+	return Crop ? Crop->Get() : nullptr;
 }
 
-FFarmFarmingSaveData UFarmingComponent::GetSaveData() const
+UVestigeInventoryComponent* UFarmingComponent::FindInventory() const
 {
-	FFarmFarmingSaveData Data;
+	const APawn* Pawn = Cast<APawn>(GetOwner());
+	const APlayerState* PlayerState = Pawn ? Pawn->GetPlayerState() : nullptr;
+	return PlayerState ? PlayerState->FindComponentByClass<UVestigeInventoryComponent>() : nullptr;
+}
+
+void UFarmingComponent::FollowInventory()
+{
+	UVestigeInventoryComponent* NewInventory = FindInventory();
+	if (NewInventory != Inventory.Get())
+	{
+		if (UVestigeInventoryComponent* OldInventory = Inventory.Get())
+		{
+			OldInventory->OnItemInHandChanged.RemoveAll(this);
+		}
+		Inventory = NewInventory;
+		if (NewInventory)
+		{
+			NewInventory->OnItemInHandChanged.AddUObject(this, &UFarmingComponent::HandleItemInHandChanged);
+		}
+	}
+	HandleItemInHandChanged();
+}
+
+void UFarmingComponent::HandleItemInHandChanged()
+{
 	const UVestigeToolData* Tool = GetCurrentTool();
-	Data.CurrentToolId = Tool ? Tool->GetContentId() : NAME_None;
-	return Data;
-}
-
-bool UFarmingComponent::RestoreFromSaveData(const FFarmFarmingSaveData& Data)
-{
-	return RestoreCurrentTool(Data.CurrentToolId);
-}
-
-FName UFarmingComponent::GetSaveKey() const
-{
-	static const FName Key(TEXT("Base.Farming"));
-	return Key;
-}
-
-int32 UFarmingComponent::GetSaveVersion() const
-{
-	return FFarmFarmingSaveData::Version;
-}
-
-FVestigeSaveRecord UFarmingComponent::WriteSaveRecord() const
-{
-	return FVestigeSaveRecord::Write(GetSaveData());
-}
-
-bool UFarmingComponent::ReadSaveRecord(const FVestigeSaveRecord& Record, int32& OutLeftOutCount)
-{
-	FFarmFarmingSaveData Data;
-	if (!Record.Read(Data))
+	if (Tool != BroadcastTool.Get())
 	{
-		return false;
+		// A tool item whose tool isn't loaded falls back to the hand; said once, when it comes into hand.
+		const UVestigeInventoryComponent* CurrentInventory = Inventory.Get();
+		const UVestigeItemData* Item = CurrentInventory ? CurrentInventory->GetItemInHand() : nullptr;
+		const UVestigeToolFragment* ToolFragment = Item ? Item->FindFragment<UVestigeToolFragment>() : nullptr;
+		if (ToolFragment && !Tools.Contains(ToolFragment->GetToolId()))
+		{
+			VESTIGE_LOG(this, LogFarm, Warning, "The item {ItemId} names the tool {ToolId}, which doesn't exist, so the hand is used.",
+				Item->GetContentId(), ToolFragment->GetToolId().ToString());
+		}
 	}
-	if (!RestoreFromSaveData(Data))
-	{
-		++OutLeftOutCount;
-	}
-	return true;
-}
 
-void UFarmingComponent::StartNewGame()
-{
-	SelectToolbarSlot(0);
+	UpdateGrantedTool();
+	if (Tool != BroadcastTool.Get())
+	{
+		// Remembered first, so a listener that changes the hand again is compared against the latest tool.
+		BroadcastTool = Tool;
+		OnToolChanged.Broadcast();
+	}
 }
 
 void UFarmingComponent::UseTool()
 {
-	if (!GetCurrentTool())
-	{
-		Notify(LOCTEXT("NoTool", "No tool in this slot."));
-		return;
-	}
-
-	// Granted here too, since the owner may have been possessed after the tool came into the hand.
-	UpdateGrantedTool();
+	FollowInventory();
 	if (UAbilitySystemComponent* AbilitySystem = GrantedAbilitySystem.Get(); AbilitySystem && GrantedSpec.IsValid())
 	{
 		AbilitySystem->TryActivateAbility(GrantedSpec);
@@ -242,13 +194,9 @@ void UFarmingComponent::StartUsingTool()
 {
 	bToolUseHeld = true;
 	OnToolUseHeldChanged.Broadcast(bToolUseHeld);
-	if (!GetCurrentTool())
-	{
-		Notify(LOCTEXT("NoTool", "No tool in this slot."));
-		return;
-	}
 
-	UpdateGrantedTool();
+	// Followed here too, since the owner may have been given a player state without a controller.
+	FollowInventory();
 	UAbilitySystemComponent* AbilitySystem = GrantedAbilitySystem.Get();
 	FGameplayAbilitySpec* Spec = FindGrantedSpec();
 	if (!AbilitySystem || !Spec)
@@ -297,7 +245,8 @@ void UFarmingComponent::UpdateGrantedTool()
 		return;
 	}
 
-	// The spec's source object is not const, but the ability only reads the tool.
+	// The spec's source object is not const, but the ability only reads the tool. While the ability list is locked (inside
+	// a tool use's first try) the grant is queued and added when the lock is released.
 	UVestigeToolData* SourceTool = const_cast<UVestigeToolData*>(Tool);
 	constexpr int32 Level = 1;
 	GrantedSpec = AbilitySystem->GiveAbility(FGameplayAbilitySpec(Tool->GetAbility(), Level, INDEX_NONE, SourceTool));
@@ -310,14 +259,21 @@ void UFarmingComponent::ReleaseGrantedTool()
 	UAbilitySystemComponent* AbilitySystem = GrantedAbilitySystem.Get();
 	if (AbilitySystem && GrantedSpec.IsValid())
 	{
-		// Released first, so an ability waiting for a tile ends now and one in a use ends when the use's time has passed.
-		if (FGameplayAbilitySpec* Spec = AbilitySystem->FindAbilitySpecFromHandle(GrantedSpec); Spec && Spec->IsActive())
+		// The default lookup doesn't find a queued grant; never ask with EConsiderPending::PendingAdd, whose loop over the
+		// queued specs doesn't compare handles in 5.8.
+		FGameplayAbilitySpec* Spec = AbilitySystem->FindAbilitySpecFromHandle(GrantedSpec);
+		if (Spec && Spec->IsActive())
 		{
+			// Released first, so an ability waiting for a tile ends now and one in a use ends when the use's time has passed.
 			AbilitySystem->AbilitySpecInputReleased(*Spec);
+			AbilitySystem->SetRemoveAbilityOnEnd(GrantedSpec);
 		}
-
-		// Removes the ability now if it isn't active, or when it ends.
-		AbilitySystem->SetRemoveAbilityOnEnd(GrantedSpec);
+		else
+		{
+			// Removes a queued grant from the pending adds, an inactive one at once (or when the list is unlocked), and does
+			// nothing for a handle the ability system no longer knows.
+			AbilitySystem->ClearAbility(GrantedSpec);
+		}
 	}
 	GrantedSpec = FGameplayAbilitySpecHandle();
 	GrantedAbilitySystem.Reset();
@@ -337,72 +293,12 @@ FGameplayAbilitySpec* UFarmingComponent::FindGrantedSpec() const
 
 void UFarmingComponent::FollowController(APawn* Pawn, AController* OldController, AController* NewController)
 {
-	UpdateGrantedTool();
+	FollowInventory();
 }
 
-void UFarmingComponent::AimAt(const FVector& WorldDirection)
+#if WITH_DEV_AUTOMATION_TESTS
+void UFarmingComponent::AddCropForTests(const UFarmCropData& Crop)
 {
-	if (!Grid)
-	{
-		return;
-	}
-
-	// Called every frame while a movement input is held, so the usual case stops here: no input, or the same direction.
-	const FIntPoint Step = FarmTileTargeting::SnapToStep(Grid->ToGridDirection(WorldDirection));
-	if (Step == FIntPoint::ZeroValue || Step == AimStep)
-	{
-		return;
-	}
-	AimStep = Step;
-	UpdateTargetTile();
+	Crops.Add(Crop.GetPrimaryAssetId(), &Crop);
 }
-
-FVector UFarmingComponent::GetAimDirection() const
-{
-	return Grid ? Grid->ToWorldDirection(AimStep) : FVector::ZeroVector;
-}
-
-TOptional<FIntPoint> UFarmingComponent::FindTargetTile() const
-{
-	const AActor* Owner = GetOwner();
-	if (!Grid || !Owner)
-	{
-		return {};
-	}
-	const FIntPoint Neighbour = FarmTileTargeting::GetNeighbour(Grid->GetCoordinatesAt(Owner->GetActorLocation()), AimStep);
-	return Grid->GetTile(Neighbour) ? TOptional<FIntPoint>(Neighbour) : TOptional<FIntPoint>();
-}
-
-void UFarmingComponent::UpdateTargetTile()
-{
-	const TOptional<FIntPoint> NewTarget = FindTargetTile();
-	if (NewTarget == TargetTile)
-	{
-		return;
-	}
-	TargetTile = NewTarget;
-
-	// A tool ability waiting with the key held listens, so walking along a row works each tile it reaches.
-	OnTargetTileChanged.Broadcast(NewTarget);
-}
-
-void UFarmingComponent::FollowOwnerTransform(
-	USceneComponent* UpdatedComponent, EUpdateTransformFlags UpdateTransformFlags, ETeleportType Teleport)
-{
-	// Fires on every move and turn; the target only changes when the owner reaches another tile.
-	const AActor* Owner = GetOwner();
-	const FIntPoint Coordinates = Grid && Owner ? Grid->GetCoordinatesAt(Owner->GetActorLocation()) : OwnerCoordinates;
-	if (Coordinates == OwnerCoordinates)
-	{
-		return;
-	}
-	OwnerCoordinates = Coordinates;
-	UpdateTargetTile();
-}
-
-void UFarmingComponent::Notify(const FText& Message) const
-{
-	UVestigeFeedbackSubsystem::Notify(GetWorld(), Message);
-}
-
-#undef LOCTEXT_NAMESPACE
+#endif

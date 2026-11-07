@@ -11,6 +11,7 @@
 class UAbilitySystemComponent;
 class UFarmField;
 class UFarmingComponent;
+class UFarmTargetingComponent;
 class UVestigeInventoryComponent;
 class UVestigeToolData;
 
@@ -82,7 +83,7 @@ protected:
 	/** The field the farmer works, or nullptr if the level has no grid or the ability isn't active. */
 	UFarmField* GetField() const;
 
-	/** The avatar's farming component while the ability is active, else nullptr. */
+	/** The avatar's farming component while the ability is active, else nullptr: the crops and the extension points. */
 	UFarmingComponent* GetFarming() const { return Farming.Get(); }
 
 	/** The inventory on the ability system's owner, the player state, or nullptr if it has none. */
@@ -127,7 +128,7 @@ private:
 	UFUNCTION()
 	void ContinueAfterLanding(EMovementMode NewMovementMode);
 
-	/** Bound to the farming component's OnTargetTileChanged while the ability is active. */
+	/** Bound to the targeting component's OnTargetTileChanged while the ability is active. */
 	void ContinueAfterTargetChange(const TOptional<FIntPoint>& Tile);
 
 	/** Ends this activation. */
@@ -137,8 +138,9 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Stamina", meta = (AllowPrivateAccess = "true", ClampMin = 1))
 	float OutOfStaminaTimeScale = 2.f;
 
-	/** The avatar's farming component, found on activation and forgotten when the ability ends. */
+	/** The avatar's farming and targeting components, found on activation and forgotten when the ability ends. */
 	TWeakObjectPtr<UFarmingComponent> Farming;
+	TWeakObjectPtr<UFarmTargetingComponent> Targeting;
 
 	FDelegateHandle TargetChangedHandle;
 

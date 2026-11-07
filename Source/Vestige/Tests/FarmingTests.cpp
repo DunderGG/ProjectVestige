@@ -8,13 +8,14 @@
 #include "AbilitySystemComponent.h"
 #include "Components/ActorTestSpawner.h"
 #include "Content/FarmCropData.h"
+#include "Content/FarmSeedFragment.h"
 #include "Content/VestigeGameData.h"
 #include "Content/VestigeItemData.h"
 #include "Content/VestigeToolData.h"
+#include "Content/VestigeToolFragment.h"
 #include "Core/VestigeFeedbackSubsystem.h"
 #include "CQTest.h"
 #include "Engine/AssetManager.h"
-#include "Farming/FarmFarmingSaveData.h"
 #include "Farming/FarmField.h"
 #include "Farming/FarmGrid.h"
 #include "Farming/FarmingComponent.h"
@@ -75,10 +76,35 @@ namespace FarmingTests
 			AbilitySystem = PlayerState->GetAbilitySystemComponent();
 			ASSERT_THAT(IsNotNull(AbilitySystem));
 
+			// Possessed, so the farming component follows the inventory's hand through the controller change, as in play.
+			Controller = &Spawner.SpawnActor<APlayerController>();
+			Controller->PlayerState = PlayerState;
 			Farmer = &SpawnFarmer();
-			Farmer->SetPlayerState(PlayerState);
+			Controller->Possess(Farmer);
+
+			// Possessing sets the default movement mode, which is falling here, since the test level has no floor.
+			Farmer->GetCharacterMovement()->SetMovementMode(MOVE_Walking);
 			FarmingComponent = Farmer->FindComponentByClass<UFarmingComponent>();
 			ASSERT_THAT(IsNotNull(FarmingComponent));
+		}
+
+		APlayerController* Controller = nullptr;
+
+		static inline const FPrimaryAssetId TurnipSeedsId = FPrimaryAssetId(UVestigeItemData::AssetType, TEXT("Base.TurnipSeeds"));
+
+		/** A loaded base item by its ContentId. */
+		static const UVestigeItemData* GetBaseItem(FName ContentId)
+		{
+			return UAssetManager::Get().GetPrimaryAssetObject<UVestigeItemData>(FPrimaryAssetId(UVestigeItemData::AssetType, ContentId));
+		}
+
+		/** Restores the bag to exactly these slots, with SelectedSlot selected, the way loading a save does. */
+		void SetBag(TArray<FVestigeInventorySlotSaveData> Slots, int32 SelectedSlot = 0)
+		{
+			FVestigeInventorySaveData Bag;
+			Bag.Slots = MoveTemp(Slots);
+			Bag.SelectedHotbarSlot = SelectedSlot;
+			ASSERT_THAT(IsTrue(Inventory->RestoreFromSaveData(Bag) == 0));
 		}
 
 		/** A farmer from the game's character Blueprint, in front of tile (3, 0), begun play but without a player state. */
@@ -93,16 +119,33 @@ namespace FarmingTests
 			return NewFarmer;
 		}
 
-		/** Puts this tool in hand, through the same restore loading uses, and makes the bag hold only this many seeds. */
+		/**
+		 * Puts the item of this tool in hotbar slot 0 and selects it, through the same restore loading uses, and makes the bag
+		 * hold only this many seeds. Base.Seeds is the turnip seeds themselves (an empty hand when Seeds is 0), and Base.Hand
+		 * an empty slot 0; other tools are the item with the tool's name, with the seeds in slot 1.
+		 */
 		void Hold(FName ToolId, int32 Seeds)
 		{
-			FFarmFarmingSaveData Data;
-			Data.CurrentToolId = ToolId;
-			ASSERT_THAT(IsTrue(FarmingComponent->RestoreFromSaveData(Data)));
-
-			FVestigeInventorySaveData Bag;
-			Bag.Slots.Add({0, FarmingComponent->GetSeedItemId().PrimaryAssetName, Seeds});
-			ASSERT_THAT(IsTrue(Inventory->RestoreFromSaveData(Bag) == 0));
+			TArray<FVestigeInventorySlotSaveData> Slots;
+			if (ToolId == TEXT("Base.Seeds"))
+			{
+				if (Seeds > 0)
+				{
+					Slots.Add({0, TurnipSeedsId.PrimaryAssetName, Seeds});
+				}
+			}
+			else
+			{
+				if (ToolId != TEXT("Base.Hand"))
+				{
+					Slots.Add({0, ToolId, 1});
+				}
+				if (Seeds > 0)
+				{
+					Slots.Add({1, TurnipSeedsId.PrimaryAssetName, Seeds});
+				}
+			}
+			SetBag(MoveTemp(Slots));
 		}
 
 		/**
@@ -148,7 +191,7 @@ namespace FarmingTests
 			Timers.Tick(OneUseSeconds);
 			return true;
 		}
-		int32 GetSeeds() const { return Inventory->GetItemCount(FarmingComponent->GetSeedItemId()); }
+		int32 GetSeeds() const { return Inventory->GetItemCount(TurnipSeedsId); }
 
 		float GetStamina() const { return AbilitySystem->GetNumericAttribute(UVestigeStaminaSet::GetStaminaAttribute()); }
 		float GetMaxStamina() const { return AbilitySystem->GetNumericAttribute(UVestigeStaminaSet::GetMaxStaminaAttribute()); }
@@ -306,19 +349,24 @@ namespace FarmingTests
 			ASSERT_THAT(IsNotNull(Crop));
 			Hold(TEXT("Base.Hand"), 0);
 
-			// Every slot holds a full stack of seeds, so the harvest has nowhere to go.
-			const UVestigeItemData* Seed = UAssetManager::Get().GetPrimaryAssetObject<UVestigeItemData>(FarmingComponent->GetSeedItemId());
+			// Every slot holds a full stack, so the harvest has nowhere to go. The slot in hand holds turnips, which aren't a
+			// tool, so the hand harvests.
+			const UVestigeItemData* Seed = GetBaseItem(TurnipSeedsId.PrimaryAssetName);
+			const UVestigeItemData* Turnip = GetBaseItem(TEXT("Base.Turnip"));
 			ASSERT_THAT(IsNotNull(Seed));
-			FVestigeInventorySaveData FullBag;
-			for (int32 Slot = 0; Slot < Inventory->GetSlots().Num(); ++Slot)
+			ASSERT_THAT(IsNotNull(Turnip));
+			TArray<FVestigeInventorySlotSaveData> FullBag;
+			FullBag.Add({0, Turnip->GetContentId(), Turnip->GetMaxStackSize()});
+			for (int32 Slot = 1; Slot < Inventory->GetSlots().Num(); ++Slot)
 			{
-				FullBag.Slots.Add({Slot, Seed->GetContentId(), Seed->GetMaxStackSize()});
+				FullBag.Add({Slot, Seed->GetContentId(), Seed->GetMaxStackSize()});
 			}
-			ASSERT_THAT(IsTrue(Inventory->RestoreFromSaveData(FullBag) == 0));
+			SetBag(MoveTemp(FullBag));
+			const int32 TurnipsBefore = Inventory->GetItemCount(Crop->GetHarvestItemId());
 
 			UseToolAndFinish();
 
-			ASSERT_THAT(IsTrue(Inventory->GetItemCount(Crop->GetHarvestItemId()) == 0));
+			ASSERT_THAT(IsTrue(Inventory->GetItemCount(Crop->GetHarvestItemId()) == TurnipsBefore));
 			ASSERT_THAT(IsTrue(TargetTile()->IsRipe()));
 		}
 
@@ -441,41 +489,230 @@ namespace FarmingTests
 			ASSERT_THAT(IsTrue(Recorder->GetEvents().IsEmpty()));
 		}
 
-		TEST_METHOD(AnUnknownSavedToolPutsTheFirstSlotInHand)
+		/** A bag with the hoe, the watering can and two stacks of turnip seeds in hotbar slots 0 to 3, the hoe in hand. */
+		void FillHotbar()
 		{
-			FFarmFarmingSaveData Data;
-			Data.CurrentToolId = TEXT("SomeMod.Scythe");
-
-			ASSERT_THAT(IsFalse(FarmingComponent->RestoreFromSaveData(Data)));
-			ASSERT_THAT(IsTrue(FarmingComponent->GetToolbar().GetCurrentSlot() == 0));
+			SetBag({{0, TEXT("Base.Hoe"), 1}, {1, TEXT("Base.WateringCan"), 1}, {2, TurnipSeedsId.PrimaryAssetName, 5},
+				{3, TurnipSeedsId.PrimaryAssetName, 5}});
 		}
 
-		TEST_METHOD(TheToolInHandGrantsItsAbility)
+		/** The tool asset with this ContentId. */
+		static const UVestigeToolData* GetBaseTool(FName ContentId)
 		{
-			Hold(TEXT("Base.Hoe"), 0);
+			return UAssetManager::Get().GetPrimaryAssetObject<UVestigeToolData>(FPrimaryAssetId(UVestigeToolData::AssetType, ContentId));
+		}
+
+		TEST_METHOD(TheToolOfTheItemInHandIsGranted)
+		{
+			FillHotbar();
 			TArray<const FGameplayAbilitySpec*> Specs = GetToolAbilities();
 			ASSERT_THAT(IsTrue(Specs.Num() == 1));
+			ASSERT_THAT(IsTrue(Specs[0]->SourceObject.Get() == GetBaseTool(TEXT("Base.Hoe"))));
 			ASSERT_THAT(IsTrue(Specs[0]->Ability->GetClass() == GetHeldTool().GetAbility()));
-			ASSERT_THAT(IsTrue(Specs[0]->SourceObject.Get() == &GetHeldTool()));
 
-			Hold(TEXT("Base.WateringCan"), 0);
-
+			// Selected without a press: the farming component follows the hand.
+			ASSERT_THAT(IsTrue(Inventory->SelectHotbarSlot(1)));
 			Specs = GetToolAbilities();
 			ASSERT_THAT(IsTrue(Specs.Num() == 1));
-			ASSERT_THAT(IsTrue(Specs[0]->Ability->GetClass() == GetHeldTool().GetAbility()));
-			ASSERT_THAT(IsTrue(Specs[0]->SourceObject.Get() == &GetHeldTool()));
+			ASSERT_THAT(IsTrue(Specs[0]->SourceObject.Get() == GetBaseTool(TEXT("Base.WateringCan"))));
+
+			ASSERT_THAT(IsTrue(Inventory->SelectHotbarSlot(2)));
+			const FGameplayAbilitySpecHandle SeedsSpec = GetToolAbilities()[0]->Handle;
+			ASSERT_THAT(IsTrue(GetToolAbilities()[0]->SourceObject.Get() == GetBaseTool(TEXT("Base.Seeds"))));
+
+			// Another stack of seeds uses the same tool, so the grant stays.
+			ASSERT_THAT(IsTrue(Inventory->SelectHotbarSlot(3)));
+			Specs = GetToolAbilities();
+			ASSERT_THAT(IsTrue(Specs.Num() == 1));
+			ASSERT_THAT(IsTrue(Specs[0]->Handle == SeedsSpec));
+		}
+
+		TEST_METHOD(SelectingASlotOfAnotherToolBroadcastsOnToolChanged)
+		{
+			FillHotbar();
+			int32 Changes = 0;
+			const FDelegateHandle Counter = FarmingComponent->OnToolChanged.AddLambda(
+				[&Changes]()
+				{
+					++Changes;
+				});
+
+			Inventory->SelectHotbarSlot(1);
+			ASSERT_THAT(IsTrue(Changes == 1));
+			Inventory->SelectHotbarSlot(2);
+			ASSERT_THAT(IsTrue(Changes == 2));
+			Inventory->SelectHotbarSlot(3);
+			ASSERT_THAT(IsTrue(Changes == 2));
+			FarmingComponent->OnToolChanged.Remove(Counter);
+		}
+
+		TEST_METHOD(AFarmerPossessedBeforeBeginPlayFollowsTheHand)
+		{
+			// As a map's first pawn is: possessed before the world begins play.
+			UClass* FarmerClass =
+				LoadClass<AVestigePlayerCharacter>(nullptr, TEXT("/Game/Vestige/Blueprints/BP_PlayerCharacter.BP_PlayerCharacter_C"));
+			ASSERT_THAT(IsNotNull(FarmerClass));
+			AVestigePlayerCharacter& NewFarmer = Spawner.SpawnActor<AVestigePlayerCharacter>(FActorSpawnParameters(), FarmerClass);
+			Controller->Possess(&NewFarmer);
+			NewFarmer.DispatchBeginPlay();
+			UFarmingComponent* NewFarming = NewFarmer.FindComponentByClass<UFarmingComponent>();
+			ASSERT_THAT(IsNotNull(NewFarming));
+			FillHotbar();
+			int32 Changes = 0;
+			const FDelegateHandle Counter = NewFarming->OnToolChanged.AddLambda(
+				[&Changes]()
+				{
+					++Changes;
+				});
+
+			Inventory->SelectHotbarSlot(1);
+
+			ASSERT_THAT(IsTrue(Changes == 1));
+			ASSERT_THAT(IsTrue(NewFarming->GetCurrentTool() == GetBaseTool(TEXT("Base.WateringCan"))));
+			NewFarming->OnToolChanged.Remove(Counter);
+		}
+
+		TEST_METHOD(AnEmptyHandOrAnItemWithoutAToolHarvests)
+		{
+			Hold(TEXT("Base.Hand"), 0);
+			ASSERT_THAT(IsTrue(FarmingComponent->GetCurrentTool() == GetBaseTool(TEXT("Base.Hand"))));
+
+			const UFarmCropData* Crop = GrowRipeCrop();
+			ASSERT_THAT(IsNotNull(Crop));
+			SetBag({{0, TEXT("Base.Turnip"), 1}});
+			ASSERT_THAT(IsTrue(FarmingComponent->GetCurrentTool() == GetBaseTool(TEXT("Base.Hand"))));
+
+			UseToolAndFinish();
+
+			ASSERT_THAT(IsTrue(Inventory->GetItemCount(Crop->GetHarvestItemId()) == 1 + Crop->GetYield()));
+			ASSERT_THAT(IsTrue(TargetTile()->GetState() == EFarmTileState::Tilled));
+		}
+
+		TEST_METHOD(PlantingUsesTheSeedInHand)
+		{
+			// A second kind of seed, growing a crop of its own, beside the turnip seeds.
+			UFarmCropData* Beet = NewObject<UFarmCropData>();
+			Beet->SetContentIdForTests(TEXT("Test.Beet"));
+			FarmingComponent->AddCropForTests(*Beet);
+			UVestigeItemData* BeetSeeds = NewObject<UVestigeItemData>();
+			BeetSeeds->SetContentIdForTests(TEXT("Test.BeetSeeds"));
+			UFarmSeedFragment* BeetSeed = NewObject<UFarmSeedFragment>(BeetSeeds);
+			BeetSeed->SetCropIdForTests(Beet->GetPrimaryAssetId());
+			BeetSeeds->AddFragmentForTests(BeetSeed);
+			UVestigeToolFragment* BeetTool = NewObject<UVestigeToolFragment>(BeetSeeds);
+			BeetTool->SetToolIdForTests(FPrimaryAssetId(UVestigeToolData::AssetType, TEXT("Base.Seeds")));
+			BeetSeeds->AddFragmentForTests(BeetTool);
+			const UVestigeItemData* TurnipSeeds = GetBaseItem(TurnipSeedsId.PrimaryAssetName);
+			ASSERT_THAT(IsNotNull(TurnipSeeds));
+			Inventory->ResetForTests(Inventory->GetSlots().Num(), {TurnipSeeds, BeetSeeds});
+			SetBag({{0, TurnipSeedsId.PrimaryAssetName, 3}, {1, BeetSeeds->GetContentId(), 3}, {5, TurnipSeedsId.PrimaryAssetName, 3}}, 1);
+			Grid->GetField()->Till(TargetCoordinates);
+
+			UseToolAndFinish();
+
+			ASSERT_THAT(IsTrue(TargetTile()->GetCrop() == Beet));
+			ASSERT_THAT(IsTrue(Inventory->GetSlots()[1].Count == 2));
+
+			// The turnip seeds in hand plant a turnip and come from the stack in hand, not the other stack.
+			const FFarmTileState* Next = StepToNextTile();
+			ASSERT_THAT(IsNotNull(Next));
+			Grid->GetField()->Till(FIntPoint(4, 0));
+			ASSERT_THAT(IsTrue(Inventory->SelectHotbarSlot(0)));
+
+			UseToolAndFinish();
+
+			ASSERT_THAT(IsTrue(NextTile()->GetCrop() != nullptr));
+			ASSERT_THAT(IsTrue(NextTile()->GetCrop()->GetContentId() == TEXT("Base.Turnip")));
+			ASSERT_THAT(IsTrue(Inventory->GetSlots()[0].Count == 2));
+			ASSERT_THAT(IsTrue(Inventory->GetSlots()[5].Count == 3));
+		}
+
+		TEST_METHOD(PlantingTheLastSeedLeavesTheHandEmpty)
+		{
+			Grid->GetField()->Till(TargetCoordinates);
+			Hold(TEXT("Base.Seeds"), 1);
+
+			FarmingComponent->UseTool();
+			ASSERT_THAT(IsTrue(TargetTile()->GetState() == EFarmTileState::Planted));
+			ASSERT_THAT(IsTrue(Inventory->GetItemInHand() == nullptr));
+
+			AfterOneUse(
+				[this]()
+				{
+					ASSERT_THAT(IsFalse(IsUsingTool()));
+					const TArray<const FGameplayAbilitySpec*> Specs = GetToolAbilities();
+					ASSERT_THAT(IsTrue(Specs.Num() == 1));
+					ASSERT_THAT(IsTrue(Specs[0]->SourceObject.Get() == GetBaseTool(TEXT("Base.Hand"))));
+				});
+		}
+
+		TEST_METHOD(PlantingTheLastSeedOnARepeatLeavesTheHandEmpty)
+		{
+			Grid->GetField()->Till(TargetCoordinates);
+			Grid->GetField()->Till(FIntPoint(4, 0));
+			Hold(TEXT("Base.Seeds"), 2);
+
+			FarmingComponent->StartUsingTool();
+			ASSERT_THAT(IsTrue(GetSeeds() == 1));
+
+			// The repeat plants the last seed on the next tile once the first use's time has passed.
+			AfterOneUse(
+				[this]()
+				{
+					const FFarmTileState* Next = StepToNextTile();
+					ASSERT_THAT(IsTrue(Next->GetState() == EFarmTileState::Planted));
+					ASSERT_THAT(IsTrue(GetSeeds() == 0));
+				});
+			AfterOneUse(
+				[this]()
+				{
+					ASSERT_THAT(IsFalse(IsUsingTool()));
+					const TArray<const FGameplayAbilitySpec*> Specs = GetToolAbilities();
+					ASSERT_THAT(IsTrue(Specs.Num() == 1));
+					ASSERT_THAT(IsTrue(Specs[0]->SourceObject.Get() == GetBaseTool(TEXT("Base.Hand"))));
+					FarmingComponent->StopUsingTool();
+				});
+		}
+
+		TEST_METHOD(ASecondHandChangeDuringTheFirstUseLeavesOneToolAbility)
+		{
+			// The hand's grant is queued while the first use holds the ability list's lock; selecting the hoe then takes the
+			// queued grant back.
+			Grid->GetField()->Till(TargetCoordinates);
+			SetBag({{0, TurnipSeedsId.PrimaryAssetName, 1}, {1, TEXT("Base.Hoe"), 1}});
+			const UVestigeToolData* Hand = GetBaseTool(TEXT("Base.Hand"));
+			const FDelegateHandle Switcher = FarmingComponent->OnToolChanged.AddLambda(
+				[this, Hand]()
+				{
+					if (FarmingComponent->GetCurrentTool() == Hand)
+					{
+						Inventory->SelectHotbarSlot(1);
+					}
+				});
+
+			FarmingComponent->UseTool();
+			FarmingComponent->OnToolChanged.Remove(Switcher);
+			ASSERT_THAT(IsTrue(TargetTile()->GetState() == EFarmTileState::Planted));
+
+			AfterOneUse(
+				[this]()
+				{
+					ASSERT_THAT(IsFalse(IsUsingTool()));
+					const UVestigeToolData* Hoe = GetBaseTool(TEXT("Base.Hoe"));
+					const TArray<const FGameplayAbilitySpec*> Specs = GetToolAbilities();
+					ASSERT_THAT(IsTrue(Specs.Num() == 1));
+					ASSERT_THAT(IsTrue(Specs[0]->SourceObject.Get() == Hoe));
+					ASSERT_THAT(IsTrue(Farmer->GetHeldToolMeshForTests() == Hoe->GetHeldMesh()));
+				});
 		}
 
 		TEST_METHOD(ANewPawnLeavesNoToolAbilityBehind)
 		{
-			// A controller with the player state possesses the farmer, then a second farmer, as respawning would.
-			APlayerController& Controller = Spawner.SpawnActor<APlayerController>();
-			Controller.PlayerState = PlayerState;
-			Controller.Possess(Farmer);
+			// The controller with the player state possesses a second farmer, as respawning would.
 			ASSERT_THAT(IsTrue(GetToolAbilities().Num() == 1));
 
 			AVestigePlayerCharacter& SecondFarmer = SpawnFarmer();
-			Controller.Possess(&SecondFarmer);
+			Controller->Possess(&SecondFarmer);
 
 			const TArray<const FGameplayAbilitySpec*> Specs = GetToolAbilities();
 			ASSERT_THAT(IsTrue(Specs.Num() == 1));

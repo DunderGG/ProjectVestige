@@ -8,6 +8,7 @@
 #include "Components/ActorTestSpawner.h"
 #include "CQTest.h"
 #include "Content/VestigeGameData.h"
+#include "Content/VestigeItemData.h"
 #include "Core/VestigeSaveRecord.h"
 #include "Core/VestigeSaveRegistry.h"
 #include "Farming/FarmingComponent.h"
@@ -250,15 +251,16 @@ namespace VestigeSaveRegistryTests
 			UAbilitySystemComponent* AbilitySystem = Before.PlayerState->GetAbilitySystemComponent();
 			UFarmingComponent* Farming = Before.Character->FindComponentByClass<UFarmingComponent>();
 			ASSERT_THAT(IsNotNull(Farming));
-			const FPrimaryAssetId SeedId = Farming->GetSeedItemId();
+			const FPrimaryAssetId SeedId(UVestigeItemData::AssetType, TEXT("Base.TurnipSeeds"));
 			ASSERT_THAT(IsTrue(Inventory->TryAddItem(SeedId, 3)));
 			const int32 Seeds = Inventory->GetItemCount(SeedId);
 			AbilitySystem->SetNumericAttributeBase(UVestigeStaminaSet::GetStaminaAttribute(), 37.f);
 			const TSubclassOf<UGameplayEffect> Exhausted = UVestigeGameData::Get().GetExhaustedEffect();
 			ASSERT_THAT(IsNotNull(Exhausted.Get()));
 			AbilitySystem->ApplyGameplayEffectToSelf(Exhausted.GetDefaultObject(), 1.f, AbilitySystem->MakeEffectContext());
-			Farming->SelectToolbarSlot(2);
+			ASSERT_THAT(IsTrue(Inventory->SelectHotbarSlot(2)));
 			const UVestigeToolData* Tool = Farming->GetCurrentTool();
+			ASSERT_THAT(IsNotNull(Tool));
 
 			// What opening a map does: the old map's owners give their parts as it starts tearing down, then its actors go.
 			Registry.KeepWorldOwnersPartsForTests(Spawner.GetWorld());
@@ -270,6 +272,7 @@ namespace VestigeSaveRegistryTests
 			ASSERT_THAT(IsTrue(After.PlayerState->GetInventory()->GetItemCount(SeedId) == Seeds));
 			ASSERT_THAT(IsTrue(NewAbilitySystem->GetNumericAttributeBase(UVestigeStaminaSet::GetStaminaAttribute()) == 37.f));
 			ASSERT_THAT(IsTrue(After.PlayerState->FindComponentByClass<UVestigeRestComponent>()->IsExhausted()));
+			ASSERT_THAT(IsTrue(After.PlayerState->GetInventory()->GetSelectedHotbarSlot() == 2));
 			ASSERT_THAT(IsTrue(After.Character->FindComponentByClass<UFarmingComponent>()->GetCurrentTool() == Tool));
 		}
 	};

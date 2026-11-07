@@ -6,7 +6,7 @@
 #include "Components/ActorTestSpawner.h"
 #include "CQTest.h"
 #include "Farming/FarmGrid.h"
-#include "Farming/FarmingComponent.h"
+#include "Farming/FarmTargetingComponent.h"
 #include "Farming/FarmTargetHighlightComponent.h"
 #include "Materials/Material.h"
 #include "Materials/MaterialInstanceDynamic.h"
@@ -21,7 +21,7 @@ namespace FarmTargetingTests
 		FActorTestSpawner Spawner;
 		AFarmGrid* Grid = nullptr;
 		AVestigePlayerCharacter* Farmer = nullptr;
-		UFarmingComponent* Farming = nullptr;
+		UFarmTargetingComponent* TargetingComponent = nullptr;
 
 		/** A default 8 x 8 grid of 1 m tiles with a corner at the origin, and a farmer, both playing. */
 		BEFORE_EACH()
@@ -32,7 +32,7 @@ namespace FarmTargetingTests
 			Grid->DispatchBeginPlay();
 			Farmer = &Spawner.SpawnActor<AVestigePlayerCharacter>();
 			Farmer->DispatchBeginPlay();
-			Farming = Farmer->FindComponentByClass<UFarmingComponent>();
+			TargetingComponent = Farmer->FindComponentByClass<UFarmTargetingComponent>();
 		}
 
 		/** The coordinates of the tile under the center of tile X, Y of the default grid, found by location. */
@@ -44,52 +44,52 @@ namespace FarmTargetingTests
 
 		TEST_METHOD(TargetStartsOnTheNeighbourTheFarmerFaces)
 		{
-			ASSERT_THAT(IsNotNull(Farming));
+			ASSERT_THAT(IsNotNull(TargetingComponent));
 
 			Farmer->SetActorLocationAndRotation(FVector(250.f, 50.f, 0.f), FRotator::ZeroRotator);
 
-			ASSERT_THAT(IsTrue(Farming->GetTargetTile() == TileAt(3, 0)));
+			ASSERT_THAT(IsTrue(TargetingComponent->GetTargetTile() == TileAt(3, 0)));
 		}
 
 		TEST_METHOD(AimingPicksTheNeighbourInThatDirectionIncludingDiagonals)
 		{
-			ASSERT_THAT(IsNotNull(Farming));
+			ASSERT_THAT(IsNotNull(TargetingComponent));
 			Farmer->SetActorLocation(FVector(250.f, 150.f, 0.f));
 
-			Farming->AimAt(FVector(0.f, 1.f, 0.f));
-			ASSERT_THAT(IsTrue(Farming->GetTargetTile() == TileAt(2, 2)));
+			TargetingComponent->AimAt(FVector(0.f, 1.f, 0.f));
+			ASSERT_THAT(IsTrue(TargetingComponent->GetTargetTile() == TileAt(2, 2)));
 
-			Farming->AimAt(FVector(-1.f, -1.f, 0.f));
-			ASSERT_THAT(IsTrue(Farming->GetTargetTile() == TileAt(1, 0)));
+			TargetingComponent->AimAt(FVector(-1.f, -1.f, 0.f));
+			ASSERT_THAT(IsTrue(TargetingComponent->GetTargetTile() == TileAt(1, 0)));
 		}
 
 		TEST_METHOD(TurningOrStoppingKeepsTheAim)
 		{
-			ASSERT_THAT(IsNotNull(Farming));
+			ASSERT_THAT(IsNotNull(TargetingComponent));
 			Farmer->SetActorLocation(FVector(250.f, 150.f, 0.f));
-			Farming->AimAt(FVector(0.f, -1.f, 0.f));
+			TargetingComponent->AimAt(FVector(0.f, -1.f, 0.f));
 
-			Farming->AimAt(FVector::ZeroVector);
+			TargetingComponent->AimAt(FVector::ZeroVector);
 			Farmer->SetActorRotation(FRotator(0.f, 90.f, 0.f));
 
-			ASSERT_THAT(IsTrue(Farming->GetTargetTile() == TileAt(2, 0)));
+			ASSERT_THAT(IsTrue(TargetingComponent->GetTargetTile() == TileAt(2, 0)));
 		}
 
 		TEST_METHOD(ANeighbourOutsideTheGridIsNoTarget)
 		{
-			ASSERT_THAT(IsNotNull(Farming));
+			ASSERT_THAT(IsNotNull(TargetingComponent));
 			Farmer->SetActorLocation(FVector(50.f, 50.f, 0.f));
 
-			Farming->AimAt(FVector(-1.f, 0.f, 0.f));
+			TargetingComponent->AimAt(FVector(-1.f, 0.f, 0.f));
 
-			ASSERT_THAT(IsFalse(Farming->GetTargetTile().IsSet()));
+			ASSERT_THAT(IsFalse(TargetingComponent->GetTargetTile().IsSet()));
 		}
 
 		TEST_METHOD(TargetChangeIsBroadcastOnlyWhenTheTileChanges)
 		{
-			ASSERT_THAT(IsNotNull(Farming));
+			ASSERT_THAT(IsNotNull(TargetingComponent));
 			int32 Changes = 0;
-			Farming->OnTargetTileChanged.AddLambda(
+			TargetingComponent->OnTargetTileChanged.AddLambda(
 				[&Changes](const TOptional<FIntPoint>& Tile)
 				{
 					++Changes;
@@ -101,7 +101,7 @@ namespace FarmTargetingTests
 
 			Farmer->SetActorLocation(FVector(-500.f, -500.f, 0.f));
 			ASSERT_THAT(IsTrue(Changes == 2));
-			ASSERT_THAT(IsFalse(Farming->GetTargetTile().IsSet()));
+			ASSERT_THAT(IsFalse(TargetingComponent->GetTargetTile().IsSet()));
 		}
 
 		TEST_METHOD(HighlightFramesTheTargetAndHidesWithoutOne)

@@ -7,9 +7,12 @@
 #include "Farming/VestigeGameplayAbility_UseTool.h"
 #include "FarmGameplayAbility_Plant.generated.h"
 
+class UFarmCropData;
+
 /**
- * The seeds' behaviour: plants the farming component's seed item (UFarmingComponent::GetSeedItemId) in empty tilled soil,
- * taking one seed from the inventory on the player state. Named by DA_Tool_Seeds.
+ * The seeds' behaviour: plants the seed item in hand (the selected hotbar slot of the inventory on the player state) in empty
+ * tilled soil, growing the crop its seed fragment names and taking one seed from that slot. Named by DA_Tool_Seeds, which
+ * every seed item's tool fragment names.
  */
 UCLASS()
 class UFarmGameplayAbility_Plant : public UVestigeGameplayAbility_UseTool
@@ -21,6 +24,6 @@ protected:
 	virtual bool UseOn(const FIntPoint& Tile) override;
 
 private:
-	/** Whether the inventory holds a seed of the farming component's seed item, and the item names a crop. */
-	bool HasSeedToPlant() const;
+	/** The crop the seed item in hand grows, or nullptr if the item in hand isn't a seed or its crop isn't loaded. */
+	const UFarmCropData* FindCropInHand() const;
 };

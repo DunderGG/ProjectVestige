@@ -3,6 +3,8 @@
 
 #include "Farming/FarmGameplayAbility_Plant.h"
 
+#include "Content/FarmSeedFragment.h"
+#include "Content/VestigeItemData.h"
 #include "Farming/FarmField.h"
 #include "Farming/FarmingComponent.h"
 #include "Farming/FarmTileState.h"
@@ -14,36 +16,40 @@ bool UFarmGameplayAbility_Plant::CanUseOn(const FIntPoint& Tile) const
 {
 	const UFarmField* Field = GetField();
 	const FFarmTileState* State = Field ? Field->GetTile(Tile) : nullptr;
-	return State && State->CanPlant() && HasSeedToPlant();
+	return State && State->CanPlant() && FindCropInHand();
 }
 
 bool UFarmGameplayAbility_Plant::UseOn(const FIntPoint& Tile)
 {
-	if (!HasSeedToPlant())
+	const UFarmCropData* Crop = FindCropInHand();
+	if (!Crop)
 	{
-		Notify(LOCTEXT("OutOfSeeds", "Out of seeds."));
+		Notify(LOCTEXT("NothingToPlant", "Nothing to plant in hand."));
 		return false;
 	}
 
-	// HasSeedToPlant found the farming component and the inventory.
-	const UFarmingComponent& FarmingComponent = *GetFarming();
 	UFarmField* Field = GetField();
-	if (!Field || !Field->Plant(Tile, FarmingComponent.GetSeedCrop()))
+	if (!Field || !Field->Plant(Tile, Crop))
 	{
 		Notify(LOCTEXT("CantPlant", "Seeds need empty tilled soil."));
 		return false;
 	}
-	GetInventory()->TryRemoveItem(FarmingComponent.GetSeedItemId(), 1);
+
+	// From the stack in hand, so another stack of the same seed stays as it is. This can empty the hand, which takes this
+	// ability back once its use has finished.
+	UVestigeInventoryComponent* Inventory = GetInventory();
+	Inventory->TryRemoveItemFromSlot(Inventory->GetSelectedHotbarSlot(), 1);
 	Notify(LOCTEXT("Planted", "Planted a seed."));
 	return true;
 }
 
-bool UFarmGameplayAbility_Plant::HasSeedToPlant() const
+const UFarmCropData* UFarmGameplayAbility_Plant::FindCropInHand() const
 {
 	const UFarmingComponent* FarmingComponent = GetFarming();
 	const UVestigeInventoryComponent* Inventory = GetInventory();
-	return FarmingComponent && Inventory && FarmingComponent->GetSeedCrop()
-		&& Inventory->GetItemCount(FarmingComponent->GetSeedItemId()) > 0;
+	const UVestigeItemData* Item = Inventory ? Inventory->GetItemInHand() : nullptr;
+	const UFarmSeedFragment* Seed = Item ? Item->FindFragment<UFarmSeedFragment>() : nullptr;
+	return FarmingComponent && Seed ? FarmingComponent->FindCrop(Seed->GetCropId()) : nullptr;
 }
 
 #undef LOCTEXT_NAMESPACE

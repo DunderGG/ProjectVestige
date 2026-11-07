@@ -222,7 +222,7 @@ private:
 
 - **Runtime state is private.** Expose it through getters, and change it only through functions that keep the object consistent (`UFarmField::Till` changes the tile *and* broadcasts `OnTileChanged`, so its view redraws).
 - **Tunables** that designers edit are `UPROPERTY(EditAnywhere / EditDefaultsOnly)`. Prefer making them `protected` or `private` with `meta = (AllowPrivateAccess = "true")`, as Lyra does, and add a getter when other classes need to read them.
-- Public mutable data members are a smell. If another class needs to set a value, add a function with a name that says why (`RestoreFromSaveData`, `SelectToolbarSlot`).
+- Public mutable data members are a smell. If another class needs to set a value, add a function with a name that says why (`RestoreFromSaveData`, `SelectHotbarSlot`).
 
 ## 6. UPROPERTY, UFUNCTION and Blueprint exposure
 
@@ -450,7 +450,7 @@ Source/Vestige/
     Content/        Content definitions: UVestigeContentData and its subclasses, UVestigeAssetManager
     Time/           The clock, its settings and save struct, and the day cycle's lighting
     Inventory/      The inventory component, its slot rules and save struct
-    Farming/        Tiles and tile state, the grid, the farming, rest and highlight components, the bed, the tool abilities, the toolbar, their save structs
+    Farming/        Tiles and tile state, the grid, the farming, targeting, rest and highlight components, the bed, the tool abilities, their save structs
     Save/           UVestigeSaveGame and UVestigeSaveSubsystem: the save files
     Player/         The player character, its movement component, the player state and the cheat manager
     UI/             The HUD and its widgets

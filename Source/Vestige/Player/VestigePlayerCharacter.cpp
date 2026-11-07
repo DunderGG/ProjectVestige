@@ -5,6 +5,7 @@
 
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Content/VestigeItemData.h"
 #include "Content/VestigeToolData.h"
 #include "Engine/LocalPlayer.h"
 #include "Engine/StaticMesh.h"
@@ -14,9 +15,11 @@
 #include "EnhancedPlayerInput.h"
 #include "Farming/FarmingComponent.h"
 #include "Farming/FarmTargetHighlightComponent.h"
+#include "Farming/FarmTargetingComponent.h"
 #include "GameFramework/Controller.h"
 #include "GameFramework/PlayerController.h"
 #include "Interaction/VestigeInteractionComponent.h"
+#include "Inventory/VestigeInventoryComponent.h"
 #include "InputAction.h"
 #include "InputMappingContext.h"
 #include "Player/VestigeCharacterMovementComponent.h"
@@ -43,6 +46,7 @@ AVestigePlayerCharacter::AVestigePlayerCharacter(const FObjectInitializer& Objec
 	GetCharacterMovement()->RotationRate = FRotator(0.f, VestigeMovement::TurnDegreesPerSecond, 0.f);
 
 	Farming = CreateDefaultSubobject<UFarmingComponent>(TEXT("Farming"));
+	Targeting = CreateDefaultSubobject<UFarmTargetingComponent>(TEXT("Targeting"));
 	Interaction = CreateDefaultSubobject<UVestigeInteractionComponent>(TEXT("Interaction"));
 	TargetHighlight = CreateDefaultSubobject<UFarmTargetHighlightComponent>(TEXT("TargetHighlight"));
 	TargetHighlight->SetupAttachment(GetRootComponent());
@@ -71,9 +75,9 @@ void AVestigePlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// Follow the component's tool so the hand also updates when a save is loaded.
+	// Follow the component's tool so the hand also updates when a save is loaded or a slot is picked.
 	Farming->OnToolChanged.AddUObject(this, &AVestigePlayerCharacter::ShowHeldTool);
-	ShowHeldTool(Farming->GetCurrentTool());
+	ShowHeldTool();
 
 	// Holding the use key slows the walk, which belongs to the movement component.
 	if (UVestigeCharacterMovementComponent* Movement = GetCharacterMovement<UVestigeCharacterMovementComponent>())
@@ -96,12 +100,12 @@ void AVestigePlayerCharacter::CreateInput()
 	UseToolAction = AddInputAction(EKeys::E, LOCTEXT("UseTool", "Use tool"));
 	InteractAction = AddInputAction(EKeys::F, LOCTEXT("Interact", "Interact"));
 
-	// The number keys pick toolbar slots. Their hints name the tool in the slot, so the actions have no description.
-	const FKey ToolbarKeys[] = {
+	// The number keys pick hotbar slots. Their hints name the item in the slot, so the actions have no description.
+	const FKey HotbarKeys[] = {
 		EKeys::One, EKeys::Two, EKeys::Three, EKeys::Four, EKeys::Five, EKeys::Six, EKeys::Seven, EKeys::Eight, EKeys::Nine};
-	for (const FKey& Key : ToolbarKeys)
+	for (const FKey& Key : HotbarKeys)
 	{
-		ToolbarSlotActions.Add(AddInputAction(Key, FText::GetEmpty()));
+		HotbarSlotActions.Add(AddInputAction(Key, FText::GetEmpty()));
 	}
 }
 
@@ -127,10 +131,9 @@ void AVestigePlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerI
 	EnhancedInput->BindAction(UseToolAction, ETriggerEvent::Started, Farming.Get(), &UFarmingComponent::StartUsingTool);
 	EnhancedInput->BindAction(UseToolAction, ETriggerEvent::Completed, Farming.Get(), &UFarmingComponent::StopUsingTool);
 	EnhancedInput->BindAction(InteractAction, ETriggerEvent::Started, Interaction.Get(), &UVestigeInteractionComponent::Interact);
-	for (int32 Slot = 0; Slot < ToolbarSlotActions.Num(); ++Slot)
+	for (int32 Slot = 0; Slot < HotbarSlotActions.Num(); ++Slot)
 	{
-		EnhancedInput->BindAction(
-			ToolbarSlotActions[Slot], ETriggerEvent::Started, Farming.Get(), &UFarmingComponent::SelectToolbarSlot, Slot);
+		EnhancedInput->BindAction(HotbarSlotActions[Slot], ETriggerEvent::Started, this, &AVestigePlayerCharacter::SelectHotbarSlot, Slot);
 	}
 
 	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = GetInputSubsystem())
@@ -160,10 +163,10 @@ void AVestigePlayerCharacter::DoMove(float Right, float Forward)
 	// The same camera-relative direction the template's DoMove walks in.
 	const FRotationMatrix YawRotation(FRotator(0.f, CurrentController->GetControlRotation().Yaw, 0.f));
 	const FVector MoveDirection = YawRotation.GetUnitAxis(EAxis::X) * Forward + YawRotation.GetUnitAxis(EAxis::Y) * Right;
-	Farming->AimAt(MoveDirection);
+	Targeting->AimAt(MoveDirection);
 	if (UVestigeCharacterMovementComponent* Movement = GetCharacterMovement<UVestigeCharacterMovementComponent>())
 	{
-		Movement->SetIdleFacing(Farming->GetAimDirection());
+		Movement->SetIdleFacing(Targeting->GetAimDirection());
 	}
 
 	const float InputScale = GetMoveInputScale(GetMoveHeldSeconds(), MoveRampSeconds);
@@ -199,18 +202,28 @@ UEnhancedInputLocalPlayerSubsystem* AVestigePlayerCharacter::GetInputSubsystem()
 	return PlayerController ? ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()) : nullptr;
 }
 
-TArray<FVestigeKeyHint> AVestigePlayerCharacter::GetToolbarKeyHints() const
+TArray<FVestigeKeyHint> AVestigePlayerCharacter::GetHotbarKeyHints(const UVestigeInventoryComponent& Inventory) const
 {
 	TArray<FVestigeKeyHint> Hints;
-	const TArray<TObjectPtr<const UVestigeToolData>>& Tools = Farming->GetToolbar().GetTools();
-	for (int32 Slot = 0; Slot < FMath::Min(Tools.Num(), ToolbarSlotActions.Num()); ++Slot)
+	const TArray<FVestigeInventorySlot>& Slots = Inventory.GetSlots();
+	const int32 SlotCount = FMath::Min(Inventory.GetHotbarSlotCount(), HotbarSlotActions.Num());
+	for (int32 Slot = 0; Slot < SlotCount; ++Slot)
 	{
-		if (const UVestigeToolData* Tool = Tools[Slot])
+		if (const UVestigeItemData* Item = Slots[Slot].Item)
 		{
-			Hints.Add({GetMappedKey(ToolbarSlotActions[Slot]).GetDisplayName(false), Tool->GetDisplayName()});
+			Hints.Add({GetMappedKey(HotbarSlotActions[Slot]).GetDisplayName(false), Item->GetDisplayName()});
 		}
 	}
 	return Hints;
+}
+
+void AVestigePlayerCharacter::SelectHotbarSlot(int32 Slot)
+{
+	const AVestigePlayerState* VestigePlayerState = GetPlayerState<AVestigePlayerState>();
+	if (UVestigeInventoryComponent* Inventory = VestigePlayerState ? VestigePlayerState->GetInventory() : nullptr)
+	{
+		Inventory->SelectHotbarSlot(Slot);
+	}
 }
 
 TArray<FVestigeKeyHint> AVestigePlayerCharacter::GetActionKeyHints() const
@@ -251,9 +264,18 @@ FKey AVestigePlayerCharacter::GetMappedKey(const UInputAction* Action) const
 	return EKeys::Invalid;
 }
 
-void AVestigePlayerCharacter::ShowHeldTool(const UVestigeToolData* Tool)
+void AVestigePlayerCharacter::ShowHeldTool()
 {
+	// Read now rather than passed, since a nested change may reach this handler out of order.
+	const UVestigeToolData* Tool = Farming->GetCurrentTool();
 	HeldTool->SetStaticMesh(Tool ? Tool->GetHeldMesh() : nullptr);
 }
+
+#if WITH_DEV_AUTOMATION_TESTS
+UStaticMesh* AVestigePlayerCharacter::GetHeldToolMeshForTests() const
+{
+	return HeldTool->GetStaticMesh();
+}
+#endif
 
 #undef LOCTEXT_NAMESPACE

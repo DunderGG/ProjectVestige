@@ -8,6 +8,7 @@
 #include "Content/FarmSeedFragment.h"
 #include "Content/VestigeItemData.h"
 #include "Content/VestigeToolData.h"
+#include "Content/VestigeToolFragment.h"
 #include "CQTest.h"
 #include "Engine/AssetManager.h"
 
@@ -150,6 +151,26 @@ namespace VestigeItemDataTests
 			AddSeedFragment(Item, FPrimaryAssetId(UFarmCropData::AssetType, TEXT("Test.NoSuchCrop")));
 
 			ASSERT_THAT(IsFalse(PassesValidation(Item)));
+		}
+
+		TEST_METHOD(AToolFragmentNeedsAKnownTool)
+		{
+			const FPrimaryAssetId Ids[] = {FPrimaryAssetId(), FPrimaryAssetId(UFarmCropData::AssetType, TEXT("Base.Turnip")),
+				FPrimaryAssetId(UVestigeToolData::AssetType, TEXT("Test.NoSuchTool"))};
+			for (const FPrimaryAssetId& Id : Ids)
+			{
+				UVestigeItemData& Item = MakeItem();
+				UVestigeToolFragment& Tool = Spawner.SpawnObject<UVestigeToolFragment>();
+				Tool.SetToolIdForTests(Id);
+				Item.AddFragmentForTests(&Tool);
+				ASSERT_THAT(IsFalse(PassesValidation(Item), *Id.ToString()));
+			}
+
+			UVestigeItemData& Item = MakeItem();
+			UVestigeToolFragment& Tool = Spawner.SpawnObject<UVestigeToolFragment>();
+			Tool.SetToolIdForTests(FPrimaryAssetId(UVestigeToolData::AssetType, TEXT("Base.Hoe")));
+			Item.AddFragmentForTests(&Tool);
+			ASSERT_THAT(IsTrue(PassesValidation(Item)));
 		}
 
 		TEST_METHOD(ACropWithoutAHarvestItemIsInvalid)

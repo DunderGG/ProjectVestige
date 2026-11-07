@@ -4,8 +4,12 @@
 #if WITH_DEV_AUTOMATION_TESTS
 
 #include "Components/ActorTestSpawner.h"
+#include "Content/VestigeItemData.h"
 #include "CQTest.h"
 #include "Farming/FarmingComponent.h"
+#include "InputCoreTypes.h"
+#include "Inventory/VestigeInventoryComponent.h"
+#include "Inventory/VestigeInventorySaveData.h"
 #include "Player/VestigeCharacterMovementComponent.h"
 #include "Player/VestigePlayerCharacter.h"
 
@@ -102,12 +106,24 @@ namespace VestigePlayerCharacterTests
 			ASSERT_THAT(IsTrue(Movement->RotationRate.Yaw > 0.f));
 		}
 
-		TEST_METHOD(ToolbarKeyHintsLeaveOutEmptySlots)
+		TEST_METHOD(HotbarKeyHintsLeaveOutEmptySlots)
 		{
-			const AVestigePlayerCharacter& Farmer = Spawner.SpawnActor<AVestigePlayerCharacter>();
+			AVestigePlayerCharacter& Farmer = Spawner.SpawnActor<AVestigePlayerCharacter>();
+			UVestigeItemData& Hoe = Spawner.SpawnObject<UVestigeItemData>();
+			Hoe.SetContentIdForTests(TEXT("Base.Hoe"));
+			UVestigeItemData& Can = Spawner.SpawnObject<UVestigeItemData>();
+			Can.SetContentIdForTests(TEXT("Base.WateringCan"));
+			UVestigeInventoryComponent* Inventory = NewObject<UVestigeInventoryComponent>(&Farmer);
+			Inventory->ResetForTests(12, {&Hoe, &Can});
+			FVestigeInventorySaveData Bag;
+			Bag.Slots = {{0, Hoe.GetContentId(), 1}, {2, Can.GetContentId(), 1}, {10, Hoe.GetContentId(), 1}};
+			Inventory->RestoreFromSaveData(Bag);
 
-			// The C++ farmer has no toolbar; the Blueprint fills it.
-			ASSERT_THAT(IsTrue(Farmer.GetToolbarKeyHints().IsEmpty()));
+			// Slot 1 is empty and slot 10 is past the hotbar, so two hints, for the keys 1 and 3.
+			const TArray<FVestigeKeyHint> Hints = Farmer.GetHotbarKeyHints(*Inventory);
+			ASSERT_THAT(IsTrue(Hints.Num() == 2));
+			ASSERT_THAT(IsTrue(Hints[0].Key.ToString() == EKeys::One.GetDisplayName(false).ToString()));
+			ASSERT_THAT(IsTrue(Hints[1].Key.ToString() == EKeys::Three.GetDisplayName(false).ToString()));
 		}
 	};
 }
