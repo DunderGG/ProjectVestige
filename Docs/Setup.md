@@ -284,8 +284,57 @@ git push origin main
 | The build log says no suitable compiler was found, or warns that the compiler version isn't preferred or is banned | The MSVC 14.50 toolset or the Windows 11 SDK 10.0.22621 is missing, or an early 14.50 compiler is installed. Import `.vsconfig` again and update Visual Studio |
 | "Unable to build while Live Coding is active" | The editor is open. Close it, or press Ctrl+Alt+F11 in the editor to apply the change with Live Coding (function bodies only) |
 | The editor offers to convert the project to another engine version | You opened it with the wrong engine. Press *Cancel*, and open it with 5.8 ([step 4](#4-unreal-engine-58)). Never convert the project |
+| Double-clicking `Vestige.uproject` asks which engine to use, or offers to convert it, and the list shows *Binary build at...* instead of 5.8 | Windows doesn't know where 5.8 is installed. See [The project asks which engine to use](#the-project-asks-which-engine-to-use) below |
+| *Build Solution* or *Rebuild Solution* fails in an engine program such as `ChaosTestHarness`, with `Build.bat` exiting with code 6 and `-Mode=Test` in the command | The solution also builds the engine's own programs, which a launcher engine can't build. See [Build Solution fails in an engine program](#build-solution-fails-in-an-engine-program) below |
 | "Modules were built with a different engine version" on a project that just built | The editor was started on its own and auto-opened the project. Close it and open `Vestige.uproject` directly ([step 7](#7-open-the-editor)) |
 | A warning about a variable that "hides class member" stops the build | That warning is an error in this project. Rename your local variable ([CodingGuidelines.md, section 2.4](CodingGuidelines.md#24-never-shadow)) |
 | The game looks wrong or grey right after the first start | Shaders are still compiling (the counter at the bottom right of the editor). Wait for it to finish |
 | Visual Studio's *Error List* shows red errors, but the build succeeds | IntelliSense doesn't fully understand Unreal's macros. Trust the *Output* window. Generating the project files again often clears them |
 | Something else | Check the log in `Saved/Logs/Vestige.log` (the editor's *Window > Output Log* shows the same). If you're stuck, open an issue with the log attached, as [CONTRIBUTING.md, section 8](../CONTRIBUTING.md#8-ideas-bugs-and-feedback) describes |
+
+### The project asks which engine to use
+
+When you double-click `Vestige.uproject`, a small window asks which engine version to open it with, or offers to convert the project. The version list has no *5.8*, only entries such as *Binary build at C:\Program Files\Epic Games\UE_5.8*.
+
+**Don't press *Convert*, and don't pick the *Binary build* entry.** Both rewrite `"EngineAssociation"` in `Vestige.uproject`: *Convert* to another version, the *Binary build* entry to a long ID that only means something on your PC. Press *Cancel*. If `git status` then shows `Vestige.uproject` as changed, undo it with `git restore Vestige.uproject`.
+
+**Cause.** Windows finds the engine for `"5.8"` in the launcher's list of installed engines, `C:\ProgramData\Epic\UnrealEngineLauncher\LauncherInstalled.dat`. When that file is empty or has no 5.8 entry, nothing maps "5.8" to the engine, even though the engine itself is installed and works. *Verify* and reinstalling the engine in the launcher don't necessarily refill the file.
+
+**Fix:** fill in the file by hand.
+
+1. Close the Epic Games Launcher completely, including its icon in the system tray. It rewrites the file while it runs.
+2. Open Notepad **as administrator** (right-click it in the Start menu, *Run as administrator*). The file is in `ProgramData`, which needs administrator rights to change.
+3. In Notepad, open `C:\ProgramData\Epic\UnrealEngineLauncher\LauncherInstalled.dat` (set the file type to *All files* to see it).
+4. If the file is empty, replace its contents with the following. If it already lists other apps, add only the part in braces `{ ... }` to the `InstallationList`, with a comma between entries. Use your install path, with every `\` doubled, and your installed 5.8 version (the launcher shows it in *Unreal Engine > Library*):
+
+   ```json
+   {
+     "InstallationList": [
+       {
+         "InstallLocation": "C:\\Program Files\\Epic Games\\UE_5.8",
+         "NamespaceId": "ue",
+         "ItemId": "",
+         "ArtifactId": "UE_5.8",
+         "AppVersion": "5.8.4",
+         "AppName": "UE_5.8"
+       }
+     ]
+   }
+   ```
+
+5. Save, then double-click `Vestige.uproject` again. It opens in 5.8 without asking.
+
+**Workaround** while it isn't fixed: start 5.8 from the launcher (*Unreal Engine > Library*, *Launch* on the 5.8 slot), then in the *Unreal Project Browser* press **Browse** and open `Vestige.uproject`. That uses the right engine and leaves the file alone.
+
+Running `UnrealVersionSelector.exe` by hand doesn't help here. Without arguments it says the folder doesn't contain an engine installation, and `-fileassociations` doesn't add the missing 5.8 entry.
+
+### Build Solution fails in an engine program
+
+*Build > Build Solution* and *Rebuild Solution* (or Ctrl+Shift+B) build every project in the solution, and the generated solution includes the engine's own programs, such as `ChaosTestHarness`. A launcher engine can't build those, so the build stops with an error from `Build.bat` (exit code 6) for one of them, even when `Vestige` itself is fine.
+
+**Fix:** build only the project.
+
+- Check that the toolbar says **Development Editor** and **Win64**.
+- In *Solution Explorer*, right-click **Vestige** (under *Games*) and choose **Build**, as in [step 6](#6-generate-the-project-files-and-build). To rebuild from scratch, choose **Rebuild** in the same menu.
+
+To make *Build Solution* itself work, open *Build > Configuration Manager*, keep *Development Editor* and *Win64* selected at the top, and untick the *Build* column for every project except **Vestige**. Visual Studio saves this in the solution file, and **generating the project files again ([step 6](#6-generate-the-project-files-and-build)) writes a new solution with the engine programs ticked again**, so you have to untick them again after each regeneration. Right-clicking **Vestige** doesn't have this problem.
