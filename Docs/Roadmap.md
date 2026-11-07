@@ -349,6 +349,11 @@ The code changes that the slice's content depends on. Doing them first means add
 - [x] A bed in the farmhouse to sleep in, instead of a key that works anywhere
    - Done 2026-11-01 without the farmhouse: `AVestigeBed` (`BP_Bed`), a placeholder box along the near edge of the field in `L_Farm`, used with F. N stays as a test key, "Skip day (test)", until the cheat manager (decided with David). The bed moves into the farmhouse when there is one, and gets its mesh with [4.6](#46-interface-and-input)
 - [ ] Hostile robots at night wait until combat exists ([milestone 3](#combat-and-the-wasteland)). When they come, the midnight warning says "it's dangerous out now" as [GameDesign.md, section 5](GameDesign.md#5-time-days-and-seasons) has it
+- [ ] No sleeping before an earliest bedtime, 18:00 as David suggests (2026-11-07), so the player can't skip days one after another *(decide: the hour, and whether the bed hides Sleep before then or offers it and says it's too early)*
+   - The rule belongs in `UVestigeRestComponent` with the other late-night hours (an `EarliestSleepHour` setting beside `LateWarningHour` and `LateNightHour`), and `AVestigeBed` asks it in `GetInteractionOptions`, so the bed keeps no rules of its own
+   - Times after midnight count as late, not early: the clock's time of day runs past 24 until the day ends at 06:00
+   - The `SkipDay` cheat calls `Sleep` too and must skip the rule. The rest tests that sleep in the morning move the clock past the hour first, and a new test covers sleeping too early
+   - Add the rule to [GameDesign.md, section 5](GameDesign.md#5-time-days-and-seasons) and its decision log, since it limits "your pace"
 
 ### 4.4 The caretaker robot
 
@@ -376,6 +381,9 @@ The code changes that the slice's content depends on. Doing them first means add
    - Done 2026-10-31, earlier than planned: in 5.8 the engine material drew as the default grey material (Architecture.md, decision log)
 - [ ] Meshes for the new crops, the sprinkler, the shipping bin, the water source and the bed
 - [ ] A sun and a moon instead of one light that is both: at sunset today `AVestigeSkyLighting` jumps the one directional light from the western horizon to the eastern one and from warm to blue in a single frame, so the shadows and the sky snap at 20:00 (seen by David, 2026-11-06). Instead the sun carries on below the horizon for a real dusk in the sky atmosphere, and a second, dim directional light for the moon (the atmosphere's second sun light) fades in as the sun goes and crosses the sky through the night. Only the brighter of the two casts shadows, so the frame costs about what it does now; measure it against the baseline ([Architecture.md, section 10](Architecture.md#measuring)). Needs a moon light placed in `L_Farm` and tests of the fading
+- [ ] The HUD clock shows every game minute instead of 10-minute steps (David, 2026-11-07). At 40 real seconds per game hour the shown time changes about every 0.67 seconds
+   - Cheap, and the clock stays as it is: `UVestigeClockSubsystem` broadcasts only whole hours, and the HUD already reads the time each frame and rebuilds the status line only when the shown time changes. The change is `VestigeHudClock::StepMinutes` in `VestigeHUD.cpp` set to 1, a short text rebuilt about 1.5 times a second, with no per-minute event on the clock. Keep the rebuild-on-change when the HUD moves to UMG ([4.0](#40-structure-from-the-code-review), H7)
+   - The 10-minute step was chosen so the clock doesn't flicker every game minute, so check in play that the moving minutes don't distract. Update the clock line in [PlayTest.md](PlayTest.md)
 
 ## 5. Milestone 3 and later
 
