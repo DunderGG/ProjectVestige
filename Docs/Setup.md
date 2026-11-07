@@ -285,7 +285,7 @@ git push origin main
 | "Unable to build while Live Coding is active" | The editor is open. Close it, or press Ctrl+Alt+F11 in the editor to apply the change with Live Coding (function bodies only) |
 | The editor offers to convert the project to another engine version | You opened it with the wrong engine. Press *Cancel*, and open it with 5.8 ([step 4](#4-unreal-engine-58)). Never convert the project |
 | Double-clicking `Vestige.uproject` asks which engine to use, or offers to convert it, and the list shows *Binary build at...* instead of 5.8 | Windows doesn't know where 5.8 is installed. See [The project asks which engine to use](#the-project-asks-which-engine-to-use) below |
-| *Build Solution* or *Rebuild Solution* fails in an engine program such as `ChaosTestHarness`, with `Build.bat` exiting with code 6 and `-Mode=Test` in the command | The solution also builds the engine's own programs, which a launcher engine can't build. See [Build Solution fails in an engine program](#build-solution-fails-in-an-engine-program) below |
+| *Build Solution* or *Rebuild Solution* fails in an engine program such as `ChaosTestHarness`, with `Build.bat` exiting with code 6 and `-Mode=Test` in the command | The project files were generated without `-game`, so the solution includes engine programs a launcher engine can't build. See [Build Solution fails in an engine program](#build-solution-fails-in-an-engine-program) below |
 | "Modules were built with a different engine version" on a project that just built | The editor was started on its own and auto-opened the project. Close it and open `Vestige.uproject` directly ([step 7](#7-open-the-editor)) |
 | A warning about a variable that "hides class member" stops the build | That warning is an error in this project. Rename your local variable ([CodingGuidelines.md, section 2.4](CodingGuidelines.md#24-never-shadow)) |
 | The game looks wrong or grey right after the first start | Shaders are still compiling (the counter at the bottom right of the editor). Wait for it to finish |
@@ -330,11 +330,19 @@ Running `UnrealVersionSelector.exe` by hand doesn't help here. Without arguments
 
 ### Build Solution fails in an engine program
 
-*Build > Build Solution* and *Rebuild Solution* (or Ctrl+Shift+B) build every project in the solution, and the generated solution includes the engine's own programs, such as `ChaosTestHarness`. A launcher engine can't build those, so the build stops with an error from `Build.bat` (exit code 6) for one of them, even when `Vestige` itself is fine.
+*Build > Build Solution* and *Rebuild Solution* (or Ctrl+Shift+B) build every project in the solution. A launcher engine can't build its own C++ programs, such as `ChaosTestHarness`, so if they're in the solution the build stops with an error from `Build.bat` (exit code 6) for one of them, even when `Vestige` itself is fine.
 
-**Fix:** build only the project.
+**Cause.** The project files were generated without the `-game` option. With `-game`, which the right-click entry and the command in [step 6](#6-generate-the-project-files-and-build) both pass, Unreal leaves the engine's programs out of the solution: it has about 65 projects, and the engine's C++ test programs aren't among them. Without it, the solution has around 85, including `ChaosTestHarness`, `EventLoopUnitTests`, `LowLevelTests` and others.
 
-- Check that the toolbar says **Development Editor** and **Win64**.
-- In *Solution Explorer*, right-click **Vestige** (under *Games*) and choose **Build**, as in [step 6](#6-generate-the-project-files-and-build). To rebuild from scratch, choose **Rebuild** in the same menu.
+**Fix:** close Visual Studio, then generate the project files again with the command from [step 6](#6-generate-the-project-files-and-build):
 
-To make *Build Solution* itself work, open *Build > Configuration Manager*, keep *Development Editor* and *Win64* selected at the top, and untick the *Build* column for every project except **Vestige**. Visual Studio saves this in the solution file, and **generating the project files again ([step 6](#6-generate-the-project-files-and-build)) writes a new solution with the engine programs ticked again**, so you have to untick them again after each regeneration. Right-clicking **Vestige** doesn't have this problem.
+```
+"C:\Program Files\Epic Games\UE_5.8\Engine\Build\BatchFiles\Build.bat" -projectfiles -project="C:\Unreal Projects\Vestige\Vestige.uproject" -game -rocket -progress
+```
+
+Open `Vestige.slnx` again and check that *Solution Explorer* has no `ChaosTestHarness`. *Build Solution* then succeeds.
+
+**Other ways around it**, if you can't regenerate right now:
+
+- Build only the project: check that the toolbar says **Development Editor** and **Win64**, then in *Solution Explorer* right-click **Vestige** (under *Games*) and choose **Build**, or **Rebuild** to build from scratch.
+- Or open *Build > Configuration Manager*, keep *Development Editor* and *Win64* selected at the top, and untick the *Build* column for every project except **Vestige**. Visual Studio saves this in the solution file, so generating the project files again throws it away.
