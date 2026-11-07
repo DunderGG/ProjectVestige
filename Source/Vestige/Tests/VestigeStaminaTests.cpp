@@ -4,12 +4,11 @@
 #if WITH_DEV_AUTOMATION_TESTS
 
 #include "AbilitySystem/VestigeGameplayTags.h"
-#include "AbilitySystem/VestigeStaminaCostEffect.h"
-#include "AbilitySystem/VestigeStaminaRefillEffect.h"
 #include "AbilitySystem/VestigeStaminaSaveData.h"
 #include "AbilitySystem/VestigeStaminaSet.h"
 #include "AbilitySystemComponent.h"
 #include "Components/ActorTestSpawner.h"
+#include "Content/VestigeGameData.h"
 #include "CQTest.h"
 #include "Player/VestigePlayerState.h"
 
@@ -24,6 +23,10 @@ namespace VestigeStaminaTests
 		/** The player state Blueprint the game uses, whose ability set grants the stamina set. */
 		BEFORE_EACH()
 		{
+			// The stamina effects are GE_ assets named by the game data, which the asset manager loaded at startup.
+			const UVestigeGameData& GameData = UVestigeGameData::Get();
+			ASSERT_THAT(IsNotNull(GameData.GetStaminaCostEffect().Get()));
+			ASSERT_THAT(IsNotNull(GameData.GetStaminaRefillEffect().Get()));
 			UClass* PlayerStateClass =
 				LoadClass<AVestigePlayerState>(nullptr, TEXT("/Game/Vestige/Blueprints/BP_PlayerState.BP_PlayerState_C"));
 			ASSERT_THAT(IsNotNull(PlayerStateClass));
@@ -41,7 +44,7 @@ namespace VestigeStaminaTests
 		void Spend(float Cost)
 		{
 			const FGameplayEffectSpecHandle Spec =
-				AbilitySystem->MakeOutgoingSpec(UVestigeStaminaCostEffect::StaticClass(), 1.f, AbilitySystem->MakeEffectContext());
+				AbilitySystem->MakeOutgoingSpec(UVestigeGameData::Get().GetStaminaCostEffect(), 1.f, AbilitySystem->MakeEffectContext());
 			Spec.Data->SetSetByCallerMagnitude(VestigeGameplayTags::Data_StaminaCost, -Cost);
 			AbilitySystem->ApplyGameplayEffectSpecToSelf(*Spec.Data);
 		}
@@ -50,7 +53,7 @@ namespace VestigeStaminaTests
 		void Refill(float Amount)
 		{
 			const FGameplayEffectSpecHandle Spec =
-				AbilitySystem->MakeOutgoingSpec(UVestigeStaminaRefillEffect::StaticClass(), 1.f, AbilitySystem->MakeEffectContext());
+				AbilitySystem->MakeOutgoingSpec(UVestigeGameData::Get().GetStaminaRefillEffect(), 1.f, AbilitySystem->MakeEffectContext());
 			Spec.Data->SetSetByCallerMagnitude(VestigeGameplayTags::Data_StaminaRefill, Amount);
 			AbilitySystem->ApplyGameplayEffectSpecToSelf(*Spec.Data);
 		}

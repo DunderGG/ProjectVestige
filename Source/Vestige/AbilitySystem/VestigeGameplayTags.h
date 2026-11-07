@@ -14,16 +14,16 @@ namespace VestigeGameplayTags
 	/** Asset tag of every tool ability (each tool's behaviour), for finding or cancelling them as a group. */
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Ability_UseTool);
 
-	/** The set-by-caller magnitude of the stamina cost effect: the stamina one use takes, as a negative amount. */
+	/** The set-by-caller magnitude code sets on the stamina cost effect (GE_StaminaCost): the stamina one use takes, as a negative amount. */
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Data_StaminaCost);
 
-	/** The set-by-caller magnitude of the stamina drain effect: the stamina each period takes, as a negative amount. */
+	/** The set-by-caller magnitude code sets on the late-night drain effect (GE_LateNightDrain): the stamina each period takes, as a negative amount. */
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Data_StaminaDrain);
 
-	/** The set-by-caller magnitude of the stamina refill effect: the stamina it sets, before the set's clamp. */
+	/** The set-by-caller magnitude code sets on the stamina refill effect (GE_StaminaRefill): the stamina it sets, before the set's clamp. */
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Data_StaminaRefill);
 
-	/** Granted by the exhausted effect while the player is exhausted from a late night. */
+	/** Granted by the exhausted effect (GE_Exhausted) while the player is exhausted from a late night. */
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(State_Exhausted);
 
 	/**

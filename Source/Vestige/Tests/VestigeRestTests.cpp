@@ -4,11 +4,10 @@
 #if WITH_DEV_AUTOMATION_TESTS
 
 #include "AbilitySystem/VestigeGameplayTags.h"
-#include "AbilitySystem/VestigeStaminaCostEffect.h"
-#include "AbilitySystem/VestigeStaminaDrainEffect.h"
 #include "AbilitySystem/VestigeStaminaSet.h"
 #include "AbilitySystemComponent.h"
 #include "Components/ActorTestSpawner.h"
+#include "Content/VestigeGameData.h"
 #include "Core/VestigeFeedbackSubsystem.h"
 #include "CQTest.h"
 #include "Farming/VestigeRestComponent.h"
@@ -38,6 +37,12 @@ namespace VestigeRestTests
 
 		BEFORE_EACH()
 		{
+			// The stamina effects are GE_ assets named by the game data, which the asset manager loaded at startup.
+			const UVestigeGameData& GameData = UVestigeGameData::Get();
+			ASSERT_THAT(IsNotNull(GameData.GetStaminaCostEffect().Get()));
+			ASSERT_THAT(IsNotNull(GameData.GetStaminaRefillEffect().Get()));
+			ASSERT_THAT(IsNotNull(GameData.GetLateNightDrainEffect().Get()));
+			ASSERT_THAT(IsNotNull(GameData.GetExhaustedEffect().Get()));
 			Spawner.InitializeGameSubsystems();
 			Player.Clock = UVestigeClockSubsystem::Get(&Spawner.GetWorld());
 			ASSERT_THAT(IsNotNull(Player.Clock));
@@ -75,7 +80,7 @@ namespace VestigeRestTests
 		{
 			UAbilitySystemComponent& AbilitySystem = *Setup.AbilitySystem;
 			const FGameplayEffectSpecHandle Cost =
-				AbilitySystem.MakeOutgoingSpec(UVestigeStaminaCostEffect::StaticClass(), 1.f, AbilitySystem.MakeEffectContext());
+				AbilitySystem.MakeOutgoingSpec(UVestigeGameData::Get().GetStaminaCostEffect(), 1.f, AbilitySystem.MakeEffectContext());
 			Cost.Data->SetSetByCallerMagnitude(VestigeGameplayTags::Data_StaminaCost, -GetMaxStamina(Setup));
 			AbilitySystem.ApplyGameplayEffectSpecToSelf(*Cost.Data);
 		}
@@ -237,14 +242,18 @@ namespace VestigeRestTests
 			PassHours(*Setup.Clock, 1.f);
 
 			FGameplayEffectQuery DrainQuery;
-			DrainQuery.EffectDefinition = UVestigeStaminaDrainEffect::StaticClass();
+			DrainQuery.EffectDefinition = UVestigeGameData::Get().GetLateNightDrainEffect();
 			const TArray<FActiveGameplayEffectHandle> Drains = Setup.AbilitySystem->GetActiveEffects(DrainQuery);
 			ASSERT_THAT(IsTrue(Drains.Num() == 1));
 			const FActiveGameplayEffect* Drain = Setup.AbilitySystem->GetActiveGameplayEffect(Drains[0]);
 			ASSERT_THAT(IsNotNull(Drain));
 
+			// The first drain comes one period after midnight, not when the drain starts.
+			ASSERT_THAT(IsTrue(FMath::IsNearlyEqual(GetStamina(Setup), GetMaxStamina(Setup))));
+
 			// The rest component's default of 10 stamina per game hour, spread over the periods in one game hour.
-			const float PeriodsPerGameHour = Setup.Clock->GetRealSecondsPerGameHour() / UVestigeStaminaDrainEffect::PeriodSeconds;
+			ASSERT_THAT(IsTrue(Drain->Spec.GetPeriod() > 0.f));
+			const float PeriodsPerGameHour = Setup.Clock->GetRealSecondsPerGameHour() / Drain->Spec.GetPeriod();
 			const float PerPeriod = Drain->Spec.GetSetByCallerMagnitude(VestigeGameplayTags::Data_StaminaDrain, false);
 			ASSERT_THAT(IsTrue(FMath::IsNearlyEqual(PerPeriod * PeriodsPerGameHour, -10.f)));
 		}
@@ -258,7 +267,7 @@ namespace VestigeRestTests
 			Setup.RestComponent->Sleep();
 
 			FGameplayEffectQuery DrainQuery;
-			DrainQuery.EffectDefinition = UVestigeStaminaDrainEffect::StaticClass();
+			DrainQuery.EffectDefinition = UVestigeGameData::Get().GetLateNightDrainEffect();
 			ASSERT_THAT(IsFalse(Setup.RestComponent->IsDrainingStamina()));
 			ASSERT_THAT(IsTrue(Setup.AbilitySystem->GetActiveEffects(DrainQuery).IsEmpty()));
 		}

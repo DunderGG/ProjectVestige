@@ -7,6 +7,7 @@
 #include "AssetRegistry/IAssetRegistry.h"
 #include "Content/VestigeContentData.h"
 #include "Content/VestigeContentLog.h"
+#include "Content/VestigeGameData.h"
 #include "ProfilingDebugging/CpuProfilerTrace.h"
 
 TArray<FVestigeDuplicateContentId> UVestigeAssetManager::FindDuplicateContentIds(TConstArrayView<TPair<FPrimaryAssetId, FName>> Assets)
@@ -26,6 +27,32 @@ TArray<FVestigeDuplicateContentId> UVestigeAssetManager::FindDuplicateContentIds
 		}
 	}
 	return Duplicates;
+}
+
+const UVestigeGameData* UVestigeAssetManager::GetGameData()
+{
+	const UVestigeAssetManager* Manager = Cast<UVestigeAssetManager>(UAssetManager::GetIfInitialized());
+	return Manager ? Manager->GameData.Get() : nullptr;
+}
+
+void UVestigeAssetManager::StartInitialLoading()
+{
+	Super::StartInitialLoading();
+
+	LoadGameData();
+}
+
+void UVestigeAssetManager::LoadGameData()
+{
+	TRACE_CPUPROFILER_EVENT_SCOPE(UVestigeAssetManager::LoadGameData);
+
+	GameData = GameDataPath.LoadSynchronous();
+	if (!GameData)
+	{
+		VESTIGE_LOG(this, LogVestigeContent, Error,
+			"The game data {Path} didn't load, so nothing applies the stamina effects. Set GameDataPath in Config/DefaultGame.ini.",
+			GameDataPath.ToString());
+	}
 }
 
 void UVestigeAssetManager::PostInitialAssetScan()

@@ -365,6 +365,17 @@ Each tool's behaviour is now its own gameplay ability, named on the tool asset a
 - [x] **Switching tools**: hold E with the hoe on a row, then press 3: the repeat stops, and the watering can starts on the next press of E. Switching right after a use and pressing E at once waits for that use's 0.4 s first.
 - [x] **Print String**: the tests' log shows `LogBlueprintUserMessages: [BP_PlayerCharacter_C_0] DA_Tool_Hoe` on every tool use, which looks like a Print String on **On Tool Used** in `BP_PlayerCharacter`. If it was only for checking the event, remove it, since it shows on screen in development builds.
 
+### Stamina effects as GE_ assets, 2026-11-07
+
+The four stamina effects are now gameplay effect Blueprints in `Content/Vestige/Abilities/`, named by a new game data asset, `Content/Vestige/DA_GameData`, that the asset manager loads at startup ([Systems.md, section 9](Systems.md#9-abilities-attributes-and-effects-gameplay-ability-system), effects as `GE_` assets). A temporary headless commandlet made the five assets, so the editor hasn't shown them yet. Look at the commit "Make the stamina effects GE_ assets" if something is wrong.
+
+- [ ] **Startup**: the Output Log at editor start has no "The game data ... didn't load" error (search for `LogVestigeContent`).
+- [ ] **Game data**: open `DA_GameData`: under **Stamina**, the four effects are `GE_StaminaCost`, `GE_StaminaRefill`, `GE_LateNightDrain` and `GE_Exhausted`. Right-click `Content/Vestige` > Validate Assets: no errors.
+- [ ] **The effects**: open each and look at its Class Defaults. `GE_StaminaCost`: Duration Policy Instant, one modifier on `VestigeStaminaSet.Stamina`, Add, Set By Caller with the tag `Vestige.Data.StaminaCost`. `GE_StaminaRefill`: Instant, Override, `Vestige.Data.StaminaRefill`. `GE_LateNightDrain`: Infinite, Period 1, **Execute Periodic Effect On Application** unticked, Add, `Vestige.Data.StaminaDrain`. `GE_Exhausted`: Infinite, no modifiers, and under Components a **Grant Tags to Target Actor** component that adds `Vestige.State.Exhausted`. Close them without saving unless something is wrong.
+- [ ] **Stamina as before**: tool uses cost the same (hoe and watering can 2, seeds and hand 1). `SkipToTime 2330`, then let the clock pass midnight: the stamina counts down, about 10 per game hour. Sleep (bed or N) after midnight: you wake at 75 and "Exhausted". Sleep before midnight the next night: full stamina, and the exhaustion goes.
+- [ ] **Tuning in the editor**: set `GE_LateNightDrain`'s Period to 2, play past midnight: the stamina now drops every 2 seconds, still about 10 per game hour. Set it back to 1 (or don't save).
+- [ ] **Packaged build**: package a Development build and play past midnight: stamina drains and tools still cost stamina, so the cook included `DA_GameData` and the effects.
+
 ### Editor chores
 
 Changes only the editor can make safely. The steps are in [Roadmap.md, Housekeeping](Roadmap.md#3-housekeeping): re-saving the template Blueprints and `L_Farm`, moving `BP_FarmTile` and the materials with redirectors fixed, and regenerating the Android File Server token if it was ever used. After each one, run the [smoke test](#3-smoke-test).

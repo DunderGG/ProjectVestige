@@ -4,11 +4,11 @@
 #if WITH_DEV_AUTOMATION_TESTS
 
 #include "AbilitySystem/VestigeGameplayTags.h"
-#include "AbilitySystem/VestigeStaminaCostEffect.h"
 #include "AbilitySystem/VestigeStaminaSet.h"
 #include "AbilitySystemComponent.h"
 #include "Components/ActorTestSpawner.h"
 #include "Content/FarmCropData.h"
+#include "Content/VestigeGameData.h"
 #include "Content/VestigeItemData.h"
 #include "Content/VestigeToolData.h"
 #include "Core/VestigeFeedbackSubsystem.h"
@@ -58,6 +58,8 @@ namespace FarmingTests
 		 */
 		BEFORE_EACH()
 		{
+			// The stamina cost is a GE_ asset named by the game data, which the asset manager loaded at startup.
+			ASSERT_THAT(IsNotNull(UVestigeGameData::Get().GetStaminaCostEffect().Get()));
 			// The grid's field and the clock live in the game instance.
 			Spawner.InitializeGameSubsystems();
 			Grid = &Spawner.SpawnActor<AFarmGrid>();
@@ -158,7 +160,7 @@ namespace FarmingTests
 		void EmptyStamina()
 		{
 			const FGameplayEffectSpecHandle Spec =
-				AbilitySystem->MakeOutgoingSpec(UVestigeStaminaCostEffect::StaticClass(), 1.f, AbilitySystem->MakeEffectContext());
+				AbilitySystem->MakeOutgoingSpec(UVestigeGameData::Get().GetStaminaCostEffect(), 1.f, AbilitySystem->MakeEffectContext());
 			Spec.Data->SetSetByCallerMagnitude(VestigeGameplayTags::Data_StaminaCost, -GetMaxStamina());
 			AbilitySystem->ApplyGameplayEffectSpecToSelf(*Spec.Data);
 		}

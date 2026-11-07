@@ -87,7 +87,10 @@ private:
 	/** Refills stamina fully and clears exhaustion, telling the player if there was any. */
 	void WakeRested(UAbilitySystemComponent& AbilitySystem);
 
-	/** Sets the owner's stamina to Fraction of its maximum through UVestigeStaminaRefillEffect. */
+	/** Applies the game data's exhausted effect, if it has one, without checking whether the owner already is. */
+	void ApplyExhaustion(UAbilitySystemComponent& AbilitySystem) const;
+
+	/** Sets the owner's stamina to Fraction of its maximum through the game data's stamina refill effect. */
 	void RefillStamina(UAbilitySystemComponent& AbilitySystem, float Fraction) const;
 
 	void StartLateNightDrain();

@@ -20,7 +20,7 @@ class UVestigeToolData;
  * says what the tool does to a tile (CanUseOn, UseOn); this class runs the uses.
  *
  * One press of the use key is one activation. The first use happens at once; each use that changed the farm costs the
- * tool's StaminaCost through UVestigeStaminaCostEffect and then takes the tool's UseSeconds (OutOfStaminaTimeScale times
+ * tool's StaminaCost through the game data's stamina cost effect and then takes the tool's UseSeconds (OutOfStaminaTimeScale times
  * as long while the player is out of stamina). While the key is held (the spec's InputPressed) the uses repeat: the next
  * starts when the last has finished, or when the target tile changes or the farmer lands, and only if it would change the
  * tile, so a repeat that would change nothing waits quietly. No use happens in the air. Releasing the key ends the
@@ -56,6 +56,12 @@ protected:
 	/** Always passes: an action works at any stamina, and the stamina set keeps a cost from taking it below zero. */
 	virtual bool CheckCost(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
 		FGameplayTagContainer* OptionalRelevantTags) const override;
+
+	/**
+	 * The game data's stamina cost effect (UVestigeGameData), which ApplyCost applies. CostGameplayEffectClass stays unset: a
+	 * C++ ability can't name a GE_ asset, and its class default object exists before the game data loads.
+	 */
+	virtual UGameplayEffect* GetCostGameplayEffect() const override;
 
 	/** Spends the StaminaCost of the tool in use, through the cost effect's set-by-caller magnitude. */
 	virtual void ApplyCost(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,

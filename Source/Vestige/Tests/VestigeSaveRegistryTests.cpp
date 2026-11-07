@@ -3,15 +3,16 @@
 
 #if WITH_DEV_AUTOMATION_TESTS
 
-#include "AbilitySystem/VestigeExhaustedEffect.h"
 #include "AbilitySystem/VestigeStaminaSet.h"
 #include "AbilitySystemComponent.h"
 #include "Components/ActorTestSpawner.h"
 #include "CQTest.h"
+#include "Content/VestigeGameData.h"
 #include "Core/VestigeSaveRecord.h"
 #include "Core/VestigeSaveRegistry.h"
 #include "Farming/FarmingComponent.h"
 #include "Farming/VestigeRestComponent.h"
+#include "GameplayEffect.h"
 #include "Inventory/VestigeInventoryComponent.h"
 #include "Player/VestigePlayerCharacter.h"
 #include "Player/VestigePlayerState.h"
@@ -253,7 +254,9 @@ namespace VestigeSaveRegistryTests
 			ASSERT_THAT(IsTrue(Inventory->TryAddItem(SeedId, 3)));
 			const int32 Seeds = Inventory->GetItemCount(SeedId);
 			AbilitySystem->SetNumericAttributeBase(UVestigeStaminaSet::GetStaminaAttribute(), 37.f);
-			AbilitySystem->ApplyGameplayEffectToSelf(GetDefault<UVestigeExhaustedEffect>(), 1.f, AbilitySystem->MakeEffectContext());
+			const TSubclassOf<UGameplayEffect> Exhausted = UVestigeGameData::Get().GetExhaustedEffect();
+			ASSERT_THAT(IsNotNull(Exhausted.Get()));
+			AbilitySystem->ApplyGameplayEffectToSelf(Exhausted.GetDefaultObject(), 1.f, AbilitySystem->MakeEffectContext());
 			Farming->SelectToolbarSlot(2);
 			const UVestigeToolData* Tool = Farming->GetCurrentTool();
 

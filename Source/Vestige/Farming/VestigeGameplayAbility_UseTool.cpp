@@ -6,8 +6,8 @@
 #include "Abilities/Tasks/AbilityTask_WaitDelay.h"
 #include "Abilities/Tasks/AbilityTask_WaitMovementModeChange.h"
 #include "AbilitySystem/VestigeGameplayTags.h"
-#include "AbilitySystem/VestigeStaminaCostEffect.h"
 #include "AbilitySystemComponent.h"
+#include "Content/VestigeGameData.h"
 #include "Content/VestigeToolData.h"
 #include "Core/VestigeFeedbackSubsystem.h"
 #include "Farming/FarmField.h"
@@ -33,7 +33,6 @@ UVestigeGameplayAbility_UseTool::UVestigeGameplayAbility_UseTool()
 	// Single-player: the ability runs where it is activated, with nothing predicted or sent to a server.
 	NetExecutionPolicy = EGameplayAbilityNetExecutionPolicy::LocalOnly;
 
-	CostGameplayEffectClass = UVestigeStaminaCostEffect::StaticClass();
 	SetAssetTags(FGameplayTagContainer(VestigeGameplayTags::Ability_UseTool));
 
 	// One tool use at a time, across every tool: the old tool's ability may still be finishing a use after a switch.
@@ -96,17 +95,24 @@ bool UVestigeGameplayAbility_UseTool::CheckCost(
 	return true;
 }
 
+UGameplayEffect* UVestigeGameplayAbility_UseTool::GetCostGameplayEffect() const
+{
+	const TSubclassOf<UGameplayEffect> CostEffect = UVestigeGameData::Get().GetStaminaCostEffect();
+	return CostEffect ? CostEffect->GetDefaultObject<UGameplayEffect>() : nullptr;
+}
+
 void UVestigeGameplayAbility_UseTool::ApplyCost(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
 	const FGameplayAbilityActivationInfo ActivationInfo) const
 {
 	const UVestigeToolData* Tool = GetTool();
-	if (!Tool || !CostGameplayEffectClass)
+	const TSubclassOf<UGameplayEffect> CostEffect = UVestigeGameData::Get().GetStaminaCostEffect();
+	if (!Tool || !CostEffect)
 	{
 		return;
 	}
 
 	const FGameplayEffectSpecHandle Spec =
-		MakeOutgoingGameplayEffectSpec(Handle, ActorInfo, ActivationInfo, CostGameplayEffectClass, GetAbilityLevel(Handle, ActorInfo));
+		MakeOutgoingGameplayEffectSpec(Handle, ActorInfo, ActivationInfo, CostEffect, GetAbilityLevel(Handle, ActorInfo));
 	if (!Spec.IsValid())
 	{
 		return;

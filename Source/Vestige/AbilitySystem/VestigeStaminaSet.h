@@ -13,7 +13,7 @@ struct FVestigeStaminaSaveData;
 
 /**
  * The player's stamina: Stamina, from 0 to MaxStamina, which tool uses spend and sleep refills. Both change only through
- * gameplay effects (UVestigeStaminaCostEffect, UVestigeStaminaRefillEffect), and this set keeps them in range. While
+ * gameplay effects (GE_StaminaCost, GE_StaminaRefill, GE_LateNightDrain, named by UVestigeGameData), and this set keeps them in range. While
  * Stamina is 0 it holds Vestige.State.OutOfStamina on its ability system, and it tells the player when stamina runs out.
  * Granted by an ability set (DA_AbilitySet_Player on BP_PlayerState).
  * Saves the stamina under Base.Stamina; the actor that holds its ability system registers it with UVestigeSaveRegistry,
