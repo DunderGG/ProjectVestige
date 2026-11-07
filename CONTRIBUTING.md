@@ -156,7 +156,7 @@ Each crop, tool and item is a **data asset**: an asset in the Content Browser wh
 
 ### Adding a tool
 
-Tools work the same way: a **Vestige Tool Data** asset named `DA_Tool_<Name>` in `Content/Vestige/Tools`, with a Content Id such as `Base.Sickle`, a held mesh (origin where the hand grips), and an *Action* chosen from the existing ones (till, plant, water, harvest). It appears in the game once it's added to **Toolbar Ids** on the farmer's Farming component; the first nine slots get the keys 1 to 9. A tool that needs a new kind of action needs C++, so open an issue first.
+Tools work the same way: a **Vestige Tool Data** asset named `DA_Tool_<Name>` in `Content/Vestige/Tools`, with a Content Id such as `Base.Sickle`, a held mesh (origin where the hand grips), and an *Ability* chosen from the existing tool abilities (`FarmGameplayAbility_Till`, `_Plant`, `_Water`, `_Harvest`), which is what the tool does. It appears in the game once it's added to **Toolbar Ids** on the farmer's Farming component; the first nine slots get the keys 1 to 9. A tool that does something new is a new tool ability in C++ (a subclass of `UVestigeGameplayAbility_UseTool`, [Systems.md, section 9](Docs/Systems.md#9-abilities-attributes-and-effects-gameplay-ability-system)), so open an issue first.
 
 ### Adding an item
 

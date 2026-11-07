@@ -11,7 +11,7 @@ namespace VestigeGameplayTags
 	/** Asset tag of the ability that uses the focused interactable. Interacting activates the abilities that have it. */
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Ability_Interact);
 
-	/** Asset tag of the ability that uses the tool in hand. Using a tool activates the abilities that have it. */
+	/** Asset tag of every tool ability (each tool's behaviour), for finding or cancelling them as a group. */
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Ability_UseTool);
 
 	/** The set-by-caller magnitude of the stamina cost effect: the stamina one use takes, as a negative amount. */
@@ -25,6 +25,13 @@ namespace VestigeGameplayTags
 
 	/** Granted by the exhausted effect while the player is exhausted from a late night. */
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(State_Exhausted);
+
+	/**
+	 * Owned by a tool ability while it is active, and blocks every tool ability, so one tool use runs at a time. Also held while
+	 * the use key is down and the ability waits for a tile it can change, so it means "a tool ability is active", not "a use is
+	 * under way".
+	 */
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(State_UsingTool);
 
 	/** Held while stamina is at zero, when every action takes longer. UVestigeStaminaSet keeps it in step with the value. */
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(State_OutOfStamina);

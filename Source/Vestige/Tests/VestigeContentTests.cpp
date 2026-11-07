@@ -8,6 +8,8 @@
 #include "Content/VestigeAssetManager.h"
 #include "Content/VestigeToolData.h"
 #include "CQTest.h"
+#include "Engine/AssetManager.h"
+#include "Farming/VestigeGameplayAbility_UseTool.h"
 
 // A namespace keeps the fixture's short name from hiding other declarations in unity builds.
 namespace VestigeContentTests
@@ -70,6 +72,23 @@ namespace VestigeContentTests
 				{FPrimaryAssetId(UVestigeToolData::AssetType, TEXT("Base.Seeds")), TEXT("/Game/B")}};
 
 			ASSERT_THAT(IsTrue(UVestigeAssetManager::FindDuplicateContentIds(Assets).IsEmpty()));
+		}
+
+		TEST_METHOD(EveryToolNamesAToolAbility)
+		{
+			TArray<FPrimaryAssetId> ToolIds;
+			UAssetManager::Get().GetPrimaryAssetIdList(UVestigeToolData::AssetType, ToolIds);
+			ASSERT_THAT(IsFalse(ToolIds.IsEmpty()));
+
+			for (const FPrimaryAssetId& ToolId : ToolIds)
+			{
+				const UVestigeToolData* Tool = Cast<UVestigeToolData>(UVestigeContentData::LoadWithVisuals(ToolId));
+				ASSERT_THAT(IsNotNull(Tool, *ToolId.ToString()));
+				const UClass* Ability = Tool->GetAbility();
+				ASSERT_THAT(IsNotNull(Ability, *ToolId.ToString()));
+				ASSERT_THAT(IsTrue(Ability->IsChildOf<UVestigeGameplayAbility_UseTool>(), *ToolId.ToString()));
+				ASSERT_THAT(IsFalse(Ability->HasAnyClassFlags(CLASS_Abstract), *ToolId.ToString()));
+			}
 		}
 	};
 }

@@ -3,7 +3,6 @@
 
 #include "Farming/FarmingComponent.h"
 
-#include "AbilitySystem/VestigeGameplayTags.h"
 #include "Abilities/GameplayAbility.h"
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemGlobals.h"
@@ -17,15 +16,11 @@
 #include "Core/VestigeSaveRegistry.h"
 #include "Engine/World.h"
 #include "Farming/FarmFarmingSaveData.h"
-#include "Farming/FarmField.h"
 #include "Farming/FarmGrid.h"
 #include "Farming/FarmLog.h"
-#include "Farming/FarmTileState.h"
 #include "Farming/FarmTileTargeting.h"
-#include "GameFramework/Character.h"
 #include "GameFramework/Pawn.h"
-#include "GameFramework/PlayerState.h"
-#include "Inventory/VestigeInventoryComponent.h"
+#include "GameplayAbilitySpec.h"
 #include "ProfilingDebugging/CpuProfilerTrace.h"
 #include "TimerManager.h"
 
@@ -79,9 +74,9 @@ void UFarmingComponent::BeginPlay()
 	{
 		Root->TransformUpdated.AddUObject(this, &UFarmingComponent::FollowOwnerTransform);
 	}
-	if (ACharacter* Character = Cast<ACharacter>(GetOwner()))
+	if (APawn* Pawn = Cast<APawn>(GetOwner()))
 	{
-		Character->LandedDelegate.AddDynamic(this, &UFarmingComponent::ContinueAfterLanding);
+		Pawn->ReceiveControllerChangedDelegate.AddDynamic(this, &UFarmingComponent::FollowController);
 	}
 	UpdateTargetTile();
 }
@@ -89,6 +84,10 @@ void UFarmingComponent::BeginPlay()
 void UFarmingComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	UVestigeSaveRegistry::UnregisterWorldOwner(GetWorld(), *this);
+
+	// By now the owner is unpossessed and reaches no ability system, so the grant goes through the one it was made on.
+	ReleaseGrantedTool();
+
 	if (Grid)
 	{
 		Grid->OnFieldReady.RemoveAll(this);
@@ -97,11 +96,10 @@ void UFarmingComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	{
 		Root->TransformUpdated.RemoveAll(this);
 	}
-	if (ACharacter* Character = Cast<ACharacter>(GetOwner()))
+	if (APawn* Pawn = Cast<APawn>(GetOwner()))
 	{
-		Character->LandedDelegate.RemoveDynamic(this, &UFarmingComponent::ContinueAfterLanding);
+		Pawn->ReceiveControllerChangedDelegate.RemoveDynamic(this, &UFarmingComponent::FollowController);
 	}
-	FollowAbilitySystem(nullptr);
 	Super::EndPlay(EndPlayReason);
 }
 
@@ -140,17 +138,21 @@ void UFarmingComponent::LoadToolbar()
 			VESTIGE_LOG(this, LogFarm, Warning, "Toolbar slot {Slot} ({ToolId}) names no tool asset, so the slot is empty.",
 				Tools.Num() + 1, ToolId.ToString());
 		}
+		else if (!Tool->GetAbility())
+		{
+			VESTIGE_LOG(this, LogFarm, Warning, "The tool {ToolId} names no Ability, so it does nothing.", ToolId.ToString());
+		}
 		Tools.Add(Tool);
 	}
 	Toolbar.SetTools(MoveTemp(Tools));
-	OnToolChanged.Broadcast(GetCurrentTool());
+	HandleToolChanged();
 }
 
 void UFarmingComponent::SelectToolbarSlot(int32 Slot)
 {
 	if (Toolbar.SelectSlot(Slot))
 	{
-		OnToolChanged.Broadcast(GetCurrentTool());
+		HandleToolChanged();
 	}
 }
 
@@ -162,8 +164,14 @@ bool UFarmingComponent::RestoreCurrentTool(FName ToolContentId)
 		VESTIGE_LOG(this, LogFarm, Warning, "The saved tool {ToolId} isn't on the toolbar, so the first slot is in hand.", ToolContentId);
 		Toolbar.SelectSlot(0);
 	}
-	OnToolChanged.Broadcast(GetCurrentTool());
+	HandleToolChanged();
 	return bFound;
+}
+
+void UFarmingComponent::HandleToolChanged()
+{
+	UpdateGrantedTool();
+	OnToolChanged.Broadcast(GetCurrentTool());
 }
 
 FFarmFarmingSaveData UFarmingComponent::GetSaveData() const
@@ -216,10 +224,17 @@ void UFarmingComponent::StartNewGame()
 
 void UFarmingComponent::UseTool()
 {
-	// Through the ability system's activation, so its rules apply: one use at a time, and the cost.
-	if (UAbilitySystemComponent* AbilitySystem = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(GetOwner()))
+	if (!GetCurrentTool())
 	{
-		AbilitySystem->TryActivateAbilitiesByTag(FGameplayTagContainer(VestigeGameplayTags::Ability_UseTool));
+		Notify(LOCTEXT("NoTool", "No tool in this slot."));
+		return;
+	}
+
+	// Granted here too, since the owner may have been possessed after the tool came into the hand.
+	UpdateGrantedTool();
+	if (UAbilitySystemComponent* AbilitySystem = GrantedAbilitySystem.Get(); AbilitySystem && GrantedSpec.IsValid())
+	{
+		AbilitySystem->TryActivateAbility(GrantedSpec);
 	}
 }
 
@@ -227,200 +242,102 @@ void UFarmingComponent::StartUsingTool()
 {
 	bToolUseHeld = true;
 	OnToolUseHeldChanged.Broadcast(bToolUseHeld);
-	FollowAbilitySystem(UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(GetOwner()));
-	UseTool();
+	if (!GetCurrentTool())
+	{
+		Notify(LOCTEXT("NoTool", "No tool in this slot."));
+		return;
+	}
+
+	UpdateGrantedTool();
+	UAbilitySystemComponent* AbilitySystem = GrantedAbilitySystem.Get();
+	FGameplayAbilitySpec* Spec = FindGrantedSpec();
+	if (!AbilitySystem || !Spec)
+	{
+		return;
+	}
+
+	// Pressed before activating, so the ability sees the key held from its first use. If a use is still finishing, the
+	// press reaches it instead, and the repeat goes on.
+	AbilitySystem->AbilitySpecInputPressed(*Spec);
+	AbilitySystem->TryActivateAbility(GrantedSpec);
 }
 
 void UFarmingComponent::StopUsingTool()
 {
 	bToolUseHeld = false;
 	OnToolUseHeldChanged.Broadcast(bToolUseHeld);
+	if (FGameplayAbilitySpec* Spec = FindGrantedSpec())
+	{
+		GrantedAbilitySystem->AbilitySpecInputReleased(*Spec);
+	}
 }
 
-void UFarmingComponent::RepeatToolUse()
+void UFarmingComponent::ReportToolUsed(const UVestigeToolData& Tool, const FIntPoint& Tile)
 {
-	if (!bToolUseHeld)
+	OnToolUsed.Broadcast(&Tool, Tile);
+}
+
+void UFarmingComponent::ReportCropHarvested(const UFarmCropData& Crop, const FIntPoint& Tile)
+{
+	OnCropHarvested.Broadcast(&Crop, Tile);
+}
+
+void UFarmingComponent::UpdateGrantedTool()
+{
+	UAbilitySystemComponent* AbilitySystem = FindAbilitySystem();
+	const UVestigeToolData* Tool = GetCurrentTool();
+	if (AbilitySystem == GrantedAbilitySystem.Get() && Tool == GrantedTool.Get())
 	{
 		return;
 	}
-	const UVestigeToolData* Tool = GetCurrentTool();
-	const TOptional<FIntPoint> Target = FindTargetTile();
-	const FFarmTileState* Tile = Target ? Grid->GetTile(*Target) : nullptr;
-	if (Tool && Tile && WouldToolChange(*Tool, *Tile))
-	{
-		UseTool();
-	}
-}
 
-bool UFarmingComponent::WouldToolChange(const UVestigeToolData& Tool, const FFarmTileState& Tile) const
-{
-	switch (Tool.GetAction())
-	{
-	case EFarmToolAction::Till:
-		return Tile.CanTill();
-
-	case EFarmToolAction::Plant:
-		return HasSeedToPlant() && Tile.CanPlant();
-
-	case EFarmToolAction::Water:
-		return Tile.CanWater();
-
-	case EFarmToolAction::Harvest:
-		return Tile.IsRipe() && HasRoomForHarvest(*Tile.GetCrop());
-	}
-	return false;
-}
-
-void UFarmingComponent::ContinueAfterUse(const FAbilityEndedData& EndedData)
-{
-	const UGameplayAbility* Ability = EndedData.AbilityThatEnded;
-	if (Ability && Ability->GetAssetTags().HasTagExact(VestigeGameplayTags::Ability_UseTool))
-	{
-		RepeatToolUse();
-	}
-}
-
-void UFarmingComponent::ContinueAfterLanding(const FHitResult& Hit)
-{
-	RepeatToolUse();
-}
-
-void UFarmingComponent::FollowAbilitySystem(UAbilitySystemComponent* AbilitySystem)
-{
-	UAbilitySystemComponent* Followed = FollowedAbilitySystem.Get();
-	if (Followed == AbilitySystem)
+	ReleaseGrantedTool();
+	if (!AbilitySystem || !Tool || !Tool->GetAbility())
 	{
 		return;
 	}
-	if (Followed)
-	{
-		Followed->OnAbilityEnded.RemoveAll(this);
-	}
-	FollowedAbilitySystem = AbilitySystem;
-	if (AbilitySystem)
-	{
-		AbilitySystem->OnAbilityEnded.AddUObject(this, &UFarmingComponent::ContinueAfterUse);
-	}
+
+	// The spec's source object is not const, but the ability only reads the tool.
+	UVestigeToolData* SourceTool = const_cast<UVestigeToolData*>(Tool);
+	constexpr int32 Level = 1;
+	GrantedSpec = AbilitySystem->GiveAbility(FGameplayAbilitySpec(Tool->GetAbility(), Level, INDEX_NONE, SourceTool));
+	GrantedAbilitySystem = AbilitySystem;
+	GrantedTool = Tool;
 }
 
-bool UFarmingComponent::UseToolOnTarget()
+void UFarmingComponent::ReleaseGrantedTool()
 {
-	const TOptional<FIntPoint> Tile = FindTargetTile();
-	UFarmField* Field = Grid ? Grid->GetField() : nullptr;
-	if (!Tile || !Field)
+	UAbilitySystemComponent* AbilitySystem = GrantedAbilitySystem.Get();
+	if (AbilitySystem && GrantedSpec.IsValid())
 	{
-		Notify(LOCTEXT("NoTile", "Stand facing a farm tile."));
-		return false;
-	}
+		// Released first, so an ability waiting for a tile ends now and one in a use ends when the use's time has passed.
+		if (FGameplayAbilitySpec* Spec = AbilitySystem->FindAbilitySpecFromHandle(GrantedSpec); Spec && Spec->IsActive())
+		{
+			AbilitySystem->AbilitySpecInputReleased(*Spec);
+		}
 
-	const UVestigeToolData* Tool = GetCurrentTool();
-	if (!Tool)
-	{
-		Notify(LOCTEXT("NoTool", "No tool in this slot."));
-		return false;
+		// Removes the ability now if it isn't active, or when it ends.
+		AbilitySystem->SetRemoveAbilityOnEnd(GrantedSpec);
 	}
-
-	if (!ApplyTool(*Tool, *Field, *Tile))
-	{
-		return false;
-	}
-	OnToolUsed.Broadcast(Tool, *Tile);
-	return true;
+	GrantedSpec = FGameplayAbilitySpecHandle();
+	GrantedAbilitySystem.Reset();
+	GrantedTool.Reset();
 }
 
-bool UFarmingComponent::ApplyTool(const UVestigeToolData& Tool, UFarmField& Field, const FIntPoint& Tile)
+UAbilitySystemComponent* UFarmingComponent::FindAbilitySystem() const
 {
-	switch (Tool.GetAction())
-	{
-	case EFarmToolAction::Till:
-		return Till(Field, Tile);
-
-	case EFarmToolAction::Plant:
-		return Plant(Field, Tile);
-
-	case EFarmToolAction::Water:
-		return Water(Field, Tile);
-
-	case EFarmToolAction::Harvest:
-		return Harvest(Field, Tile);
-	}
-	return false;
+	return UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(GetOwner());
 }
 
-bool UFarmingComponent::Till(UFarmField& Field, const FIntPoint& Tile) const
+FGameplayAbilitySpec* UFarmingComponent::FindGrantedSpec() const
 {
-	const bool bTilled = Field.Till(Tile);
-	Notify(bTilled ? LOCTEXT("Tilled", "Tilled the soil.") : LOCTEXT("CantTill", "Only grass can be tilled."));
-	return bTilled;
+	UAbilitySystemComponent* AbilitySystem = GrantedAbilitySystem.Get();
+	return AbilitySystem && GrantedSpec.IsValid() ? AbilitySystem->FindAbilitySpecFromHandle(GrantedSpec) : nullptr;
 }
 
-bool UFarmingComponent::Plant(UFarmField& Field, const FIntPoint& Tile)
+void UFarmingComponent::FollowController(APawn* Pawn, AController* OldController, AController* NewController)
 {
-	if (!HasSeedToPlant())
-	{
-		Notify(LOCTEXT("OutOfSeeds", "Out of seeds."));
-		return false;
-	}
-	if (!Field.Plant(Tile, SeedCrop))
-	{
-		Notify(LOCTEXT("CantPlant", "Seeds need empty tilled soil."));
-		return false;
-	}
-	GetInventory()->TryRemoveItem(SeedItemId, 1);
-	Notify(LOCTEXT("Planted", "Planted a seed."));
-	return true;
-}
-
-bool UFarmingComponent::Water(UFarmField& Field, const FIntPoint& Tile) const
-{
-	const bool bWatered = Field.Water(Tile);
-	Notify(bWatered ? LOCTEXT("Watered", "Watered.") : LOCTEXT("CantWater", "Nothing to water here."));
-	return bWatered;
-}
-
-bool UFarmingComponent::Harvest(UFarmField& Field, const FIntPoint& Tile)
-{
-	const FFarmTileState* State = Field.GetTile(Tile);
-	const UFarmCropData* Crop = State ? State->GetCrop() : nullptr;
-	if (!Crop || !State->IsRipe())
-	{
-		Notify(LOCTEXT("NothingRipe", "Nothing ripe here."));
-		return false;
-	}
-
-	// Asked before harvesting, so a full bag leaves the crop in the ground instead of destroying it.
-	if (!HasRoomForHarvest(*Crop))
-	{
-		Notify(LOCTEXT("BagFull", "No room in your bag."));
-		return false;
-	}
-	if (!Field.Harvest(Tile))
-	{
-		return false;
-	}
-	GetInventory()->TryAddItem(Crop->GetHarvestItemId(), Crop->GetYield());
-	Notify(LOCTEXT("Harvested", "Harvested a crop!"));
-	OnCropHarvested.Broadcast(Crop, Tile);
-	return true;
-}
-
-bool UFarmingComponent::HasSeedToPlant() const
-{
-	const UVestigeInventoryComponent* Inventory = GetInventory();
-	return Inventory && SeedCrop && Inventory->GetItemCount(SeedItemId) > 0;
-}
-
-bool UFarmingComponent::HasRoomForHarvest(const UFarmCropData& Crop) const
-{
-	const UVestigeInventoryComponent* Inventory = GetInventory();
-	return Inventory && Inventory->CanAddItem(Crop.GetHarvestItemId(), Crop.GetYield());
-}
-
-UVestigeInventoryComponent* UFarmingComponent::GetInventory() const
-{
-	const APawn* Pawn = Cast<APawn>(GetOwner());
-	const APlayerState* PlayerState = Pawn ? Pawn->GetPlayerState() : nullptr;
-	return PlayerState ? PlayerState->FindComponentByClass<UVestigeInventoryComponent>() : nullptr;
+	UpdateGrantedTool();
 }
 
 void UFarmingComponent::AimAt(const FVector& WorldDirection)
@@ -464,10 +381,9 @@ void UFarmingComponent::UpdateTargetTile()
 		return;
 	}
 	TargetTile = NewTarget;
-	OnTargetTileChanged.Broadcast(NewTarget);
 
-	// Walking along a row with the key held works each tile it reaches.
-	RepeatToolUse();
+	// A tool ability waiting with the key held listens, so walking along a row works each tile it reaches.
+	OnTargetTileChanged.Broadcast(NewTarget);
 }
 
 void UFarmingComponent::FollowOwnerTransform(

@@ -62,7 +62,7 @@ Follow Epic's naming rules. The `.editorconfig` in the repo enforces the prefixe
 | `U` | Classes deriving from `UObject` (components, subsystems, data assets) | `UFarmingComponent` |
 | `S` | Slate widgets | `SVestigeHudWidget` |
 | `F` | Structs and most other classes | `FFarmTileSaveData` |
-| `E` | Enums | `EFarmToolAction` |
+| `E` | Enums | `EFarmTileState` |
 | `I` | Interfaces | `IVestigeInteractable` |
 | `T` | Templates | `TVestigePool` |
 | `b` | Booleans (variables, members, parameters) | `bWatered`, `bHasCrop` |
@@ -375,7 +375,7 @@ Not in `Tick`, not in a timer that runs every frame, and not in a Slate or UMG b
 ### 12.3 Memory and allocation
 
 - `Reserve` an array when its final size is known. Pass and return containers by `const&`, and move (`MoveTemp`) into sink parameters.
-- Every `UObject` costs memory and garbage collection time. Short-lived data is a struct, not a `UObject`. Don't create `UObject`s or spawn actors per action for something that could be reused; when something is spawned often (projectiles, effects, floating text), measure and pool it.
+- Every `UObject` costs memory and garbage collection time. Short-lived data is a struct, not a `UObject`. Don't create `UObject`s or spawn actors per action for something that could be reused; when something is spawned often (projectiles, effects, floating text), measure and pool it. One exception: an ability may create its standard ability tasks (`WaitDelay`, `WaitMovementModeChange`, later montage tasks) per action, including from the previous task's callback, and the farming component may grant a tool's ability (one ability object) when the tool comes into the hand, because that is the engine's way of writing abilities and costs one small object per action ([CodeReview.md, L3](CodeReview.md#low), decided 2026-11-07). Never per frame: a held tool use makes at most a few a second.
 - Look things up by key with `TMap` or `TSet` once a collection can grow past a few dozen entries. Content is looked up by `FName` ID, which compares as cheaply as an integer.
 
 ### 12.4 Assets and loading
@@ -450,7 +450,7 @@ Source/Vestige/
     Content/        Content definitions: UVestigeContentData and its subclasses, UVestigeAssetManager
     Time/           The clock, its settings and save struct, and the day cycle's lighting
     Inventory/      The inventory component, its slot rules and save struct
-    Farming/        Tiles and tile state, the grid, the farming, rest and highlight components, the bed, the use-tool ability, the toolbar, their save structs
+    Farming/        Tiles and tile state, the grid, the farming, rest and highlight components, the bed, the tool abilities, the toolbar, their save structs
     Save/           UVestigeSaveGame and UVestigeSaveSubsystem: the save files
     Player/         The player character, its movement component, the player state and the cheat manager
     UI/             The HUD and its widgets
@@ -525,7 +525,7 @@ Before committing, check:
 - [ ] Strong `UObject` references are `UPROPERTY() TObjectPtr<>`; non-owning ones are weak, deferred assets are soft. Pointers that can be null are checked.
 - [ ] Runtime state is private. Nothing new is exposed to Blueprints without a reason.
 - [ ] No magic numbers, no duplicated logic, no commented-out code, no stray debug messages.
-- [ ] Ticking is off unless needed and justified in a comment. Nothing polls another object's state; nothing in `Tick`, timers or UI bindings searches the world, loads, spawns, allocates `UObject`s or rebuilds unchanged strings ([section 12](#12-performance)).
+- [ ] Ticking is off unless needed and justified in a comment. Nothing polls another object's state; nothing in `Tick`, timers or UI bindings searches the world, loads, spawns, allocates `UObject`s or rebuilds unchanged strings ([section 12](#12-performance)); an ability's tasks per action are the one exception ([section 12.3](#123-memory-and-allocation)).
 - [ ] New assets and Blueprints are soft-referenced where they aren't always needed, and their Size Map doesn't pull in unrelated content. No synchronous loads during play.
 - [ ] Loops over many objects, new-day work, loading and saving have a `TRACE_CPUPROFILER_EVENT_SCOPE`.
 - [ ] Classes and non-obvious public members have `/** */` comments.

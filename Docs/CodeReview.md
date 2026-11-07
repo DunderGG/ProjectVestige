@@ -62,6 +62,8 @@ The gameplay effects are C++ classes because editor scripting couldn't author ef
 
 **Fix.** Each tool data asset names the ability that is its behaviour (`TSubclassOf<UGameplayAbility>`), granted while the tool is in hand. The abilities do the tile work through a small interface on the grid. Holding the key to repeat lives inside the ability (wait for the input release, loop) instead of re-activating from the component's `OnAbilityEnded` handler. Tunable effects become `GE_` data assets. `EFarmToolAction` and the switch go away.
 
+**Status: Tools resolved (2026-11-07); the `GE_` effects remain.** Each tool asset names its ability (`UFarmGameplayAbility_Till`, `_Plant`, `_Water`, `_Harvest`, on the shared base `UVestigeGameplayAbility_UseTool`), which the farming component grants while the tool is in hand, with the tool asset as the spec's source object. One press is one activation, and the repeat while the key is held, the cost and the use time live inside the ability. The abilities work the tiles through `UFarmField`'s rule functions, which already were the interface, so no new one was added on the grid. The component never calls an ability, which ends the circle, and `EFarmToolAction` and its switch are gone. Tool abilities are C++ for now, so a mod can't add one yet: Blueprint tool abilities wait for mod support ([Roadmap.md, 4.0](Roadmap.md#40-structure-from-the-code-review)). Design in [Systems.md, section 9](Systems.md#9-abilities-attributes-and-effects-gameplay-ability-system).
+
 ### H2 — `UFarmingComponent` does seven jobs and can plant only one seed
 
 In about 450 lines it owns the toolbar, the seed choice, tile targeting, the tool rules, hold-to-repeat, inventory transactions, player messages and the Blueprint events. It plants whatever its one `SeedItemId` names, so the three or four crops of 4.2 can't all be planted.
@@ -178,7 +180,7 @@ The farming component posts "Tilled the soil." and "Watered." on every successfu
 
 - **L1 — Two class prefixes.** `Vestige` and `Farm` in one module make every new class a judgement call, and have already cost two renames. Use `Vestige` for everything new, and stop renaming existing `Farm` classes.
 - **L2 — Fields nobody reads.** `UFarmCropData` has `Seasons`, `WaterNeed` and `ContaminationTolerance`, and items have `SellPrice`, all marked "not used yet". Design them with 4.2 and 4.5 instead of guessing their shape now.
-- **L3 — Home-made ability idioms.** The use-tool ability waits on an `FTimerManager` timer instead of a wait-delay or montage task, to avoid one small task object per use. The saving is negligible, and standard ability tasks are what other Unreal developers and contributors expect to read.
+- **L3 — Home-made ability idioms.** The use-tool ability waits on an `FTimerManager` timer instead of a wait-delay or montage task, to avoid one small task object per use. The saving is negligible, and standard ability tasks are what other Unreal developers and contributors expect to read. **Status: Resolved (2026-11-07)** with H1: the tool abilities wait with `WaitDelay` and `WaitMovementModeChange`, an exception recorded in [CodingGuidelines.md, section 12.3](CodingGuidelines.md#123-memory-and-allocation).
 - **L4 — Synchronous save on the game thread.** Fine at today's size. When saves grow, serialise on the game thread and write with `AsyncSaveGameToSlot`.
 - **L5 — No CI.** The 181 tests only run when someone runs them on the maintainer's PC. A script that builds and runs them before each commit is enough for a solo project.
 

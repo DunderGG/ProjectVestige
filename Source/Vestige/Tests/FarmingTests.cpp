@@ -21,30 +21,40 @@
 #include "Farming/FarmTileState.h"
 #include "Farming/VestigeGameplayAbility_UseTool.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/PlayerController.h"
 #include "Inventory/VestigeInventoryComponent.h"
 #include "Inventory/VestigeInventorySaveData.h"
+#include "Misc/ScopeExit.h"
 #include "Player/VestigePlayerCharacter.h"
 #include "Player/VestigePlayerState.h"
 #include "Tests/VestigeTestEventRecorder.h"
+#include "Tests/VestigeTestToolAbility.h"
+#include "TimerManager.h"
 #include "UObject/StrongObjectPtr.h"
 
 // A namespace keeps the fixture's short name from hiding other declarations in unity builds.
 namespace FarmingTests
 {
+	/** More than one use takes at full stamina (0.4 s), and less than two. */
+	constexpr float OneUseSeconds = 0.6f;
+
 	TEST_CLASS(Farming, "Vestige")
 	{
 		FActorTestSpawner Spawner;
 		AFarmGrid* Grid = nullptr;
+		AVestigePlayerState* PlayerState = nullptr;
 		AVestigePlayerCharacter* Farmer = nullptr;
 		UFarmingComponent* FarmingComponent = nullptr;
 		UVestigeInventoryComponent* Inventory = nullptr;
 		UAbilitySystemComponent* AbilitySystem = nullptr;
 
+		/** The feedback messages since ListenToFeedback, kept on the fixture so latent steps can read them. */
+		TArray<FString> Messages;
+
 		/**
 		 * A default grid and the character Blueprint the game uses, standing in front of tile (3, 0), with the game's
-		 * player state Blueprint, whose inventory knows the base items and whose ability set grants the use-tool ability
-		 * and stamina. The Blueprints are used because they hold the real toolbar, seed item and ability set, which load
-		 * from the base content.
+		 * player state Blueprint, whose inventory knows the base items and whose ability set grants stamina. The Blueprints
+		 * are used because they hold the real toolbar, seed item and ability set, which load from the base content.
 		 */
 		BEFORE_EACH()
 		{
@@ -56,22 +66,29 @@ namespace FarmingTests
 			UClass* PlayerStateClass =
 				LoadClass<AVestigePlayerState>(nullptr, TEXT("/Game/Vestige/Blueprints/BP_PlayerState.BP_PlayerState_C"));
 			ASSERT_THAT(IsNotNull(PlayerStateClass));
-			AVestigePlayerState& PlayerState = Spawner.SpawnActor<AVestigePlayerState>(FActorSpawnParameters(), PlayerStateClass);
-			PlayerState.DispatchBeginPlay();
-			Inventory = PlayerState.GetInventory();
+			PlayerState = &Spawner.SpawnActor<AVestigePlayerState>(FActorSpawnParameters(), PlayerStateClass);
+			PlayerState->DispatchBeginPlay();
+			Inventory = PlayerState->GetInventory();
 			ASSERT_THAT(IsNotNull(Inventory));
-			AbilitySystem = PlayerState.GetAbilitySystemComponent();
+			AbilitySystem = PlayerState->GetAbilitySystemComponent();
 			ASSERT_THAT(IsNotNull(AbilitySystem));
 
-			UClass* FarmerClass =
-				LoadClass<AVestigePlayerCharacter>(nullptr, TEXT("/Game/Vestige/Blueprints/BP_PlayerCharacter.BP_PlayerCharacter_C"));
-			ASSERT_THAT(IsNotNull(FarmerClass));
-			Farmer = &Spawner.SpawnActor<AVestigePlayerCharacter>(FActorSpawnParameters(), FarmerClass);
-			Farmer->DispatchBeginPlay();
-			Farmer->SetActorLocationAndRotation(FVector(250.f, 50.f, 0.f), FRotator::ZeroRotator);
-			Farmer->SetPlayerState(&PlayerState);
+			Farmer = &SpawnFarmer();
+			Farmer->SetPlayerState(PlayerState);
 			FarmingComponent = Farmer->FindComponentByClass<UFarmingComponent>();
 			ASSERT_THAT(IsNotNull(FarmingComponent));
+		}
+
+		/** A farmer from the game's character Blueprint, in front of tile (3, 0), begun play but without a player state. */
+		AVestigePlayerCharacter& SpawnFarmer()
+		{
+			UClass* FarmerClass =
+				LoadClass<AVestigePlayerCharacter>(nullptr, TEXT("/Game/Vestige/Blueprints/BP_PlayerCharacter.BP_PlayerCharacter_C"));
+			check(FarmerClass);
+			AVestigePlayerCharacter& NewFarmer = Spawner.SpawnActor<AVestigePlayerCharacter>(FActorSpawnParameters(), FarmerClass);
+			NewFarmer.DispatchBeginPlay();
+			NewFarmer.SetActorLocationAndRotation(FVector(250.f, 50.f, 0.f), FRotator::ZeroRotator);
+			return NewFarmer;
 		}
 
 		/** Puts this tool in hand, through the same restore loading uses, and makes the bag hold only this many seeds. */
@@ -87,7 +104,7 @@ namespace FarmingTests
 		}
 
 		/**
-		 * Uses the tool in hand, then ends the use at once, as its timer would once its time is up: these tests don't let
+		 * Uses the tool in hand once, then ends the use at once, as its wait would once its time is up: these tests don't let
 		 * time pass, and the next use can't start before the last one ends.
 		 */
 		void UseToolAndFinish()
@@ -96,6 +113,39 @@ namespace FarmingTests
 			AbilitySystem->CancelAllAbilities();
 		}
 
+		/**
+		 * Lets one use's time pass, then runs Check. The test world isn't ticked, and ticking it would move the farmer, so
+		 * only its timers advance (a use's wait is a timer). A timer manager ticks at most once a frame, and a timer set
+		 * outside its tick only becomes active at the end of its next tick, so this takes two frames: one tick makes the
+		 * use's wait active, the next lets OneUseSeconds pass.
+		 */
+		void AfterOneUse(TFunction<void()> Check)
+		{
+			TestCommandBuilder
+				.Until(
+					[this]()
+					{
+						return TickTimersOnce();
+					})
+				.Until(
+					[this]()
+					{
+						return TickTimersOnce();
+					})
+				.Then(MoveTemp(Check));
+		}
+
+		/** Ticks the world's timers by OneUseSeconds, unless they were ticked this frame. Returns whether it ticked them. */
+		bool TickTimersOnce()
+		{
+			FTimerManager& Timers = Spawner.GetWorld().GetTimerManager();
+			if (Timers.HasBeenTickedThisFrame())
+			{
+				return false;
+			}
+			Timers.Tick(OneUseSeconds);
+			return true;
+		}
 		int32 GetSeeds() const { return Inventory->GetItemCount(FarmingComponent->GetSeedItemId()); }
 
 		float GetStamina() const { return AbilitySystem->GetNumericAttribute(UVestigeStaminaSet::GetStaminaAttribute()); }
@@ -113,11 +163,21 @@ namespace FarmingTests
 			AbilitySystem->ApplyGameplayEffectSpecToSelf(*Spec.Data);
 		}
 
-		/** Whether a tool use is under way, so the next one can't start yet. */
-		bool IsUsingTool() const
+		/** Whether a tool ability is active, so no other tool use can start yet. */
+		bool IsUsingTool() const { return AbilitySystem->HasMatchingGameplayTag(VestigeGameplayTags::State_UsingTool); }
+
+		/** The tool abilities granted on the player's ability system. Read at once: specs move when abilities are removed. */
+		TArray<const FGameplayAbilitySpec*> GetToolAbilities() const
 		{
-			const FGameplayAbilitySpec* Spec = AbilitySystem->FindAbilitySpecFromClass(UVestigeGameplayAbility_UseTool::StaticClass());
-			return Spec && Spec->IsActive();
+			TArray<const FGameplayAbilitySpec*> Specs;
+			for (const FGameplayAbilitySpec& Spec : AbilitySystem->GetActivatableAbilities())
+			{
+				if (Spec.Ability && Spec.Ability->GetAssetTags().HasTagExact(VestigeGameplayTags::Ability_UseTool))
+				{
+					Specs.Add(&Spec);
+				}
+			}
+			return Specs;
 		}
 
 		/** The tile the farmer faces at the start. */
@@ -151,6 +211,27 @@ namespace FarmingTests
 			FarmingComponent->OnToolUsed.AddDynamic(Recorder.Get(), &UVestigeTestEventRecorder::RecordToolUsed);
 			return Recorder;
 		}
+
+		/** Collects every feedback message from now on into Messages. */
+		void ListenToFeedback()
+		{
+			UVestigeFeedbackSubsystem* Feedback = Spawner.GetWorld().GetSubsystem<UVestigeFeedbackSubsystem>();
+			ASSERT_THAT(IsNotNull(Feedback));
+			Feedback->OnFeedback.AddLambda(
+				[this](const FText& Message)
+				{
+					Messages.Add(Message.ToString());
+				});
+		}
+
+		/** Moves the farmer one tile on along the row, so the target becomes tile (4, 0). */
+		const FFarmTileState* StepToNextTile()
+		{
+			Farmer->SetActorLocation(FVector(350.f, 50.f, 0.f));
+			return Grid->GetTile(FIntPoint(4, 0));
+		}
+
+		const FFarmTileState* NextTile() const { return Grid->GetTile(FIntPoint(4, 0)); }
 
 		TEST_METHOD(PlantingUsesASeed)
 		{
@@ -276,15 +357,27 @@ namespace FarmingTests
 			ASSERT_THAT(IsTrue(IsUsingTool()));
 
 			// One tile on, so the hoe faces grass again.
-			Farmer->SetActorLocation(FVector(350.f, 50.f, 0.f));
-			const FFarmTileState* NextTile = Grid->GetTile(FIntPoint(4, 0));
-			ASSERT_THAT(IsNotNull(NextTile));
+			const FFarmTileState* Next = StepToNextTile();
+			ASSERT_THAT(IsNotNull(Next));
 			FarmingComponent->UseTool();
-			ASSERT_THAT(IsTrue(NextTile->GetState() == EFarmTileState::Grass));
+			ASSERT_THAT(IsTrue(Next->GetState() == EFarmTileState::Grass));
 
 			AbilitySystem->CancelAllAbilities();
 			UseToolAndFinish();
-			ASSERT_THAT(IsTrue(NextTile->GetState() == EFarmTileState::Tilled));
+			ASSERT_THAT(IsTrue(Next->GetState() == EFarmTileState::Tilled));
+		}
+
+		TEST_METHOD(AUseEndsOnceItsTimeHasPassed)
+		{
+			Hold(TEXT("Base.Hoe"), 0);
+			FarmingComponent->UseTool();
+			ASSERT_THAT(IsTrue(IsUsingTool()));
+
+			AfterOneUse(
+				[this]()
+				{
+					ASSERT_THAT(IsFalse(IsUsingTool()));
+				});
 		}
 
 		TEST_METHOD(AtZeroStaminaToolsStillWork)
@@ -355,80 +448,144 @@ namespace FarmingTests
 			ASSERT_THAT(IsTrue(FarmingComponent->GetToolbar().GetCurrentSlot() == 0));
 		}
 
-		/** Collects every feedback message from now on into Messages. */
-		void ListenToFeedback(TArray<FString>& Messages)
+		TEST_METHOD(TheToolInHandGrantsItsAbility)
 		{
-			UVestigeFeedbackSubsystem* Feedback = Spawner.GetWorld().GetSubsystem<UVestigeFeedbackSubsystem>();
-			ASSERT_THAT(IsNotNull(Feedback));
-			Feedback->OnFeedback.AddLambda(
-				[&Messages](const FText& Message)
+			Hold(TEXT("Base.Hoe"), 0);
+			TArray<const FGameplayAbilitySpec*> Specs = GetToolAbilities();
+			ASSERT_THAT(IsTrue(Specs.Num() == 1));
+			ASSERT_THAT(IsTrue(Specs[0]->Ability->GetClass() == GetHeldTool().GetAbility()));
+			ASSERT_THAT(IsTrue(Specs[0]->SourceObject.Get() == &GetHeldTool()));
+
+			Hold(TEXT("Base.WateringCan"), 0);
+
+			Specs = GetToolAbilities();
+			ASSERT_THAT(IsTrue(Specs.Num() == 1));
+			ASSERT_THAT(IsTrue(Specs[0]->Ability->GetClass() == GetHeldTool().GetAbility()));
+			ASSERT_THAT(IsTrue(Specs[0]->SourceObject.Get() == &GetHeldTool()));
+		}
+
+		TEST_METHOD(ANewPawnLeavesNoToolAbilityBehind)
+		{
+			// A controller with the player state possesses the farmer, then a second farmer, as respawning would.
+			APlayerController& Controller = Spawner.SpawnActor<APlayerController>();
+			Controller.PlayerState = PlayerState;
+			Controller.Possess(Farmer);
+			ASSERT_THAT(IsTrue(GetToolAbilities().Num() == 1));
+
+			AVestigePlayerCharacter& SecondFarmer = SpawnFarmer();
+			Controller.Possess(&SecondFarmer);
+
+			const TArray<const FGameplayAbilitySpec*> Specs = GetToolAbilities();
+			ASSERT_THAT(IsTrue(Specs.Num() == 1));
+			const UFarmingComponent* SecondFarming = SecondFarmer.FindComponentByClass<UFarmingComponent>();
+			ASSERT_THAT(IsNotNull(SecondFarming));
+			ASSERT_THAT(IsTrue(Specs[0]->SourceObject.Get() == SecondFarming->GetCurrentTool()));
+		}
+
+		TEST_METHOD(SwitchingToolsDuringAUseWaitsForTheUseToFinish)
+		{
+			Hold(TEXT("Base.Hoe"), 0);
+			FarmingComponent->UseTool();
+			ASSERT_THAT(IsTrue(TargetTile()->GetState() == EFarmTileState::Tilled));
+
+			Hold(TEXT("Base.WateringCan"), 0);
+			FarmingComponent->UseTool();
+			ASSERT_THAT(IsFalse(TargetTile()->IsWatered()));
+			ASSERT_THAT(IsTrue(IsUsingTool()));
+
+			AfterOneUse(
+				[this]()
 				{
-					Messages.Add(Message.ToString());
+					ASSERT_THAT(IsFalse(IsUsingTool()));
+					ASSERT_THAT(IsTrue(GetToolAbilities().Num() == 1));
+					FarmingComponent->UseTool();
+					ASSERT_THAT(IsTrue(TargetTile()->IsWatered()));
+					AbilitySystem->CancelAllAbilities();
 				});
 		}
 
-		/** Moves the farmer one tile on along the row, so the target becomes tile (4, 0). */
-		const FFarmTileState* StepToNextTile()
+		TEST_METHOD(ANewToolNeedsOnlyItsAbility)
 		{
-			Farmer->SetActorLocation(FVector(350.f, 50.f, 0.f));
-			return Grid->GetTile(FIntPoint(4, 0));
+			// The hand, made to do something no base tool does, through a new ability alone.
+			UVestigeToolData* Hand = const_cast<UVestigeToolData*>(Cast<UVestigeToolData>(
+				UAssetManager::Get().GetPrimaryAssetObject(FPrimaryAssetId(UVestigeToolData::AssetType, TEXT("Base.Hand")))));
+			ASSERT_THAT(IsNotNull(Hand));
+			const TSubclassOf<UGameplayAbility> HandAbility = Hand->GetAbility();
+			ON_SCOPE_EXIT
+			{
+				Hand->SetAbilityForTests(HandAbility);
+			};
+			Hand->SetAbilityForTests(UVestigeTestToolAbility::StaticClass());
+			Hold(TEXT("Base.Hand"), 0);
+
+			UseToolAndFinish();
+
+			ASSERT_THAT(IsTrue(TargetTile()->GetState() == EFarmTileState::Tilled));
+			ASSERT_THAT(IsTrue(TargetTile()->IsWatered()));
+			ASSERT_THAT(IsTrue(GetStamina() == GetMaxStamina() - Hand->GetStaminaCost()));
 		}
 
 		TEST_METHOD(HoldingTheUseKeyWorksTheNextTileOnceTheUseHasFinished)
 		{
 			Hold(TEXT("Base.Hoe"), 0);
 			FarmingComponent->StartUsingTool();
-			const FFarmTileState* NextTile = StepToNextTile();
-			ASSERT_THAT(IsNotNull(NextTile));
-			ASSERT_THAT(IsTrue(NextTile->GetState() == EFarmTileState::Grass));
+			const FFarmTileState* Next = StepToNextTile();
+			ASSERT_THAT(IsNotNull(Next));
+			ASSERT_THAT(IsTrue(Next->GetState() == EFarmTileState::Grass));
 
-			AbilitySystem->CancelAllAbilities();
-
-			ASSERT_THAT(IsTrue(NextTile->GetState() == EFarmTileState::Tilled));
-			AbilitySystem->CancelAllAbilities();
+			AfterOneUse(
+				[this]()
+				{
+					ASSERT_THAT(IsTrue(NextTile()->GetState() == EFarmTileState::Tilled));
+					AbilitySystem->CancelAllAbilities();
+				});
 		}
 
 		TEST_METHOD(HoldingTheUseKeyWorksTheNextTileWhenTheTargetChanges)
 		{
 			Hold(TEXT("Base.Hoe"), 0);
 			FarmingComponent->StartUsingTool();
-			AbilitySystem->CancelAllAbilities();
 
-			const FFarmTileState* NextTile = StepToNextTile();
-
-			ASSERT_THAT(IsNotNull(NextTile));
-			ASSERT_THAT(IsTrue(NextTile->GetState() == EFarmTileState::Tilled));
-			AbilitySystem->CancelAllAbilities();
+			AfterOneUse(
+				[this]()
+				{
+					const FFarmTileState* Next = StepToNextTile();
+					ASSERT_THAT(IsNotNull(Next));
+					ASSERT_THAT(IsTrue(Next->GetState() == EFarmTileState::Tilled));
+					AbilitySystem->CancelAllAbilities();
+				});
 		}
 
 		TEST_METHOD(ARepeatThatWouldChangeNothingIsSkippedQuietly)
 		{
 			Hold(TEXT("Base.Hoe"), 0);
-			TArray<FString> Messages;
-			ListenToFeedback(Messages);
+			ListenToFeedback();
 			FarmingComponent->StartUsingTool();
 
-			// The use ends on the tile it just tilled, which the hoe can't change again.
-			AbilitySystem->CancelAllAbilities();
+			// The use ends on the tile it just tilled, which the hoe can't change again, so the repeat waits for another.
+			AfterOneUse(
+				[this]()
+				{
+					ASSERT_THAT(IsTrue(Messages.Num() == 1));
+					ASSERT_THAT(IsTrue(GetStamina() == GetMaxStamina() - GetHeldTool().GetStaminaCost()));
 
-			ASSERT_THAT(IsTrue(Messages.Num() == 1));
-			ASSERT_THAT(IsFalse(IsUsingTool()));
-			ASSERT_THAT(IsTrue(GetStamina() == GetMaxStamina() - GetHeldTool().GetStaminaCost()));
+					FarmingComponent->StopUsingTool();
+					ASSERT_THAT(IsFalse(IsUsingTool()));
+				});
 		}
 
 		TEST_METHOD(ThePressSaysWhyAUseChangesNothingAndTheRepeatWaitsForTheNextTile)
 		{
 			Hold(TEXT("Base.Hoe"), 0);
 			Grid->GetField()->Till(TargetCoordinates);
-			TArray<FString> Messages;
-			ListenToFeedback(Messages);
+			ListenToFeedback();
 
 			FarmingComponent->StartUsingTool();
 			ASSERT_THAT(IsTrue(Messages.Num() == 1));
 
-			const FFarmTileState* NextTile = StepToNextTile();
-			ASSERT_THAT(IsNotNull(NextTile));
-			ASSERT_THAT(IsTrue(NextTile->GetState() == EFarmTileState::Tilled));
+			const FFarmTileState* Next = StepToNextTile();
+			ASSERT_THAT(IsNotNull(Next));
+			ASSERT_THAT(IsTrue(Next->GetState() == EFarmTileState::Tilled));
 			AbilitySystem->CancelAllAbilities();
 		}
 
@@ -437,10 +594,11 @@ namespace FarmingTests
 			Hold(TEXT("Base.Hoe"), 0);
 			Farmer->GetCharacterMovement()->SetMovementMode(MOVE_Falling);
 
-			UseToolAndFinish();
+			FarmingComponent->UseTool();
 
 			ASSERT_THAT(IsTrue(TargetTile()->GetState() == EFarmTileState::Grass));
 			ASSERT_THAT(IsTrue(GetStamina() == GetMaxStamina()));
+			ASSERT_THAT(IsFalse(IsUsingTool()));
 		}
 
 		TEST_METHOD(LandingWithTheUseKeyHeldWorksTheTarget)
@@ -451,7 +609,6 @@ namespace FarmingTests
 			ASSERT_THAT(IsTrue(TargetTile()->GetState() == EFarmTileState::Grass));
 
 			Farmer->GetCharacterMovement()->SetMovementMode(MOVE_Walking);
-			Farmer->Landed(FHitResult());
 
 			ASSERT_THAT(IsTrue(TargetTile()->GetState() == EFarmTileState::Tilled));
 			AbilitySystem->CancelAllAbilities();
@@ -462,13 +619,34 @@ namespace FarmingTests
 			Hold(TEXT("Base.Hoe"), 0);
 			FarmingComponent->StartUsingTool();
 			FarmingComponent->StopUsingTool();
-			AbilitySystem->CancelAllAbilities();
-
-			const FFarmTileState* NextTile = StepToNextTile();
-
-			ASSERT_THAT(IsNotNull(NextTile));
-			ASSERT_THAT(IsTrue(NextTile->GetState() == EFarmTileState::Grass));
 			ASSERT_THAT(IsFalse(FarmingComponent->IsToolUseHeld()));
+
+			AfterOneUse(
+				[this]()
+				{
+					ASSERT_THAT(IsFalse(IsUsingTool()));
+					const FFarmTileState* Next = StepToNextTile();
+					ASSERT_THAT(IsNotNull(Next));
+					ASSERT_THAT(IsTrue(Next->GetState() == EFarmTileState::Grass));
+				});
+		}
+
+		TEST_METHOD(APressDuringTheLastUsesTimeKeepsTheRepeat)
+		{
+			Hold(TEXT("Base.Hoe"), 0);
+			FarmingComponent->StartUsingTool();
+			FarmingComponent->StopUsingTool();
+			FarmingComponent->StartUsingTool();
+			const FFarmTileState* Next = StepToNextTile();
+			ASSERT_THAT(IsNotNull(Next));
+			ASSERT_THAT(IsTrue(Next->GetState() == EFarmTileState::Grass));
+
+			AfterOneUse(
+				[this]()
+				{
+					ASSERT_THAT(IsTrue(NextTile()->GetState() == EFarmTileState::Tilled));
+					AbilitySystem->CancelAllAbilities();
+				});
 		}
 	};
 }
