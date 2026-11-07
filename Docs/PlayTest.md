@@ -393,12 +393,12 @@ The toolbar is now the bag's first nine slots: keys 1 to 9 select a slot, and th
 
 Facing a ripe crop now shows "F Harvest", and F harvests it whatever is in hand; E only uses the item in hand, and an empty hand does nothing ("Nothing in hand to use."). What F uses is what the farmer faces: a ripe tile in front of him, or the bed when he looks at it ([Systems.md, section 7](Systems.md#7-interaction), harvesting with F). The farming component's Hand Tool Id is now Harvest Tool Id; a redirect in `DefaultEngine.ini` and a temporary commandlet carried `BP_PlayerCharacter`'s value over. Look at the commit "Harvest ripe crops with F" if something is wrong.
 
-- [ ] **Asset**: `BP_PlayerCharacter`'s **Farming** shows Harvest Tool Id `VestigeTool:Base.Hand`, and the Output Log at editor start has no warning about it.
-- [ ] **The prompt**: grow a crop until it's ripe (water it and `SkipDay`). Facing it, the prompt reads "F Harvest"; facing an unripe or empty tile, there's no prompt. The prompt appears within a moment of turning to the crop and goes as soon as you've harvested.
-- [ ] **Harvesting**: F harvests the ripe crop with the hoe, the seeds or nothing in hand: the turnips go in the bag, the tile is tilled soil again, and the stamina drops by 1.
-- [ ] **E with nothing in hand**: select an empty slot and press E: "Nothing in hand to use.", nothing changes, and holding E doesn't slow the walk.
-- [ ] **Next to the bed**: walk along the field edge past the bed with an unripe crop in front of you and press F: nothing happens (you don't sleep). With a ripe crop in front of you, beside the bed, F harvests. Turn to face the bed: the prompt reads "F Sleep", and F sleeps.
-- [ ] **Walking**: with a row of ripe crops, walk along it and press F as you pass: each time the crop in front of you is harvested (holding F doesn't repeat yet).
+- [x] **Asset**: `BP_PlayerCharacter`'s **Farming** shows Harvest Tool Id `VestigeTool:Base.Hand`, and the Output Log at editor start has no warning about it.
+- [x] **The prompt**: grow a crop until it's ripe (water it and `SkipDay`). Facing it, the prompt reads "F Harvest"; facing an unripe or empty tile, there's no prompt. The prompt appears within a moment of turning to the crop and goes as soon as you've harvested.
+- [x] **Harvesting**: F harvests the ripe crop with the hoe, the seeds or nothing in hand: the turnips go in the bag, the tile is tilled soil again, and the stamina drops by 1.
+- [x] **E with nothing in hand**: select an empty slot and press E: "Nothing in hand to use.", nothing changes, and holding E doesn't slow the walk.
+- [x] **Next to the bed**: walk along the field edge past the bed with an unripe crop in front of you and press F: nothing happens (you don't sleep). With a ripe crop in front of you, beside the bed, F harvests. Turn to face the bed: the prompt reads "F Sleep", and F sleeps.
+- [x] **Walking**: with a row of ripe crops, walk along it and press F as you pass: each time the crop in front of you is harvested (holding F doesn't repeat yet).
 
 ### Editor chores
 
