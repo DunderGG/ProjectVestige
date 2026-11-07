@@ -28,10 +28,16 @@ namespace VestigeInteractionTests
 	{
 		FActorTestSpawner Spawner;
 
-		/** An actor at the origin with an interaction component, which looks for interactables only when a test scans. */
+		/**
+		 * An actor at the origin facing along X, with an interaction component, which looks for interactables only when a test
+		 * scans. It has a root, so a test can turn it.
+		 */
 		UVestigeInteractionComponent& MakeInteractor()
 		{
 			AActor& Interactor = Spawner.SpawnActor<AActor>();
+			USceneComponent* Root = NewObject<USceneComponent>(&Interactor);
+			Interactor.SetRootComponent(Root);
+			Root->RegisterComponent();
 			UVestigeInteractionComponent* Interaction = NewObject<UVestigeInteractionComponent>(&Interactor);
 			Interaction->RegisterComponent();
 			return *Interaction;
@@ -175,6 +181,98 @@ namespace VestigeInteractionTests
 			ASSERT_THAT(IsTrue(Interaction.InteractWithFocus()));
 
 			ASSERT_THAT(IsTrue(Clock->GetCurrentDay() == 2));
+		}
+
+		/** An interactable out of the way, offering Action at Location. */
+		AVestigeTestInteractable& MakeInteractableAt(const FVector& Location, FName Action)
+		{
+			AVestigeTestInteractable& Interactable = MakeInteractable(60.f);
+			Interactable.Offer(FText::FromName(Action), Action, Location);
+			return Interactable;
+		}
+
+		TEST_METHOD(OnlyAnOptionInFrontCanBeFocused)
+		{
+			UVestigeInteractionComponent& Interaction = MakeInteractor();
+			const float Angle = FMath::DegreesToRadians(60.f);
+			MakeInteractableAt(FVector(FMath::Cos(Angle), FMath::Sin(Angle), 0.f) * 50.f, Open);
+
+			Interaction.Scan();
+
+			ASSERT_THAT(IsNull(Interaction.GetFocusedActor()));
+		}
+
+		TEST_METHOD(AmongFacedOptionsTheNearerWins)
+		{
+			UVestigeInteractionComponent& Interaction = MakeInteractor();
+			const float Wide = FMath::DegreesToRadians(40.f);
+			const float Narrow = FMath::DegreesToRadians(5.f);
+			AVestigeTestInteractable& Nearer = MakeInteractableAt(FVector(FMath::Cos(Wide), FMath::Sin(Wide), 0.f) * 40.f, Open);
+			MakeInteractableAt(FVector(FMath::Cos(Narrow), FMath::Sin(Narrow), 0.f) * 80.f, Take);
+
+			Interaction.Scan();
+
+			ASSERT_THAT(IsTrue(Interaction.GetFocusedActor() == &Nearer));
+		}
+
+		TEST_METHOD(AnOptionWithoutALocationIsFacedOnlyWhenTheFacingRayHitsItsShape)
+		{
+			UVestigeInteractionComponent& Interaction = MakeInteractor();
+			AVestigeTestInteractable& Beside = MakeInteractable(0.f, Open);
+			Beside.SetActorLocation(FVector(0.f, 50.f, 0.f));
+
+			Interaction.Scan();
+			ASSERT_THAT(IsNull(Interaction.GetFocusedActor()));
+
+			Interaction.GetOwner()->SetActorRotation(FRotator(0.f, 90.f, 0.f));
+			Interaction.Scan();
+			ASSERT_THAT(IsTrue(Interaction.GetFocusedActor() == &Beside));
+		}
+
+		TEST_METHOD(AnOptionsLocationIsUsedForItsAngle)
+		{
+			UVestigeInteractionComponent& Interaction = MakeInteractor();
+			AVestigeTestInteractable& Behind = MakeInteractable(-50.f);
+			Behind.Offer(FText::FromName(Open), Open, FVector(50.f, 0.f, 0.f));
+
+			Interaction.Scan();
+
+			ASSERT_THAT(IsTrue(Interaction.GetFocusedActor() == &Behind));
+		}
+
+		TEST_METHOD(TheFacingDelegateIsUsedOverTheActorsRotation)
+		{
+			UVestigeInteractionComponent& Interaction = MakeInteractor();
+			AVestigeTestInteractable& Beside = MakeInteractable(0.f, Open);
+			Beside.SetActorLocation(FVector(0.f, 50.f, 0.f));
+			Interaction.FacingDirection.BindLambda(
+				[]()
+				{
+					return FVector(0.f, 1.f, 0.f);
+				});
+
+			Interaction.Scan();
+
+			ASSERT_THAT(IsTrue(Interaction.GetFocusedActor() == &Beside));
+		}
+
+		TEST_METHOD(MovingBetweenOptionsWithTheSamePromptUpdatesTheLocation)
+		{
+			UVestigeInteractionComponent& Interaction = MakeInteractor();
+			AVestigeTestInteractable& Interactable = MakeInteractableAt(FVector(40.f, 0.f, 0.f), Open);
+			int32 Changes = 0;
+			Interaction.OnFocusChanged.AddLambda(
+				[&Changes]()
+				{
+					++Changes;
+				});
+			Interaction.Scan();
+
+			Interactable.MoveOffersTo(FVector(60.f, 10.f, 0.f));
+			Interaction.Scan();
+
+			ASSERT_THAT(IsTrue(Changes == 1));
+			ASSERT_THAT(IsTrue(Interaction.GetFocusedOption().Location.Equals(FVector(60.f, 10.f, 0.f))));
 		}
 
 		TEST_METHOD(TheBedOffersNothingToAnActorThatCantSleep)

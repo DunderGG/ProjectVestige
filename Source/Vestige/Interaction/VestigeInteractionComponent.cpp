@@ -7,6 +7,8 @@
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemGlobals.h"
 #include "CollisionQueryParams.h"
+#include "Components/PrimitiveComponent.h"
+#include "Engine/HitResult.h"
 #include "Engine/World.h"
 #include "GameFramework/Actor.h"
 #include "TimerManager.h"
@@ -56,6 +58,9 @@ bool UVestigeInteractionComponent::InteractWithFocus()
 	// A copy, so the option stays as it was offered even if what the interactable does changes the focus.
 	const FVestigeInteractionOption Option = FocusedOption;
 	IVestigeInteractable::Execute_Interact(Focus, GetOwner(), Option);
+
+	// What the interaction did (a harvest) may have taken the option away, so the prompt follows at once.
+	Scan();
 	return true;
 }
 
@@ -77,6 +82,7 @@ void UVestigeInteractionComponent::Scan()
 	World->OverlapMultiByObjectType(Overlaps, Origin, FQuat::Identity, FCollisionObjectQueryParams(VestigeInteraction::ObjectChannel),
 		FCollisionShape::MakeSphere(InteractionRadius), Params);
 
+	const FVector Facing = GetFacing();
 	AActor* Nearest = nullptr;
 	FVestigeInteractionOption NearestOption;
 	double NearestDistanceSquared = TNumericLimits<double>::Max();
@@ -88,15 +94,12 @@ void UVestigeInteractionComponent::Scan()
 			continue;
 		}
 
-		const double DistanceSquared = FVector::DistSquared(Origin, Candidate->GetActorLocation());
-		if (DistanceSquared >= NearestDistanceSquared)
-		{
-			continue;
-		}
-
+		// Only the first option is weighed, as it is the one interacting would use.
 		Options.Reset();
 		IVestigeInteractable::Execute_GetInteractionOptions(Candidate, OwningActor, Options);
-		if (!Options.IsEmpty())
+		double DistanceSquared = 0.0;
+		if (!Options.IsEmpty() && IsFaced(Options[0], Overlap.GetComponent(), Origin, Facing, DistanceSquared)
+			&& DistanceSquared < NearestDistanceSquared)
 		{
 			Nearest = Candidate;
 			NearestOption = Options[0];
@@ -106,14 +109,55 @@ void UVestigeInteractionComponent::Scan()
 	SetFocus(Nearest, NearestOption);
 }
 
-void UVestigeInteractionComponent::SetFocus(AActor* Actor, const FVestigeInteractionOption& Option)
+FVector UVestigeInteractionComponent::GetFacing() const
 {
-	if (Actor == FocusedActor.Get() && Option.IsSameAs(FocusedOption))
+	FVector Facing = FacingDirection.IsBound() ? FacingDirection.Execute() : FVector::ZeroVector;
+	if (Facing.IsNearlyZero() && GetOwner())
 	{
-		return;
+		Facing = GetOwner()->GetActorForwardVector();
+	}
+	return Facing.GetSafeNormal2D();
+}
+
+bool UVestigeInteractionComponent::IsFaced(const FVestigeInteractionOption& Option, UPrimitiveComponent* Shape, const FVector& Origin,
+	const FVector& Facing, double& OutDistanceSquared) const
+{
+	if (Option.bHasLocation)
+	{
+		// Within the cone around the facing direction, on the ground plane, or at the owner's own location.
+		const FVector ToOption = (Option.Location - Origin) * FVector(1.0, 1.0, 0.0);
+		OutDistanceSquared = FVector::DistSquared(Origin, Option.Location);
+		if (ToOption.SizeSquared() < 1.0)
+		{
+			return true;
+		}
+		return FVector::DotProduct(ToOption.GetSafeNormal(), Facing) >= FMath::Cos(FMath::DegreesToRadians(FrontHalfAngleDegrees));
 	}
 
+	// One ray against the one shape the scan found, at the shape's centre height so any shape height works.
+	if (!Shape || Facing.IsNearlyZero())
+	{
+		return false;
+	}
+	const FVector Start(Origin.X, Origin.Y, Shape->Bounds.Origin.Z);
+	const FVector End = Start + Facing * (2.f * InteractionRadius);
+	FHitResult Hit;
+	const FCollisionQueryParams Params(SCENE_QUERY_STAT(VestigeInteractionFacing));
+	if (!Shape->LineTraceComponent(Hit, Start, End, Params))
+	{
+		return false;
+	}
+	OutDistanceSquared = FVector::DistSquared2D(Origin, Hit.ImpactPoint);
+	return true;
+}
+void UVestigeInteractionComponent::SetFocus(AActor* Actor, const FVestigeInteractionOption& Option)
+{
+	// The latest option is kept even when its prompt is the same (another ripe tile), so its location stays current.
+	const bool bChanged = Actor != FocusedActor.Get() || !Option.IsSameAs(FocusedOption);
 	FocusedActor = Actor;
 	FocusedOption = Actor ? Option : FVestigeInteractionOption();
-	OnFocusChanged.Broadcast();
+	if (bChanged)
+	{
+		OnFocusChanged.Broadcast();
+	}
 }

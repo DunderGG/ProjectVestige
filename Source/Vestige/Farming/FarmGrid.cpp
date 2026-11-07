@@ -9,13 +9,29 @@
 #include "Farming/FarmField.h"
 #include "Farming/FarmFieldMeshesComponent.h"
 #include "Farming/FarmFieldSubsystem.h"
+#include "Farming/FarmingComponent.h"
 #include "Farming/FarmLog.h"
+#include "Farming/FarmTargetingComponent.h"
+#include "Farming/FarmTileState.h"
 
 namespace FarmGridEditor
 {
 	/** Half the height of the box that outlines the grid in the editor, in cm. Only needs to be visible. */
 	constexpr float BoundsHalfHeight = 10.f;
 }
+
+namespace FarmGridInteraction
+{
+	/** How far below the grid the interaction volume reaches, in cm, for uneven ground. */
+	constexpr float Below = 50.f;
+
+	/** How far above the grid it reaches, in cm, so the scan around a standing or jumping farmer overlaps it. */
+	constexpr float Above = 200.f;
+}
+
+#define LOCTEXT_NAMESPACE "FarmGrid"
+
+const FName AFarmGrid::HarvestAction(TEXT("Harvest"));
 
 AFarmGrid::AFarmGrid()
 {
@@ -28,6 +44,13 @@ AFarmGrid::AFarmGrid()
 	Bounds->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	Bounds->SetGenerateOverlapEvents(false);
 	Bounds->SetHiddenInGame(true);
+
+	InteractionVolume = CreateDefaultSubobject<UBoxComponent>(TEXT("InteractionVolume"));
+	InteractionVolume->SetupAttachment(RootComponent);
+	InteractionVolume->SetCollisionProfileName(VestigeInteraction::CollisionProfile);
+	InteractionVolume->SetGenerateOverlapEvents(false);
+	InteractionVolume->SetCanEverAffectNavigation(false);
+	InteractionVolume->SetHiddenInGame(true);
 
 	Meshes = CreateDefaultSubobject<UFarmFieldMeshesComponent>(TEXT("Meshes"));
 	Meshes->SetupAttachment(RootComponent);
@@ -44,11 +67,18 @@ void AFarmGrid::UpdateBounds()
 	const FVector HalfSize(Width * TileSize * 0.5f, Height * TileSize * 0.5f, FarmGridEditor::BoundsHalfHeight);
 	Bounds->SetBoxExtent(HalfSize);
 	Bounds->SetRelativeLocation(FVector(HalfSize.X, HalfSize.Y, 0.f));
+
+	const float InteractionHalfHeight = (FarmGridInteraction::Below + FarmGridInteraction::Above) * 0.5f;
+	InteractionVolume->SetBoxExtent(FVector(HalfSize.X + TileSize, HalfSize.Y + TileSize, InteractionHalfHeight));
+	InteractionVolume->SetRelativeLocation(FVector(HalfSize.X, HalfSize.Y, FarmGridInteraction::Above - InteractionHalfHeight));
 }
 
 void AFarmGrid::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// A grid saved before the interaction volume existed hasn't sized it, and a cooked game doesn't run OnConstruction.
+	UpdateBounds();
 
 	if (UFarmFieldSubsystem* FarmFields = UFarmFieldSubsystem::Get(GetWorld()))
 	{
@@ -120,3 +150,38 @@ FVector AFarmGrid::ToWorldDirection(const FIntPoint& Step) const
 {
 	return GetActorTransform().TransformVectorNoScale(FVector(Step.X, Step.Y, 0.f)).GetSafeNormal();
 }
+
+void AFarmGrid::GetInteractionOptions_Implementation(AActor* Interactor, TArray<FVestigeInteractionOption>& OutOptions) const
+{
+	const UFarmTargetingComponent* Targeting = Interactor ? Interactor->FindComponentByClass<UFarmTargetingComponent>() : nullptr;
+	const TOptional<FIntPoint>& Target = Targeting ? Targeting->GetTargetTile() : TOptional<FIntPoint>();
+	if (!Targeting || Targeting->GetGrid() != this || !Target)
+	{
+		return;
+	}
+	const FFarmTileState* Tile = GetTile(*Target);
+	if (!Tile || !Tile->IsRipe())
+	{
+		return;
+	}
+
+	FVestigeInteractionOption& HarvestOption = OutOptions.AddDefaulted_GetRef();
+	HarvestOption.Text = LOCTEXT("Harvest", "Harvest");
+	HarvestOption.Action = HarvestAction;
+	HarvestOption.bHasLocation = true;
+	HarvestOption.Location = GetTileTransform(*Target).GetLocation();
+}
+
+void AFarmGrid::Interact_Implementation(AActor* Interactor, const FVestigeInteractionOption& Option)
+{
+	if (Option.Action != HarvestAction)
+	{
+		return;
+	}
+	if (UFarmingComponent* Farming = Interactor ? Interactor->FindComponentByClass<UFarmingComponent>() : nullptr)
+	{
+		Farming->Harvest();
+	}
+}
+
+#undef LOCTEXT_NAMESPACE

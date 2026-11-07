@@ -5,6 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Interaction/VestigeInteractable.h"
 #include "FarmGrid.generated.h"
 
 class UBoxComponent;
@@ -20,9 +21,11 @@ DECLARE_MULTICAST_DELEGATE(FOnFarmFieldReady);
  * grid finds its field there by FieldId at BeginPlay, has its UFarmFieldMeshesComponent draw it, and converts between world
  * and grid space. There is no actor per tile: a tile is its coordinates in the field. Levels place BP_FarmGrid, which sets
  * the art the field is drawn with.
+ * It is also the interactable for its tiles: facing a ripe tile offers Harvest (Systems.md, section 7, harvesting with F),
+ * used from InteractionVolume, which covers the field and one tile around it.
  */
 UCLASS()
-class AFarmGrid : public AActor
+class AFarmGrid : public AActor, public IVestigeInteractable
 {
 	GENERATED_BODY()
 
@@ -30,7 +33,19 @@ public:
 	/** Width of a tile at scale 1, in cm, which tile art is made for. A tile TileSize wide is scaled from it. */
 	static constexpr float UnscaledTileSize = 100.f;
 
+	/** The action of the option that harvests the faced ripe tile. */
+	static const FName HarvestAction;
+
 	AFarmGrid();
+
+	/**
+	 * Offers Harvest, at the tile's centre, while Interactor's targeting component aims at a ripe tile of this grid. A component
+	 * lookup and a tile read: asked five times a second while the farmer is near.
+	 */
+	virtual void GetInteractionOptions_Implementation(AActor* Interactor, TArray<FVestigeInteractionOption>& OutOptions) const override;
+
+	/** Harvest: asks Interactor's farming component to harvest the tile it aims at. */
+	virtual void Interact_Implementation(AActor* Interactor, const FVestigeInteractionOption& Option) override;
 
 	/**
 	 * Returns the world's farm grid, or nullptr if the level has none. The game has a single field.
@@ -84,7 +99,7 @@ protected:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 private:
-	/** Fits the editor outline to Width x Height tiles. */
+	/** Fits the editor outline to Width x Height tiles, and the interaction volume to them and one tile around. */
 	void UpdateBounds();
 
 	/**
@@ -109,6 +124,13 @@ private:
 	/** Outlines the grid in the editor so it's easy to place. Hidden in game. */
 	UPROPERTY(VisibleAnywhere, Category = "Farming")
 	TObjectPtr<UBoxComponent> Bounds;
+
+	/**
+	 * Where the field's tiles can be used from: the field and one tile around it, from 50 cm below the grid to 200 cm above,
+	 * on the interaction channel only.
+	 */
+	UPROPERTY(VisibleAnywhere, Category = "Farming")
+	TObjectPtr<UBoxComponent> InteractionVolume;
 
 	/** Draws the field with instanced meshes. Its art is set in BP_FarmGrid. */
 	UPROPERTY(VisibleAnywhere, Category = "Farming", meta = (AllowPrivateAccess = "true"))

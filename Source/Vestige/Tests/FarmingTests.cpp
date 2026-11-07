@@ -19,9 +19,14 @@
 #include "Farming/FarmField.h"
 #include "Farming/FarmGrid.h"
 #include "Farming/FarmingComponent.h"
+#include "Farming/FarmTargetingComponent.h"
 #include "Farming/FarmTileState.h"
+#include "Farming/VestigeBed.h"
 #include "Farming/VestigeGameplayAbility_UseTool.h"
+#include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Interaction/VestigeInteractable.h"
+#include "Interaction/VestigeInteractionComponent.h"
 #include "GameFramework/PlayerController.h"
 #include "Inventory/VestigeInventoryComponent.h"
 #include "Inventory/VestigeInventorySaveData.h"
@@ -211,18 +216,53 @@ namespace FarmingTests
 		/** Whether a tool ability is active, so no other tool use can start yet. */
 		bool IsUsingTool() const { return AbilitySystem->HasMatchingGameplayTag(VestigeGameplayTags::State_UsingTool); }
 
-		/** The tool abilities granted on the player's ability system. Read at once: specs move when abilities are removed. */
-		TArray<const FGameplayAbilitySpec*> GetToolAbilities() const
+		/**
+		 * The abilities of the tool in hand granted on the player's ability system, without the harvest, which is granted all
+		 * the time. Read at once: specs move when abilities are removed.
+		 */
+		TArray<const FGameplayAbilitySpec*> GetToolAbilities() const { return GetUseToolAbilities(false); }
+
+		/** The harvest abilities granted on the player's ability system: the ones whose source is the hand's tool asset. */
+		TArray<const FGameplayAbilitySpec*> GetHarvestAbilities() const { return GetUseToolAbilities(true); }
+
+		TArray<const FGameplayAbilitySpec*> GetUseToolAbilities(bool bHarvest) const
 		{
+			const UVestigeToolData* HarvestTool = GetBaseTool(TEXT("Base.Hand"));
 			TArray<const FGameplayAbilitySpec*> Specs;
 			for (const FGameplayAbilitySpec& Spec : AbilitySystem->GetActivatableAbilities())
 			{
-				if (Spec.Ability && Spec.Ability->GetAssetTags().HasTagExact(VestigeGameplayTags::Ability_UseTool))
+				if (Spec.Ability && Spec.Ability->GetAssetTags().HasTagExact(VestigeGameplayTags::Ability_UseTool)
+					&& (Spec.SourceObject.Get() == HarvestTool) == bHarvest)
 				{
 					Specs.Add(&Spec);
 				}
 			}
 			return Specs;
+		}
+
+		/** Harvests the target tile once, then ends the use at once, as UseToolAndFinish does. */
+		void HarvestAndFinish()
+		{
+			FarmingComponent->Harvest();
+			AbilitySystem->CancelAllAbilities();
+		}
+
+		/** Tills, plants a turnip at Coordinates and grows it until it is ripe, through the field's rules. */
+		const UFarmCropData* GrowRipeCropAt(const FIntPoint& Coordinates)
+		{
+			UFarmField* Field = Grid->GetField();
+			const UFarmCropData* Crop = FarmingComponent->FindCrop(FPrimaryAssetId(UFarmCropData::AssetType, TEXT("Base.Turnip")));
+			Field->Till(Coordinates);
+			if (!Crop || !Field->Plant(Coordinates, Crop))
+			{
+				return nullptr;
+			}
+			for (int32 Day = 0; Day < Crop->GetDaysToMature(); ++Day)
+			{
+				Field->Water(Coordinates);
+				Field->AdvanceDay();
+			}
+			return Crop;
 		}
 
 		/** The tile the farmer faces at the start. */
@@ -337,7 +377,7 @@ namespace FarmingTests
 			ASSERT_THAT(IsNotNull(Crop));
 			Hold(TEXT("Base.Hand"), 0);
 
-			UseToolAndFinish();
+			HarvestAndFinish();
 
 			ASSERT_THAT(IsTrue(Inventory->GetItemCount(Crop->GetHarvestItemId()) == Crop->GetYield()));
 			ASSERT_THAT(IsTrue(TargetTile()->GetState() == EFarmTileState::Tilled));
@@ -349,8 +389,7 @@ namespace FarmingTests
 			ASSERT_THAT(IsNotNull(Crop));
 			Hold(TEXT("Base.Hand"), 0);
 
-			// Every slot holds a full stack, so the harvest has nowhere to go. The slot in hand holds turnips, which aren't a
-			// tool, so the hand harvests.
+			// Every slot holds a full stack, so the harvest has nowhere to go.
 			const UVestigeItemData* Seed = GetBaseItem(TurnipSeedsId.PrimaryAssetName);
 			const UVestigeItemData* Turnip = GetBaseItem(TEXT("Base.Turnip"));
 			ASSERT_THAT(IsNotNull(Seed));
@@ -364,7 +403,7 @@ namespace FarmingTests
 			SetBag(MoveTemp(FullBag));
 			const int32 TurnipsBefore = Inventory->GetItemCount(Crop->GetHarvestItemId());
 
-			UseToolAndFinish();
+			HarvestAndFinish();
 
 			ASSERT_THAT(IsTrue(Inventory->GetItemCount(Crop->GetHarvestItemId()) == TurnipsBefore));
 			ASSERT_THAT(IsTrue(TargetTile()->IsRipe()));
@@ -471,7 +510,7 @@ namespace FarmingTests
 			Hold(TEXT("Base.Hand"), 0);
 			const TStrongObjectPtr<UVestigeTestEventRecorder> Recorder = ListenToBlueprintEvents();
 
-			UseToolAndFinish();
+			HarvestAndFinish();
 
 			const FString Tile = TargetCoordinates.ToString();
 			const TArray<FString> Expected = {FString::Printf(TEXT("CropHarvested %s %s"), *Crop->GetContentId().ToString(), *Tile),
@@ -572,20 +611,60 @@ namespace FarmingTests
 			NewFarming->OnToolChanged.Remove(Counter);
 		}
 
-		TEST_METHOD(AnEmptyHandOrAnItemWithoutAToolHarvests)
+		TEST_METHOD(HarvestingWorksWithAnyItemInHand)
+		{
+			const UFarmCropData* Crop = GrowRipeCropAt(TargetCoordinates);
+			ASSERT_THAT(IsNotNull(Crop));
+			Hold(TEXT("Base.Hoe"), 0);
+
+			HarvestAndFinish();
+
+			ASSERT_THAT(IsTrue(Inventory->GetItemCount(Crop->GetHarvestItemId()) == Crop->GetYield()));
+			ASSERT_THAT(IsTrue(GrowRipeCropAt(TargetCoordinates) != nullptr));
+			Hold(TEXT("Base.Seeds"), 3);
+
+			HarvestAndFinish();
+
+			ASSERT_THAT(IsTrue(Inventory->GetItemCount(Crop->GetHarvestItemId()) == Crop->GetYield()));
+			ASSERT_THAT(IsTrue(TargetTile()->GetState() == EFarmTileState::Tilled));
+		}
+
+		TEST_METHOD(AnEmptyHandUsesNothing)
 		{
 			Hold(TEXT("Base.Hand"), 0);
-			ASSERT_THAT(IsTrue(FarmingComponent->GetCurrentTool() == GetBaseTool(TEXT("Base.Hand"))));
+			ASSERT_THAT(IsNull(FarmingComponent->GetCurrentTool()));
+			ListenToFeedback();
 
-			const UFarmCropData* Crop = GrowRipeCrop();
-			ASSERT_THAT(IsNotNull(Crop));
-			SetBag({{0, TEXT("Base.Turnip"), 1}});
-			ASSERT_THAT(IsTrue(FarmingComponent->GetCurrentTool() == GetBaseTool(TEXT("Base.Hand"))));
+			FarmingComponent->StartUsingTool();
 
-			UseToolAndFinish();
+			ASSERT_THAT(IsTrue(TargetTile()->GetState() == EFarmTileState::Grass));
+			ASSERT_THAT(IsTrue(GetStamina() == GetMaxStamina()));
+			ASSERT_THAT(IsTrue(Messages.Num() == 1));
+			ASSERT_THAT(IsFalse(FarmingComponent->IsToolUseHeld()));
+			FarmingComponent->StopUsingTool();
+		}
 
-			ASSERT_THAT(IsTrue(Inventory->GetItemCount(Crop->GetHarvestItemId()) == 1 + Crop->GetYield()));
-			ASSERT_THAT(IsTrue(TargetTile()->GetState() == EFarmTileState::Tilled));
+		TEST_METHOD(TheHarvestIsAlwaysGranted)
+		{
+			FillHotbar();
+			TArray<const FGameplayAbilitySpec*> Harvests = GetHarvestAbilities();
+			ASSERT_THAT(IsTrue(Harvests.Num() == 1));
+			const FGameplayAbilitySpecHandle HarvestSpec = Harvests[0]->Handle;
+
+			for (int32 Slot : {1, 2, 5, 0})
+			{
+				ASSERT_THAT(IsTrue(Inventory->SelectHotbarSlot(Slot)));
+				Harvests = GetHarvestAbilities();
+				ASSERT_THAT(IsTrue(Harvests.Num() == 1));
+				ASSERT_THAT(IsTrue(Harvests[0]->Handle == HarvestSpec));
+			}
+			ASSERT_THAT(IsTrue(GetToolAbilities().Num() == 1));
+		}
+
+		TEST_METHOD(TheFarmerBlueprintNamesTheHarvestTool)
+		{
+			ASSERT_THAT(IsNotNull(FarmingComponent->GetHarvestTool()));
+			ASSERT_THAT(IsTrue(FarmingComponent->GetHarvestTool() == GetBaseTool(TEXT("Base.Hand"))));
 		}
 
 		TEST_METHOD(PlantingUsesTheSeedInHand)
@@ -640,9 +719,8 @@ namespace FarmingTests
 				[this]()
 				{
 					ASSERT_THAT(IsFalse(IsUsingTool()));
-					const TArray<const FGameplayAbilitySpec*> Specs = GetToolAbilities();
-					ASSERT_THAT(IsTrue(Specs.Num() == 1));
-					ASSERT_THAT(IsTrue(Specs[0]->SourceObject.Get() == GetBaseTool(TEXT("Base.Hand"))));
+					ASSERT_THAT(IsTrue(GetToolAbilities().IsEmpty()));
+					ASSERT_THAT(IsTrue(GetHarvestAbilities().Num() == 1));
 				});
 		}
 
@@ -667,24 +745,29 @@ namespace FarmingTests
 				[this]()
 				{
 					ASSERT_THAT(IsFalse(IsUsingTool()));
-					const TArray<const FGameplayAbilitySpec*> Specs = GetToolAbilities();
-					ASSERT_THAT(IsTrue(Specs.Num() == 1));
-					ASSERT_THAT(IsTrue(Specs[0]->SourceObject.Get() == GetBaseTool(TEXT("Base.Hand"))));
+					ASSERT_THAT(IsTrue(GetToolAbilities().IsEmpty()));
+					ASSERT_THAT(IsTrue(GetHarvestAbilities().Num() == 1));
 					FarmingComponent->StopUsingTool();
 				});
 		}
 
 		TEST_METHOD(ASecondHandChangeDuringTheFirstUseLeavesOneToolAbility)
 		{
-			// The hand's grant is queued while the first use holds the ability list's lock; selecting the hoe then takes the
-			// queued grant back.
+			// The last seed empties the hand inside the first use, which holds the ability list's lock. The handler then selects
+			// the watering can, whose grant is queued, and when the can comes into hand, the hoe, which takes the queued grant
+			// back.
 			Grid->GetField()->Till(TargetCoordinates);
-			SetBag({{0, TurnipSeedsId.PrimaryAssetName, 1}, {1, TEXT("Base.Hoe"), 1}});
-			const UVestigeToolData* Hand = GetBaseTool(TEXT("Base.Hand"));
+			SetBag({{0, TurnipSeedsId.PrimaryAssetName, 1}, {1, TEXT("Base.Hoe"), 1}, {2, TEXT("Base.WateringCan"), 1}});
+			const UVestigeToolData* Can = GetBaseTool(TEXT("Base.WateringCan"));
 			const FDelegateHandle Switcher = FarmingComponent->OnToolChanged.AddLambda(
-				[this, Hand]()
+				[this, Can]()
 				{
-					if (FarmingComponent->GetCurrentTool() == Hand)
+					const UVestigeToolData* Tool = FarmingComponent->GetCurrentTool();
+					if (!Tool)
+					{
+						Inventory->SelectHotbarSlot(2);
+					}
+					else if (Tool == Can)
 					{
 						Inventory->SelectHotbarSlot(1);
 					}
@@ -702,6 +785,7 @@ namespace FarmingTests
 					const TArray<const FGameplayAbilitySpec*> Specs = GetToolAbilities();
 					ASSERT_THAT(IsTrue(Specs.Num() == 1));
 					ASSERT_THAT(IsTrue(Specs[0]->SourceObject.Get() == Hoe));
+					ASSERT_THAT(IsTrue(GetHarvestAbilities().Num() == 1));
 					ASSERT_THAT(IsTrue(Farmer->GetHeldToolMeshForTests() == Hoe->GetHeldMesh()));
 				});
 		}
@@ -716,6 +800,7 @@ namespace FarmingTests
 
 			const TArray<const FGameplayAbilitySpec*> Specs = GetToolAbilities();
 			ASSERT_THAT(IsTrue(Specs.Num() == 1));
+			ASSERT_THAT(IsTrue(GetHarvestAbilities().Num() == 1));
 			const UFarmingComponent* SecondFarming = SecondFarmer.FindComponentByClass<UFarmingComponent>();
 			ASSERT_THAT(IsNotNull(SecondFarming));
 			ASSERT_THAT(IsTrue(Specs[0]->SourceObject.Get() == SecondFarming->GetCurrentTool()));
@@ -745,23 +830,25 @@ namespace FarmingTests
 
 		TEST_METHOD(ANewToolNeedsOnlyItsAbility)
 		{
-			// The hand, made to do something no base tool does, through a new ability alone.
-			UVestigeToolData* Hand = const_cast<UVestigeToolData*>(Cast<UVestigeToolData>(
-				UAssetManager::Get().GetPrimaryAssetObject(FPrimaryAssetId(UVestigeToolData::AssetType, TEXT("Base.Hand")))));
-			ASSERT_THAT(IsNotNull(Hand));
-			const TSubclassOf<UGameplayAbility> HandAbility = Hand->GetAbility();
-			ON_SCOPE_EXIT
-			{
-				Hand->SetAbilityForTests(HandAbility);
-			};
-			Hand->SetAbilityForTests(UVestigeTestToolAbility::StaticClass());
-			Hold(TEXT("Base.Hand"), 0);
+			// A tool no base tool is like, through a new ability, a tool asset and an item alone.
+			UVestigeToolData* Tool = NewObject<UVestigeToolData>();
+			Tool->SetContentIdForTests(TEXT("Test.Tiller"));
+			Tool->SetAbilityForTests(UVestigeTestToolAbility::StaticClass());
+			FarmingComponent->AddToolForTests(*Tool);
+			UVestigeItemData* Item = NewObject<UVestigeItemData>();
+			Item->SetContentIdForTests(TEXT("Test.Tiller"));
+			UVestigeToolFragment* ToolFragment = NewObject<UVestigeToolFragment>(Item);
+			ToolFragment->SetToolIdForTests(Tool->GetPrimaryAssetId());
+			Item->AddFragmentForTests(ToolFragment);
+			Inventory->ResetForTests(Inventory->GetSlots().Num(), {Item});
+			SetBag({{0, Item->GetContentId(), 1}});
+			ASSERT_THAT(IsTrue(FarmingComponent->GetCurrentTool() == Tool));
 
 			UseToolAndFinish();
 
 			ASSERT_THAT(IsTrue(TargetTile()->GetState() == EFarmTileState::Tilled));
 			ASSERT_THAT(IsTrue(TargetTile()->IsWatered()));
-			ASSERT_THAT(IsTrue(GetStamina() == GetMaxStamina() - Hand->GetStaminaCost()));
+			ASSERT_THAT(IsTrue(GetStamina() == GetMaxStamina() - Tool->GetStaminaCost()));
 		}
 
 		TEST_METHOD(HoldingTheUseKeyWorksTheNextTileOnceTheUseHasFinished)
@@ -886,6 +973,163 @@ namespace FarmingTests
 					ASSERT_THAT(IsTrue(NextTile()->GetState() == EFarmTileState::Tilled));
 					AbilitySystem->CancelAllAbilities();
 				});
+		}
+		/** The farmer's interaction component, which finds what F would use. */
+		UVestigeInteractionComponent& GetInteraction() const { return *Farmer->FindComponentByClass<UVestigeInteractionComponent>(); }
+
+		/** Stands the farmer at Location (on the ground of the grid) aiming along AimDirection, and lets the target follow. */
+		void StandAt(const FVector& Location, const FVector& AimDirection)
+		{
+			UFarmTargetingComponent* Targeting = Farmer->FindComponentByClass<UFarmTargetingComponent>();
+			Farmer->SetActorLocation(Location);
+			Targeting->AimAt(AimDirection);
+		}
+
+		/**
+		 * A bed lying along the field's near edge (row 0's outer side), its long side on the edge, centred 400 cm along it, as
+		 * L_Farm places one: it covers X 300 to 500 and Y -100 to 0.
+		 */
+		AVestigeBed& PlaceBedAlongTheEdge()
+		{
+			AVestigeBed& Bed = Spawner.SpawnActor<AVestigeBed>();
+			Bed.SetActorLocation(FVector(400.f, -50.f, 0.f));
+			return Bed;
+		}
+
+		TEST_METHOD(FacingARipeTileOffersHarvest)
+		{
+			ASSERT_THAT(IsNotNull(GrowRipeCropAt(TargetCoordinates)));
+			TArray<FVestigeInteractionOption> Options;
+
+			IVestigeInteractable::Execute_GetInteractionOptions(Grid, Farmer, Options);
+
+			ASSERT_THAT(IsTrue(Options.Num() == 1));
+			ASSERT_THAT(IsTrue(Options[0].Action == AFarmGrid::HarvestAction));
+			ASSERT_THAT(IsTrue(Options[0].bHasLocation));
+			ASSERT_THAT(IsTrue(Options[0].Location.Equals(Grid->GetTileTransform(TargetCoordinates).GetLocation())));
+		}
+
+		TEST_METHOD(AnUnripeOrEmptyTileOffersNothing)
+		{
+			TArray<FVestigeInteractionOption> Options;
+			IVestigeInteractable::Execute_GetInteractionOptions(Grid, Farmer, Options);
+			ASSERT_THAT(IsTrue(Options.IsEmpty()));
+
+			Grid->GetField()->Till(TargetCoordinates);
+			Grid->GetField()->Plant(
+				TargetCoordinates, FarmingComponent->FindCrop(FPrimaryAssetId(UFarmCropData::AssetType, TEXT("Base.Turnip"))));
+			ASSERT_THAT(IsTrue(TargetTile()->GetState() == EFarmTileState::Planted));
+			IVestigeInteractable::Execute_GetInteractionOptions(Grid, Farmer, Options);
+			ASSERT_THAT(IsTrue(Options.IsEmpty()));
+		}
+
+		TEST_METHOD(NextToTheBedTheFacedRipeTileWins)
+		{
+			PlaceBedAlongTheEdge();
+
+			// On row 0 beside the bed, 42 cm in from its side, aiming along the edge with the bed's centre this far ahead.
+			for (float Ahead : {60.f, 100.f, 150.f})
+			{
+				StandAt(FVector(400.f - Ahead, 42.f, 0.f), FVector(1.f, 0.f, 0.f));
+				const TOptional<FIntPoint> Target = Farmer->FindComponentByClass<UFarmTargetingComponent>()->GetTargetTile();
+				ASSERT_THAT(IsTrue(Target.IsSet()));
+				if (!Grid->GetTile(*Target)->IsRipe())
+				{
+					ASSERT_THAT(IsNotNull(GrowRipeCropAt(*Target)));
+				}
+
+				// Turned off the aim as while walking: the aim decides, not the body.
+				Farmer->SetActorRotation(FRotator(0.f, 22.5f, 0.f));
+				GetInteraction().Scan();
+
+				ASSERT_THAT(IsTrue(GetInteraction().GetFocusedActor() == Grid));
+				ASSERT_THAT(IsTrue(GetInteraction().GetFocusedOption().Action == AFarmGrid::HarvestAction));
+			}
+		}
+
+		TEST_METHOD(NextToTheBedAnUnripeTargetFocusesNothing)
+		{
+			PlaceBedAlongTheEdge();
+
+			for (float Ahead : {60.f, 100.f, 150.f})
+			{
+				StandAt(FVector(400.f - Ahead, 42.f, 0.f), FVector(1.f, 0.f, 0.f));
+				GetInteraction().Scan();
+
+				ASSERT_THAT(IsNull(GetInteraction().GetFocusedActor()));
+			}
+		}
+
+		TEST_METHOD(FacingTheBedFocusesTheBed)
+		{
+			AVestigeBed& Bed = PlaceBedAlongTheEdge();
+
+			// Facing its long side near one end, from beyond the field.
+			StandAt(FVector(320.f, -142.f, 0.f), FVector(0.f, 1.f, 0.f));
+			GetInteraction().Scan();
+			ASSERT_THAT(IsTrue(GetInteraction().GetFocusedActor() == &Bed));
+
+			// Facing its end, from the ring of tiles around the field.
+			StandAt(FVector(560.f, -50.f, 0.f), FVector(-1.f, 0.f, 0.f));
+			GetInteraction().Scan();
+			ASSERT_THAT(IsTrue(GetInteraction().GetFocusedActor() == &Bed));
+		}
+
+		TEST_METHOD(InteractingWithARipeTileHarvestsIt)
+		{
+			const UFarmCropData* Crop = GrowRipeCropAt(TargetCoordinates);
+			ASSERT_THAT(IsNotNull(Crop));
+			Hold(TEXT("Base.Hoe"), 0);
+			const TStrongObjectPtr<UVestigeTestEventRecorder> Recorder = ListenToBlueprintEvents();
+
+			// The interact key, through the player's interact ability.
+			GetInteraction().Interact();
+
+			ASSERT_THAT(IsTrue(Inventory->GetItemCount(Crop->GetHarvestItemId()) == Crop->GetYield()));
+			ASSERT_THAT(IsTrue(TargetTile()->GetState() == EFarmTileState::Tilled));
+			ASSERT_THAT(IsTrue(GetStamina() == GetMaxStamina() - GetBaseTool(TEXT("Base.Hand"))->GetStaminaCost()));
+			const FString Tile = TargetCoordinates.ToString();
+			const TArray<FString> Expected = {FString::Printf(TEXT("CropHarvested %s %s"), *Crop->GetContentId().ToString(), *Tile),
+				FString::Printf(TEXT("ToolUsed Base.Hand %s"), *Tile)};
+			ASSERT_THAT(IsTrue(Recorder->GetEvents() == Expected));
+			ASSERT_THAT(IsNull(GetInteraction().GetFocusedActor()));
+			AbilitySystem->CancelAllAbilities();
+		}
+
+		TEST_METHOD(FDuringAToolUseDoesntHarvest)
+		{
+			ASSERT_THAT(IsNotNull(GrowRipeCropAt(TargetCoordinates)));
+			Hold(TEXT("Base.Hoe"), 0);
+
+			// The hoe can't change a ripe tile, so with E held its ability waits for another tile, holding the tool use.
+			FarmingComponent->StartUsingTool();
+			ASSERT_THAT(IsTrue(IsUsingTool()));
+
+			GetInteraction().Interact();
+
+			ASSERT_THAT(IsTrue(TargetTile()->IsRipe()));
+			bool bInteractActive = false;
+			for (const FGameplayAbilitySpec& Spec : AbilitySystem->GetActivatableAbilities())
+			{
+				bInteractActive |=
+					Spec.IsActive() && Spec.Ability && Spec.Ability->GetAssetTags().HasTagExact(VestigeGameplayTags::Ability_Interact);
+			}
+			ASSERT_THAT(IsFalse(bInteractActive));
+			FarmingComponent->StopUsingTool();
+		}
+
+		TEST_METHOD(TheGridsInteractionVolumeCoversTheFieldAndOneTileAround)
+		{
+			// Standing on the ring of tiles left of the field, facing in at a ripe edge tile.
+			ASSERT_THAT(IsNotNull(GrowRipeCropAt(FIntPoint(0, 3))));
+			const float HalfHeight = Farmer->GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
+			StandAt(FVector(-50.f, 350.f, Grid->GetActorLocation().Z + HalfHeight), FVector(1.f, 0.f, 0.f));
+			ASSERT_THAT(
+				IsTrue(Farmer->FindComponentByClass<UFarmTargetingComponent>()->GetTargetTile() == TOptional<FIntPoint>(FIntPoint(0, 3))));
+
+			GetInteraction().Scan();
+
+			ASSERT_THAT(IsTrue(GetInteraction().GetFocusedActor() == Grid));
 		}
 	};
 }

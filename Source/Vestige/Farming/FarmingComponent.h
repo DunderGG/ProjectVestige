@@ -23,14 +23,15 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnFarmCropHarvested, const UFarmCr
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnFarmToolUsed, const UVestigeToolData*, Tool, FIntPoint, Tile);
 
 /**
- * Lets its owner, a pawn, use what is in hand: the item in the selected hotbar slot of the inventory on the owner's player
- * state. An item with a UVestigeToolFragment uses the tool it names; an empty slot or any other item uses the hand
- * (HandToolId). What a tool does is its ability (UVestigeToolData::GetAbility, a UVestigeGameplayAbility_UseTool subclass):
- * this component grants the ability of the tool in hand on the ability system the owner reaches (the player state's),
- * with the tool asset as its source object, and passes the use key's press and release to it. It never calls the
- * abilities; they read the target from UFarmTargetingComponent and the crops here, and report what they did, which this
- * component broadcasts as the extension points OnCropHarvested and OnToolUsed. Loads every tool and crop at BeginPlay, so
- * nothing in hand waits on a load. Systems.md, section 8.
+ * Lets its owner, a pawn, use what is in hand and harvest. The item in hand is the item in the selected hotbar slot of the
+ * inventory on the owner's player state; an item with a UVestigeToolFragment is the tool it names, and an empty slot or any
+ * other item is no tool. What a tool does is its ability (UVestigeToolData::GetAbility, a UVestigeGameplayAbility_UseTool
+ * subclass): this component grants the ability of the tool in hand on the ability system the owner reaches (the player
+ * state's), with the tool asset as its source object, and passes the use key's press and release to it. It also grants the
+ * harvest all the time (HarvestToolId), which Harvest activates once; the farm grid calls it when the player interacts with
+ * a ripe tile. It never calls the abilities' rules; they read the target from UFarmTargetingComponent and the crops here,
+ * and report what they did, which this component broadcasts as the extension points OnCropHarvested and OnToolUsed. Loads
+ * every tool and crop at BeginPlay, so nothing waits on a load. Systems.md, sections 7 and 8.
  */
 UCLASS(ClassGroup = (Farming), meta = (BlueprintSpawnableComponent))
 class UFarmingComponent : public UActorComponent
@@ -41,10 +42,13 @@ public:
 	UFarmingComponent();
 
 	/**
-	 * The tool in hand: the one the item in hand's tool fragment names, else the hand. Read from the inventory each time.
-	 * Nullptr while the owner reaches no inventory (it has no player state) or the hand tool isn't set.
+	 * The tool in hand: the one the item in hand's tool fragment names, read from the inventory each time. Nullptr for an empty
+	 * slot, an item without a tool fragment or whose tool isn't loaded, and while the owner reaches no inventory.
 	 */
 	const UVestigeToolData* GetCurrentTool() const;
+
+	/** The tool whose ability harvests (VestigeTool:Base.Hand), or nullptr if HarvestToolId names none. */
+	const UVestigeToolData* GetHarvestTool() const;
 
 	/** The loaded crop with this ID (FarmCrop:Base.Turnip), or nullptr if the Asset Manager knows none. */
 	const UFarmCropData* FindCrop(const FPrimaryAssetId& CropId) const;
@@ -64,6 +68,12 @@ public:
 
 	/** The use key is released: the tool's ability ends once a use under way has finished. */
 	void StopUsingTool();
+
+	/**
+	 * Harvests the target tile once, whatever is in hand, by activating the harvest ability without pressing it. Does nothing
+	 * while a tool use is under way. Called when the player interacts with a ripe tile (AFarmGrid).
+	 */
+	void Harvest();
 
 	/** Whether the use key is held. The farmer walks slower meanwhile. */
 	bool IsToolUseHeld() const { return bToolUseHeld; }
@@ -101,6 +111,9 @@ public:
 #if WITH_DEV_AUTOMATION_TESTS
 	/** For tests only: makes a crop the Asset Manager doesn't know (a transient one) plantable. */
 	void AddCropForTests(const UFarmCropData& Crop);
+
+	/** For tests only: makes a tool the Asset Manager doesn't know (a transient one) usable by the items that name it. */
+	void AddToolForTests(const UVestigeToolData& Tool);
 #endif
 
 protected:
@@ -123,21 +136,27 @@ private:
 	 */
 	void FollowInventory();
 
-	/** The item in hand changed: grants the ability of the tool in hand, and broadcasts OnToolChanged if the tool changed. */
+	/** The item in hand changed: updates the grants, and broadcasts OnToolChanged if the tool in hand changed. */
 	void HandleItemInHandChanged();
 
 	/**
-	 * Makes the granted ability match the tool in hand and the ability system the owner reaches now: takes back the old
-	 * grant if either changed, and gives the tool's ability. Does nothing while the owner reaches no ability system.
+	 * Makes the grants match the ability system the owner reaches now: the harvest, given again only when that changes, and
+	 * the tool in hand's ability, taken back and given again when either changes. Nothing is granted without an ability system.
 	 */
 	void UpdateGrantedTool();
 
+	/** Gives Tool's ability on AbilitySystem with Tool as the source object, or returns an invalid handle if either is missing. */
+	static FGameplayAbilitySpecHandle Grant(UAbilitySystemComponent* AbilitySystem, const UVestigeToolData* Tool);
+
+	/** Says there is nothing in hand to use, and warns if the item in hand names a tool that isn't loaded. */
+	void SayNothingInHand() const;
+
 	/**
-	 * Takes back the granted ability through the ability system it was granted on, which the owner may no longer reach. A
-	 * use under way is told the key is released and finishes its time before the ability goes, so a switch can't cut it
-	 * short. A grant still queued (made while the ability list was locked) is cleared.
+	 * Takes back the grant Spec through AbilitySystem, the ability system it was granted on, which the owner may no longer reach,
+	 * and empties both. A use under way is told the key is released and finishes its time before the ability goes, so a switch
+	 * can't cut it short. A grant still queued (made while the ability list was locked) is cleared.
 	 */
-	void ReleaseGrantedTool();
+	static void ReleaseGrant(FGameplayAbilitySpecHandle& Spec, TWeakObjectPtr<UAbilitySystemComponent>& AbilitySystem);
 
 	/** The ability system the owner reaches now: the player state's once the owner is possessed. */
 	UAbilitySystemComponent* FindAbilitySystem() const;
@@ -157,15 +176,19 @@ private:
 	TWeakObjectPtr<UAbilitySystemComponent> GrantedAbilitySystem;
 	FGameplayAbilitySpecHandle GrantedSpec;
 
+	/** The harvest's grant and the ability system it is granted on, apart from the tool's. */
+	FGameplayAbilitySpecHandle HarvestSpec;
+	TWeakObjectPtr<UAbilitySystemComponent> HarvestAbilitySystem;
+
 	/** The tool at the last OnToolChanged, apart from GrantedTool, which is empty while there is no ability system. */
 	TWeakObjectPtr<const UVestigeToolData> BroadcastTool;
 
 	/** The inventory whose OnItemInHandChanged this component listens to. */
 	TWeakObjectPtr<UVestigeInventoryComponent> Inventory;
 
-	/** The tool used when the item in hand isn't a tool or the slot is empty (VestigeTool:Base.Hand). */
+	/** The tool whose ability harvests, granted all the time (VestigeTool:Base.Hand). Was HandToolId (a redirect loads it). */
 	UPROPERTY(EditDefaultsOnly, Category = "Farming", meta = (AllowPrivateAccess = "true", AllowedTypes = "VestigeTool"))
-	FPrimaryAssetId HandToolId;
+	FPrimaryAssetId HarvestToolId;
 
 	/** Every tool, by its primary asset ID, loaded with its visuals at BeginPlay. */
 	UPROPERTY()

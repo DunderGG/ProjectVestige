@@ -30,6 +30,22 @@ void AVestigeTestInteractable::Offer(const FText& Text, FName Action)
 	Option.Action = Action;
 }
 
+void AVestigeTestInteractable::Offer(const FText& Text, FName Action, const FVector& Location)
+{
+	Offer(Text, Action);
+	OfferedOptions.Last().bHasLocation = true;
+	OfferedOptions.Last().Location = Location;
+}
+
+void AVestigeTestInteractable::MoveOffersTo(const FVector& Location)
+{
+	for (FVestigeInteractionOption& Option : OfferedOptions)
+	{
+		Option.bHasLocation = true;
+		Option.Location = Location;
+	}
+}
+
 void AVestigeTestInteractable::GetInteractionOptions_Implementation(AActor* Interactor, TArray<FVestigeInteractionOption>& OutOptions) const
 {
 	OutOptions.Append(OfferedOptions);

@@ -28,6 +28,12 @@ public:
 	/** Offers an option with Text and Action to every interactor, after the ones it already offers. */
 	void Offer(const FText& Text, FName Action);
 
+	/** Offers an option with Text and Action at Location, after the ones it already offers. */
+	void Offer(const FText& Text, FName Action, const FVector& Location);
+
+	/** Moves every option it offers to Location. */
+	void MoveOffersTo(const FVector& Location);
+
 	/** The actions of the options it was asked to do, oldest first. */
 	const TArray<FName>& GetInteractions() const { return Interactions; }
 

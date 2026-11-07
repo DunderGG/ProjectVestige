@@ -70,10 +70,11 @@ namespace VestigePlayerCharacterTests
 			Movement->SetMovementMode(MOVE_Walking);
 			const float WalkSpeed = Movement->GetMaxSpeed();
 
-			Farming->StartUsingTool();
+			// As the farming component announces the key when a tool is in hand (with nothing in hand the walk isn't slowed).
+			Farming->OnToolUseHeldChanged.Broadcast(true);
 			ASSERT_THAT(IsTrue(FMath::IsNearlyEqual(Movement->GetMaxSpeed(), WalkSpeed * 0.5f)));
 
-			Farming->StopUsingTool();
+			Farming->OnToolUseHeldChanged.Broadcast(false);
 			ASSERT_THAT(IsTrue(Movement->GetMaxSpeed() == WalkSpeed));
 		}
 
@@ -88,7 +89,7 @@ namespace VestigePlayerCharacterTests
 			Movement->SetMovementMode(MOVE_Falling);
 			const float FallingSpeed = Movement->GetMaxSpeed();
 
-			Farming->StartUsingTool();
+			Farming->OnToolUseHeldChanged.Broadcast(true);
 
 			ASSERT_THAT(IsTrue(FMath::IsNearlyEqual(Movement->GetMaxSpeed(), FallingSpeed * 0.5f)));
 		}

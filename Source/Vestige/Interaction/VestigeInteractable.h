@@ -34,6 +34,17 @@ struct FVestigeInteractionOption
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")
 	FName Action;
 
+	/**
+	 * Whether Location is set: the option is somewhere else than its actor's location (a tile of a large actor). The player
+	 * must face that location to be offered it. Without one, the player must face the actor's interaction shape.
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")
+	bool bHasLocation = false;
+
+	/** Where in the world the option is, when bHasLocation is set. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction", meta = (EditCondition = "bHasLocation"))
+	FVector Location = FVector::ZeroVector;
+
 	/** Whether Other is the same option with the same text, so a prompt showing this one needn't change. */
 	bool IsSameAs(const FVestigeInteractionOption& Other) const;
 };

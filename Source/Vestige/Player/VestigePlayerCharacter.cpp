@@ -79,6 +79,9 @@ void AVestigePlayerCharacter::BeginPlay()
 	Farming->OnToolChanged.AddUObject(this, &AVestigePlayerCharacter::ShowHeldTool);
 	ShowHeldTool();
 
+	// What the farmer means to use is what he aims at, not where his body points while he walks.
+	Interaction->FacingDirection.BindUObject(Targeting.Get(), &UFarmTargetingComponent::GetAimDirection);
+
 	// Holding the use key slows the walk, which belongs to the movement component.
 	if (UVestigeCharacterMovementComponent* Movement = GetCharacterMovement<UVestigeCharacterMovementComponent>())
 	{
@@ -89,6 +92,7 @@ void AVestigePlayerCharacter::BeginPlay()
 void AVestigePlayerCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Farming->OnToolChanged.RemoveAll(this);
+	Interaction->FacingDirection.Unbind();
 	Farming->OnToolUseHeldChanged.RemoveAll(GetCharacterMovement());
 	Super::EndPlay(EndPlayReason);
 }
