@@ -452,7 +452,7 @@ Source/Vestige/
     Inventory/      The inventory component, its slot rules and save struct
     Farming/        Tiles and tile state, the grid, the farming, targeting, rest and highlight components, the bed, the tool abilities, their save structs
     Save/           UVestigeSaveGame and UVestigeSaveSubsystem: the save files
-    Player/         The player character, its movement component, the player state and the cheat manager
+    Player/         The player character, its input config, its movement component, the player state and the cheat manager
     UI/             The HUD and its widgets
     Game/           The game mode and the player controller: the game's wiring, at the top
     Template/       Epic's template character; not maintained to this guide

@@ -7,11 +7,13 @@
 #include "Content/VestigeItemData.h"
 #include "CQTest.h"
 #include "Farming/FarmingComponent.h"
+#include "GameFramework/PlayerController.h"
 #include "InputCoreTypes.h"
 #include "Inventory/VestigeInventoryComponent.h"
 #include "Inventory/VestigeInventorySaveData.h"
 #include "Player/VestigeCharacterMovementComponent.h"
 #include "Player/VestigePlayerCharacter.h"
+#include "Player/VestigePlayerState.h"
 
 // A namespace keeps the fixture's short name from hiding other declarations in unity builds.
 namespace VestigePlayerCharacterTests
@@ -20,13 +22,27 @@ namespace VestigePlayerCharacterTests
 	{
 		FActorTestSpawner Spawner;
 
+		/** The game's character Blueprint, which names the input config and the mapping contexts the native class lacks. */
+		static UClass* LoadFarmerClass()
+		{
+			return LoadClass<AVestigePlayerCharacter>(nullptr, TEXT("/Game/Vestige/Blueprints/BP_PlayerCharacter.BP_PlayerCharacter_C"));
+		}
+
+		/** A farmer spawned from the game's character Blueprint, not begun play. */
+		AVestigePlayerCharacter& SpawnBlueprintFarmer()
+		{
+			UClass* FarmerClass = LoadFarmerClass();
+			check(FarmerClass);
+			return Spawner.SpawnActor<AVestigePlayerCharacter>(FActorSpawnParameters(), FarmerClass);
+		}
+
 		TEST_METHOD(ActionKeyHintsNameTheBoundKeys)
 		{
-			const AVestigePlayerCharacter& Farmer = Spawner.SpawnActor<AVestigePlayerCharacter>();
+			const AVestigePlayerCharacter& Farmer = SpawnBlueprintFarmer();
 
 			const TArray<FVestigeKeyHint> Hints = Farmer.GetActionKeyHints();
 
-			// The test keys N and F9 are console commands now (UVestigeCheatManager), so they are neither bound nor hinted.
+			// One hint per action with a description, with its keyboard key: the gamepad keys (X, B) don't show.
 			ASSERT_THAT(IsTrue(Hints.Num() == 2));
 			ASSERT_THAT(IsTrue(Hints[0].Key.ToString() == TEXT("E")));
 			ASSERT_THAT(IsTrue(Hints[1].Key.ToString() == TEXT("F")));
@@ -109,7 +125,7 @@ namespace VestigePlayerCharacterTests
 
 		TEST_METHOD(HotbarKeyHintsLeaveOutEmptySlots)
 		{
-			AVestigePlayerCharacter& Farmer = Spawner.SpawnActor<AVestigePlayerCharacter>();
+			AVestigePlayerCharacter& Farmer = SpawnBlueprintFarmer();
 			UVestigeItemData& Hoe = Spawner.SpawnObject<UVestigeItemData>();
 			Hoe.SetContentIdForTests(TEXT("Base.Hoe"));
 			UVestigeItemData& Can = Spawner.SpawnObject<UVestigeItemData>();
@@ -125,6 +141,68 @@ namespace VestigePlayerCharacterTests
 			ASSERT_THAT(IsTrue(Hints.Num() == 2));
 			ASSERT_THAT(IsTrue(Hints[0].Key.ToString() == EKeys::One.GetDisplayName(false).ToString()));
 			ASSERT_THAT(IsTrue(Hints[1].Key.ToString() == EKeys::Three.GetDisplayName(false).ToString()));
+		}
+
+		TEST_METHOD(WithoutAnInputConfigTheHintsAreEmpty)
+		{
+			// The native class names no input config; asking for hints is quiet (an error here would fail the test).
+			AVestigePlayerCharacter& Farmer = Spawner.SpawnActor<AVestigePlayerCharacter>();
+			UVestigeItemData& Hoe = Spawner.SpawnObject<UVestigeItemData>();
+			Hoe.SetContentIdForTests(TEXT("Base.Hoe"));
+			UVestigeInventoryComponent* Inventory = NewObject<UVestigeInventoryComponent>(&Farmer);
+			Inventory->ResetForTests(12, {&Hoe});
+			FVestigeInventorySaveData Bag;
+			Bag.Slots = {{0, Hoe.GetContentId(), 1}};
+			Inventory->RestoreFromSaveData(Bag);
+
+			ASSERT_THAT(IsTrue(Farmer.GetActionKeyHints().IsEmpty()));
+			ASSERT_THAT(IsTrue(Farmer.GetHotbarKeyHints(*Inventory).IsEmpty()));
+			ASSERT_THAT(IsTrue(Farmer.GetInteractKey().IsEmpty()));
+		}
+
+		TEST_METHOD(UnpossessingReleasesTheUseKey)
+		{
+			// The setup of Vestige.Farming.AFarmerPossessedBeforeBeginPlayFollowsTheHand: the game's player state, with its
+			// inventory and ability system, and the farmer Blueprint possessed by a player controller.
+			Spawner.InitializeGameSubsystems();
+			UClass* PlayerStateClass =
+				LoadClass<AVestigePlayerState>(nullptr, TEXT("/Game/Vestige/Blueprints/BP_PlayerState.BP_PlayerState_C"));
+			ASSERT_THAT(IsNotNull(PlayerStateClass));
+			AVestigePlayerState& PlayerState = Spawner.SpawnActor<AVestigePlayerState>(FActorSpawnParameters(), PlayerStateClass);
+			PlayerState.DispatchBeginPlay();
+			UVestigeInventoryComponent* Inventory = PlayerState.GetInventory();
+			ASSERT_THAT(IsNotNull(Inventory));
+			APlayerController& Controller = Spawner.SpawnActor<APlayerController>();
+			Controller.PlayerState = &PlayerState;
+			AVestigePlayerCharacter& Farmer = SpawnBlueprintFarmer();
+			Controller.Possess(&Farmer);
+			Farmer.DispatchBeginPlay();
+			UVestigeCharacterMovementComponent* Movement = Farmer.GetCharacterMovement<UVestigeCharacterMovementComponent>();
+			UFarmingComponent* Farming = Farmer.FindComponentByClass<UFarmingComponent>();
+			ASSERT_THAT(IsNotNull(Movement));
+			ASSERT_THAT(IsNotNull(Farming));
+			Movement->SetMovementMode(MOVE_Walking);
+			const float WalkSpeed = Movement->GetMaxSpeed();
+			FVestigeInventorySaveData Bag;
+			Bag.Slots = {{0, TEXT("Base.Hoe"), 1}};
+			ASSERT_THAT(IsTrue(Inventory->RestoreFromSaveData(Bag) == 0));
+			TArray<bool> HeldChanges;
+			const FDelegateHandle Recorder = Farming->OnToolUseHeldChanged.AddLambda(
+				[&HeldChanges](bool bHeld)
+				{
+					HeldChanges.Add(bHeld);
+				});
+
+			Farming->StartUsingTool();
+			ASSERT_THAT(IsTrue(HeldChanges.Num() == 1 && HeldChanges[0]));
+			ASSERT_THAT(IsTrue(FMath::IsNearlyEqual(Movement->GetMaxSpeed(), WalkSpeed * 0.5f)));
+
+			Controller.UnPossess();
+
+			// The input component, with the key's release binding, is gone, so only UnPossessed can release the key.
+			ASSERT_THAT(IsTrue(HeldChanges.Num() == 2 && !HeldChanges[1]));
+			ASSERT_THAT(IsTrue(Movement->GetMaxSpeed() == WalkSpeed));
+			Farming->OnToolUseHeldChanged.Remove(Recorder);
 		}
 	};
 }

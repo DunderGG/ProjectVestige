@@ -35,4 +35,37 @@ namespace VestigeGameplayTags
 
 	/** Held while stamina is at zero, when every action takes longer. UVestigeStaminaSet keeps it in step with the value. */
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(State_OutOfStamina);
+
+	// Input tags: an input config (UVestigeInputConfig) names the input action for each, and the player character binds by
+	// them, so code never names an input asset (Systems.md, section 5).
+
+	/** The parent of every input tag. An input config accepts only tags under it. */
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Input);
+
+	/** Uses the item in hand while held (E). */
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Input_UseTool);
+
+	/** Uses the focused interactable (F). */
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Input_Interact);
+
+	/** Selects one hotbar slot (keys 1 to 9). Input_HotbarSlots lists them in slot order. */
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Input_HotbarSlot1);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Input_HotbarSlot2);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Input_HotbarSlot3);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Input_HotbarSlot4);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Input_HotbarSlot5);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Input_HotbarSlot6);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Input_HotbarSlot7);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Input_HotbarSlot8);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Input_HotbarSlot9);
+
+	/** The hotbar slot tags in slot order: index 0 selects the first slot. */
+	inline constexpr const FNativeGameplayTag* Input_HotbarSlots[] = {&Input_HotbarSlot1, &Input_HotbarSlot2, &Input_HotbarSlot3,
+		&Input_HotbarSlot4, &Input_HotbarSlot5, &Input_HotbarSlot6, &Input_HotbarSlot7, &Input_HotbarSlot8, &Input_HotbarSlot9};
+
+	/** Selects the next hotbar slot, wrapping around (mouse wheel down, gamepad right shoulder). */
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Input_HotbarNext);
+
+	/** Selects the previous hotbar slot, wrapping around (mouse wheel up, gamepad left shoulder). */
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Input_HotbarPrevious);
 }

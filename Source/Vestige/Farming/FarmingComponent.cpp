@@ -204,11 +204,14 @@ void UFarmingComponent::StartUsingTool()
 
 void UFarmingComponent::StopUsingTool()
 {
-	if (bToolUseHeld)
+	// Only a press that held the key pressed the spec, so without one there is nothing to release. The pawn also calls this
+	// when it is unpossessed, held or not.
+	if (!bToolUseHeld)
 	{
-		bToolUseHeld = false;
-		OnToolUseHeldChanged.Broadcast(bToolUseHeld);
+		return;
 	}
+	bToolUseHeld = false;
+	OnToolUseHeldChanged.Broadcast(bToolUseHeld);
 	if (FGameplayAbilitySpec* Spec = FindGrantedSpec())
 	{
 		GrantedAbilitySystem->AbilitySpecInputReleased(*Spec);

@@ -9,9 +9,11 @@
 #include "VestigePlayerCharacter.generated.h"
 
 class UAbilitySystemComponent;
+class UEnhancedInputComponent;
 class UEnhancedInputLocalPlayerSubsystem;
 class UFarmingComponent;
 class UFarmTargetingComponent;
+class UVestigeInputConfig;
 class UVestigeInventoryComponent;
 class UVestigeInteractionComponent;
 class UFarmTargetHighlightComponent;
@@ -19,6 +21,7 @@ class UInputAction;
 class UInputMappingContext;
 class UStaticMesh;
 class UStaticMeshComponent;
+struct FGameplayTag;
 
 /** A key the player can press and what it does, for on-screen hints. */
 struct FVestigeKeyHint
@@ -27,12 +30,28 @@ struct FVestigeKeyHint
 	FText Action;
 };
 
+/** A mapping context the pawn adds to its player while it is possessed, and its priority. */
+USTRUCT()
+struct FVestigeMappingContextAndPriority
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	TObjectPtr<const UInputMappingContext> MappingContext = nullptr;
+
+	/** Where two contexts map the same key, the higher priority wins. */
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	int32 Priority = 0;
+};
+
 /**
  * The template's third person character plus farming.
  * BP_PlayerCharacter (Content/Vestige/Blueprints) is the player in the game: the template's character Blueprint, reparented to this
  * class so it keeps its mesh, animation and movement input.
- * Owns the farming key bindings, and describes them for the HUD's key hints. Its abilities live on the player state, which
- * outlives it; it only hands out that ability system, so code that has the pawn finds it the engine's usual way.
+ * Owns its input setup: binds the actions of its input config by tag to the components that own them, adds its mapping
+ * contexts to its player while possessed, and describes the keys for the HUD's key hints (Systems.md, section 5). Its
+ * abilities live on the player state, which outlives it; it only hands out that ability system, so code that has the pawn
+ * finds it the engine's usual way.
  */
 UCLASS()
 class AVestigePlayerCharacter : public AVestigeCharacter, public IAbilitySystemInterface
@@ -49,12 +68,13 @@ public:
 	TArray<FVestigeKeyHint> GetHotbarKeyHints(const UVestigeInventoryComponent& Inventory) const;
 
 	/**
-	 * The other farming keys and what they do (use tool, interact), in the order they are mapped.
-	 * Read from the mapping context, so the hints always name the keys that are really bound.
+	 * The other farming keys and what they do (use tool, interact): every action of the input config with a description, in
+	 * the config's order, with its keyboard or mouse key in the mapping contexts, so the hints name the keys really bound.
+	 * Empty without an input config.
 	 */
 	TArray<FVestigeKeyHint> GetActionKeyHints() const;
 
-	/** The key that interacts, for the prompt shown next to an interactable. Empty before the input is created. */
+	/** The key that interacts, for the prompt shown next to an interactable. Empty without an input config. */
 	FText GetInteractKey() const;
 
 	/**
@@ -72,24 +92,41 @@ public:
 #if WITH_DEV_AUTOMATION_TESTS
 	/** For tests only: the mesh shown in the hand. */
 	UStaticMesh* GetHeldToolMeshForTests() const;
+
+	/** For tests only: binds the input to TestInputComponent as possession does. Without a controller no context is added. */
+	void SetupPlayerInputComponentForTests(UInputComponent& TestInputComponent);
+
+	const UVestigeInputConfig* GetInputConfigForTests() const { return InputConfig; }
+	const TArray<FVestigeMappingContextAndPriority>& GetMappingContextsForTests() const { return MappingContexts; }
 #endif
 
 protected:
-	virtual void PostInitializeComponents() override;
 	virtual void BeginPlay() override;
+
+	/** Binds the template's movement and the input config's actions, then adds MappingContexts to the player. */
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
+
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
+	/** Releases a held use key and removes MappingContexts while the old controller is known, so contexts never stack. */
 	virtual void UnPossessed() override;
 
 private:
-	/** Creates the farming input actions and maps their keys. Runs once, before the farmer is first possessed. */
-	void CreateInput();
+	/** Binds each action of the input config, found by its tag, to the call that owns it. Logs an error without a config. */
+	void BindNativeActions(UEnhancedInputComponent& EnhancedInput);
 
-	/** A new input action mapped to Key in the farming mapping context. A Description makes it show in the key hints. */
-	UInputAction* AddInputAction(const FKey& Key, const FText& Description);
+	/** Adds or removes every context in MappingContexts on the local player's Enhanced Input. Without one, does nothing. */
+	void AddMappingContexts();
+	void RemoveMappingContexts();
 
-	/** The key Action is mapped to in the farming mapping context, or an invalid key. */
-	FKey GetMappedKey(const UInputAction* Action) const;
+	/**
+	 * The first keyboard or mouse key Action is mapped to in MappingContexts (their default mappings), or an invalid key.
+	 * Gamepad keys aren't hinted until the HUD follows the device in use.
+	 */
+	FKey FindHintKey(const UInputAction* Action) const;
+
+	/** The input config's action for Tag, or nullptr, without logging: hints simply leave it out. */
+	const UInputAction* FindActionForHint(const FGameplayTag& Tag) const;
 
 	UEnhancedInputLocalPlayerSubsystem* GetInputSubsystem() const;
 
@@ -98,6 +135,12 @@ private:
 
 	/** Selects the hotbar slot Slot of the inventory on the player state. Does nothing without one. Bound to keys 1 to 9. */
 	void SelectHotbarSlot(int32 Slot);
+
+	/**
+	 * Selects the next (positive Direction) or previous hotbar slot of the inventory on the player state. Does nothing
+	 * without one. Bound to the hotbar's next and previous actions (the mouse wheel and the gamepad shoulders).
+	 */
+	void StepHotbarSlot(int32 Direction);
 
 	/** Shows the held mesh of the tool in hand, or nothing for the hand or a tool without one. Bound to OnToolChanged. */
 	void ShowHeldTool();
@@ -127,17 +170,17 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Tool")
 	TObjectPtr<UStaticMeshComponent> HeldTool;
 
-	// Input is created in code so no input assets are needed yet. These can move to IA_ and IMC_ assets later.
-	UPROPERTY(Transient)
-	TObjectPtr<UInputMappingContext> FarmingMappingContext;
+	/**
+	 * Which input action each of the farmer's input tags means (DA_InputConfig_Player). Hard-referenced: it is tiny and
+	 * needed the moment the pawn is possessed.
+	 */
+	UPROPERTY(EditDefaultsOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<const UVestigeInputConfig> InputConfig = nullptr;
 
-	UPROPERTY(Transient)
-	TObjectPtr<UInputAction> UseToolAction;
-
-	UPROPERTY(Transient)
-	TObjectPtr<UInputAction> InteractAction;
-
-	/** One action per number key; the index is the hotbar slot it selects. */
-	UPROPERTY(Transient)
-	TArray<TObjectPtr<UInputAction>> HotbarSlotActions;
+	/**
+	 * The contexts added to the player while this pawn is possessed: moving and looking (IMC_Default, IMC_MouseLook) and
+	 * farming (IMC_Farming, above them).
+	 */
+	UPROPERTY(EditDefaultsOnly, Category = "Input", meta = (AllowPrivateAccess = "true", TitleProperty = "MappingContext"))
+	TArray<FVestigeMappingContextAndPriority> MappingContexts;
 };

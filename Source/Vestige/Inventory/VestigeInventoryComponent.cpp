@@ -240,6 +240,21 @@ bool UVestigeInventoryComponent::SelectHotbarSlot(int32 Slot)
 	return true;
 }
 
+bool UVestigeInventoryComponent::StepHotbarSlot(int32 Direction)
+{
+	const int32 Count = GetHotbarSlotCount();
+	if (Count == 0 || Direction == 0)
+	{
+		return false;
+	}
+	const int32 Step = FMath::Sign(Direction);
+	if (SelectedHotbarSlot == INDEX_NONE)
+	{
+		return SelectHotbarSlot(Step > 0 ? 0 : Count - 1);
+	}
+	return SelectHotbarSlot(((SelectedHotbarSlot + Step) % Count + Count) % Count);
+}
+
 const UVestigeItemData* UVestigeInventoryComponent::GetItemInHand() const
 {
 	const TArray<FVestigeInventorySlot>& Slots = Inventory.GetSlots();

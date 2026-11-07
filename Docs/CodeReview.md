@@ -102,6 +102,8 @@ F9 (new game: delete both slots and reopen the map) and N (skip the day) are in 
 
 **Fix.** `IA_` and `IMC_` assets, with a small input config data asset that maps each action to a gameplay tag (the pattern of Epic's Lyra sample), so code binds by tag. Roadmap 4.6 says "decide when": decide now, before more keys arrive.
 
+**Status: Resolved (2026-11-07).** The farming actions are `IA_` assets with `IMC_Farming` in `Content/Vestige/Input`, and `DA_InputConfig_Player` (`UVestigeInputConfig`) names the action for each native `Vestige.Input.*` tag; the character binds by tag and adds the body's contexts (the template's two and `IMC_Farming`) while possessed, instead of the player controller. Every function has a gamepad key, the hotbar steps with the mouse wheel and the shoulders, and every action has player-mappable key settings named after its tag, ready for rebinding with the settings menu. Approved by a reviewer agent after three rounds ([Systems.md, section 5](Systems.md#5-input), [Architecture.md, decision log](Architecture.md#16-decision-log)).
+
 ### H7 — The HUD is raw Slate written in C++
 
 Slate is the engine's own UI layer; game HUDs are normally UMG widgets, with Common UI for menus and gamepad navigation. Raw Slate means every layout or colour change is a recompile, nobody can lay out the UI in the editor, and mods can't touch it. The event-driven texts in `AVestigeHUD` are good and can stay as the data side.

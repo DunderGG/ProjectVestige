@@ -247,6 +247,55 @@ namespace VestigeInventoryTests
 			ASSERT_THAT(IsTrue(Component.GetItemInHand() == &Can));
 		}
 
+		TEST_METHOD(SteppingTheHotbarWrapsAround)
+		{
+			UVestigeInventoryComponent& Component = MakeComponent(12, {});
+			const int32 LastSlot = Component.GetHotbarSlotCount() - 1;
+			ASSERT_THAT(IsTrue(Component.SelectHotbarSlot(LastSlot)));
+
+			// Empty slots count: every slot here is empty.
+			ASSERT_THAT(IsTrue(Component.StepHotbarSlot(1)));
+			ASSERT_THAT(IsTrue(Component.GetSelectedHotbarSlot() == 0));
+
+			ASSERT_THAT(IsTrue(Component.StepHotbarSlot(-1)));
+			ASSERT_THAT(IsTrue(Component.GetSelectedHotbarSlot() == LastSlot));
+
+			// Only the direction counts, never the size: one step either way.
+			ASSERT_THAT(IsTrue(Component.StepHotbarSlot(-5)));
+			ASSERT_THAT(IsTrue(Component.GetSelectedHotbarSlot() == LastSlot - 1));
+			ASSERT_THAT(IsFalse(Component.StepHotbarSlot(0)));
+			ASSERT_THAT(IsTrue(Component.GetSelectedHotbarSlot() == LastSlot - 1));
+		}
+
+		TEST_METHOD(SteppingWithoutAHotbarDoesNothing)
+		{
+			UVestigeInventoryComponent& Component = MakeComponent(0, {});
+			ASSERT_THAT(IsTrue(Component.GetHotbarSlotCount() == 0));
+
+			ASSERT_THAT(IsFalse(Component.StepHotbarSlot(1)));
+			ASSERT_THAT(IsFalse(Component.StepHotbarSlot(-1)));
+			ASSERT_THAT(IsTrue(Component.GetSelectedHotbarSlot() == INDEX_NONE));
+		}
+
+		TEST_METHOD(SteppingTheHotbarPutsTheNextItemInHand)
+		{
+			const UVestigeItemData& Hoe = MakeItem(TEXT("Base.Hoe"), 1);
+			const UVestigeItemData& Can = MakeItem(TEXT("Base.WateringCan"), 1);
+			UVestigeInventoryComponent& Component = MakeComponent(12, {&Hoe, &Can});
+			Component.RestoreFromSaveData(MakeSave({{0, Hoe.GetContentId(), 1}, {1, Can.GetContentId(), 1}}));
+			int32 Changes = 0;
+			Component.OnItemInHandChanged.AddLambda(
+				[&Changes]()
+				{
+					++Changes;
+				});
+
+			ASSERT_THAT(IsTrue(Component.StepHotbarSlot(1)));
+
+			ASSERT_THAT(IsTrue(Changes == 1));
+			ASSERT_THAT(IsTrue(Component.GetItemInHand() == &Can));
+		}
+
 		TEST_METHOD(ASlotOutsideTheHotbarIsRefused)
 		{
 			UVestigeInventoryComponent& Component = MakeComponent(12, {});

@@ -75,6 +75,12 @@ public:
 	 */
 	bool SelectHotbarSlot(int32 Slot);
 
+	/**
+	 * Selects the next hotbar slot for a positive Direction, the previous one for a negative one, wrapping around and
+	 * counting empty slots. Returns false, changing nothing, when Direction is 0 or there is no hotbar.
+	 */
+	bool StepHotbarSlot(int32 Direction);
+
 	/** The selected hotbar slot, or INDEX_NONE if the inventory has no hotbar. */
 	int32 GetSelectedHotbarSlot() const { return SelectedHotbarSlot; }
 
@@ -154,7 +160,10 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Inventory", meta = (AllowPrivateAccess = "true", ClampMin = 1))
 	int32 SlotCount = 24;
 
-	/** How many of the first slots are the hotbar, selected with keys 1 to 9. 0 for an inventory without a hand (a chest). */
+	/**
+	 * How many of the first slots are the hotbar, selected with keys 1 to 9 or stepped through. 0 for an inventory without a
+	 * hand (a chest).
+	 */
 	UPROPERTY(EditDefaultsOnly, Category = "Inventory", meta = (AllowPrivateAccess = "true", ClampMin = 0))
 	int32 HotbarSlotCount = 9;
 

@@ -66,7 +66,10 @@ public:
 	 */
 	void StartUsingTool();
 
-	/** The use key is released: the tool's ability ends once a use under way has finished. */
+	/**
+	 * The use key is released: the tool's ability ends once a use under way has finished. Does nothing unless a press held
+	 * the key, so the pawn can call it when it is unpossessed.
+	 */
 	void StopUsingTool();
 
 	/**

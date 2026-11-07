@@ -3,6 +3,7 @@
 
 #include "Player/VestigePlayerCharacter.h"
 
+#include "AbilitySystem/VestigeGameplayTags.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Content/VestigeItemData.h"
@@ -23,14 +24,15 @@
 #include "InputAction.h"
 #include "InputMappingContext.h"
 #include "Player/VestigeCharacterMovementComponent.h"
+#include "Player/VestigeInputConfig.h"
+#include "Player/VestigeInputLog.h"
 #include "Player/VestigePlayerState.h"
-
-#define LOCTEXT_NAMESPACE "VestigePlayerCharacter"
 
 namespace FarmerInput
 {
-	/** Above the template's movement contexts (priority 0), so farming keys win if a key is ever mapped twice. */
-	constexpr int32 MappingContextPriority = 1;
+	/** The direction StepHotbarSlot takes for the hotbar's next and previous actions. */
+	constexpr int32 NextSlot = 1;
+	constexpr int32 PreviousSlot = -1;
 }
 
 namespace FarmerMesh
@@ -64,13 +66,6 @@ UAbilitySystemComponent* AVestigePlayerCharacter::GetAbilitySystemComponent() co
 	return VestigePlayerState ? VestigePlayerState->GetAbilitySystemComponent() : nullptr;
 }
 
-void AVestigePlayerCharacter::PostInitializeComponents()
-{
-	Super::PostInitializeComponents();
-
-	CreateInput();
-}
-
 void AVestigePlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
@@ -97,62 +92,102 @@ void AVestigePlayerCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	Super::EndPlay(EndPlayReason);
 }
 
-void AVestigePlayerCharacter::CreateInput()
-{
-	FarmingMappingContext = NewObject<UInputMappingContext>(this, NAME_None, RF_Transient);
-
-	UseToolAction = AddInputAction(EKeys::E, LOCTEXT("UseTool", "Use tool"));
-	InteractAction = AddInputAction(EKeys::F, LOCTEXT("Interact", "Interact"));
-
-	// The number keys pick hotbar slots. Their hints name the item in the slot, so the actions have no description.
-	const FKey HotbarKeys[] = {
-		EKeys::One, EKeys::Two, EKeys::Three, EKeys::Four, EKeys::Five, EKeys::Six, EKeys::Seven, EKeys::Eight, EKeys::Nine};
-	for (const FKey& Key : HotbarKeys)
-	{
-		HotbarSlotActions.Add(AddInputAction(Key, FText::GetEmpty()));
-	}
-}
-
-UInputAction* AVestigePlayerCharacter::AddInputAction(const FKey& Key, const FText& Description)
-{
-	UInputAction* Action = NewObject<UInputAction>(this, NAME_None, RF_Transient);
-	Action->ActionDescription = Description;
-	FarmingMappingContext->MapKey(Action, Key);
-	return Action;
-}
-
 void AVestigePlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
+	// The template binds moving, looking and jumping through its own properties until it is replaced (CodeReview.md, M6).
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	UEnhancedInputComponent* EnhancedInput = Cast<UEnhancedInputComponent>(PlayerInputComponent);
-	if (!EnhancedInput)
+	if (UEnhancedInputComponent* EnhancedInput = Cast<UEnhancedInputComponent>(PlayerInputComponent))
 	{
+		BindNativeActions(*EnhancedInput);
+	}
+	AddMappingContexts();
+}
+
+void AVestigePlayerCharacter::BindNativeActions(UEnhancedInputComponent& EnhancedInput)
+{
+	if (!InputConfig)
+	{
+		VESTIGE_LOG(this, LogVestigeInput, Error, "No Input Config is set, so the farming keys are not bound.");
 		return;
 	}
 
 	// Holding the key repeats the use, so walking along a row works it.
-	EnhancedInput->BindAction(UseToolAction, ETriggerEvent::Started, Farming.Get(), &UFarmingComponent::StartUsingTool);
-	EnhancedInput->BindAction(UseToolAction, ETriggerEvent::Completed, Farming.Get(), &UFarmingComponent::StopUsingTool);
-	EnhancedInput->BindAction(InteractAction, ETriggerEvent::Started, Interaction.Get(), &UVestigeInteractionComponent::Interact);
-	for (int32 Slot = 0; Slot < HotbarSlotActions.Num(); ++Slot)
+	if (const UInputAction* UseToolAction = InputConfig->FindNativeInputActionForTag(VestigeGameplayTags::Input_UseTool, true))
 	{
-		EnhancedInput->BindAction(HotbarSlotActions[Slot], ETriggerEvent::Started, this, &AVestigePlayerCharacter::SelectHotbarSlot, Slot);
+		EnhancedInput.BindAction(UseToolAction, ETriggerEvent::Started, Farming.Get(), &UFarmingComponent::StartUsingTool);
+		EnhancedInput.BindAction(UseToolAction, ETriggerEvent::Completed, Farming.Get(), &UFarmingComponent::StopUsingTool);
+	}
+	if (const UInputAction* InteractAction = InputConfig->FindNativeInputActionForTag(VestigeGameplayTags::Input_Interact, true))
+	{
+		EnhancedInput.BindAction(InteractAction, ETriggerEvent::Started, Interaction.Get(), &UVestigeInteractionComponent::Interact);
+	}
+	for (int32 Slot = 0; Slot < static_cast<int32>(UE_ARRAY_COUNT(VestigeGameplayTags::Input_HotbarSlots)); ++Slot)
+	{
+		if (const UInputAction* SlotAction = InputConfig->FindNativeInputActionForTag(*VestigeGameplayTags::Input_HotbarSlots[Slot], true))
+		{
+			EnhancedInput.BindAction(SlotAction, ETriggerEvent::Started, this, &AVestigePlayerCharacter::SelectHotbarSlot, Slot);
+		}
 	}
 
-	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = GetInputSubsystem())
+	// One wheel notch is one press; several notches in one frame are one step.
+	if (const UInputAction* NextAction = InputConfig->FindNativeInputActionForTag(VestigeGameplayTags::Input_HotbarNext, true))
 	{
-		Subsystem->AddMappingContext(FarmingMappingContext, FarmerInput::MappingContextPriority);
+		EnhancedInput.BindAction(NextAction, ETriggerEvent::Started, this, &AVestigePlayerCharacter::StepHotbarSlot, FarmerInput::NextSlot);
+	}
+	if (const UInputAction* PreviousAction = InputConfig->FindNativeInputActionForTag(VestigeGameplayTags::Input_HotbarPrevious, true))
+	{
+		EnhancedInput.BindAction(
+			PreviousAction, ETriggerEvent::Started, this, &AVestigePlayerCharacter::StepHotbarSlot, FarmerInput::PreviousSlot);
+	}
+}
+
+void AVestigePlayerCharacter::AddMappingContexts()
+{
+	UEnhancedInputLocalPlayerSubsystem* Subsystem = GetInputSubsystem();
+	if (!Subsystem)
+	{
+		return;
+	}
+
+	// Registered with the player's Enhanced Input user settings, so remapped keys apply once rebinding is built. A context
+	// already applied isn't added twice, it only takes the new priority.
+	FModifyContextOptions Options;
+	Options.bNotifyUserSettings = true;
+	for (const FVestigeMappingContextAndPriority& Entry : MappingContexts)
+	{
+		if (Entry.MappingContext)
+		{
+			Subsystem->AddMappingContext(Entry.MappingContext, Entry.Priority, Options);
+		}
+	}
+}
+
+void AVestigePlayerCharacter::RemoveMappingContexts()
+{
+	UEnhancedInputLocalPlayerSubsystem* Subsystem = GetInputSubsystem();
+	if (!Subsystem)
+	{
+		return;
+	}
+
+	// Default options, so the contexts stay registered with the user settings for the next possession.
+	for (const FVestigeMappingContextAndPriority& Entry : MappingContexts)
+	{
+		if (Entry.MappingContext)
+		{
+			Subsystem->RemoveMappingContext(Entry.MappingContext);
+		}
 	}
 }
 
 void AVestigePlayerCharacter::UnPossessed()
 {
+	// The input component, and the use key's release binding with it, goes in Super, so a held key is released first.
+	Farming->StopUsingTool();
+
 	// Removed while the old controller is still known, so a later possession doesn't stack a second copy.
-	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = GetInputSubsystem())
-	{
-		Subsystem->RemoveMappingContext(FarmingMappingContext);
-	}
+	RemoveMappingContexts();
 	Super::UnPossessed();
 }
 
@@ -210,12 +245,15 @@ TArray<FVestigeKeyHint> AVestigePlayerCharacter::GetHotbarKeyHints(const UVestig
 {
 	TArray<FVestigeKeyHint> Hints;
 	const TArray<FVestigeInventorySlot>& Slots = Inventory.GetSlots();
-	const int32 SlotCount = FMath::Min(Inventory.GetHotbarSlotCount(), HotbarSlotActions.Num());
+	const int32 SlotCount =
+		FMath::Min(Inventory.GetHotbarSlotCount(), static_cast<int32>(UE_ARRAY_COUNT(VestigeGameplayTags::Input_HotbarSlots)));
 	for (int32 Slot = 0; Slot < SlotCount; ++Slot)
 	{
-		if (const UVestigeItemData* Item = Slots[Slot].Item)
+		const UVestigeItemData* Item = Slots[Slot].Item;
+		const FKey Key = FindHintKey(FindActionForHint(*VestigeGameplayTags::Input_HotbarSlots[Slot]));
+		if (Item && Key.IsValid())
 		{
-			Hints.Add({GetMappedKey(HotbarSlotActions[Slot]).GetDisplayName(false), Item->GetDisplayName()});
+			Hints.Add({Key.GetDisplayName(false), Item->GetDisplayName()});
 		}
 	}
 	return Hints;
@@ -230,18 +268,32 @@ void AVestigePlayerCharacter::SelectHotbarSlot(int32 Slot)
 	}
 }
 
+void AVestigePlayerCharacter::StepHotbarSlot(int32 Direction)
+{
+	const AVestigePlayerState* VestigePlayerState = GetPlayerState<AVestigePlayerState>();
+	if (UVestigeInventoryComponent* Inventory = VestigePlayerState ? VestigePlayerState->GetInventory() : nullptr)
+	{
+		Inventory->StepHotbarSlot(Direction);
+	}
+}
+
 TArray<FVestigeKeyHint> AVestigePlayerCharacter::GetActionKeyHints() const
 {
 	TArray<FVestigeKeyHint> Hints;
-	if (!FarmingMappingContext)
+	if (!InputConfig)
 	{
 		return Hints;
 	}
-	for (const FEnhancedActionKeyMapping& Mapping : FarmingMappingContext->GetMappings())
+	for (const FVestigeInputAction& Entry : InputConfig->GetNativeInputActions())
 	{
-		if (Mapping.Action && !Mapping.Action->ActionDescription.IsEmpty())
+		if (!Entry.InputAction || Entry.InputAction->ActionDescription.IsEmpty())
 		{
-			Hints.Add({Mapping.Key.GetDisplayName(false), Mapping.Action->ActionDescription});
+			continue;
+		}
+		const FKey Key = FindHintKey(Entry.InputAction);
+		if (Key.IsValid())
+		{
+			Hints.Add({Key.GetDisplayName(false), Entry.InputAction->ActionDescription});
 		}
 	}
 	return Hints;
@@ -249,17 +301,32 @@ TArray<FVestigeKeyHint> AVestigePlayerCharacter::GetActionKeyHints() const
 
 FText AVestigePlayerCharacter::GetInteractKey() const
 {
-	const FKey Key = GetMappedKey(InteractAction);
+	const FKey Key = FindHintKey(FindActionForHint(VestigeGameplayTags::Input_Interact));
 	return Key.IsValid() ? Key.GetDisplayName(false) : FText::GetEmpty();
 }
 
-FKey AVestigePlayerCharacter::GetMappedKey(const UInputAction* Action) const
+const UInputAction* AVestigePlayerCharacter::FindActionForHint(const FGameplayTag& Tag) const
 {
-	if (FarmingMappingContext)
+	return InputConfig ? InputConfig->FindNativeInputActionForTag(Tag, false) : nullptr;
+}
+
+FKey AVestigePlayerCharacter::FindHintKey(const UInputAction* Action) const
+{
+	// The assets' default mappings are right while keys can't be rebound. With rebinding, this asks Enhanced Input for the
+	// player's current key instead (Roadmap.md, the settings item).
+	if (!Action)
 	{
-		for (const FEnhancedActionKeyMapping& Mapping : FarmingMappingContext->GetMappings())
+		return EKeys::Invalid;
+	}
+	for (const FVestigeMappingContextAndPriority& Entry : MappingContexts)
+	{
+		if (!Entry.MappingContext)
 		{
-			if (Mapping.Action == Action)
+			continue;
+		}
+		for (const FEnhancedActionKeyMapping& Mapping : Entry.MappingContext->GetMappings())
+		{
+			if (Mapping.Action == Action && !Mapping.Key.IsGamepadKey() && !Mapping.Key.IsTouch() && !Mapping.Key.IsGesture())
 			{
 				return Mapping.Key;
 			}
@@ -280,6 +347,9 @@ UStaticMesh* AVestigePlayerCharacter::GetHeldToolMeshForTests() const
 {
 	return HeldTool->GetStaticMesh();
 }
-#endif
 
-#undef LOCTEXT_NAMESPACE
+void AVestigePlayerCharacter::SetupPlayerInputComponentForTests(UInputComponent& TestInputComponent)
+{
+	SetupPlayerInputComponent(&TestInputComponent);
+}
+#endif
