@@ -284,7 +284,7 @@ git push origin main
 | The build log says no suitable compiler was found, or warns that the compiler version isn't preferred or is banned | The MSVC 14.50 toolset or the Windows 11 SDK 10.0.22621 is missing, or an early 14.50 compiler is installed. Import `.vsconfig` again and update Visual Studio |
 | "Unable to build while Live Coding is active" | The editor is open. Close it, or press Ctrl+Alt+F11 in the editor to apply the change with Live Coding (function bodies only) |
 | The editor offers to convert the project to another engine version | You opened it with the wrong engine. Press *Cancel*, and open it with 5.8 ([step 4](#4-unreal-engine-58)). Never convert the project |
-| Double-clicking `Vestige.uproject` asks which engine to use, or offers to convert it, and the list shows *Binary build at...* instead of 5.8 | Windows doesn't know where 5.8 is installed. See [The project asks which engine to use](#the-project-asks-which-engine-to-use) below |
+| Double-clicking `Vestige.uproject` asks which engine to use, offers to convert it, or finds no engine, and the list shows *Binary build at...* instead of 5.8 | Windows doesn't know where 5.8 is installed. See [The project asks which engine to use](#the-project-asks-which-engine-to-use) below |
 | *Build Solution* or *Rebuild Solution* fails in an engine program such as `ChaosTestHarness`, with `Build.bat` exiting with code 6 and `-Mode=Test` in the command | The project files were generated without `-game`, so the solution includes engine programs a launcher engine can't build. See [Build Solution fails in an engine program](#build-solution-fails-in-an-engine-program) below |
 | "Modules were built with a different engine version" on a project that just built | The editor was started on its own and auto-opened the project. Close it and open `Vestige.uproject` directly ([step 7](#7-open-the-editor)) |
 | A warning about a variable that "hides class member" stops the build | That warning is an error in this project. Rename your local variable ([CodingGuidelines.md, section 2.4](CodingGuidelines.md#24-never-shadow)) |
@@ -294,39 +294,28 @@ git push origin main
 
 ### The project asks which engine to use
 
-When you double-click `Vestige.uproject`, a small window asks which engine version to open it with, or offers to convert the project. The version list has no *5.8*, only entries such as *Binary build at C:\Program Files\Epic Games\UE_5.8*.
+When you double-click `Vestige.uproject`, a small window asks which engine version to open it with, offers to convert the project, or says no Unreal Engine installation was found. The version list has no *5.8*, only entries such as *Binary build at C:\Program Files\Epic Games\UE_5.8*.
 
 **Don't press *Convert*, and don't pick the *Binary build* entry.** Both rewrite `"EngineAssociation"` in `Vestige.uproject`: *Convert* to another version, the *Binary build* entry to a long ID that only means something on your PC. Press *Cancel*. If `git status` then shows `Vestige.uproject` as changed, undo it with `git restore Vestige.uproject`.
 
-**Cause.** Windows finds the engine for `"5.8"` in the launcher's list of installed engines, `C:\ProgramData\Epic\UnrealEngineLauncher\LauncherInstalled.dat`. When that file is empty or has no 5.8 entry, nothing maps "5.8" to the engine, even though the engine itself is installed and works. *Verify* and reinstalling the engine in the launcher don't necessarily refill the file.
+**Cause.** Windows looks up the engine for `"5.8"` in two places: the Epic Games Launcher's list of installed apps, `C:\ProgramData\Epic\UnrealEngineLauncher\LauncherInstalled.dat`, and your own list of engines in the registry. Normally the launcher's list has a `UE_5.8` entry, and that is what maps "5.8" to the engine. On some PCs the launcher leaves 5.8 out of that file, even though the engine is installed and works. *Verify*, reinstalling the engine and running the launcher as administrator don't necessarily bring it back.
 
-**Fix:** fill in the file by hand.
+**Fix:** register the engine in the registry under the name `5.8`, the name the project asks for. The launcher doesn't touch this entry, so it stays.
 
-1. Close the Epic Games Launcher completely, including its icon in the system tray. It rewrites the file while it runs.
-2. Open Notepad **as administrator** (right-click it in the Start menu, *Run as administrator*). The file is in `ProgramData`, which needs administrator rights to change.
-3. In Notepad, open `C:\ProgramData\Epic\UnrealEngineLauncher\LauncherInstalled.dat` (set the file type to *All files* to see it).
-4. If the file is empty, replace its contents with the following. If it already lists other apps, add only the part in braces `{ ... }` to the `InstallationList`, with a comma between entries. Use your install path, with every `\` doubled, and your installed 5.8 version (the launcher shows it in *Unreal Engine > Library*):
+1. Press **Win+R**, type `regedit` and press Enter.
+2. Go to `HKEY_CURRENT_USER\Software\Epic Games\Unreal Engine\Builds`. If `Builds` doesn't exist, right-click `Unreal Engine`, choose *New > Key* and name it `Builds`.
+3. If the right pane has a value named with a long `{...}` ID whose data is your 5.8 folder, that is the *Binary build* entry. **Delete it.** Only one entry may point at a folder: when two do, Unreal keeps one and deletes the other, and it may keep the wrong one.
+4. Right-click in the right pane, choose *New > String Value*, name it `5.8`, and set its data to your engine folder, the one that contains `Engine`. With the default install that's `C:\Program Files\Epic Games\UE_5.8`.
+5. Double-click `Vestige.uproject`. It opens in 5.8 without asking.
 
-   ```json
-   {
-     "InstallationList": [
-       {
-         "InstallLocation": "C:\\Program Files\\Epic Games\\UE_5.8",
-         "NamespaceId": "ue",
-         "ItemId": "",
-         "ArtifactId": "UE_5.8",
-         "AppVersion": "5.8.4",
-         "AppName": "UE_5.8"
-       }
-     ]
-   }
-   ```
+If the launcher lists 5.8 again some day, Unreal sees the registry entry as a duplicate of the same folder and removes it by itself. That's fine: "5.8" then comes from the launcher.
 
-5. Save, then double-click `Vestige.uproject` again. It opens in 5.8 without asking.
+**Workaround** without changing anything: start 5.8 from the launcher (*Unreal Engine > Library*, *Launch* on the 5.8 slot), then in the *Unreal Project Browser* press **Browse** and open `Vestige.uproject`. That uses the right engine and leaves the file alone.
 
-**Workaround** while it isn't fixed: start 5.8 from the launcher (*Unreal Engine > Library*, *Launch* on the 5.8 slot), then in the *Unreal Project Browser* press **Browse** and open `Vestige.uproject`. That uses the right engine and leaves the file alone.
+**What doesn't last or doesn't help:**
 
-Running `UnrealVersionSelector.exe` by hand doesn't help here. Without arguments it says the folder doesn't contain an engine installation, and `-fileassociations` doesn't add the missing 5.8 entry.
+- Adding a `UE_5.8` entry to `LauncherInstalled.dat` by hand (as administrator, with the launcher closed) works only until the launcher starts again. It rewrites the file, and on an affected PC it leaves 5.8 out again. Use the registry fix instead.
+- Running `UnrealVersionSelector.exe` by hand. Without arguments it says the folder doesn't contain an engine installation, and `-fileassociations` doesn't add the missing entry.
 
 ### Build Solution fails in an engine program
 
