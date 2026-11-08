@@ -5,12 +5,15 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/HUD.h"
+#include "Player/VestigeKeyHints.h"
 #include "UI/VestigeHudMessages.h"
 #include "VestigeHUD.generated.h"
 
 class AVestigePlayerCharacter;
 class APawn;
 class UAbilitySystemComponent;
+class UCommonInputSubsystem;
+enum class ECommonInputType : uint8;
 class UVestigeClockSubsystem;
 class UVestigeHudWidget;
 class UVestigeInteractionComponent;
@@ -41,6 +44,12 @@ public:
 
 	/** The widget class this HUD shows, WBP_Hud on BP_HUD. */
 	TSubclassOf<UVestigeHudWidget> GetHudWidgetClass() const { return HudWidgetClass; }
+
+	/**
+	 * The device whose keys the hints name after the player used InputType: the gamepad's after the gamepad, else the
+	 * keyboard's. The game has no touch controls, so a touch leaves the keyboard hints.
+	 */
+	static EVestigeHintDevice GetHintDevice(ECommonInputType InputType);
 
 protected:
 	virtual void BeginPlay() override;
@@ -88,6 +97,18 @@ private:
 
 	void RefreshKeyHintsText();
 
+	/**
+	 * Follows the device the player uses, from Common Input's subsystem on the local player, so the hints name its keys.
+	 * Only called with a local player, which the widget needs anyway.
+	 */
+	void FollowInputMethod();
+
+	/**
+	 * Rebuilds the key hints and the prompt when the device whose keys they name changes. Bound to Common Input's
+	 * OnInputMethodChangedNative, which also fires with an unchanged type; that rebuilds nothing.
+	 */
+	void HandleInputMethodChanged(ECommonInputType InputType);
+
 	/** Shows Message in a box of its own, under the ones already showing, for MessageSeconds. Bound to UVestigeFeedbackSubsystem. */
 	void ShowMessage(const FText& Message);
 
@@ -106,6 +127,10 @@ private:
 	TWeakObjectPtr<UVestigeInventoryComponent> Inventory;
 	TWeakObjectPtr<UAbilitySystemComponent> AbilitySystem;
 	TWeakObjectPtr<const AVestigePlayerCharacter> Farmer;
+	TWeakObjectPtr<UCommonInputSubsystem> InputMethod;
+
+	/** The device whose keys the hints and the prompt name. */
+	EVestigeHintDevice HintDevice = EVestigeHintDevice::KeyboardAndMouse;
 
 	FText ItemInHandText;
 

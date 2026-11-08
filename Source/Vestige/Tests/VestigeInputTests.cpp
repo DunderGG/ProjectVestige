@@ -4,12 +4,17 @@
 #if WITH_DEV_AUTOMATION_TESTS
 
 #include "AbilitySystem/VestigeGameplayTags.h"
+#include "CommonInputBaseTypes.h"
+#include "CommonInputTypeEnum.h"
 #include "Components/ActorTestSpawner.h"
 #include "CQTest.h"
 #include "EnhancedInputComponent.h"
+#include "HAL/IConsoleManager.h"
 #include "InputAction.h"
+#include "InputCoreTypes.h"
 #include "InputMappingContext.h"
 #include "Player/VestigeInputConfig.h"
+#include "Player/VestigeKeyHints.h"
 #include "Player/VestigePlayerCharacter.h"
 #include "PlayerMappableKeySettings.h"
 
@@ -185,6 +190,33 @@ namespace VestigeInputTests
 			}
 		}
 
+		TEST_METHOD(GamepadKeysHaveShortHintNames)
+		{
+			ASSERT_THAT(IsTrue(VestigeKeyHints::GetKeyName(EKeys::Gamepad_FaceButton_Left).ToString() == TEXT("X")));
+			ASSERT_THAT(IsTrue(VestigeKeyHints::GetKeyName(EKeys::Gamepad_LeftShoulder).ToString() == TEXT("LB")));
+			ASSERT_THAT(IsTrue(VestigeKeyHints::GetKeyName(EKeys::E).ToString() == TEXT("E")));
+
+			// A gamepad key without a label of ours keeps the engine's name.
+			ASSERT_THAT(IsTrue(VestigeKeyHints::GetKeyName(EKeys::Gamepad_LeftX).EqualTo(EKeys::Gamepad_LeftX.GetDisplayName(false))));
+		}
+
+		TEST_METHOD(ThePlatformDefaultsToKeyboardAndMouse)
+		{
+			// Common Input ignores an input type the platform doesn't support, so without these the hints would be stuck.
+			const UCommonInputPlatformSettings* Settings = UCommonInputPlatformSettings::Get();
+			ASSERT_THAT(IsNotNull(Settings));
+			ASSERT_THAT(IsTrue(Settings->SupportsInputType(ECommonInputType::MouseAndKeyboard)));
+			ASSERT_THAT(IsTrue(Settings->SupportsInputType(ECommonInputType::Gamepad)));
+			ASSERT_THAT(IsTrue(Settings->GetDefaultInputType() == ECommonInputType::MouseAndKeyboard));
+		}
+
+		TEST_METHOD(TheActionRouterCheckIsOff)
+		{
+			// Until the first menu sets Common UI's viewport client; then the setting and this test go (Systems.md, section 5).
+			const IConsoleVariable* Check = IConsoleManager::Get().FindConsoleVariable(TEXT("CommonUI.Debug.CheckGameViewportClientValid"));
+			ASSERT_THAT(IsNotNull(Check));
+			ASSERT_THAT(IsFalse(Check->GetBool()));
+		}
 		TEST_METHOD(EveryFarmingActionHasAUniqueMappableName)
 		{
 			const AVestigePlayerCharacter* Defaults = GetFarmerDefaults();

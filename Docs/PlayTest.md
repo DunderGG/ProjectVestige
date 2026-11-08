@@ -428,6 +428,18 @@ The HUD is UMG now instead of C++ Slate: `WBP_Hud` and `WBP_HudMessage` in `Cont
 - [x] **No widget class**: open `Content/Vestige/Blueprints/BP_HUD` and clear **HUD Widget Class**, Compile, and press Play: no HUD shows and the Output Log has the error "No HUD Widget Class is set, so the HUD shows nothing". Then set it back to `WBP_Hud` (or close without saving).
 - [ ] **Packaged build**: a packaged Development build shows the HUD as in the editor.
 
+### Gamepad key hints, 2026-11-08
+
+The key hints and the prompt name the keys of the device you used last, keyboard and mouse or gamepad, told by Common Input, part of the CommonUI plugin, which is now on ([Systems.md, section 5](Systems.md#5-input), gamepad key hints). Have a gamepad connected. The commit is the one titled "Key hints follow the device used last".
+
+- [ ] **Solution**: regenerate the project files (right-click `Vestige.uproject` > Generate Visual Studio project files): the solution lists `Player/VestigeKeyHints.h` and `.cpp`.
+- [ ] **Editor starts**: the editor opens without asking about plugins, and Edit > Plugins shows **Common UI Plugin** ticked. The Output Log at start has no `LogUIActionRouter` error (one Display line, "Found 0 derived classes", is expected).
+- [ ] **Keyboard first**: press Play and use only the keyboard and mouse. The hints read as before, "1 Hoe   2 Turnip Seeds   3 Watering Can   |   E Use tool   |   F Interact", and the bed shows "F Sleep".
+- [ ] **Switch to the gamepad**: press any gamepad button, a trigger or push a stick all the way. The hints change at once to "LB / RB Hotbar   |   X Use tool   |   B Interact", and facing the bed shows "B Sleep" (a ripe crop "B Harvest"). The gamepad plays exactly as before: X uses, B interacts, the shoulders step the hotbar, A jumps, the sticks walk and look.
+- [ ] **Back to the keyboard**: press a key, click, scroll or move the mouse: the keyboard hints come back. Switch back and forth a few times; the hints follow each time and don't flicker while you use only one device.
+- [ ] **No cursor**: after using the gamepad, Alt-Tab out of the editor and back, click into the game and move the mouse: the camera turns and no mouse cursor shows. Then use the gamepad and stop Play (Esc): the editor's mouse cursor shows. If it stays hidden, it comes back with the next Play; say so.
+- [ ] **Touch screen** (Dunder-YOGA): touch the game view while playing: the keyboard hints stay (the game has no touch controls).
+- [ ] **Packaged build**: a packaged Development build switches the hints the same way.
 ### Editor chores
 
 Changes only the editor can make safely. The steps are in [Roadmap.md, Housekeeping](Roadmap.md#3-housekeeping): re-saving the template Blueprints and `L_Farm`, moving `BP_FarmTile` and the materials with redirectors fixed, and regenerating the Android File Server token if it was ever used. After each one, run the [smoke test](#3-smoke-test).

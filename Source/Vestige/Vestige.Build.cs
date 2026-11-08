@@ -20,6 +20,7 @@ public class Vestige : ModuleRules
 		// Private: no other module uses our headers, so they don't need to expose these modules' types.
 		PrivateDependencyModuleNames.AddRange(new string[] {
 			"AssetRegistry",
+			"CommonInput",
 			"Slate",
 			"DeveloperSettings",
 			"EngineSettings",

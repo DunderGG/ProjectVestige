@@ -7,6 +7,8 @@
 #include "AbilitySystem/VestigeStaminaSet.h"
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemGlobals.h"
+#include "CommonInputSubsystem.h"
+#include "CommonInputTypeEnum.h"
 #include "Content/VestigeItemData.h"
 #include "Core/VestigeFeedbackSubsystem.h"
 #include "Core/VestigeLog.h"
@@ -96,6 +98,9 @@ void AVestigeHUD::BeginPlay()
 	}
 	HudWidget->AddToPlayerScreen();
 
+	// First, so the first hints and prompt already name the keys of the device in use.
+	FollowInputMethod();
+
 	// Each follow refreshes its texts at once, which now reach the widget.
 	Clock = UVestigeClockSubsystem::Get(World);
 	SetActorTickEnabled(Clock.IsValid());
@@ -132,6 +137,10 @@ void AVestigeHUD::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	if (UVestigeFeedbackSubsystem* Feedback = UWorld::GetSubsystem<UVestigeFeedbackSubsystem>(GetWorld()))
 	{
 		Feedback->OnFeedback.RemoveAll(this);
+	}
+	if (UCommonInputSubsystem* CurrentInputMethod = InputMethod.Get())
+	{
+		CurrentInputMethod->OnInputMethodChangedNative.RemoveAll(this);
 	}
 
 	// The widget's outer is the game instance, which outlives this map, so it is let go here.
@@ -172,6 +181,35 @@ void AVestigeHUD::RefreshStatusText()
 		TEXT("Clock"), VestigeHudClock::Format(StatusClockMinutes), TEXT("Item"), ItemInHandText));
 }
 
+EVestigeHintDevice AVestigeHUD::GetHintDevice(ECommonInputType InputType)
+{
+	return InputType == ECommonInputType::Gamepad ? EVestigeHintDevice::Gamepad : EVestigeHintDevice::KeyboardAndMouse;
+}
+
+void AVestigeHUD::FollowInputMethod()
+{
+	// Common Input sorts every key, button, mouse move and touch by the key itself, and is what Common UI's menus will
+	// follow too (Systems.md, section 5, gamepad key hints).
+	InputMethod = UCommonInputSubsystem::Get(PlayerOwner ? PlayerOwner->GetLocalPlayer() : nullptr);
+	if (UCommonInputSubsystem* CurrentInputMethod = InputMethod.Get())
+	{
+		HintDevice = GetHintDevice(CurrentInputMethod->GetCurrentInputType());
+		CurrentInputMethod->OnInputMethodChangedNative.AddUObject(this, &AVestigeHUD::HandleInputMethodChanged);
+	}
+}
+
+void AVestigeHUD::HandleInputMethodChanged(ECommonInputType InputType)
+{
+	const EVestigeHintDevice NewDevice = GetHintDevice(InputType);
+	if (NewDevice == HintDevice)
+	{
+		return;
+	}
+	HintDevice = NewDevice;
+	RefreshKeyHintsText();
+	RefreshPromptText();
+}
+
 void AVestigeHUD::FollowPawn(APawn* OldPawn, APawn* NewPawn)
 {
 	StopFollowingPawn();
@@ -208,7 +246,8 @@ void AVestigeHUD::RefreshPromptText()
 		HudWidget->SetPromptText(FText::GetEmpty());
 		return;
 	}
-	HudWidget->SetPromptText(VestigeHudHints::Format({CurrentFarmer->GetInteractKey(), CurrentInteraction->GetFocusedOption().Text}));
+	HudWidget->SetPromptText(
+		VestigeHudHints::Format({CurrentFarmer->GetInteractKey(HintDevice), CurrentInteraction->GetFocusedOption().Text}));
 }
 
 void AVestigeHUD::FollowInventory()
@@ -342,7 +381,7 @@ void AVestigeHUD::RefreshKeyHintsText()
 	TArray<FText> HotbarHints;
 	if (const UVestigeInventoryComponent* CurrentInventory = Inventory.Get())
 	{
-		for (const FVestigeKeyHint& Hint : CurrentFarmer->GetHotbarKeyHints(*CurrentInventory))
+		for (const FVestigeKeyHint& Hint : CurrentFarmer->GetHotbarKeyHints(*CurrentInventory, HintDevice))
 		{
 			HotbarHints.Add(VestigeHudHints::Format(Hint));
 		}
@@ -354,7 +393,7 @@ void AVestigeHUD::RefreshKeyHintsText()
 	{
 		Groups.Add(FText::Join(FText::AsCultureInvariant(TEXT("   ")), HotbarHints));
 	}
-	for (const FVestigeKeyHint& Hint : CurrentFarmer->GetActionKeyHints())
+	for (const FVestigeKeyHint& Hint : CurrentFarmer->GetActionKeyHints(HintDevice))
 	{
 		Groups.Add(VestigeHudHints::Format(Hint));
 	}

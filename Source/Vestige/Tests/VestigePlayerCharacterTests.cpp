@@ -40,7 +40,7 @@ namespace VestigePlayerCharacterTests
 		{
 			const AVestigePlayerCharacter& Farmer = SpawnBlueprintFarmer();
 
-			const TArray<FVestigeKeyHint> Hints = Farmer.GetActionKeyHints();
+			const TArray<FVestigeKeyHint> Hints = Farmer.GetActionKeyHints(EVestigeHintDevice::KeyboardAndMouse);
 
 			// One hint per action with a description, with its keyboard key: the gamepad keys (X, B) don't show.
 			ASSERT_THAT(IsTrue(Hints.Num() == 2));
@@ -50,6 +50,32 @@ namespace VestigePlayerCharacterTests
 			{
 				ASSERT_THAT(IsFalse(Hint.Action.IsEmpty()));
 			}
+		}
+
+		TEST_METHOD(GamepadActionHintsNameTheGamepadKeys)
+		{
+			const AVestigePlayerCharacter& Farmer = SpawnBlueprintFarmer();
+
+			const TArray<FVestigeKeyHint> KeyboardHints = Farmer.GetActionKeyHints(EVestigeHintDevice::KeyboardAndMouse);
+			const TArray<FVestigeKeyHint> GamepadHints = Farmer.GetActionKeyHints(EVestigeHintDevice::Gamepad);
+
+			// The same actions, with the gamepad's keys in their short names.
+			ASSERT_THAT(IsTrue(GamepadHints.Num() == 2));
+			ASSERT_THAT(IsTrue(GamepadHints[0].Key.ToString() == TEXT("X")));
+			ASSERT_THAT(IsTrue(GamepadHints[1].Key.ToString() == TEXT("B")));
+			ASSERT_THAT(IsTrue(KeyboardHints.Num() == GamepadHints.Num()));
+			for (int32 Index = 0; Index < GamepadHints.Num(); ++Index)
+			{
+				ASSERT_THAT(IsTrue(GamepadHints[Index].Action.EqualTo(KeyboardHints[Index].Action)));
+			}
+		}
+
+		TEST_METHOD(TheInteractKeyFollowsTheDevice)
+		{
+			const AVestigePlayerCharacter& Farmer = SpawnBlueprintFarmer();
+
+			ASSERT_THAT(IsTrue(Farmer.GetInteractKey(EVestigeHintDevice::KeyboardAndMouse).ToString() == TEXT("F")));
+			ASSERT_THAT(IsTrue(Farmer.GetInteractKey(EVestigeHintDevice::Gamepad).ToString() == TEXT("B")));
 		}
 
 		TEST_METHOD(MovementInputRampsInFromThePress)
@@ -137,10 +163,32 @@ namespace VestigePlayerCharacterTests
 			Inventory->RestoreFromSaveData(Bag);
 
 			// Slot 1 is empty and slot 10 is past the hotbar, so two hints, for the keys 1 and 3.
-			const TArray<FVestigeKeyHint> Hints = Farmer.GetHotbarKeyHints(*Inventory);
+			const TArray<FVestigeKeyHint> Hints = Farmer.GetHotbarKeyHints(*Inventory, EVestigeHintDevice::KeyboardAndMouse);
 			ASSERT_THAT(IsTrue(Hints.Num() == 2));
 			ASSERT_THAT(IsTrue(Hints[0].Key.ToString() == EKeys::One.GetDisplayName(false).ToString()));
 			ASSERT_THAT(IsTrue(Hints[1].Key.ToString() == EKeys::Three.GetDisplayName(false).ToString()));
+		}
+
+		TEST_METHOD(TheGamepadHotbarHintIsTheSteppingKeys)
+		{
+			AVestigePlayerCharacter& Farmer = SpawnBlueprintFarmer();
+			UVestigeItemData& Hoe = Spawner.SpawnObject<UVestigeItemData>();
+			Hoe.SetContentIdForTests(TEXT("Base.Hoe"));
+			UVestigeInventoryComponent* Inventory = NewObject<UVestigeInventoryComponent>(&Farmer);
+			Inventory->ResetForTests(12, {&Hoe});
+
+			// An empty hotbar has nothing to step through.
+			ASSERT_THAT(IsTrue(Farmer.GetHotbarKeyHints(*Inventory, EVestigeHintDevice::Gamepad).IsEmpty()));
+
+			FVestigeInventorySaveData Bag;
+			Bag.Slots = {{0, Hoe.GetContentId(), 1}, {2, Hoe.GetContentId(), 1}};
+			Inventory->RestoreFromSaveData(Bag);
+
+			// The gamepad has no slot keys, so one hint: the previous and next keys.
+			const TArray<FVestigeKeyHint> Hints = Farmer.GetHotbarKeyHints(*Inventory, EVestigeHintDevice::Gamepad);
+			ASSERT_THAT(IsTrue(Hints.Num() == 1));
+			ASSERT_THAT(IsTrue(Hints[0].Key.ToString() == TEXT("LB / RB")));
+			ASSERT_THAT(IsTrue(Hints[0].Action.ToString() == TEXT("Hotbar")));
 		}
 
 		TEST_METHOD(WithoutAnInputConfigTheHintsAreEmpty)
@@ -155,9 +203,12 @@ namespace VestigePlayerCharacterTests
 			Bag.Slots = {{0, Hoe.GetContentId(), 1}};
 			Inventory->RestoreFromSaveData(Bag);
 
-			ASSERT_THAT(IsTrue(Farmer.GetActionKeyHints().IsEmpty()));
-			ASSERT_THAT(IsTrue(Farmer.GetHotbarKeyHints(*Inventory).IsEmpty()));
-			ASSERT_THAT(IsTrue(Farmer.GetInteractKey().IsEmpty()));
+			for (const EVestigeHintDevice Device : {EVestigeHintDevice::KeyboardAndMouse, EVestigeHintDevice::Gamepad})
+			{
+				ASSERT_THAT(IsTrue(Farmer.GetActionKeyHints(Device).IsEmpty()));
+				ASSERT_THAT(IsTrue(Farmer.GetHotbarKeyHints(*Inventory, Device).IsEmpty()));
+				ASSERT_THAT(IsTrue(Farmer.GetInteractKey(Device).IsEmpty()));
+			}
 		}
 
 		TEST_METHOD(UnpossessingReleasesTheUseKey)

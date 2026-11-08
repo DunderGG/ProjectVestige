@@ -7,6 +7,7 @@
 #include "Blueprint/WidgetBlueprintGeneratedClass.h"
 #include "Components/ActorTestSpawner.h"
 #include "Components/PanelWidget.h"
+#include "CommonInputTypeEnum.h"
 #include "Components/TextBlock.h"
 #include "CQTest.h"
 #include "GameFramework/GameModeBase.h"
@@ -152,6 +153,14 @@ namespace VestigeHudWidgetTests
 
 			Hud->SetStamina(LOCTEXT("Full", "Stamina 100 / 100"), 100, 100, false, false);
 			ASSERT_THAT(IsTrue(StaminaText->GetColorAndOpacity().GetSpecifiedColor().Equals(Normal)));
+		}
+
+		TEST_METHOD(TheHintDeviceFollowsTheInputType)
+		{
+			// The game has no touch controls, so a touch leaves the keyboard hints.
+			ASSERT_THAT(IsTrue(AVestigeHUD::GetHintDevice(ECommonInputType::Gamepad) == EVestigeHintDevice::Gamepad));
+			ASSERT_THAT(IsTrue(AVestigeHUD::GetHintDevice(ECommonInputType::MouseAndKeyboard) == EVestigeHintDevice::KeyboardAndMouse));
+			ASSERT_THAT(IsTrue(AVestigeHUD::GetHintDevice(ECommonInputType::Touch) == EVestigeHintDevice::KeyboardAndMouse));
 		}
 	};
 }

@@ -5,6 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "AbilitySystemInterface.h"
+#include "Player/VestigeKeyHints.h"
 #include "Template/VestigeCharacter.h"
 #include "VestigePlayerCharacter.generated.h"
 
@@ -22,13 +23,6 @@ class UInputMappingContext;
 class UStaticMesh;
 class UStaticMeshComponent;
 struct FGameplayTag;
-
-/** A key the player can press and what it does, for on-screen hints. */
-struct FVestigeKeyHint
-{
-	FText Key;
-	FText Action;
-};
 
 /** A mapping context the pawn adds to its player while it is possessed, and its priority. */
 USTRUCT()
@@ -64,18 +58,22 @@ public:
 	/** The ability system on the player state, or nullptr while no player state is set. */
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
-	/** The hotbar keys in slot order, each named after the item in its slot of Inventory. Empty slots are left out. */
-	TArray<FVestigeKeyHint> GetHotbarKeyHints(const UVestigeInventoryComponent& Inventory) const;
+	/**
+	 * The hotbar's keys on Device. For the keyboard, the slot keys in slot order, each named after the item in its slot of
+	 * Inventory, with empty slots left out. The gamepad has no slot keys, it steps, so for the gamepad one hint, its
+	 * previous and next keys ("LB / RB Hotbar"), when the hotbar has an item.
+	 */
+	TArray<FVestigeKeyHint> GetHotbarKeyHints(const UVestigeInventoryComponent& Inventory, EVestigeHintDevice Device) const;
 
 	/**
 	 * The other farming keys and what they do (use tool, interact): every action of the input config with a description, in
-	 * the config's order, with its keyboard or mouse key in the mapping contexts, so the hints name the keys really bound.
-	 * Empty without an input config.
+	 * the config's order, with its key on Device in the mapping contexts, so the hints name the keys really bound. Empty
+	 * without an input config.
 	 */
-	TArray<FVestigeKeyHint> GetActionKeyHints() const;
+	TArray<FVestigeKeyHint> GetActionKeyHints(EVestigeHintDevice Device) const;
 
-	/** The key that interacts, for the prompt shown next to an interactable. Empty without an input config. */
-	FText GetInteractKey() const;
+	/** The key on Device that interacts, for the prompt shown next to an interactable. Empty without an input config. */
+	FText GetInteractKey(EVestigeHintDevice Device) const;
 
 	/**
 	 * Walks as the template does, and aims the targeting component at the neighbouring tile in the movement direction. The
@@ -120,10 +118,10 @@ private:
 	void RemoveMappingContexts();
 
 	/**
-	 * The first keyboard or mouse key Action is mapped to in MappingContexts (their default mappings), or an invalid key.
-	 * Gamepad keys aren't hinted until the HUD follows the device in use.
+	 * The first key on Device that Action is mapped to in MappingContexts (their default mappings), or an invalid key: a
+	 * gamepad key for the gamepad, and for the keyboard a key that is neither a gamepad, touch nor gesture key.
 	 */
-	FKey FindHintKey(const UInputAction* Action) const;
+	FKey FindHintKey(const UInputAction* Action, EVestigeHintDevice Device) const;
 
 	/** The input config's action for Tag, or nullptr, without logging: hints simply leave it out. */
 	const UInputAction* FindActionForHint(const FGameplayTag& Tag) const;

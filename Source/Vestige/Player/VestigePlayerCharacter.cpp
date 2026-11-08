@@ -28,6 +28,8 @@
 #include "Player/VestigeInputLog.h"
 #include "Player/VestigePlayerState.h"
 
+#define LOCTEXT_NAMESPACE "VestigePlayerCharacter"
+
 namespace FarmerInput
 {
 	/** The direction StepHotbarSlot takes for the hotbar's next and previous actions. */
@@ -241,19 +243,40 @@ UEnhancedInputLocalPlayerSubsystem* AVestigePlayerCharacter::GetInputSubsystem()
 	return PlayerController ? ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()) : nullptr;
 }
 
-TArray<FVestigeKeyHint> AVestigePlayerCharacter::GetHotbarKeyHints(const UVestigeInventoryComponent& Inventory) const
+TArray<FVestigeKeyHint> AVestigePlayerCharacter::GetHotbarKeyHints(
+	const UVestigeInventoryComponent& Inventory, EVestigeHintDevice Device) const
 {
 	TArray<FVestigeKeyHint> Hints;
 	const TArray<FVestigeInventorySlot>& Slots = Inventory.GetSlots();
-	const int32 SlotCount =
-		FMath::Min(Inventory.GetHotbarSlotCount(), static_cast<int32>(UE_ARRAY_COUNT(VestigeGameplayTags::Input_HotbarSlots)));
+	const int32 HotbarSlotCount = FMath::Min(Inventory.GetHotbarSlotCount(), Slots.Num());
+
+	// The gamepad has no slot keys: it steps through the hotbar, so its hint is the two stepping keys.
+	if (Device == EVestigeHintDevice::Gamepad)
+	{
+		bool bHotbarHasAnItem = false;
+		for (int32 Slot = 0; Slot < HotbarSlotCount; ++Slot)
+		{
+			bHotbarHasAnItem |= !Slots[Slot].IsEmpty();
+		}
+		const FKey PreviousKey = FindHintKey(FindActionForHint(VestigeGameplayTags::Input_HotbarPrevious), Device);
+		const FKey NextKey = FindHintKey(FindActionForHint(VestigeGameplayTags::Input_HotbarNext), Device);
+		if (bHotbarHasAnItem && PreviousKey.IsValid() && NextKey.IsValid())
+		{
+			Hints.Add({FText::FormatNamed(LOCTEXT("HotbarStepKeys", "{Previous} / {Next}"), TEXT("Previous"),
+						   VestigeKeyHints::GetKeyName(PreviousKey), TEXT("Next"), VestigeKeyHints::GetKeyName(NextKey)),
+				LOCTEXT("HotbarStepHint", "Hotbar")});
+		}
+		return Hints;
+	}
+
+	const int32 SlotCount = FMath::Min(HotbarSlotCount, static_cast<int32>(UE_ARRAY_COUNT(VestigeGameplayTags::Input_HotbarSlots)));
 	for (int32 Slot = 0; Slot < SlotCount; ++Slot)
 	{
 		const UVestigeItemData* Item = Slots[Slot].Item;
-		const FKey Key = FindHintKey(FindActionForHint(*VestigeGameplayTags::Input_HotbarSlots[Slot]));
+		const FKey Key = FindHintKey(FindActionForHint(*VestigeGameplayTags::Input_HotbarSlots[Slot]), Device);
 		if (Item && Key.IsValid())
 		{
-			Hints.Add({Key.GetDisplayName(false), Item->GetDisplayName()});
+			Hints.Add({VestigeKeyHints::GetKeyName(Key), Item->GetDisplayName()});
 		}
 	}
 	return Hints;
@@ -277,7 +300,7 @@ void AVestigePlayerCharacter::StepHotbarSlot(int32 Direction)
 	}
 }
 
-TArray<FVestigeKeyHint> AVestigePlayerCharacter::GetActionKeyHints() const
+TArray<FVestigeKeyHint> AVestigePlayerCharacter::GetActionKeyHints(EVestigeHintDevice Device) const
 {
 	TArray<FVestigeKeyHint> Hints;
 	if (!InputConfig)
@@ -290,19 +313,19 @@ TArray<FVestigeKeyHint> AVestigePlayerCharacter::GetActionKeyHints() const
 		{
 			continue;
 		}
-		const FKey Key = FindHintKey(Entry.InputAction);
+		const FKey Key = FindHintKey(Entry.InputAction, Device);
 		if (Key.IsValid())
 		{
-			Hints.Add({Key.GetDisplayName(false), Entry.InputAction->ActionDescription});
+			Hints.Add({VestigeKeyHints::GetKeyName(Key), Entry.InputAction->ActionDescription});
 		}
 	}
 	return Hints;
 }
 
-FText AVestigePlayerCharacter::GetInteractKey() const
+FText AVestigePlayerCharacter::GetInteractKey(EVestigeHintDevice Device) const
 {
-	const FKey Key = FindHintKey(FindActionForHint(VestigeGameplayTags::Input_Interact));
-	return Key.IsValid() ? Key.GetDisplayName(false) : FText::GetEmpty();
+	const FKey Key = FindHintKey(FindActionForHint(VestigeGameplayTags::Input_Interact), Device);
+	return Key.IsValid() ? VestigeKeyHints::GetKeyName(Key) : FText::GetEmpty();
 }
 
 const UInputAction* AVestigePlayerCharacter::FindActionForHint(const FGameplayTag& Tag) const
@@ -310,7 +333,7 @@ const UInputAction* AVestigePlayerCharacter::FindActionForHint(const FGameplayTa
 	return InputConfig ? InputConfig->FindNativeInputActionForTag(Tag, false) : nullptr;
 }
 
-FKey AVestigePlayerCharacter::FindHintKey(const UInputAction* Action) const
+FKey AVestigePlayerCharacter::FindHintKey(const UInputAction* Action, EVestigeHintDevice Device) const
 {
 	// The assets' default mappings are right while keys can't be rebound. With rebinding, this asks Enhanced Input for the
 	// player's current key instead (Roadmap.md, the settings item).
@@ -326,7 +349,14 @@ FKey AVestigePlayerCharacter::FindHintKey(const UInputAction* Action) const
 		}
 		for (const FEnhancedActionKeyMapping& Mapping : Entry.MappingContext->GetMappings())
 		{
-			if (Mapping.Action == Action && !Mapping.Key.IsGamepadKey() && !Mapping.Key.IsTouch() && !Mapping.Key.IsGesture())
+			if (Mapping.Action != Action)
+			{
+				continue;
+			}
+			const bool bOnDevice = Device == EVestigeHintDevice::Gamepad
+				? Mapping.Key.IsGamepadKey()
+				: !Mapping.Key.IsGamepadKey() && !Mapping.Key.IsTouch() && !Mapping.Key.IsGesture();
+			if (bOnDevice)
 			{
 				return Mapping.Key;
 			}
@@ -353,3 +383,5 @@ void AVestigePlayerCharacter::SetupPlayerInputComponentForTests(UInputComponent&
 	SetupPlayerInputComponent(&TestInputComponent);
 }
 #endif
+
+#undef LOCTEXT_NAMESPACE
