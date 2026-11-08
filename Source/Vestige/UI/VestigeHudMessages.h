@@ -23,8 +23,8 @@ struct FVestigeHudMessage
 
 /**
  * The feedback messages on screen, oldest first. Each shows in its own box for its own lifetime, fading in and out, and
- * the oldest goes when the list is full. Plain C++, so the rules are tested without Slate or a world: AVestigeHUD keeps one
- * and SVestigeHudWidget draws it.
+ * the oldest goes when the list is full. Plain C++, so the rules are tested without UMG or a world: AVestigeHUD keeps one
+ * and UVestigeHudWidget shows it, each message in a UVestigeHudMessageWidget.
  */
 class FVestigeHudMessages
 {

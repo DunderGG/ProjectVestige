@@ -9,6 +9,7 @@
 #include "AbilitySystemGlobals.h"
 #include "Content/VestigeItemData.h"
 #include "Core/VestigeFeedbackSubsystem.h"
+#include "Core/VestigeLog.h"
 #include "Engine/GameViewportClient.h"
 #include "Engine/World.h"
 #include "GameFramework/Pawn.h"
@@ -58,6 +59,14 @@ namespace VestigeHudHints
 	}
 }
 
+AVestigeHUD::AVestigeHUD()
+{
+	// The HUD ticks for the clock alone: the time changes every frame with no event (the clock broadcasts only whole
+	// hours, Roadmap.md), so Tick compares two numbers and rebuilds the status line only when the shown minute changes.
+	// The tick is turned off when there is no widget or no clock to show.
+	PrimaryActorTick.bCanEverTick = true;
+}
+
 void AVestigeHUD::BeginPlay()
 {
 	Super::BeginPlay();
@@ -66,24 +75,39 @@ void AVestigeHUD::BeginPlay()
 	MaxMessages = Settings.GetMaxMessages();
 	MessageSeconds = Settings.GetMessageSeconds();
 
-	UGameViewportClient* Viewport = GetWorld() ? GetWorld()->GetGameViewport() : nullptr;
-	if (!PlayerOwner || !PlayerOwner->IsLocalController() || !Viewport)
+	// A widget needs a local player on screen: CreateWidget refuses a controller without one.
+	const UWorld* World = GetWorld();
+	if (!PlayerOwner || !PlayerOwner->GetLocalPlayer() || !World || !World->GetGameViewport())
 	{
+		SetActorTickEnabled(false);
 		return;
 	}
+	if (!HudWidgetClass)
+	{
+		VESTIGE_LOG(this, LogVestige, Error, "No HUD Widget Class is set, so the HUD shows nothing. Set it on BP_HUD.");
+		SetActorTickEnabled(false);
+		return;
+	}
+	HudWidget = CreateWidget<UVestigeHudWidget>(PlayerOwner, HudWidgetClass);
+	if (!HudWidget)
+	{
+		SetActorTickEnabled(false);
+		return;
+	}
+	HudWidget->AddToPlayerScreen();
 
-	Clock = UVestigeClockSubsystem::Get(GetWorld());
+	// Each follow refreshes its texts at once, which now reach the widget.
+	Clock = UVestigeClockSubsystem::Get(World);
+	SetActorTickEnabled(Clock.IsValid());
 	PlayerOwner->OnPossessedPawnChanged.AddDynamic(this, &AVestigeHUD::FollowPawn);
 	FollowPawn(nullptr, PlayerOwner->GetPawn());
 	FollowInventory();
 	FollowAbilitySystem();
-	if (UVestigeFeedbackSubsystem* Feedback = GetWorld()->GetSubsystem<UVestigeFeedbackSubsystem>())
+	if (UVestigeFeedbackSubsystem* Feedback = World->GetSubsystem<UVestigeFeedbackSubsystem>())
 	{
 		Feedback->OnFeedback.AddUObject(this, &AVestigeHUD::ShowMessage);
 	}
-
-	HudWidget = SNew(SVestigeHudWidget).Hud(this);
-	Viewport->AddViewportWidgetContent(HudWidget.ToSharedRef());
+	MessagesChanged();
 }
 
 void AVestigeHUD::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -109,49 +133,57 @@ void AVestigeHUD::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	{
 		Feedback->OnFeedback.RemoveAll(this);
 	}
+
+	// The widget's outer is the game instance, which outlives this map, so it is let go here.
 	if (HudWidget)
 	{
-		if (UGameViewportClient* Viewport = GetWorld() ? GetWorld()->GetGameViewport() : nullptr)
-		{
-			Viewport->RemoveViewportWidgetContent(HudWidget.ToSharedRef());
-		}
-		HudWidget.Reset();
+		HudWidget->RemoveFromParent();
+		HudWidget = nullptr;
 	}
 	Super::EndPlay(EndPlayReason);
 }
 
-FText AVestigeHUD::GetStatusText() const
+void AVestigeHUD::Tick(float DeltaSeconds)
 {
+	Super::Tick(DeltaSeconds);
+
 	const UVestigeClockSubsystem* CurrentClock = Clock.Get();
 	if (!CurrentClock)
 	{
-		return FText::GetEmpty();
+		return;
+	}
+	if (CurrentClock->GetCurrentDay() != StatusDay || VestigeHudClock::ToShownMinutes(CurrentClock->GetTimeOfDay()) != StatusClockMinutes)
+	{
+		RefreshStatusText();
+	}
+}
+
+void AVestigeHUD::RefreshStatusText()
+{
+	const UVestigeClockSubsystem* CurrentClock = Clock.Get();
+	if (!HudWidget || !CurrentClock)
+	{
+		return;
 	}
 
-	const int32 Day = CurrentClock->GetCurrentDay();
-	const int32 ClockMinutes = VestigeHudClock::ToShownMinutes(CurrentClock->GetTimeOfDay());
-	if (Day != StatusDay || ClockMinutes != StatusClockMinutes)
-	{
-		StatusDay = Day;
-		StatusClockMinutes = ClockMinutes;
-		StatusText = FText::FormatNamed(LOCTEXT("Status", "Day {Day}   {Clock}   |   {Item}"), TEXT("Day"), Day, TEXT("Clock"),
-			VestigeHudClock::Format(ClockMinutes), TEXT("Item"), ItemInHandText);
-	}
-	return StatusText;
+	StatusDay = CurrentClock->GetCurrentDay();
+	StatusClockMinutes = VestigeHudClock::ToShownMinutes(CurrentClock->GetTimeOfDay());
+	HudWidget->SetStatusText(FText::FormatNamed(LOCTEXT("Status", "Day {Day}   {Clock}   |   {Item}"), TEXT("Day"), StatusDay,
+		TEXT("Clock"), VestigeHudClock::Format(StatusClockMinutes), TEXT("Item"), ItemInHandText));
 }
 
 void AVestigeHUD::FollowPawn(APawn* OldPawn, APawn* NewPawn)
 {
 	StopFollowingPawn();
 	Farmer = Cast<AVestigePlayerCharacter>(NewPawn);
-	RefreshControlsText();
+	RefreshKeyHintsText();
 
 	Interaction = NewPawn ? NewPawn->FindComponentByClass<UVestigeInteractionComponent>() : nullptr;
 	if (UVestigeInteractionComponent* NewInteraction = Interaction.Get())
 	{
-		NewInteraction->OnFocusChanged.AddUObject(this, &AVestigeHUD::RefreshInteractionText);
+		NewInteraction->OnFocusChanged.AddUObject(this, &AVestigeHUD::RefreshPromptText);
 	}
-	RefreshInteractionText();
+	RefreshPromptText();
 }
 
 void AVestigeHUD::StopFollowingPawn()
@@ -162,16 +194,21 @@ void AVestigeHUD::StopFollowingPawn()
 	}
 }
 
-void AVestigeHUD::RefreshInteractionText()
+void AVestigeHUD::RefreshPromptText()
 {
+	if (!HudWidget)
+	{
+		return;
+	}
+
 	const UVestigeInteractionComponent* CurrentInteraction = Interaction.Get();
 	const AVestigePlayerCharacter* CurrentFarmer = Farmer.Get();
 	if (!CurrentInteraction || !CurrentFarmer || !CurrentInteraction->GetFocusedActor())
 	{
-		InteractionText = FText::GetEmpty();
+		HudWidget->SetPromptText(FText::GetEmpty());
 		return;
 	}
-	InteractionText = VestigeHudHints::Format({CurrentFarmer->GetInteractKey(), CurrentInteraction->GetFocusedOption().Text});
+	HudWidget->SetPromptText(VestigeHudHints::Format({CurrentFarmer->GetInteractKey(), CurrentInteraction->GetFocusedOption().Text}));
 }
 
 void AVestigeHUD::FollowInventory()
@@ -181,10 +218,10 @@ void AVestigeHUD::FollowInventory()
 	if (UVestigeInventoryComponent* CurrentInventory = Inventory.Get())
 	{
 		CurrentInventory->OnInventoryChanged.AddUObject(this, &AVestigeHUD::RefreshInventoryTexts);
-		CurrentInventory->OnItemInHandChanged.AddUObject(this, &AVestigeHUD::RefreshItemInHandTexts);
+		CurrentInventory->OnItemInHandChanged.AddUObject(this, &AVestigeHUD::RefreshItemInHandText);
 	}
 	RefreshInventoryTexts();
-	RefreshItemInHandTexts();
+	RefreshItemInHandText();
 }
 
 void AVestigeHUD::FollowAbilitySystem()
@@ -199,78 +236,79 @@ void AVestigeHUD::FollowAbilitySystem()
 			CurrentAbilitySystem->GetGameplayAttributeValueChangeDelegate(Attribute).AddWeakLambda(this,
 				[this](const FOnAttributeChangeData&)
 				{
-					RefreshStaminaText();
+					RefreshStamina();
 				});
 		}
 
 		// The set decides when the player is out of stamina; the HUD follows its tag rather than judging the number itself.
-		CurrentAbilitySystem->RegisterGameplayTagEvent(VestigeGameplayTags::State_OutOfStamina)
-			.AddUObject(this, &AVestigeHUD::RefreshOutOfStamina);
-		bOutOfStamina = CurrentAbilitySystem->HasMatchingGameplayTag(VestigeGameplayTags::State_OutOfStamina);
-		CurrentAbilitySystem->RegisterGameplayTagEvent(VestigeGameplayTags::State_Exhausted)
-			.AddWeakLambda(this,
+		for (const FGameplayTag& Tag : {VestigeGameplayTags::State_OutOfStamina.GetTag(), VestigeGameplayTags::State_Exhausted.GetTag()})
+		{
+			CurrentAbilitySystem->RegisterGameplayTagEvent(Tag).AddWeakLambda(this,
 				[this](const FGameplayTag, int32)
 				{
-					RefreshStaminaText();
+					RefreshStamina();
 				});
+		}
 	}
-	RefreshStaminaText();
+	RefreshStamina();
 }
 
-void AVestigeHUD::RefreshOutOfStamina(const FGameplayTag Tag, int32 NewCount)
+void AVestigeHUD::RefreshStamina()
 {
-	bOutOfStamina = NewCount > 0;
-	if (HudWidget)
+	if (!HudWidget)
 	{
-		HudWidget->RefreshStaminaColor();
+		return;
 	}
-}
 
-void AVestigeHUD::RefreshStaminaText()
-{
 	const UAbilitySystemComponent* CurrentAbilitySystem = AbilitySystem.Get();
 	if (!CurrentAbilitySystem || !CurrentAbilitySystem->HasAttributeSetForAttribute(UVestigeStaminaSet::GetStaminaAttribute()))
 	{
-		StaminaText = FText::GetEmpty();
+		HudWidget->SetStamina(FText::GetEmpty(), 0, 0, false, false);
 		return;
 	}
 
 	// Rounded up, so the HUD only shows 0 when the player is really out of stamina.
 	const int32 Stamina = FMath::CeilToInt(CurrentAbilitySystem->GetNumericAttribute(UVestigeStaminaSet::GetStaminaAttribute()));
 	const int32 MaxStamina = FMath::RoundToInt(CurrentAbilitySystem->GetNumericAttribute(UVestigeStaminaSet::GetMaxStaminaAttribute()));
-	StaminaText = FText::FormatNamed(
+	const bool bOutOfStamina = CurrentAbilitySystem->HasMatchingGameplayTag(VestigeGameplayTags::State_OutOfStamina);
+	const bool bExhausted = CurrentAbilitySystem->HasMatchingGameplayTag(VestigeGameplayTags::State_Exhausted);
+	FText Text = FText::FormatNamed(
 		LOCTEXT("Stamina", "Stamina {Stamina} / {MaxStamina}"), TEXT("Stamina"), Stamina, TEXT("MaxStamina"), MaxStamina);
-	if (CurrentAbilitySystem->HasMatchingGameplayTag(VestigeGameplayTags::State_Exhausted))
+	if (bExhausted)
 	{
-		StaminaText = FText::FormatNamed(LOCTEXT("StaminaExhausted", "{Stamina}   Exhausted"), TEXT("Stamina"), StaminaText);
+		Text = FText::FormatNamed(LOCTEXT("StaminaExhausted", "{Stamina}   Exhausted"), TEXT("Stamina"), Text);
 	}
+	HudWidget->SetStamina(Text, Stamina, MaxStamina, bOutOfStamina, bExhausted);
 }
 
-void AVestigeHUD::RefreshItemInHandTexts()
+void AVestigeHUD::RefreshItemInHandText()
 {
 	// Read now rather than passed, since a nested change may reach this handler out of order.
 	const UVestigeInventoryComponent* CurrentInventory = Inventory.Get();
 	const UVestigeItemData* Item = CurrentInventory ? CurrentInventory->GetItemInHand() : nullptr;
 	ItemInHandText = Item ? Item->GetDisplayName() : LOCTEXT("EmptyHand", "Empty hand");
-
-	// The status line shows the item in hand, so it is built again on its next read.
-	StatusDay = INDEX_NONE;
+	RefreshStatusText();
 }
 
 void AVestigeHUD::RefreshInventoryTexts()
 {
-	RefreshInventoryText();
+	RefreshBagText();
 
 	// The hotbar hints name the items in the hotbar slots.
-	RefreshControlsText();
+	RefreshKeyHintsText();
 }
 
-void AVestigeHUD::RefreshInventoryText()
+void AVestigeHUD::RefreshBagText()
 {
+	if (!HudWidget)
+	{
+		return;
+	}
+
 	const UVestigeInventoryComponent* CurrentInventory = Inventory.Get();
 	if (!CurrentInventory)
 	{
-		InventoryText = FText::GetEmpty();
+		HudWidget->SetBagText(FText::GetEmpty());
 		return;
 	}
 
@@ -284,15 +322,20 @@ void AVestigeHUD::RefreshInventoryText()
 		}
 	}
 	const FText Contents = Stacks.IsEmpty() ? LOCTEXT("BagEmpty", "empty") : FText::Join(FText::AsCultureInvariant(TEXT("   ")), Stacks);
-	InventoryText = FText::FormatNamed(LOCTEXT("Inventory", "Bag: {Contents}"), TEXT("Contents"), Contents);
+	HudWidget->SetBagText(FText::FormatNamed(LOCTEXT("Inventory", "Bag: {Contents}"), TEXT("Contents"), Contents));
 }
 
-void AVestigeHUD::RefreshControlsText()
+void AVestigeHUD::RefreshKeyHintsText()
 {
+	if (!HudWidget)
+	{
+		return;
+	}
+
 	const AVestigePlayerCharacter* CurrentFarmer = Farmer.Get();
 	if (!CurrentFarmer)
 	{
-		ControlsText = FText::GetEmpty();
+		HudWidget->SetKeyHintsText(FText::GetEmpty());
 		return;
 	}
 
@@ -315,7 +358,7 @@ void AVestigeHUD::RefreshControlsText()
 	{
 		Groups.Add(VestigeHudHints::Format(Hint));
 	}
-	ControlsText = FText::Join(FText::AsCultureInvariant(TEXT("   |   ")), Groups);
+	HudWidget->SetKeyHintsText(FText::Join(FText::AsCultureInvariant(TEXT("   |   ")), Groups));
 }
 
 void AVestigeHUD::ShowMessage(const FText& Message)
@@ -334,7 +377,7 @@ void AVestigeHUD::MessagesChanged()
 {
 	if (HudWidget)
 	{
-		HudWidget->RefreshMessages();
+		HudWidget->ShowMessages(Messages.GetMessages(), MessageSeconds);
 	}
 
 	// Every message lives as long, so one timer for the oldest is enough; it is set again each time the list changes.
@@ -349,16 +392,6 @@ void AVestigeHUD::MessagesChanged()
 	constexpr float MinimumWaitSeconds = 0.001f;
 	GetWorldTimerManager().SetTimer(
 		ExpireTimer, this, &AVestigeHUD::RemoveExpiredMessages, FMath::Max(MinimumWaitSeconds, static_cast<float>(SecondsLeft.GetValue())));
-}
-
-float AVestigeHUD::GetMessageOpacity(int32 Index) const
-{
-	const TArray<FVestigeHudMessage>& Shown = Messages.GetMessages();
-	if (!Shown.IsValidIndex(Index) || !GetWorld())
-	{
-		return 0.f;
-	}
-	return FVestigeHudMessages::GetOpacity(Shown[Index].StartTime, GetWorld()->GetTimeSeconds(), MessageSeconds);
 }
 
 #undef LOCTEXT_NAMESPACE

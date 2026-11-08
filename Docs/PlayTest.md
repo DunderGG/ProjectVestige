@@ -413,6 +413,20 @@ The farming keys are input assets now: `IA_` actions and `IMC_Farming` in `Conte
 - [x] **Contexts don't stack**: while playing, open the console and type `showdebug enhancedinput`. `IMC_Default`, `IMC_MouseLook` and `IMC_Farming` each show once. Then have the farmer possessed again and check that each still shows once. There is no console command that only re-possesses: try F8 twice in Play in Editor (eject, then possess); if `showdebug enhancedinput` shows the contexts the whole time, ejecting didn't unpossess him, so tell the agent, and a `RepossessPlayer` cheat or an automated test takes this check's place ([Roadmap.md, 4.0](Roadmap.md#40-structure-from-the-code-review)).
 - [ ] **Packaged build**: a packaged Development build has working input: move, look, jump, E, F, 1 to 9 and the mouse wheel.
 
+### The HUD in UMG, 2026-11-08
+
+The HUD is UMG now instead of C++ Slate: `WBP_Hud` and `WBP_HudMessage` in `Content/Vestige/UI`, named by the new `BP_HUD`, which `BP_GameMode` uses as its HUD class ([Systems.md, section 6](Systems.md#6-user-interface)). It should look and behave exactly as before. The commit is the one titled "Move the HUD to UMG".
+
+- [ ] **Solution**: regenerate the project files (right-click `Vestige.uproject` > Generate Visual Studio project files): the solution lists `UI/VestigeHudMessageWidget.h` and `.cpp` and `Tests/VestigeHudWidgetTests.cpp`.
+- [ ] **Looks as before**: press Play. Top left, the status panel reads the day, clock and item in hand, then "Stamina 100 / 100" and the bag line, on the dark backdrop; the key hints run along the bottom; facing the bed shows "F Sleep" below the farmer, and a ripe crop "F Harvest". Fonts, sizes, colours, shadows and spacing match what you had. Say if anything moved or changed size.
+- [ ] **Smaller window**: play in a smaller window (Play > New Editor Window, then resize it): the HUD scales down the same way it used to and nothing overlaps.
+- [ ] **Messages**: sleep (F at the bed). "You slept. Day N begins." and the messages after it each appear in a box of their own, stacked above the key hints, fade in, and fade out one after another. Harvesting several crops quickly shows at most five boxes.
+- [ ] **Out of stamina**: keep tilling and watering until "Stamina 0 / 100": the stamina line turns red with the out-of-stamina message, and goes white again after sleeping.
+- [ ] **The mouse isn't caught**: while playing, the mouse still turns the camera everywhere on screen, including over the status panel and the messages.
+- [ ] **Designer**: open `Content/Vestige/UI/WBP_Hud`. The Hierarchy shows the overlay with `StatusPanel`, `PromptBox`, `MessageList` and `KeyHintsText`, and the Designer shows the HUD with preview texts. Select `StatusPanel`, change its Brush Color, Compile and press Play: the panel shows the new colour without building. Then put the colour back (or close without saving). `WBP_HudMessage` opens too and shows "Game saved." in its box.
+- [ ] **Widget Reflector**: while playing, press Ctrl+Shift+W, then **Pick Hit-Testable Widgets** and hover over the HUD: it picks the game viewport, never a HUD widget. **Pick Painted Widgets** over the status line finds `StatusText` inside `WBP_Hud`.
+- [ ] **No widget class**: open `Content/Vestige/Blueprints/BP_HUD` and clear **HUD Widget Class**, Compile, and press Play: no HUD shows and the Output Log has the error "No HUD Widget Class is set, so the HUD shows nothing". Then set it back to `WBP_Hud` (or close without saving).
+- [ ] **Packaged build**: a packaged Development build shows the HUD as in the editor.
 ### Editor chores
 
 Changes only the editor can make safely. The steps are in [Roadmap.md, Housekeeping](Roadmap.md#3-housekeeping): re-saving the template Blueprints and `L_Farm`, moving `BP_FarmTile` and the materials with redirectors fixed, and regenerating the Android File Server token if it was ever used. After each one, run the [smoke test](#3-smoke-test).

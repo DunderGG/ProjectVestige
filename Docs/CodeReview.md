@@ -110,6 +110,8 @@ Slate is the engine's own UI layer; game HUDs are normally UMG widgets, with Com
 
 **Fix.** Before the 4.6 hotbar, move the HUD to UMG with a C++ base class or a view model (the MVVM plugin, which [Systems.md, section 6](Systems.md#6-user-interface) already names), and adopt Common UI with the first menu.
 
+**Status: HUD resolved (2026-11-08); Common UI waits for the first menu.** The HUD is UMG: `WBP_Hud` on the C++ base `UVestigeHudWidget`, with each feedback message in a reused `WBP_HudMessage` (`UVestigeHudMessageWidget`); `AVestigeHUD` stays the data side and pushes its event-built texts, and `BP_HUD` and `BP_GameMode` name the widget. The widgets fire Blueprint events after each change so a Blueprint can restyle without C++. No MVVM plugin: the HUD has six fields. Design in [Systems.md, section 6](Systems.md#6-user-interface).
+
 ### H8 — Rendering is Unreal's maximum feature set, unmeasured on the target
 
 `Config/DefaultEngine.ini` turns on hardware ray tracing project-wide, Lumen for lighting and reflections, virtual shadow maps, mesh distance fields and Substrate, and the default performance level stays at Maximum. The target is an RTX 2060 at 60 fps, 1080p High ([Architecture.md, section 10](Architecture.md#budget)). On top of that the sun moves every frame (`AVestigeDayCycle::Tick`), and a moving directional light makes virtual shadow maps redraw their cached shadows every frame, one of the most expensive things to do with them. The first performance baseline is still an open item.

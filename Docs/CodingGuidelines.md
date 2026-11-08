@@ -60,7 +60,7 @@ Follow Epic's naming rules. The `.editorconfig` in the repo enforces the prefixe
 |---|---|---|
 | `A` | Classes deriving from `AActor` | `AFarmGrid` |
 | `U` | Classes deriving from `UObject` (components, subsystems, data assets) | `UFarmingComponent` |
-| `S` | Slate widgets | `SVestigeHudWidget` |
+| `S` | Slate widgets (none of ours yet; UI is UMG) | `STextBlock` |
 | `F` | Structs and most other classes | `FFarmTileSaveData` |
 | `E` | Enums | `EFarmTileState` |
 | `I` | Interfaces | `IVestigeInteractable` |
@@ -263,7 +263,7 @@ Choose a member's pointer type by what the reference **means**, not by habit:
 | points at something we don't own and must not keep alive (another actor that may be destroyed, the HUD from a Slate widget) | `TWeakObjectPtr<T>` | Weak: becomes null when the target is destroyed. Check with `IsValid()` or `Get()` before use. Add `UPROPERTY()` when the editor or serialization needs to see it |
 | names an asset that shouldn't load with the class (crop meshes, data assets for content not in use) | `UPROPERTY() TSoftObjectPtr<T>` / `TSoftClassPtr<T>` | Soft: stores the asset's path; load it when needed |
 
-`SVestigeHudWidget` holding its HUD in a `TWeakObjectPtr` is an example of the second row.
+`AVestigeHUD` holding the clock subsystem and the interaction component in `TWeakObjectPtr`s is an example of the second row.
 
 - Non-`UObject` heap data: `TUniquePtr`, `TSharedPtr`, `TSharedRef` (Slate widgets use `TSharedPtr`).
 - Raw pointers are fine for locals and parameters that don't outlive the call.
@@ -396,7 +396,7 @@ Not in `Tick`, not in a timer that runs every frame, and not in a Slate or UMG b
 
 ### 12.6 User interface
 
-- Slate attribute bindings (`.Text(this, &SVestigeHudWidget::GetStatusText)`) and UMG property bindings run every frame. Bind only values that change every frame (the clock). Everything else is set when an event says it changed.
+- UMG property bindings and Slate attribute bindings run every frame, so we use none: a widget is set when an event says what it shows changed. The clock is the one value that changes with no event; `AVestigeHUD::Tick` reads it and sets the status line only when the shown minute changes. No Blueprint `Tick` in widgets; a widget that animates every frame (a fading message box) ticks in C++ only while it is shown.
 - A bound getter only reads values the widget or HUD already holds. It never searches, loads or calls into game code that does.
 
 ### 12.7 Bulk and once-a-day work
