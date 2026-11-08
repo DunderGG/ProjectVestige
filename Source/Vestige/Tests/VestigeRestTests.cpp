@@ -277,21 +277,20 @@ namespace VestigeRestTests
 			const FPlayerSetup& Setup = Player;
 			UVestigeFeedbackSubsystem* Feedback = Spawner.GetWorld().GetSubsystem<UVestigeFeedbackSubsystem>();
 			ASSERT_THAT(IsNotNull(Feedback));
-			TArray<FString> Messages;
+			TArray<FGameplayTag> Reports;
 			Feedback->OnFeedback.AddLambda(
-				[&Messages](const FText& Message)
+				[&Reports](const FVestigeFeedbackReport& Report)
 				{
-					Messages.Add(Message.ToString());
+					Reports.Add(Report.Tag);
 				});
 			SetClock(*Setup.Clock, 21.5f);
 
 			PassHours(*Setup.Clock, 1.f);
-			ASSERT_THAT(IsTrue(Messages.Num() == 1));
-			ASSERT_THAT(IsTrue(Messages[0].Contains(TEXT("getting late"))));
+			ASSERT_THAT(IsTrue(Reports == TArray<FGameplayTag>{VestigeGameplayTags::Feedback_Rest_GettingLate}));
 
 			PassHours(*Setup.Clock, 2.f);
-			ASSERT_THAT(IsTrue(Messages.Num() == 2));
-			ASSERT_THAT(IsTrue(Messages[1].Contains(TEXT("midnight"))));
+			ASSERT_THAT(IsTrue(Reports
+				== TArray<FGameplayTag>{VestigeGameplayTags::Feedback_Rest_GettingLate, VestigeGameplayTags::Feedback_Rest_PastMidnight}));
 		}
 
 		TEST_METHOD(ExhaustionRoundTripsThroughTheSave)

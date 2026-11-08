@@ -23,6 +23,7 @@
 #include "Player/VestigePlayerCharacter.h"
 #include "Time/VestigeClockSubsystem.h"
 #include "TimerManager.h"
+#include "UI/VestigeFeedbackResponses.h"
 #include "UI/VestigeHudSettings.h"
 #include "UI/VestigeHudWidget.h"
 
@@ -108,9 +109,13 @@ void AVestigeHUD::BeginPlay()
 	FollowPawn(nullptr, PlayerOwner->GetPawn());
 	FollowInventory();
 	FollowAbilitySystem();
-	if (UVestigeFeedbackSubsystem* Feedback = World->GetSubsystem<UVestigeFeedbackSubsystem>())
+	if (!FeedbackResponses)
 	{
-		Feedback->OnFeedback.AddUObject(this, &AVestigeHUD::ShowMessage);
+		VESTIGE_LOG(this, LogVestige, Error, "No Feedback Responses are set, so the HUD shows no messages. Set them on BP_HUD.");
+	}
+	else if (UVestigeFeedbackSubsystem* Feedback = World->GetSubsystem<UVestigeFeedbackSubsystem>())
+	{
+		Feedback->OnFeedback.AddUObject(this, &AVestigeHUD::ShowFeedback);
 	}
 	MessagesChanged();
 }
@@ -398,6 +403,23 @@ void AVestigeHUD::RefreshKeyHintsText()
 		Groups.Add(VestigeHudHints::Format(Hint));
 	}
 	HudWidget->SetKeyHintsText(FText::Join(FText::AsCultureInvariant(TEXT("   |   ")), Groups));
+}
+
+void AVestigeHUD::ShowFeedback(const FVestigeFeedbackReport& Report)
+{
+	const FVestigeFeedbackResponse* Response = FeedbackResponses ? FeedbackResponses->FindResponse(Report.Tag) : nullptr;
+	if (!Response)
+	{
+		VESTIGE_LOG(this, LogVestigeFeedback, Warning, "{Responses} has no response to {Tag}, so the player sees nothing for it.",
+			GetNameSafe(FeedbackResponses), Report.Tag.ToString());
+		return;
+	}
+
+	// An empty message is a deliberate choice to show nothing, such as for the morning save.
+	if (!Response->Message.IsEmpty())
+	{
+		ShowMessage(UVestigeFeedbackResponses::FormatMessage(*Response, Report));
+	}
 }
 
 void AVestigeHUD::ShowMessage(const FText& Message)

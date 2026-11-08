@@ -3,24 +3,23 @@
 
 #include "Farming/FarmGameplayAbility_Water.h"
 
+#include "AbilitySystem/VestigeGameplayTags.h"
 #include "Farming/FarmField.h"
 #include "Farming/FarmTileState.h"
 
-#define LOCTEXT_NAMESPACE "FarmGameplayAbility_Water"
-
-bool UFarmGameplayAbility_Water::CanUseOn(const FIntPoint& Tile) const
+bool UFarmGameplayAbility_Water::CanUseOn(const FIntPoint& Tile, FGameplayTag* OutFailureReason) const
 {
 	const UFarmField* Field = GetField();
 	const FFarmTileState* State = Field ? Field->GetTile(Tile) : nullptr;
-	return State && State->CanWater();
+	if (!State)
+	{
+		return FailBecause(OutFailureReason, VestigeGameplayTags::Feedback_Tool_NoTarget);
+	}
+	return State->CanWater() || FailBecause(OutFailureReason, VestigeGameplayTags::Feedback_Farm_CantWater);
 }
 
 bool UFarmGameplayAbility_Water::UseOn(const FIntPoint& Tile)
 {
 	UFarmField* Field = GetField();
-	const bool bWatered = Field && Field->Water(Tile);
-	Notify(bWatered ? LOCTEXT("Watered", "Watered.") : LOCTEXT("CantWater", "Nothing to water here."));
-	return bWatered;
+	return Field && Field->Water(Tile);
 }
-
-#undef LOCTEXT_NAMESPACE

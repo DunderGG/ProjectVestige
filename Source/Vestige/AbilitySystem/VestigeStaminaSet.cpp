@@ -9,8 +9,6 @@
 #include "Core/VestigeFeedbackSubsystem.h"
 #include "GameFramework/Actor.h"
 
-#define LOCTEXT_NAMESPACE "VestigeStaminaSet"
-
 namespace VestigeStamina
 {
 	/** The player's stamina at the start of a game, until characters get their starting stats from data. */
@@ -115,8 +113,7 @@ void UVestigeStaminaSet::PostAttributeChange(const FGameplayAttribute& Attribute
 	const AActor* OwningActor = GetOwningActor();
 	if (bOutOfStamina && OldValue > 0.f && OwningActor)
 	{
-		UVestigeFeedbackSubsystem::Notify(
-			OwningActor->GetWorld(), LOCTEXT("OutOfStamina", "You're out of stamina. Everything takes longer until you sleep."));
+		UVestigeFeedbackSubsystem::Report(OwningActor->GetWorld(), VestigeGameplayTags::Feedback_Stamina_Empty);
 	}
 }
 
@@ -131,5 +128,3 @@ void UVestigeStaminaSet::ClampAttribute(const FGameplayAttribute& Attribute, flo
 		NewValue = FMath::Max(NewValue, 0.f);
 	}
 }
-
-#undef LOCTEXT_NAMESPACE

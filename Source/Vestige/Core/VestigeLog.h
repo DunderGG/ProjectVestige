@@ -9,7 +9,7 @@
 /** Level setup that belongs to no one system, and Epic's template code. Each system has its own category (Systems.md, section 21). */
 DECLARE_LOG_CATEGORY_EXTERN(LogVestige, Log, All);
 
-/** Every message for the player, as UVestigeFeedbackSubsystem::Notify sends it, so the log keeps what the HUD fades. */
+/** Every feedback report for the player, as UVestigeFeedbackSubsystem::Report sends it, so the log keeps what the HUD fades or hides. */
 DECLARE_LOG_CATEGORY_EXTERN(LogVestigeFeedback, Log, All);
 
 namespace VestigeLog

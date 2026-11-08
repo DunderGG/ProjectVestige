@@ -73,9 +73,9 @@ Replaces the earlier messages check (c87081e), after David's note that messages 
 
 Raises the cap from the message boxes checks above.
 
-- [ ] **At most five** (77a2218): with five boxes showing, a sixth message pushes out the oldest. Tilling and planting quickly along a row is the easiest way to get there. The boxes stay clear of the key hints and the status line.
+- [ ] **At most five** (77a2218): with five boxes showing, a sixth message pushes out the oldest. Since M4 (2026-11-08) tilling and planting show no message, so press E with the hoe on tilled soil, then on grass with the watering can, and so on (each press shows its reason). The boxes stay clear of the key hints and the status line.
 - [ ] **Settings** (77a2218): Edit > Project Settings > Game > Vestige HUD shows Max Messages (5) and Message Seconds (3). Changing them takes effect the next time you press Play, and is saved to `Config/DefaultGame.ini`; tell the agent the values you settle on.
-- [ ] **Log** (77a2218): every message also appears in the Output Log (Window > Output Log, filter on `LogVestigeFeedback`) as `[L_Farm] UVestigeFeedbackSubsystem::Notify: ...`, so you can read messages that have already faded. (Updated 2026-11-02 for the logging categories; the line read `LogVestige: Feedback: ...` before.)
+- [ ] **Log** (77a2218): every message also appears in the Output Log (Window > Output Log, filter on `LogVestigeFeedback`) as `[L_Farm] UVestigeFeedbackSubsystem::Notify: ...`, so you can read messages that have already faded. (Updated 2026-11-02 for the logging categories; the line read `LogVestige: Feedback: ...` before. Since M4, 2026-11-08, the line is `UVestigeFeedbackSubsystem::Report:` with the tag, checked under "Feedback reports" below.)
 
 ### Unreal Engine 5.8.4 build, 2026-10-30
 
@@ -440,6 +440,20 @@ The key hints and the prompt name the keys of the device you used last, keyboard
 - [ ] **No cursor**: after using the gamepad, Alt-Tab out of the editor and back, click into the game and move the mouse: the camera turns and no mouse cursor shows. Then use the gamepad and stop Play (Esc): the editor's mouse cursor shows. If it stays hidden, it comes back with the next Play; say so.
 - [ ] **Touch screen** (Dunder-YOGA): touch the game view while playing: the keyboard hints stay (the game has no touch controls).
 - [ ] **Packaged build**: a packaged Development build switches the hints the same way.
+
+### Feedback reports, 2026-11-08
+
+Gameplay no longer writes the player's messages: it reports what happened as a tag, and the HUD shows the text `DA_FeedbackResponses` (`Content/Vestige/UI`) gives it ([Systems.md, section 15](Systems.md#15-visual-effects-and-feedback), feedback reports). The texts are the same as before. The commit is the one titled "Report feedback as tags and let the HUD pick the text".
+
+- [ ] **Solution**: regenerate the project files (right-click `Vestige.uproject` > Generate Visual Studio project files): the solution lists `UI/VestigeFeedbackResponses.h` and `.cpp`.
+- [ ] **Quiet work**: hold E with the hoe across a row of grass, then plant, water and harvest it. No message shows for any use that worked.
+- [ ] **Reasons**: one press of E shows its reason once for each of these: the hoe on tilled soil ("Only grass can be tilled."), the watering can on grass ("Nothing to water here."), seeds on grass ("Seeds need empty tilled soil."), an empty hotbar slot ("Nothing in hand to use."), and any tool facing away from the field ("Stand facing a farm tile."). F on a ripe crop with a full bag shows "No room in your bag." and the crop stays. Holding E on such a tile shows the reason once, not again and again.
+- [ ] **Day and stamina**: sleep: "You slept. Day N begins." shows, and "Game saved." no longer does. Running out of stamina, 22:00, midnight and waking exhausted show their messages as before, and a Play with a save shows "Welcome back. Day N."
+- [ ] **Log**: the Output Log, filtered on `LogVestigeFeedback`, shows a line per report such as `UVestigeFeedbackSubsystem::Report: Vestige.Feedback.Day.Slept Day=2`, also for the save (`Vestige.Feedback.Save.Saved`), which shows nothing on screen.
+- [ ] **Edit without a build**: open `DA_FeedbackResponses` (`Content/Vestige/UI`), give the `Vestige.Feedback.Save.Saved` row the text "Game saved.", save and Play, then sleep: the text shows. Put it back afterwards, or tell the agent to keep it.
+- [ ] **Missing row**: remove the `Vestige.Feedback.Farm.CantWater` row, Play and water grass: nothing shows, and the Output Log has a `LogVestigeFeedback` warning naming the tag and `DA_FeedbackResponses`. Close the asset without saving.
+- [ ] **No grid**: in a level without a `BP_FarmGrid`, Play: no message on screen, and the Output Log warns that the level has no FarmGrid.
+
 ### Editor chores
 
 Changes only the editor can make safely. The steps are in [Roadmap.md, Housekeeping](Roadmap.md#3-housekeeping): re-saving the template Blueprints and `L_Farm`, moving `BP_FarmTile` and the materials with redirectors fixed, and regenerating the Android File Server token if it was ever used. After each one, run the [smoke test](#3-smoke-test).

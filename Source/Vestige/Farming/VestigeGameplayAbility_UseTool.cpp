@@ -12,13 +12,12 @@
 #include "Core/VestigeFeedbackSubsystem.h"
 #include "Farming/FarmField.h"
 #include "Farming/FarmGrid.h"
+#include "Farming/FarmLog.h"
 #include "Farming/FarmingComponent.h"
 #include "Farming/FarmTargetingComponent.h"
 #include "GameFramework/Actor.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Inventory/VestigeInventoryComponent.h"
-
-#define LOCTEXT_NAMESPACE "VestigeGameplayAbility_UseTool"
 
 namespace VestigeUseTool
 {
@@ -149,17 +148,27 @@ void UVestigeGameplayAbility_UseTool::TryNextUse()
 	const TOptional<FIntPoint> Target = TargetingComponent ? TargetingComponent->GetTargetTile() : TOptional<FIntPoint>();
 	if (!Target || !GetField())
 	{
-		if (bFirst)
+		if (bFirst && !ReportFeedback(VestigeGameplayTags::Feedback_Tool_NoTarget))
 		{
-			Notify(LOCTEXT("NoTile", "Stand facing a farm tile."));
+			return;
 		}
 		WaitForTargetOrEnd();
 		return;
 	}
 
-	// A repeat that would change nothing waits quietly, so a held key doesn't post a message on every tile.
-	if (!bFirst && !CanUseOn(*Target))
+	// Only the press says why the tool can't change the target; a repeat waits quietly, so a held key doesn't report on
+	// every tile.
+	FGameplayTag FailureReason;
+	if (!CanUseOn(*Target, bFirst ? &FailureReason : nullptr))
 	{
+		if (bFirst)
+		{
+			ensureMsgf(FailureReason.IsValid(), TEXT("%s::CanUseOn returned false without a reason."), *GetClass()->GetName());
+			if (!ReportFeedback(FailureReason))
+			{
+				return;
+			}
+		}
 		WaitForTargetOrEnd();
 		return;
 	}
@@ -178,6 +187,9 @@ void UVestigeGameplayAbility_UseTool::TryNextUse()
 	}
 	if (!bChanged)
 	{
+		// Nothing runs between CanUseOn and UseOn, so they disagree: a bug in the subclass.
+		VESTIGE_LOG(this, LogFarm, Warning, "{Ability} changed nothing on tile {Tile}, though its CanUseOn said it would.",
+			GetClass()->GetName(), Target->ToString());
 		WaitForTargetOrEnd();
 		return;
 	}
@@ -277,9 +289,22 @@ UVestigeInventoryComponent* UVestigeGameplayAbility_UseTool::GetInventory() cons
 	return Owner ? Owner->FindComponentByClass<UVestigeInventoryComponent>() : nullptr;
 }
 
-void UVestigeGameplayAbility_UseTool::Notify(const FText& Message) const
+bool UVestigeGameplayAbility_UseTool::FailBecause(FGameplayTag* OutFailureReason, const FGameplayTag& Reason)
 {
-	UVestigeFeedbackSubsystem::Notify(GetWorld(), Message);
+	if (OutFailureReason)
+	{
+		*OutFailureReason = Reason;
+	}
+	return false;
 }
 
-#undef LOCTEXT_NAMESPACE
+bool UVestigeGameplayAbility_UseTool::ReportFeedback(const FGameplayTag& Reason)
+{
+	// The report runs other code (the HUD, Blueprint listeners later) that may end this ability, as UseOn may.
+	Step = EUseStep::Using;
+	if (Reason.IsValid())
+	{
+		UVestigeFeedbackSubsystem::Report(GetWorld(), Reason);
+	}
+	return IsActive();
+}

@@ -158,6 +158,8 @@ The farming component posts "Tilled the soil." and "Watered." on every successfu
 
 **Fix.** Gameplay reports results and failure reasons (a gameplay tag or an enum); presentation turns them into text, sound or effects. Successes get a sound and an animation, not a sentence.
 
+**Status: done (2026-11-08).** Gameplay reports a `Vestige.Feedback.*` tag with named values through `UVestigeFeedbackSubsystem::Report`, and the HUD shows the text `DA_FeedbackResponses` (`UVestigeFeedbackResponses`, on `BP_HUD`) gives it. Tool abilities give their reason from `CanUseOn`, reported on the press only; a use that worked reports nothing, the morning save's row is empty, and the missing grid is a log warning only ([Systems.md, section 15](Systems.md#15-visual-effects-and-feedback)). Sounds and animations for successes wait for audio and tool animations, through gameplay cues.
+
 ### M5 — Every inventory loads and keeps every item definition
 
 `UVestigeInventoryComponent::LoadItems` loads all items synchronously and keeps its own map. Chests, the shipping bin and robot inventories would each do it again, and once items have icons, every icon loads at start.

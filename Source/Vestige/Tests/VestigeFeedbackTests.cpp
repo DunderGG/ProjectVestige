@@ -3,12 +3,11 @@
 
 #if WITH_DEV_AUTOMATION_TESTS
 
+#include "AbilitySystem/VestigeGameplayTags.h"
 #include "Components/ActorTestSpawner.h"
 #include "Core/VestigeFeedbackSubsystem.h"
 #include "CQTest.h"
 #include "Engine/World.h"
-
-#define LOCTEXT_NAMESPACE "VestigeFeedbackTests"
 
 // A namespace keeps the fixture's short name from hiding other declarations in unity builds.
 namespace VestigeFeedbackTests
@@ -16,26 +15,39 @@ namespace VestigeFeedbackTests
 	TEST_CLASS(Feedback, "Vestige")
 	{
 		FActorTestSpawner Spawner;
+		TArray<FVestigeFeedbackReport> Received;
 
-		TEST_METHOD(MessagesReachEveryListener)
+		BEFORE_EACH()
 		{
 			UVestigeFeedbackSubsystem* Feedback = Spawner.GetWorld().GetSubsystem<UVestigeFeedbackSubsystem>();
 			ASSERT_THAT(IsNotNull(Feedback));
-			TArray<FText> Received;
 			Feedback->OnFeedback.AddLambda(
-				[&Received](const FText& Message)
+				[this](const FVestigeFeedbackReport& Report)
 				{
-					Received.Add(Message);
+					Received.Add(Report);
 				});
+		}
 
-			UVestigeFeedbackSubsystem::Notify(&Spawner.GetWorld(), LOCTEXT("Tilled", "Tilled the soil."));
+		TEST_METHOD(ReportsReachEveryListener)
+		{
+			UVestigeFeedbackSubsystem::Report(&Spawner.GetWorld(), VestigeGameplayTags::Feedback_Day_Slept, {{TEXT("Day"), 4}});
 
 			ASSERT_THAT(IsTrue(Received.Num() == 1));
-			ASSERT_THAT(IsTrue(Received[0].EqualTo(LOCTEXT("Tilled", "Tilled the soil."))));
+			ASSERT_THAT(IsTrue(Received[0].Tag == VestigeGameplayTags::Feedback_Day_Slept));
+			const FFormatArgumentValue* Day = Received[0].Arguments.Find(TEXT("Day"));
+			ASSERT_THAT(IsNotNull(Day));
+			ASSERT_THAT(IsTrue(Day->GetType() == EFormatArgumentType::Int && Day->GetIntValue() == 4));
+		}
+
+		TEST_METHOD(AnInvalidTagIsNotReported)
+		{
+			TestRunner->AddExpectedMessagePlain(TEXT("A report without a valid tag was ignored."), ELogVerbosity::Warning);
+
+			UVestigeFeedbackSubsystem::Report(&Spawner.GetWorld(), FGameplayTag());
+
+			ASSERT_THAT(IsTrue(Received.IsEmpty()));
 		}
 	};
 }
-
-#undef LOCTEXT_NAMESPACE
 
 #endif

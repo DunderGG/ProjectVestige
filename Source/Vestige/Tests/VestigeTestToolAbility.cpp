@@ -5,14 +5,15 @@
 
 #if WITH_TESTS
 
+#include "AbilitySystem/VestigeGameplayTags.h"
 #include "Farming/FarmField.h"
 #include "Farming/FarmTileState.h"
 
-bool UVestigeTestToolAbility::CanUseOn(const FIntPoint& Tile) const
+bool UVestigeTestToolAbility::CanUseOn(const FIntPoint& Tile, FGameplayTag* OutFailureReason) const
 {
 	const UFarmField* Field = GetField();
 	const FFarmTileState* State = Field ? Field->GetTile(Tile) : nullptr;
-	return State && State->CanTill();
+	return (State && State->CanTill()) || FailBecause(OutFailureReason, VestigeGameplayTags::Feedback_Farm_CantTill);
 }
 
 bool UVestigeTestToolAbility::UseOn(const FIntPoint& Tile)

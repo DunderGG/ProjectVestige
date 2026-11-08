@@ -3,14 +3,13 @@
 
 #include "Game/VestigeGameMode.h"
 
+#include "AbilitySystem/VestigeGameplayTags.h"
 #include "Core/VestigeFeedbackSubsystem.h"
 #include "Engine/World.h"
 #include "Game/VestigePlayerController.h"
 #include "Player/VestigePlayerState.h"
 #include "Time/VestigeClockSubsystem.h"
 #include "UI/VestigeHUD.h"
-
-#define LOCTEXT_NAMESPACE "VestigeGameMode"
 
 AVestigeGameMode::AVestigeGameMode()
 {
@@ -48,11 +47,8 @@ void AVestigeGameMode::StartNextDay(const FVestigeDayEnd& DayEnd)
 		return;
 	}
 
-	// Raised first, so the messages of everything reacting to the new day, like waking exhausted and saving, follow it.
-	const FText Format = DayEnd.bEndedEarly ? LOCTEXT("Slept", "You slept. Day {Day} begins.")
-											: LOCTEXT("StayedUp", "You stayed up all night. Day {Day} begins.");
-	UVestigeFeedbackSubsystem::Notify(GetWorld(), FText::FormatNamed(Format, TEXT("Day"), DayEnd.Day + 1));
+	// Reported first, so the reports of everything reacting to the new day, like waking exhausted and saving, follow it.
+	const FGameplayTag DayTag = DayEnd.bEndedEarly ? VestigeGameplayTags::Feedback_Day_Slept : VestigeGameplayTags::Feedback_Day_StayedUp;
+	UVestigeFeedbackSubsystem::Report(GetWorld(), DayTag, {{TEXT("Day"), DayEnd.Day + 1}});
 	GameClock->StartNextDay();
 }
-
-#undef LOCTEXT_NAMESPACE

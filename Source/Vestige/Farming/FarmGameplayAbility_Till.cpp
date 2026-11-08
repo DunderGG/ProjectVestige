@@ -3,24 +3,23 @@
 
 #include "Farming/FarmGameplayAbility_Till.h"
 
+#include "AbilitySystem/VestigeGameplayTags.h"
 #include "Farming/FarmField.h"
 #include "Farming/FarmTileState.h"
 
-#define LOCTEXT_NAMESPACE "FarmGameplayAbility_Till"
-
-bool UFarmGameplayAbility_Till::CanUseOn(const FIntPoint& Tile) const
+bool UFarmGameplayAbility_Till::CanUseOn(const FIntPoint& Tile, FGameplayTag* OutFailureReason) const
 {
 	const UFarmField* Field = GetField();
 	const FFarmTileState* State = Field ? Field->GetTile(Tile) : nullptr;
-	return State && State->CanTill();
+	if (!State)
+	{
+		return FailBecause(OutFailureReason, VestigeGameplayTags::Feedback_Tool_NoTarget);
+	}
+	return State->CanTill() || FailBecause(OutFailureReason, VestigeGameplayTags::Feedback_Farm_CantTill);
 }
 
 bool UFarmGameplayAbility_Till::UseOn(const FIntPoint& Tile)
 {
 	UFarmField* Field = GetField();
-	const bool bTilled = Field && Field->Till(Tile);
-	Notify(bTilled ? LOCTEXT("Tilled", "Tilled the soil.") : LOCTEXT("CantTill", "Only grass can be tilled."));
-	return bTilled;
+	return Field && Field->Till(Tile);
 }
-
-#undef LOCTEXT_NAMESPACE

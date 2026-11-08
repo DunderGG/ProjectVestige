@@ -151,8 +151,8 @@ private:
 	/** Gives Tool's ability on AbilitySystem with Tool as the source object, or returns an invalid handle if either is missing. */
 	static FGameplayAbilitySpecHandle Grant(UAbilitySystemComponent* AbilitySystem, const UVestigeToolData* Tool);
 
-	/** Says there is nothing in hand to use, and warns if the item in hand names a tool that isn't loaded. */
-	void SayNothingInHand() const;
+	/** Reports there is nothing in hand to use, and warns if the item in hand names a tool that isn't loaded. */
+	void ReportNothingInHand() const;
 
 	/**
 	 * Takes back the grant Spec through AbilitySystem, the ability system it was granted on, which the owner may no longer reach,

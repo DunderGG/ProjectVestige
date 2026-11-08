@@ -17,8 +17,6 @@
 #include "GameFramework/PlayerState.h"
 #include "Time/VestigeClockSubsystem.h"
 
-#define LOCTEXT_NAMESPACE "VestigeRestComponent"
-
 namespace VestigeRest
 {
 	/** Stamina effects have no levels, so they are applied at the ability system's default level. */
@@ -154,12 +152,11 @@ void UVestigeRestComponent::ReactToHour(int32 Hour)
 {
 	if (Hour == LateWarningHour)
 	{
-		UVestigeFeedbackSubsystem::Notify(
-			GetWorld(), LOCTEXT("GettingLate", "It's getting late. Going to bed after midnight leaves you exhausted tomorrow."));
+		UVestigeFeedbackSubsystem::Report(GetWorld(), VestigeGameplayTags::Feedback_Rest_GettingLate);
 	}
 	if (Hour == LateNightHour)
 	{
-		UVestigeFeedbackSubsystem::Notify(GetWorld(), LOCTEXT("LateNight", "It's past midnight. Your stamina drains until you sleep."));
+		UVestigeFeedbackSubsystem::Report(GetWorld(), VestigeGameplayTags::Feedback_Rest_PastMidnight);
 		StartLateNightDrain();
 	}
 }
@@ -197,7 +194,7 @@ void UVestigeRestComponent::WakeExhausted(UAbilitySystemComponent& AbilitySystem
 		ApplyExhaustion(AbilitySystem);
 	}
 	RefillStamina(AbilitySystem, ExhaustedRefillFraction);
-	UVestigeFeedbackSubsystem::Notify(GetWorld(), LOCTEXT("Exhausted", "You went to bed late and wake up exhausted."));
+	UVestigeFeedbackSubsystem::Report(GetWorld(), VestigeGameplayTags::Feedback_Rest_WokeExhausted);
 }
 
 void UVestigeRestComponent::WakeRested(UAbilitySystemComponent& AbilitySystem)
@@ -208,7 +205,7 @@ void UVestigeRestComponent::WakeRested(UAbilitySystemComponent& AbilitySystem)
 		return;
 	}
 	AbilitySystem.RemoveActiveGameplayEffectBySourceEffect(UVestigeGameData::Get().GetExhaustedEffect(), nullptr);
-	UVestigeFeedbackSubsystem::Notify(GetWorld(), LOCTEXT("Rested", "A good night's sleep. You're no longer exhausted."));
+	UVestigeFeedbackSubsystem::Report(GetWorld(), VestigeGameplayTags::Feedback_Rest_WokeRested);
 }
 
 void UVestigeRestComponent::ApplyExhaustion(UAbilitySystemComponent& AbilitySystem) const
@@ -278,5 +275,3 @@ UAbilitySystemComponent* UVestigeRestComponent::GetAbilitySystem() const
 {
 	return UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(GetOwner());
 }
-
-#undef LOCTEXT_NAMESPACE

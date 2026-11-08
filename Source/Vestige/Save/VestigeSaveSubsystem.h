@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Core/VestigeFeedbackSubsystem.h"
 #include "Engine/World.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "VestigeSaveSubsystem.generated.h"
@@ -101,11 +102,11 @@ private:
 	/** Writes every record to the slot that doesn't hold the newest good save. Bound to the clock's OnNewDayFinished. */
 	void SaveGame(int32 NewDay);
 
-	/** Turns saving off for the rest of the session and keeps Reason to tell the player. */
-	void RefuseToSave(const FText& Reason);
+	/** Turns saving off for the rest of the session and keeps Reason, a Vestige.Feedback tag, to report to the player. */
+	void RefuseToSave(const FGameplayTag& Reason);
 
-	/** Raises Message for the player in the open map. */
-	void Notify(const FText& Message) const;
+	/** Reports Tag, with the values a text about it may use, for the player in the open map. */
+	void ReportToPlayer(const FGameplayTag& Tag, FFormatNamedArguments Arguments = {}) const;
 
 	UPROPERTY()
 	TObjectPtr<UVestigeSaveRegistry> Registry;
@@ -119,8 +120,8 @@ private:
 	FDelegateHandle WorldInitializedHandle;
 	FDelegateHandle WorldBeginPlayHandle;
 
-	/** What the player is told once the first map has begun play. */
-	TArray<FText> MessagesForPlayer;
+	/** What is reported to the player once the first map has begun play. */
+	TArray<FVestigeFeedbackReport> PendingReports;
 
 	/** True once the save has been loaded, or a new game started. Nothing is saved before. */
 	bool bGameStarted = false;

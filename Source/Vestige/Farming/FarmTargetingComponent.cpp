@@ -4,15 +4,11 @@
 #include "Farming/FarmTargetingComponent.h"
 
 #include "Components/SceneComponent.h"
-#include "Core/VestigeFeedbackSubsystem.h"
 #include "Engine/World.h"
 #include "Farming/FarmGrid.h"
 #include "Farming/FarmLog.h"
 #include "Farming/FarmTileTargeting.h"
 #include "GameFramework/Actor.h"
-#include "TimerManager.h"
-
-#define LOCTEXT_NAMESPACE "FarmTargetingComponent"
 
 UFarmTargetingComponent::UFarmTargetingComponent()
 {
@@ -40,16 +36,6 @@ void UFarmTargetingComponent::BeginPlay()
 	else
 	{
 		VESTIGE_LOG(this, LogFarm, Warning, "The level {Level} has no FarmGrid, so there is nothing to farm.", GetWorld()->GetMapName());
-
-		// The HUD may not be listening for feedback yet during BeginPlay.
-		GetWorld()->GetTimerManager().SetTimerForNextTick(
-			[WeakThis = TWeakObjectPtr<UFarmTargetingComponent>(this)]()
-			{
-				if (const UFarmTargetingComponent* Targeting = WeakThis.Get())
-				{
-					Targeting->Notify(LOCTEXT("NoGrid", "No FarmGrid in the level. Drag one in from the Place Actors panel."));
-				}
-			});
 	}
 
 	if (USceneComponent* Root = GetOwner() ? GetOwner()->GetRootComponent() : nullptr)
@@ -131,10 +117,3 @@ void UFarmTargetingComponent::FollowOwnerTransform(
 	OwnerCoordinates = Coordinates;
 	UpdateTargetTile();
 }
-
-void UFarmTargetingComponent::Notify(const FText& Message) const
-{
-	UVestigeFeedbackSubsystem::Notify(GetWorld(), Message);
-}
-
-#undef LOCTEXT_NAMESPACE

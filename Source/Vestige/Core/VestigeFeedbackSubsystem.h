@@ -4,15 +4,26 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayTagContainer.h"
 #include "Subsystems/WorldSubsystem.h"
 #include "VestigeFeedbackSubsystem.generated.h"
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnVestigeFeedback, const FText& /* Message */);
+/**
+ * Something the player may need to know about, as gameplay reports it: what happened (a Vestige.Feedback tag) and the values
+ * a text about it may use (such as Day). Presentation picks the text, sound or effect for the tag; gameplay never writes it.
+ */
+struct FVestigeFeedbackReport
+{
+	FGameplayTag Tag;
+	FFormatNamedArguments Arguments;
+};
+
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnVestigeFeedback, const FVestigeFeedbackReport& /* Report */);
 
 /**
- * Carries short messages for the player ("Tilled the soil.", "Game saved.") from game code to whatever shows them.
- * Game code raises a message and never knows who listens; AVestigeHUD listens and displays it.
- * The game is single-player, so the world's player is the one the messages are for.
+ * Carries feedback reports from game code to whatever presents them (Systems.md, section 15, feedback reports).
+ * Game code reports what happened and never knows who listens; AVestigeHUD listens and shows the text its responses asset
+ * gives the tag. The game is single-player, so the world's player is the one the reports are for.
  */
 UCLASS()
 class UVestigeFeedbackSubsystem : public UWorldSubsystem
@@ -20,9 +31,12 @@ class UVestigeFeedbackSubsystem : public UWorldSubsystem
 	GENERATED_BODY()
 
 public:
-	/** Raises Message for the player in World. Does nothing without a world or before the subsystem exists. */
-	static void Notify(const UWorld* World, const FText& Message);
+	/**
+	 * Reports Tag, with the values a text about it may use, for the player in World. Does nothing without a world or before the
+	 * subsystem exists. An invalid tag logs a warning and isn't broadcast.
+	 */
+	static void Report(const UWorld* World, const FGameplayTag& Tag, FFormatNamedArguments Arguments = {});
 
-	/** Broadcast with each message as it is raised. Presentation listens; game code doesn't. */
+	/** Broadcast with each report as it is made. Presentation listens; game code doesn't. */
 	FOnVestigeFeedback OnFeedback;
 };

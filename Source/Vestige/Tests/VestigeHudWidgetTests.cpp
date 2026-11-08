@@ -3,15 +3,18 @@
 
 #if WITH_DEV_AUTOMATION_TESTS
 
+#include "AbilitySystem/VestigeGameplayTags.h"
 #include "Blueprint/UserWidget.h"
 #include "Blueprint/WidgetBlueprintGeneratedClass.h"
 #include "Components/ActorTestSpawner.h"
 #include "Components/PanelWidget.h"
 #include "CommonInputTypeEnum.h"
 #include "Components/TextBlock.h"
+#include "Core/VestigeFeedbackSubsystem.h"
 #include "CQTest.h"
 #include "GameFramework/GameModeBase.h"
 #include "UI/VestigeHUD.h"
+#include "UI/VestigeFeedbackResponses.h"
 #include "UI/VestigeHudMessageWidget.h"
 #include "UI/VestigeHudMessages.h"
 #include "UI/VestigeHudWidget.h"
@@ -161,6 +164,85 @@ namespace VestigeHudWidgetTests
 			ASSERT_THAT(IsTrue(AVestigeHUD::GetHintDevice(ECommonInputType::Gamepad) == EVestigeHintDevice::Gamepad));
 			ASSERT_THAT(IsTrue(AVestigeHUD::GetHintDevice(ECommonInputType::MouseAndKeyboard) == EVestigeHintDevice::KeyboardAndMouse));
 			ASSERT_THAT(IsTrue(AVestigeHUD::GetHintDevice(ECommonInputType::Touch) == EVestigeHintDevice::KeyboardAndMouse));
+		}
+
+		TEST_METHOD(TheFeedbackResponsesFormatTheReport)
+		{
+			UVestigeFeedbackResponses* Responses = NewObject<UVestigeFeedbackResponses>();
+			FVestigeFeedbackResponse DayBegins;
+			DayBegins.Message = LOCTEXT("DayBegins", "Day {Day} begins.");
+			Responses->SetResponsesForTests({{VestigeGameplayTags::Feedback_Day_Slept, DayBegins}});
+
+			const FVestigeFeedbackResponse* Response = Responses->FindResponse(VestigeGameplayTags::Feedback_Day_Slept);
+			ASSERT_THAT(IsNotNull(Response));
+			const FVestigeFeedbackReport Report{VestigeGameplayTags::Feedback_Day_Slept, {{TEXT("Day"), 4}}};
+			ASSERT_THAT(IsTrue(UVestigeFeedbackResponses::FormatMessage(*Response, Report).ToString() == TEXT("Day 4 begins.")));
+			ASSERT_THAT(IsNull(Responses->FindResponse(VestigeGameplayTags::Feedback_Day_StayedUp)));
+		}
+
+		TEST_METHOD(EveryFeedbackTagHasAResponse)
+		{
+			const UClass* GameModeClass = LoadClass<AGameModeBase>(nullptr, GameModePath);
+			ASSERT_THAT(IsNotNull(GameModeClass));
+			const UClass* HudActorClass = GameModeClass->GetDefaultObject<AGameModeBase>()->HUDClass;
+			ASSERT_THAT(IsTrue(HudActorClass && HudActorClass->IsChildOf<AVestigeHUD>()));
+			const UVestigeFeedbackResponses* Responses = HudActorClass->GetDefaultObject<AVestigeHUD>()->GetFeedbackResponses();
+			ASSERT_THAT(IsNotNull(Responses));
+
+			// Each native feedback tag with the values its reporter gives. Listed here rather than asked of the tag manager,
+			// whose children of Vestige.Feedback include the in-between tags (Vestige.Feedback.Farm).
+			const TArray<FString> NoValues;
+			const TArray<FString> DayValue = {TEXT("Day")};
+			const TMap<FGameplayTag, TArray<FString>> Expected = {
+				{VestigeGameplayTags::Feedback_Tool_NoTarget, NoValues},
+				{VestigeGameplayTags::Feedback_Tool_NothingInHand, NoValues},
+				{VestigeGameplayTags::Feedback_Farm_CantTill, NoValues},
+				{VestigeGameplayTags::Feedback_Farm_NothingToPlant, NoValues},
+				{VestigeGameplayTags::Feedback_Farm_CantPlant, NoValues},
+				{VestigeGameplayTags::Feedback_Farm_CantWater, NoValues},
+				{VestigeGameplayTags::Feedback_Farm_NothingRipe, NoValues},
+				{VestigeGameplayTags::Feedback_Inventory_Full, NoValues},
+				{VestigeGameplayTags::Feedback_Stamina_Empty, NoValues},
+				{VestigeGameplayTags::Feedback_Rest_GettingLate, NoValues},
+				{VestigeGameplayTags::Feedback_Rest_PastMidnight, NoValues},
+				{VestigeGameplayTags::Feedback_Rest_WokeExhausted, NoValues},
+				{VestigeGameplayTags::Feedback_Rest_WokeRested, NoValues},
+				{VestigeGameplayTags::Feedback_Day_Slept, DayValue},
+				{VestigeGameplayTags::Feedback_Day_StayedUp, DayValue},
+				{VestigeGameplayTags::Feedback_Save_Loaded, DayValue},
+				{VestigeGameplayTags::Feedback_Save_Saved, NoValues},
+				{VestigeGameplayTags::Feedback_Save_Failed, NoValues},
+				{VestigeGameplayTags::Feedback_Save_ContentMissing, NoValues},
+				{VestigeGameplayTags::Feedback_Save_Unreadable, NoValues},
+				{VestigeGameplayTags::Feedback_Save_TooNew, NoValues},
+				{VestigeGameplayTags::Feedback_Save_PartTooNew, NoValues},
+			};
+
+			ASSERT_THAT(IsTrue(Responses->GetResponses().Num() == Expected.Num()));
+			for (const TPair<FGameplayTag, TArray<FString>>& Entry : Expected)
+			{
+				const FVestigeFeedbackResponse* Response = Responses->FindResponse(Entry.Key);
+				ASSERT_THAT(IsNotNull(Response, Entry.Key.ToString()));
+
+				// The morning save shows nothing until there is an icon for it.
+				const bool bSilent = Entry.Key == VestigeGameplayTags::Feedback_Save_Saved;
+				ASSERT_THAT(IsTrue(Response->Message.IsEmpty() == bSilent, Entry.Key.ToString()));
+
+				const FTextFormat Format(Response->Message);
+				ASSERT_THAT(IsTrue(Format.IsValid(), Entry.Key.ToString()));
+				TArray<FString> Names;
+				Format.GetFormatArgumentNames(Names);
+				for (const FString& Name : Names)
+				{
+					// Case-sensitive, as FText::Format matches names, so a {day} typo fails.
+					const bool bAllowed = Entry.Value.ContainsByPredicate(
+						[&Name](const FString& Allowed)
+						{
+							return Allowed.Equals(Name, ESearchCase::CaseSensitive);
+						});
+					ASSERT_THAT(IsTrue(bAllowed, Entry.Key.ToString() + TEXT(" uses {") + Name + TEXT("}")));
+				}
+			}
 		}
 	};
 }

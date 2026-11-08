@@ -68,14 +68,22 @@ protected:
 	virtual void ApplyCost(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
 		const FGameplayAbilityActivationInfo ActivationInfo) const override;
 
-	/** Whether a use would change the tile at Tile (column X, row Y) of the field now. Changes nothing and says nothing. */
-	virtual bool CanUseOn(const FIntPoint& Tile) const PURE_VIRTUAL(UVestigeGameplayAbility_UseTool::CanUseOn, return false;);
+	/**
+	 * Whether a use would change the tile at Tile (column X, row Y) of the field now. Changes nothing and reports nothing.
+	 * When it returns false and OutFailureReason isn't null, sets it to why: a Vestige.Feedback tag, which the base reports
+	 * on the press. Every false must give a reason.
+	 */
+	virtual bool CanUseOn(const FIntPoint& Tile, FGameplayTag* OutFailureReason) const
+		PURE_VIRTUAL(UVestigeGameplayAbility_UseTool::CanUseOn, return false;);
 
 	/**
-	 * Uses the tool on the tile at Tile of the field. Returns whether the farm changed; when it didn't, tells the player
-	 * why (Notify), and the use costs nothing. Only called while the ability is active.
+	 * Uses the tool on the tile at Tile of the field, after CanUseOn said it would change it. Returns whether the farm
+	 * changed; a use that changed nothing costs nothing. Reports nothing. Only called while the ability is active.
 	 */
 	virtual bool UseOn(const FIntPoint& Tile) PURE_VIRTUAL(UVestigeGameplayAbility_UseTool::UseOn, return false;);
+
+	/** For CanUseOn: sets OutFailureReason to Reason when it isn't null, and returns false. */
+	static bool FailBecause(FGameplayTag* OutFailureReason, const FGameplayTag& Reason);
 
 	/** The tool this ability was granted for: the spec's source object. Null only if the spec has none. */
 	const UVestigeToolData* GetTool() const;
@@ -88,9 +96,6 @@ protected:
 
 	/** The inventory on the ability system's owner, the player state, or nullptr if it has none. */
 	UVestigeInventoryComponent* GetInventory() const;
-
-	/** Tells the player something through UVestigeFeedbackSubsystem. */
-	void Notify(const FText& Message) const;
 
 private:
 	/** What the ability is doing, so an event that arrives at the wrong moment is ignored. */
@@ -134,6 +139,12 @@ private:
 	/** Ends this activation. */
 	void EndUse();
 
+	/**
+	 * On the press: reports Reason, a Vestige.Feedback tag, for the player through UVestigeFeedbackSubsystem. Returns whether
+	 * the ability is still active, since a listener may end it.
+	 */
+	bool ReportFeedback(const FGameplayTag& Reason);
+
 	/** How many times as long a use takes while the player is out of stamina. */
 	UPROPERTY(EditDefaultsOnly, Category = "Stamina", meta = (AllowPrivateAccess = "true", ClampMin = 1))
 	float OutOfStaminaTimeScale = 2.f;
@@ -146,6 +157,6 @@ private:
 
 	EUseStep Step = EUseStep::Idle;
 
-	/** Set from activation until the first try, which always uses the tool and says why when it changes nothing. */
+	/** Set from activation until the first try, which reports why when the tool can't change the target. */
 	bool bFirstTry = false;
 };

@@ -16,6 +16,6 @@ class UFarmGameplayAbility_Water : public UVestigeGameplayAbility_UseTool
 	GENERATED_BODY()
 
 protected:
-	virtual bool CanUseOn(const FIntPoint& Tile) const override;
+	virtual bool CanUseOn(const FIntPoint& Tile, FGameplayTag* OutFailureReason) const override;
 	virtual bool UseOn(const FIntPoint& Tile) override;
 };

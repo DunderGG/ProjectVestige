@@ -15,16 +15,18 @@ class UAbilitySystemComponent;
 class UCommonInputSubsystem;
 enum class ECommonInputType : uint8;
 class UVestigeClockSubsystem;
+class UVestigeFeedbackResponses;
 class UVestigeHudWidget;
 class UVestigeInteractionComponent;
 class UVestigeInventoryComponent;
 struct FGameplayTag;
+struct FVestigeFeedbackReport;
 
 /**
  * The farming HUD's data side for its player: the day and time from the game's UVestigeClockSubsystem, the item in hand
  * and the items from the inventory and the stamina from the ability system on the player state, the farmer's key hints,
- * the prompt for the interactable the pawn's UVestigeInteractionComponent focuses, and the feedback messages
- * UVestigeFeedbackSubsystem carries. It only displays.
+ * the prompt for the interactable the pawn's UVestigeInteractionComponent focuses, and the message FeedbackResponses gives
+ * each report UVestigeFeedbackSubsystem carries. It only displays.
  * It creates its HudWidgetClass widget (WBP_Hud, set on BP_HUD) for a local player at BeginPlay, builds each text when an
  * event says what it shows has changed, and pushes it to the widget; the messages are the one thing it keeps, and only
  * until they fade. New HUD parts find their own data rather than growing this class (Systems.md, section 6).
@@ -45,6 +47,9 @@ public:
 	/** The widget class this HUD shows, WBP_Hud on BP_HUD. */
 	TSubclassOf<UVestigeHudWidget> GetHudWidgetClass() const { return HudWidgetClass; }
 
+	/** The responses this HUD shows for feedback reports, DA_FeedbackResponses on BP_HUD. */
+	const UVestigeFeedbackResponses* GetFeedbackResponses() const { return FeedbackResponses; }
+
 	/**
 	 * The device whose keys the hints name after the player used InputType: the gamepad's after the gamepad, else the
 	 * keyboard's. The game has no touch controls, so a touch leaves the keyboard hints.
@@ -59,6 +64,10 @@ private:
 	/** The widget the HUD shows. Without one the HUD logs an error and shows nothing. */
 	UPROPERTY(EditDefaultsOnly, Category = "HUD", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UVestigeHudWidget> HudWidgetClass;
+
+	/** What each feedback report shows. Without it the HUD logs an error and shows no messages. */
+	UPROPERTY(EditDefaultsOnly, Category = "HUD", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<const UVestigeFeedbackResponses> FeedbackResponses;
 
 	UPROPERTY(Transient)
 	TObjectPtr<UVestigeHudWidget> HudWidget;
@@ -109,7 +118,13 @@ private:
 	 */
 	void HandleInputMethodChanged(ECommonInputType InputType);
 
-	/** Shows Message in a box of its own, under the ones already showing, for MessageSeconds. Bound to UVestigeFeedbackSubsystem. */
+	/**
+	 * Shows the message FeedbackResponses gives Report, if it isn't empty; logs a warning for a report with no response.
+	 * Bound to UVestigeFeedbackSubsystem.
+	 */
+	void ShowFeedback(const FVestigeFeedbackReport& Report);
+
+	/** Shows Message in a box of its own, under the ones already showing, for MessageSeconds. */
 	void ShowMessage(const FText& Message);
 
 	/** Drops the messages whose time is up, and waits for the next one to expire. */

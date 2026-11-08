@@ -3,6 +3,7 @@
 
 #if WITH_DEV_AUTOMATION_TESTS
 
+#include "AbilitySystem/VestigeGameplayTags.h"
 #include "Components/ActorTestSpawner.h"
 #include "Core/VestigeFeedbackSubsystem.h"
 #include "CQTest.h"
@@ -48,18 +49,25 @@ namespace VestigeGameModeTests
 		/** Runs the clock forward by GameHours, the way a frame's tick does. */
 		void PassHours(float GameHours) { Clock->Tick(GameHours * Clock->GetRealSecondsPerGameHour()); }
 
-		/** Every message for the player from now on. */
-		void RecordMessages(TArray<FString>& OutMessages)
+		/** Every feedback report from now on. */
+		void RecordReports(TArray<FVestigeFeedbackReport>& OutReports)
 		{
 			UVestigeFeedbackSubsystem* Feedback = Spawner.GetWorld().GetSubsystem<UVestigeFeedbackSubsystem>();
 			if (Feedback)
 			{
 				Feedback->OnFeedback.AddLambda(
-					[&OutMessages](const FText& Message)
+					[&OutReports](const FVestigeFeedbackReport& Report)
 					{
-						OutMessages.Add(Message.ToString());
+						OutReports.Add(Report);
 					});
 			}
+		}
+
+		/** The Day value of Report, or INDEX_NONE if it has none. */
+		static int64 GetDay(const FVestigeFeedbackReport& Report)
+		{
+			const FFormatArgumentValue* Day = Report.Arguments.Find(TEXT("Day"));
+			return Day && Day->GetType() == EFormatArgumentType::Int ? Day->GetIntValue() : INDEX_NONE;
 		}
 
 		TEST_METHOD(TheNextDayStartsAtTheDayEndWithoutAPlayer)
@@ -92,18 +100,20 @@ namespace VestigeGameModeTests
 			ASSERT_THAT(IsTrue(Clock->GetCurrentDay() == 2));
 		}
 
-		TEST_METHOD(TheMessageSaysWhetherThePlayerSleptOrStayedUp)
+		TEST_METHOD(TheReportSaysWhetherThePlayerSleptOrStayedUp)
 		{
-			TArray<FString> Messages;
-			RecordMessages(Messages);
+			TArray<FVestigeFeedbackReport> Reports;
+			RecordReports(Reports);
 
 			SetClock(22.f);
 			Clock->EndDay();
 			PassHours(Clock->GetDayEndHour());
 
-			ASSERT_THAT(IsTrue(Messages.Num() == 2));
-			ASSERT_THAT(IsTrue(Messages[0] == TEXT("You slept. Day 2 begins.")));
-			ASSERT_THAT(IsTrue(Messages[1] == TEXT("You stayed up all night. Day 3 begins.")));
+			ASSERT_THAT(IsTrue(Reports.Num() == 2));
+			ASSERT_THAT(IsTrue(Reports[0].Tag == VestigeGameplayTags::Feedback_Day_Slept));
+			ASSERT_THAT(IsTrue(GetDay(Reports[0]) == 2));
+			ASSERT_THAT(IsTrue(Reports[1].Tag == VestigeGameplayTags::Feedback_Day_StayedUp));
+			ASSERT_THAT(IsTrue(GetDay(Reports[1]) == 3));
 		}
 
 		TEST_METHOD(AGameModeThatHasStoppedPlayingNoLongerStartsDays)

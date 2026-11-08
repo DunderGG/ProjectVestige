@@ -9,6 +9,7 @@
 #include "AbilitySystemComponent.h"
 #include "Components/ActorTestSpawner.h"
 #include "Content/VestigeGameData.h"
+#include "Core/VestigeFeedbackSubsystem.h"
 #include "CQTest.h"
 #include "Player/VestigePlayerState.h"
 
@@ -64,6 +65,25 @@ namespace VestigeStaminaTests
 			ASSERT_THAT(IsTrue(GetMaxStamina() > 0.f));
 			ASSERT_THAT(IsTrue(GetStamina() == GetMaxStamina()));
 			ASSERT_THAT(IsFalse(IsOutOfStamina()));
+		}
+
+		TEST_METHOD(RunningOutReportsOnce)
+		{
+			UVestigeFeedbackSubsystem* Feedback = Spawner.GetWorld().GetSubsystem<UVestigeFeedbackSubsystem>();
+			ASSERT_THAT(IsNotNull(Feedback));
+			TArray<FGameplayTag> Reports;
+			Feedback->OnFeedback.AddLambda(
+				[&Reports](const FVestigeFeedbackReport& Report)
+				{
+					Reports.Add(Report.Tag);
+				});
+
+			Spend(GetMaxStamina() - 1.f);
+			ASSERT_THAT(IsTrue(Reports.IsEmpty()));
+			Spend(5.f);
+			Spend(5.f);
+
+			ASSERT_THAT(IsTrue(Reports == TArray<FGameplayTag>{VestigeGameplayTags::Feedback_Stamina_Empty}));
 		}
 
 		TEST_METHOD(ACostIsTakenFromStamina)

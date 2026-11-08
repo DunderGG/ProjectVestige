@@ -3,6 +3,7 @@
 
 #include "Save/VestigeSaveSubsystem.h"
 
+#include "AbilitySystem/VestigeGameplayTags.h"
 #include "Core/VestigeFeedbackSubsystem.h"
 #include "Core/VestigeSaveLog.h"
 #include "Core/VestigeSaveRegistry.h"
@@ -11,8 +12,6 @@
 #include "ProfilingDebugging/CpuProfilerTrace.h"
 #include "Save/VestigeSaveGame.h"
 #include "Time/VestigeClockSubsystem.h"
-
-#define LOCTEXT_NAMESPACE "VestigeSaveSubsystem"
 
 namespace VestigeSaveSlots
 {
@@ -188,16 +187,14 @@ void UVestigeSaveSubsystem::LoadGame()
 
 	case EVestigeLoadOutcome::RefuseUnreadable:
 		VESTIGE_LOG(this, LogVestigeSave, Error, "No save slot could be read. The files are left as they are and saving is off.");
-		RefuseToSave(LOCTEXT(
-			"SaveUnreadable", "The save couldn't be read. It is kept as it is, and the game won't save until you start a new game."));
+		RefuseToSave(VestigeGameplayTags::Feedback_Save_Unreadable);
 		return;
 
 	case EVestigeLoadOutcome::RefuseNewer:
 		VESTIGE_LOG(this, LogVestigeSave, Error,
 			"Slot {Slot} holds a save from a newer version ({Version}, this build writes {CurrentVersion}). Saving is off.",
 			UVestigeSaveGame::SlotNames[Decision.Slot], Slots[Decision.Slot].Save->SaveVersion, UVestigeSaveGame::CurrentVersion);
-		RefuseToSave(LOCTEXT("SaveTooNew",
-			"The save is from a newer version of the game. It is kept as it is, and the game won't save until you start a new game."));
+		RefuseToSave(VestigeGameplayTags::Feedback_Save_TooNew);
 		return;
 
 	case EVestigeLoadOutcome::Load:
@@ -210,7 +207,7 @@ void UVestigeSaveSubsystem::LoadGame()
 	Registry->Load(Save.Records);
 	VESTIGE_LOG(this, LogVestigeSave, Log, "Loaded day {Day} from save slot {Slot} (version {Version}, save {Sequence}, {Count} parts).",
 		Clock->GetCurrentDay(), UVestigeSaveGame::SlotNames[Decision.Slot], Save.SaveVersion, Save.SaveSequence, Save.Records.Num());
-	MessagesForPlayer.Add(FText::FormatNamed(LOCTEXT("Loaded", "Welcome back. Day {Day}."), TEXT("Day"), Clock->GetCurrentDay()));
+	PendingReports.Add({VestigeGameplayTags::Feedback_Save_Loaded, FFormatNamedArguments{{TEXT("Day"), Clock->GetCurrentDay()}}});
 }
 
 void UVestigeSaveSubsystem::TellPlayerAboutLoad()
@@ -224,19 +221,17 @@ void UVestigeSaveSubsystem::TellPlayerAboutLoad()
 	// The map's owners have read their parts in their BeginPlay by now, so the registry knows what was left out.
 	if (Registry && Registry->GetLeftOutCount() > 0)
 	{
-		Notify(LOCTEXT("ContentMissing", "Some saved things no longer exist in the game and were left out."));
+		ReportToPlayer(VestigeGameplayTags::Feedback_Save_ContentMissing);
 	}
 	if (Registry && Registry->HasNewerParts() && bSavingAllowed)
 	{
-		RefuseToSave(LOCTEXT("PartTooNew",
-			"Part of the save is from a newer version of the game. It is kept as it is, and the game won't save until you start a new "
-			"game."));
+		RefuseToSave(VestigeGameplayTags::Feedback_Save_PartTooNew);
 	}
-	for (const FText& Message : MessagesForPlayer)
+	for (FVestigeFeedbackReport& Pending : PendingReports)
 	{
-		Notify(Message);
+		ReportToPlayer(Pending.Tag, MoveTemp(Pending.Arguments));
 	}
-	MessagesForPlayer.Reset();
+	PendingReports.Reset();
 }
 
 void UVestigeSaveSubsystem::SaveGame(int32 NewDay)
@@ -264,24 +259,22 @@ void UVestigeSaveSubsystem::SaveGame(int32 NewDay)
 	{
 		VESTIGE_LOG(this, LogVestigeSave, Error, "Couldn't write the save to slot {Slot}. The previous save is kept.",
 			UVestigeSaveGame::SlotNames[Slot]);
-		Notify(LOCTEXT("SaveFailed", "Couldn't save the game. The previous save is kept."));
+		ReportToPlayer(VestigeGameplayTags::Feedback_Save_Failed);
 		return;
 	}
 
 	NewestSlot = Slot;
 	NewestSequence = Save->SaveSequence;
-	Notify(LOCTEXT("Saved", "Game saved."));
+	ReportToPlayer(VestigeGameplayTags::Feedback_Save_Saved);
 }
 
-void UVestigeSaveSubsystem::RefuseToSave(const FText& Reason)
+void UVestigeSaveSubsystem::RefuseToSave(const FGameplayTag& Reason)
 {
 	bSavingAllowed = false;
-	MessagesForPlayer.Add(Reason);
+	PendingReports.Add({Reason, {}});
 }
 
-void UVestigeSaveSubsystem::Notify(const FText& Message) const
+void UVestigeSaveSubsystem::ReportToPlayer(const FGameplayTag& Tag, FFormatNamedArguments Arguments) const
 {
-	UVestigeFeedbackSubsystem::Notify(GetGameInstance()->GetWorld(), Message);
+	UVestigeFeedbackSubsystem::Report(GetGameInstance()->GetWorld(), Tag, MoveTemp(Arguments));
 }
-
-#undef LOCTEXT_NAMESPACE

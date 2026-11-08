@@ -54,8 +54,8 @@ namespace FarmingTests
 		UVestigeInventoryComponent* Inventory = nullptr;
 		UAbilitySystemComponent* AbilitySystem = nullptr;
 
-		/** The feedback messages since ListenToFeedback, kept on the fixture so latent steps can read them. */
-		TArray<FString> Messages;
+		/** The tags of the feedback reports since ListenToFeedback, kept on the fixture so latent steps can read them. */
+		TArray<FGameplayTag> Reports;
 
 		/**
 		 * A default grid and the character Blueprint the game uses, standing in front of tile (3, 0), with the game's
@@ -297,15 +297,15 @@ namespace FarmingTests
 			return Recorder;
 		}
 
-		/** Collects every feedback message from now on into Messages. */
+		/** Collects the tag of every feedback report from now on into Reports. */
 		void ListenToFeedback()
 		{
 			UVestigeFeedbackSubsystem* Feedback = Spawner.GetWorld().GetSubsystem<UVestigeFeedbackSubsystem>();
 			ASSERT_THAT(IsNotNull(Feedback));
 			Feedback->OnFeedback.AddLambda(
-				[this](const FText& Message)
+				[this](const FVestigeFeedbackReport& Report)
 				{
-					Messages.Add(Message.ToString());
+					Reports.Add(Report.Tag);
 				});
 		}
 
@@ -402,11 +402,13 @@ namespace FarmingTests
 			}
 			SetBag(MoveTemp(FullBag));
 			const int32 TurnipsBefore = Inventory->GetItemCount(Crop->GetHarvestItemId());
+			ListenToFeedback();
 
 			HarvestAndFinish();
 
 			ASSERT_THAT(IsTrue(Inventory->GetItemCount(Crop->GetHarvestItemId()) == TurnipsBefore));
 			ASSERT_THAT(IsTrue(TargetTile()->IsRipe()));
+			ASSERT_THAT(IsTrue(Reports == TArray<FGameplayTag>{VestigeGameplayTags::Feedback_Inventory_Full}));
 		}
 
 		TEST_METHOD(UsingAToolAwayFromTheFieldChangesNothing)
@@ -436,6 +438,70 @@ namespace FarmingTests
 			UseToolAndFinish();
 
 			ASSERT_THAT(IsTrue(TargetTile()->GetState() == EFarmTileState::Grass));
+			ASSERT_THAT(IsTrue(GetStamina() == GetMaxStamina()));
+		}
+
+		TEST_METHOD(AUseThatWorkedReportsNothing)
+		{
+			ListenToFeedback();
+
+			Hold(TEXT("Base.Hoe"), 0);
+			UseToolAndFinish();
+			ASSERT_THAT(IsTrue(TargetTile()->GetState() == EFarmTileState::Tilled));
+			Hold(TEXT("Base.Seeds"), 1);
+			UseToolAndFinish();
+			ASSERT_THAT(IsTrue(TargetTile()->GetState() == EFarmTileState::Planted));
+			Hold(TEXT("Base.WateringCan"), 0);
+			UseToolAndFinish();
+			ASSERT_THAT(IsTrue(TargetTile()->IsWatered()));
+
+			const UFarmCropData* Crop = TargetTile()->GetCrop();
+			ASSERT_THAT(IsNotNull(Crop));
+			for (int32 Day = 0; Day < Crop->GetDaysToMature(); ++Day)
+			{
+				Grid->GetField()->Water(TargetCoordinates);
+				Grid->GetField()->AdvanceDay();
+			}
+			ASSERT_THAT(IsTrue(TargetTile()->IsRipe()));
+			Hold(TEXT("Base.Hand"), 0);
+			HarvestAndFinish();
+			ASSERT_THAT(IsTrue(TargetTile()->GetState() == EFarmTileState::Tilled));
+
+			ASSERT_THAT(IsTrue(Reports.IsEmpty()));
+		}
+
+		TEST_METHOD(APressReportsWhyAUseChangesNothing)
+		{
+			ListenToFeedback();
+			const auto ExpectOnlyReport = [this](const FGameplayTag& Reason)
+			{
+				ASSERT_THAT(IsTrue(Reports == TArray<FGameplayTag>{Reason}));
+				Reports.Reset();
+			};
+
+			Hold(TEXT("Base.WateringCan"), 0);
+			UseToolAndFinish();
+			ExpectOnlyReport(VestigeGameplayTags::Feedback_Farm_CantWater);
+
+			Hold(TEXT("Base.Seeds"), 3);
+			UseToolAndFinish();
+			ExpectOnlyReport(VestigeGameplayTags::Feedback_Farm_CantPlant);
+
+			Hold(TEXT("Base.Hand"), 0);
+			HarvestAndFinish();
+			ExpectOnlyReport(VestigeGameplayTags::Feedback_Farm_NothingRipe);
+
+			Grid->GetField()->Till(TargetCoordinates);
+			Hold(TEXT("Base.Hoe"), 0);
+			UseToolAndFinish();
+			ExpectOnlyReport(VestigeGameplayTags::Feedback_Farm_CantTill);
+
+			Farmer->SetActorLocation(FVector(-500.f, -500.f, 0.f));
+			UseToolAndFinish();
+			ExpectOnlyReport(VestigeGameplayTags::Feedback_Tool_NoTarget);
+
+			// Hold replaces the whole bag, so the seeds are gone by now; the tile shows nothing was planted.
+			ASSERT_THAT(IsTrue(TargetTile()->GetState() == EFarmTileState::Tilled));
 			ASSERT_THAT(IsTrue(GetStamina() == GetMaxStamina()));
 		}
 
@@ -639,7 +705,7 @@ namespace FarmingTests
 
 			ASSERT_THAT(IsTrue(TargetTile()->GetState() == EFarmTileState::Grass));
 			ASSERT_THAT(IsTrue(GetStamina() == GetMaxStamina()));
-			ASSERT_THAT(IsTrue(Messages.Num() == 1));
+			ASSERT_THAT(IsTrue(Reports == TArray<FGameplayTag>{VestigeGameplayTags::Feedback_Tool_NothingInHand}));
 			ASSERT_THAT(IsFalse(FarmingComponent->IsToolUseHeld()));
 			FarmingComponent->StopUsingTool();
 		}
@@ -892,7 +958,8 @@ namespace FarmingTests
 			AfterOneUse(
 				[this]()
 				{
-					ASSERT_THAT(IsTrue(Messages.Num() == 1));
+					// The till worked, which reports nothing, and the repeat that would change nothing waits quietly.
+					ASSERT_THAT(IsTrue(Reports.IsEmpty()));
 					ASSERT_THAT(IsTrue(GetStamina() == GetMaxStamina() - GetHeldTool().GetStaminaCost()));
 
 					FarmingComponent->StopUsingTool();
@@ -907,7 +974,7 @@ namespace FarmingTests
 			ListenToFeedback();
 
 			FarmingComponent->StartUsingTool();
-			ASSERT_THAT(IsTrue(Messages.Num() == 1));
+			ASSERT_THAT(IsTrue(Reports == TArray<FGameplayTag>{VestigeGameplayTags::Feedback_Farm_CantTill}));
 
 			const FFarmTileState* Next = StepToNextTile();
 			ASSERT_THAT(IsNotNull(Next));

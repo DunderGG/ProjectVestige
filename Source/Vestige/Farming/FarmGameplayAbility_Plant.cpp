@@ -3,6 +3,7 @@
 
 #include "Farming/FarmGameplayAbility_Plant.h"
 
+#include "AbilitySystem/VestigeGameplayTags.h"
 #include "Content/FarmSeedFragment.h"
 #include "Content/VestigeItemData.h"
 #include "Farming/FarmField.h"
@@ -10,28 +11,28 @@
 #include "Farming/FarmTileState.h"
 #include "Inventory/VestigeInventoryComponent.h"
 
-#define LOCTEXT_NAMESPACE "FarmGameplayAbility_Plant"
-
-bool UFarmGameplayAbility_Plant::CanUseOn(const FIntPoint& Tile) const
+bool UFarmGameplayAbility_Plant::CanUseOn(const FIntPoint& Tile, FGameplayTag* OutFailureReason) const
 {
+	// The seed first: without one, the tile doesn't matter.
+	if (!FindCropInHand())
+	{
+		return FailBecause(OutFailureReason, VestigeGameplayTags::Feedback_Farm_NothingToPlant);
+	}
 	const UFarmField* Field = GetField();
 	const FFarmTileState* State = Field ? Field->GetTile(Tile) : nullptr;
-	return State && State->CanPlant() && FindCropInHand();
+	if (!State)
+	{
+		return FailBecause(OutFailureReason, VestigeGameplayTags::Feedback_Tool_NoTarget);
+	}
+	return State->CanPlant() || FailBecause(OutFailureReason, VestigeGameplayTags::Feedback_Farm_CantPlant);
 }
 
 bool UFarmGameplayAbility_Plant::UseOn(const FIntPoint& Tile)
 {
 	const UFarmCropData* Crop = FindCropInHand();
-	if (!Crop)
-	{
-		Notify(LOCTEXT("NothingToPlant", "Nothing to plant in hand."));
-		return false;
-	}
-
 	UFarmField* Field = GetField();
-	if (!Field || !Field->Plant(Tile, Crop))
+	if (!Crop || !Field || !Field->Plant(Tile, Crop))
 	{
-		Notify(LOCTEXT("CantPlant", "Seeds need empty tilled soil."));
 		return false;
 	}
 
@@ -39,7 +40,6 @@ bool UFarmGameplayAbility_Plant::UseOn(const FIntPoint& Tile)
 	// ability back once its use has finished.
 	UVestigeInventoryComponent* Inventory = GetInventory();
 	Inventory->TryRemoveItemFromSlot(Inventory->GetSelectedHotbarSlot(), 1);
-	Notify(LOCTEXT("Planted", "Planted a seed."));
 	return true;
 }
 
@@ -51,5 +51,3 @@ const UFarmCropData* UFarmGameplayAbility_Plant::FindCropInHand() const
 	const UFarmSeedFragment* Seed = Item ? Item->FindFragment<UFarmSeedFragment>() : nullptr;
 	return FarmingComponent && Seed ? FarmingComponent->FindCrop(Seed->GetCropId()) : nullptr;
 }
-
-#undef LOCTEXT_NAMESPACE

@@ -65,9 +65,6 @@ private:
 	/** Bound to the owner's root component, so the target follows the owner from tile to tile without ticking. */
 	void FollowOwnerTransform(USceneComponent* UpdatedComponent, EUpdateTransformFlags UpdateTransformFlags, ETeleportType Teleport);
 
-	/** Tells the player what happened, through UVestigeFeedbackSubsystem. */
-	void Notify(const FText& Message) const;
-
 	UPROPERTY()
 	TObjectPtr<AFarmGrid> Grid;
 

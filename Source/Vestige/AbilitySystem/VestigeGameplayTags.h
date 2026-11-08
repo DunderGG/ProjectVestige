@@ -36,6 +36,75 @@ namespace VestigeGameplayTags
 	/** Held while stamina is at zero, when every action takes longer. UVestigeStaminaSet keeps it in step with the value. */
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(State_OutOfStamina);
 
+	// Feedback tags: what gameplay reports for the player through UVestigeFeedbackSubsystem::Report. Presentation picks the
+	// response to each (DA_FeedbackResponses on BP_HUD), so gameplay never writes the player's text (Systems.md, section 15).
+
+	/** The tool ability, on the press: the farmer faces no farm tile. */
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Feedback_Tool_NoTarget);
+
+	/** The farming component, on the press: the hand holds nothing that can be used. */
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Feedback_Tool_NothingInHand);
+
+	/** The till ability, on the press: the tile isn't grass. */
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Feedback_Farm_CantTill);
+
+	/** The plant ability, on the press: no seed is in hand. */
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Feedback_Farm_NothingToPlant);
+
+	/** The plant ability, on the press: the tile isn't empty tilled soil. */
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Feedback_Farm_CantPlant);
+
+	/** The water ability, on the press: nothing on the tile can be watered. */
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Feedback_Farm_CantWater);
+
+	/** The harvest ability, on the press: no ripe crop on the tile. */
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Feedback_Farm_NothingRipe);
+
+	/** The harvest ability, on the press: the inventory has no room for the harvest, which stays in the ground. */
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Feedback_Inventory_Full);
+
+	/** The stamina set: stamina has just reached zero. */
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Feedback_Stamina_Empty);
+
+	/** The rest component, at its warning hour: going to bed after midnight will leave the player exhausted. */
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Feedback_Rest_GettingLate);
+
+	/** The rest component, at its late-night hour: stamina drains until the player sleeps. */
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Feedback_Rest_PastMidnight);
+
+	/** The rest component: the player wakes exhausted after a late night. */
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Feedback_Rest_WokeExhausted);
+
+	/** The rest component: a night that ended before midnight cleared the exhaustion. */
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Feedback_Rest_WokeRested);
+
+	/** The game mode: the player slept and a new day begins. Value Day: the day that begins. */
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Feedback_Day_Slept);
+
+	/** The game mode: the player stayed up until the day ended and a new day begins. Value Day: the day that begins. */
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Feedback_Day_StayedUp);
+
+	/** The save subsystem: a save was loaded. Value Day: the loaded day. */
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Feedback_Save_Loaded);
+
+	/** The save subsystem: the game was saved. */
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Feedback_Save_Saved);
+
+	/** The save subsystem: the save couldn't be written, and the previous one is kept. */
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Feedback_Save_Failed);
+
+	/** The save subsystem: content the save names no longer exists and was left out. */
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Feedback_Save_ContentMissing);
+
+	/** The save subsystem: no save slot could be read, so saving is off until a new game. */
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Feedback_Save_Unreadable);
+
+	/** The save subsystem: the save is from a newer version of the game, so saving is off until a new game. */
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Feedback_Save_TooNew);
+
+	/** The save subsystem: part of the save is from a newer version of the game, so saving is off until a new game. */
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Feedback_Save_PartTooNew);
+
 	// Input tags: an input config (UVestigeInputConfig) names the input action for each, and the player character binds by
 	// them, so code never names an input asset (Systems.md, section 5).
 

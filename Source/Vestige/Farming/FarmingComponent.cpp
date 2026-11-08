@@ -4,6 +4,7 @@
 #include "Farming/FarmingComponent.h"
 
 #include "Abilities/GameplayAbility.h"
+#include "AbilitySystem/VestigeGameplayTags.h"
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemGlobals.h"
 #include "Content/FarmCropData.h"
@@ -19,8 +20,6 @@
 #include "GameplayAbilitySpec.h"
 #include "Inventory/VestigeInventoryComponent.h"
 #include "ProfilingDebugging/CpuProfilerTrace.h"
-
-#define LOCTEXT_NAMESPACE "FarmingComponent"
 
 UFarmingComponent::UFarmingComponent()
 {
@@ -182,7 +181,7 @@ void UFarmingComponent::StartUsingTool()
 	FollowInventory();
 	if (!GetCurrentTool())
 	{
-		SayNothingInHand();
+		ReportNothingInHand();
 		return;
 	}
 
@@ -230,7 +229,7 @@ void UFarmingComponent::Harvest()
 	}
 }
 
-void UFarmingComponent::SayNothingInHand() const
+void UFarmingComponent::ReportNothingInHand() const
 {
 	const UVestigeInventoryComponent* CurrentInventory = FindInventory();
 	if (!CurrentInventory)
@@ -247,7 +246,7 @@ void UFarmingComponent::SayNothingInHand() const
 		VESTIGE_LOG(this, LogFarm, Warning, "The item {ItemId} names the tool {ToolId}, which doesn't exist, so it can't be used.",
 			Item->GetContentId(), ToolFragment->GetToolId().ToString());
 	}
-	UVestigeFeedbackSubsystem::Notify(GetWorld(), LOCTEXT("NothingInHand", "Nothing in hand to use."));
+	UVestigeFeedbackSubsystem::Report(GetWorld(), VestigeGameplayTags::Feedback_Tool_NothingInHand);
 }
 
 void UFarmingComponent::ReportToolUsed(const UVestigeToolData& Tool, const FIntPoint& Tile)
@@ -356,5 +355,3 @@ void UFarmingComponent::AddToolForTests(const UVestigeToolData& Tool)
 	Tools.Add(Tool.GetPrimaryAssetId(), &Tool);
 }
 #endif
-
-#undef LOCTEXT_NAMESPACE
