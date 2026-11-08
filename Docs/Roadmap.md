@@ -481,6 +481,7 @@ Roughly in the order from [GameDesign.md section 13](GameDesign.md#13-scope-and-
 - [ ] Other camera angles, such as a higher angled view
 - [ ] Mod support: base content as a Game Feature plugin, loading mods from a folder, load order, a mod kit, and letting mods override base content
 - [ ] Co-op multiplayer, which needs its own design and changes to the architecture
+- [ ] Gamepads that aren't Xbox-style (Switch-style pads such as HORI's, the Stadia controller and other plain HID pads) through Unreal's GameInput plugin, which maps a raw HID pad by its USB vendor and product ID. Until then only XInput pads work on Windows, as in most PC games, and Steam Input covers the rest for players. A nice to have, not needed yet (David, 2026-11-08, after the gamepad key hints)
 
 ### Open problems
 > Anything minor we have been putting off.
