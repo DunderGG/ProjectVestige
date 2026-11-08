@@ -7,6 +7,7 @@
 #include "Content/FarmCropData.h"
 #include "Content/FarmSeedFragment.h"
 #include "Content/VestigeAssetManager.h"
+#include "Content/VestigeContentCatalog.h"
 #include "Content/VestigeItemData.h"
 #include "Content/VestigeToolData.h"
 #include "Content/VestigeToolFragment.h"
@@ -79,13 +80,15 @@ namespace VestigeContentTests
 
 		TEST_METHOD(EveryToolNamesAToolAbility)
 		{
+			Spawner.InitializeGameSubsystems();
+			const UVestigeContentCatalog* Catalog = UVestigeContentCatalog::Get(&Spawner.GetWorld());
 			TArray<FPrimaryAssetId> ToolIds;
 			UAssetManager::Get().GetPrimaryAssetIdList(UVestigeToolData::AssetType, ToolIds);
 			ASSERT_THAT(IsFalse(ToolIds.IsEmpty()));
 
 			for (const FPrimaryAssetId& ToolId : ToolIds)
 			{
-				const UVestigeToolData* Tool = Cast<UVestigeToolData>(UVestigeContentData::LoadWithVisuals(ToolId));
+				const UVestigeToolData* Tool = Catalog->Find<UVestigeToolData>(ToolId);
 				ASSERT_THAT(IsNotNull(Tool, *ToolId.ToString()));
 				const UClass* Ability = Tool->GetAbility();
 				ASSERT_THAT(IsNotNull(Ability, *ToolId.ToString()));

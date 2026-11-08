@@ -29,9 +29,10 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnFarmToolUsed, const UVestigeTool
  * subclass): this component grants the ability of the tool in hand on the ability system the owner reaches (the player
  * state's), with the tool asset as its source object, and passes the use key's press and release to it. It also grants the
  * harvest all the time (HarvestToolId), which Harvest activates once; the farm grid calls it when the player interacts with
- * a ripe tile. It never calls the abilities' rules; they read the target from UFarmTargetingComponent and the crops here,
- * and report what they did, which this component broadcasts as the extension points OnCropHarvested and OnToolUsed. Loads
- * every tool and crop at BeginPlay, so nothing waits on a load. Systems.md, sections 7 and 8.
+ * a ripe tile. It never calls the abilities' rules; they read the target from UFarmTargetingComponent and content from the
+ * content catalogue, and report what they did, which this component broadcasts as the extension points OnCropHarvested and
+ * OnToolUsed. Finds tools in the content catalogue (UVestigeContentCatalog), which loaded them before play, so nothing
+ * waits on a load. Systems.md, sections 2, 7 and 8.
  */
 UCLASS(ClassGroup = (Farming), meta = (BlueprintSpawnableComponent))
 class UFarmingComponent : public UActorComponent
@@ -49,9 +50,6 @@ public:
 
 	/** The tool whose ability harvests (VestigeTool:Base.Hand), or nullptr if HarvestToolId names none. */
 	const UVestigeToolData* GetHarvestTool() const;
-
-	/** The loaded crop with this ID (FarmCrop:Base.Turnip), or nullptr if the Asset Manager knows none. */
-	const UFarmCropData* FindCrop(const FPrimaryAssetId& CropId) const;
 
 	/**
 	 * Uses the tool in hand once on the target tile, by activating its ability without pressing the use key: the ability
@@ -111,25 +109,14 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Farming")
 	FOnFarmToolUsed OnToolUsed;
 
-#if WITH_DEV_AUTOMATION_TESTS
-	/** For tests only: makes a crop the Asset Manager doesn't know (a transient one) plantable. */
-	void AddCropForTests(const UFarmCropData& Crop);
-
-	/** For tests only: makes a tool the Asset Manager doesn't know (a transient one) usable by the items that name it. */
-	void AddToolForTests(const UVestigeToolData& Tool);
-#endif
-
 protected:
-	/** Loads the tools and crops, then follows the owner's controller and the inventory on its player state. */
+	/** Warns if HarvestToolId names no tool, then follows the owner's controller and the inventory on its player state. */
 	virtual void BeginPlay() override;
 
 	/** Takes the tool's ability back, then stops following the owner and the inventory. */
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 private:
-	/** Loads every tool and crop the Asset Manager knows, with their visuals, in one batch. */
-	void LoadToolsAndCrops();
-
 	/** The inventory on the owner's player state now, or nullptr without one. */
 	UVestigeInventoryComponent* FindInventory() const;
 
@@ -192,12 +179,4 @@ private:
 	/** The tool whose ability harvests, granted all the time (VestigeTool:Base.Hand). Was HandToolId (a redirect loads it). */
 	UPROPERTY(EditDefaultsOnly, Category = "Farming", meta = (AllowPrivateAccess = "true", AllowedTypes = "VestigeTool"))
 	FPrimaryAssetId HarvestToolId;
-
-	/** Every tool, by its primary asset ID, loaded with its visuals at BeginPlay. */
-	UPROPERTY()
-	TMap<FPrimaryAssetId, TObjectPtr<const UVestigeToolData>> Tools;
-
-	/** Every crop, by its primary asset ID, loaded with its visuals at BeginPlay. */
-	UPROPERTY()
-	TMap<FPrimaryAssetId, TObjectPtr<const UFarmCropData>> Crops;
 };

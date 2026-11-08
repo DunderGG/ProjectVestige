@@ -8,18 +8,17 @@
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemGlobals.h"
 #include "Content/FarmCropData.h"
-#include "Content/VestigeContentData.h"
+#include "Content/VestigeContentCatalog.h"
 #include "Content/VestigeItemData.h"
 #include "Content/VestigeToolData.h"
 #include "Content/VestigeToolFragment.h"
 #include "Core/VestigeFeedbackSubsystem.h"
-#include "Engine/AssetManager.h"
+#include "Engine/World.h"
 #include "Farming/FarmLog.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerState.h"
 #include "GameplayAbilitySpec.h"
 #include "Inventory/VestigeInventoryComponent.h"
-#include "ProfilingDebugging/CpuProfilerTrace.h"
 
 UFarmingComponent::UFarmingComponent()
 {
@@ -30,7 +29,11 @@ void UFarmingComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	LoadToolsAndCrops();
+	if (UVestigeContentCatalog::Get(GetWorld()) && !GetHarvestTool())
+	{
+		VESTIGE_LOG(
+			this, LogFarm, Warning, "The Harvest Tool Id ({ToolId}) names no tool, so nothing can be harvested.", HarvestToolId.ToString());
+	}
 	if (APawn* Pawn = Cast<APawn>(GetOwner()))
 	{
 		Pawn->ReceiveControllerChangedDelegate.AddDynamic(this, &UFarmingComponent::FollowController);
@@ -59,74 +62,19 @@ void UFarmingComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	Super::EndPlay(EndPlayReason);
 }
 
-void UFarmingComponent::LoadToolsAndCrops()
-{
-	TRACE_CPUPROFILER_EVENT_SCOPE(UFarmingComponent::LoadToolsAndCrops);
-
-	UAssetManager* AssetManager = UAssetManager::GetIfInitialized();
-	if (!AssetManager)
-	{
-		return;
-	}
-
-	TArray<FPrimaryAssetId> ToolIds;
-	AssetManager->GetPrimaryAssetIdList(UVestigeToolData::AssetType, ToolIds);
-	TArray<FPrimaryAssetId> CropIds;
-	AssetManager->GetPrimaryAssetIdList(UFarmCropData::AssetType, CropIds);
-
-	// Waiting is fine at play start, and with the meshes loaded now, holding or planting never stalls on a load. The asset
-	// manager keeps the handle, so a later pawn finds them in memory.
-	TArray<FPrimaryAssetId> AssetIds = ToolIds;
-	AssetIds.Append(CropIds);
-	if (const TSharedPtr<FStreamableHandle> Handle = AssetManager->LoadPrimaryAssets(AssetIds, {UVestigeContentData::VisualsBundle}))
-	{
-		Handle->WaitUntilComplete();
-	}
-
-	for (const FPrimaryAssetId& ToolId : ToolIds)
-	{
-		if (const UVestigeToolData* Tool = AssetManager->GetPrimaryAssetObject<UVestigeToolData>(ToolId))
-		{
-			if (!Tool->GetAbility())
-			{
-				VESTIGE_LOG(this, LogFarm, Warning, "The tool {ToolId} names no Ability, so it does nothing.", ToolId.ToString());
-			}
-			Tools.Add(ToolId, Tool);
-		}
-	}
-	for (const FPrimaryAssetId& CropId : CropIds)
-	{
-		if (const UFarmCropData* Crop = AssetManager->GetPrimaryAssetObject<UFarmCropData>(CropId))
-		{
-			Crops.Add(CropId, Crop);
-		}
-	}
-	if (!Tools.Contains(HarvestToolId))
-	{
-		VESTIGE_LOG(
-			this, LogFarm, Warning, "The Harvest Tool Id ({ToolId}) names no tool, so nothing can be harvested.", HarvestToolId.ToString());
-	}
-}
-
 const UVestigeToolData* UFarmingComponent::GetCurrentTool() const
 {
 	const UVestigeInventoryComponent* CurrentInventory = FindInventory();
 	const UVestigeItemData* Item = CurrentInventory ? CurrentInventory->GetItemInHand() : nullptr;
 	const UVestigeToolFragment* ToolFragment = Item ? Item->FindFragment<UVestigeToolFragment>() : nullptr;
-	const TObjectPtr<const UVestigeToolData>* Tool = ToolFragment ? Tools.Find(ToolFragment->GetToolId()) : nullptr;
-	return Tool ? Tool->Get() : nullptr;
+	const UVestigeContentCatalog* Catalog = ToolFragment ? UVestigeContentCatalog::Get(GetWorld()) : nullptr;
+	return Catalog ? Catalog->Find<UVestigeToolData>(ToolFragment->GetToolId()) : nullptr;
 }
 
 const UVestigeToolData* UFarmingComponent::GetHarvestTool() const
 {
-	const TObjectPtr<const UVestigeToolData>* Tool = Tools.Find(HarvestToolId);
-	return Tool ? Tool->Get() : nullptr;
-}
-
-const UFarmCropData* UFarmingComponent::FindCrop(const FPrimaryAssetId& CropId) const
-{
-	const TObjectPtr<const UFarmCropData>* Crop = Crops.Find(CropId);
-	return Crop ? Crop->Get() : nullptr;
+	const UVestigeContentCatalog* Catalog = UVestigeContentCatalog::Get(GetWorld());
+	return Catalog ? Catalog->Find<UVestigeToolData>(HarvestToolId) : nullptr;
 }
 
 UVestigeInventoryComponent* UFarmingComponent::FindInventory() const
@@ -291,8 +239,13 @@ void UFarmingComponent::UpdateGrantedTool()
 
 FGameplayAbilitySpecHandle UFarmingComponent::Grant(UAbilitySystemComponent* AbilitySystem, const UVestigeToolData* Tool)
 {
-	if (!AbilitySystem || !Tool || !Tool->GetAbility())
+	if (!AbilitySystem || !Tool)
 	{
+		return FGameplayAbilitySpecHandle();
+	}
+	if (!Tool->GetAbility())
+	{
+		VESTIGE_LOG(Tool, LogFarm, Warning, "The tool {ToolId} names no Ability, so it does nothing.", Tool->GetContentId());
 		return FGameplayAbilitySpecHandle();
 	}
 
@@ -343,15 +296,3 @@ void UFarmingComponent::FollowController(APawn* Pawn, AController* OldController
 {
 	FollowInventory();
 }
-
-#if WITH_DEV_AUTOMATION_TESTS
-void UFarmingComponent::AddCropForTests(const UFarmCropData& Crop)
-{
-	Crops.Add(Crop.GetPrimaryAssetId(), &Crop);
-}
-
-void UFarmingComponent::AddToolForTests(const UVestigeToolData& Tool)
-{
-	Tools.Add(Tool.GetPrimaryAssetId(), &Tool);
-}
-#endif

@@ -4,6 +4,7 @@
 #if WITH_DEV_AUTOMATION_TESTS
 
 #include "Components/ActorTestSpawner.h"
+#include "Content/VestigeContentCatalog.h"
 #include "Content/VestigeItemData.h"
 #include "CQTest.h"
 #include "GameFramework/GameModeBase.h"
@@ -19,6 +20,9 @@ namespace VestigeInventoryTests
 	{
 		FActorTestSpawner Spawner;
 
+		/** The content catalogue lives in the game instance. */
+		BEFORE_EACH() { Spawner.InitializeGameSubsystems(); }
+
 		/** An item asset with this ContentId and stack size. */
 		const UVestigeItemData& MakeItem(FName ContentId, int32 StackSize)
 		{
@@ -28,12 +32,17 @@ namespace VestigeInventoryTests
 			return Item;
 		}
 
-		/** An inventory component with SlotCount slots that knows these items, without loading any. */
+		/** An inventory component with SlotCount slots, with these items added to the content catalogue. */
 		UVestigeInventoryComponent& MakeComponent(int32 SlotCount, TConstArrayView<const UVestigeItemData*> Items)
 		{
+			UVestigeContentCatalog* Catalog = UVestigeContentCatalog::Get(&Spawner.GetWorld());
+			for (const UVestigeItemData* Item : Items)
+			{
+				Catalog->AddForTests(*Item);
+			}
 			AActor& Owner = Spawner.SpawnActor<AActor>();
 			UVestigeInventoryComponent* Component = NewObject<UVestigeInventoryComponent>(&Owner);
-			Component->ResetForTests(SlotCount, Items);
+			Component->ResetForTests(SlotCount);
 			return *Component;
 		}
 
@@ -133,6 +142,35 @@ namespace VestigeInventoryTests
 			ASSERT_THAT(IsFalse(Component.CanAddItem(Unknown, 1)));
 			ASSERT_THAT(IsFalse(Component.TryAddItem(Unknown, 1)));
 			ASSERT_THAT(IsTrue(Component.GetItemCount(Unknown) == 0));
+		}
+
+		TEST_METHOD(InventoriesShareTheCatalogue)
+		{
+			const FPrimaryAssetId TurnipId(UVestigeItemData::AssetType, TEXT("Base.Turnip"));
+			const UVestigeItemData* Turnip = UVestigeContentCatalog::Get(&Spawner.GetWorld())->Find<UVestigeItemData>(TurnipId);
+			ASSERT_THAT(IsNotNull(Turnip));
+			UVestigeInventoryComponent& Bag = MakeComponent(4, {});
+			UVestigeInventoryComponent& Chest = MakeComponent(4, {});
+
+			ASSERT_THAT(IsTrue(Bag.TryAddItem(TurnipId, 1)));
+			ASSERT_THAT(IsTrue(Chest.TryAddItem(TurnipId, 1)));
+
+			ASSERT_THAT(IsTrue(Bag.GetSlots()[0].Item == Turnip));
+			ASSERT_THAT(IsTrue(Chest.GetSlots()[0].Item == Turnip));
+		}
+
+		TEST_METHOD(WithoutACatalogueNoItemIsKnown)
+		{
+			// A world without a game instance (an editor preview) has no catalogue.
+			FActorTestSpawner WorldWithoutAGame;
+			AActor& Owner = WorldWithoutAGame.SpawnActor<AActor>();
+			UVestigeInventoryComponent* Component = NewObject<UVestigeInventoryComponent>(&Owner);
+			Component->ResetForTests(4);
+			const FPrimaryAssetId TurnipId(UVestigeItemData::AssetType, TEXT("Base.Turnip"));
+
+			ASSERT_THAT(IsNull(UVestigeContentCatalog::Get(&WorldWithoutAGame.GetWorld())));
+			ASSERT_THAT(IsFalse(Component->TryAddItem(TurnipId, 1)));
+			ASSERT_THAT(IsTrue(Component->GetItemCount(TurnipId) == 0));
 		}
 
 		TEST_METHOD(EveryChangeIsBroadcast)

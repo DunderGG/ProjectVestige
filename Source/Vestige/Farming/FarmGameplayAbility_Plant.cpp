@@ -4,10 +4,11 @@
 #include "Farming/FarmGameplayAbility_Plant.h"
 
 #include "AbilitySystem/VestigeGameplayTags.h"
+#include "Content/FarmCropData.h"
 #include "Content/FarmSeedFragment.h"
+#include "Content/VestigeContentCatalog.h"
 #include "Content/VestigeItemData.h"
 #include "Farming/FarmField.h"
-#include "Farming/FarmingComponent.h"
 #include "Farming/FarmTileState.h"
 #include "Inventory/VestigeInventoryComponent.h"
 
@@ -45,9 +46,9 @@ bool UFarmGameplayAbility_Plant::UseOn(const FIntPoint& Tile)
 
 const UFarmCropData* UFarmGameplayAbility_Plant::FindCropInHand() const
 {
-	const UFarmingComponent* FarmingComponent = GetFarming();
 	const UVestigeInventoryComponent* Inventory = GetInventory();
 	const UVestigeItemData* Item = Inventory ? Inventory->GetItemInHand() : nullptr;
 	const UFarmSeedFragment* Seed = Item ? Item->FindFragment<UFarmSeedFragment>() : nullptr;
-	return FarmingComponent && Seed ? FarmingComponent->FindCrop(Seed->GetCropId()) : nullptr;
+	const UVestigeContentCatalog* Catalog = Seed ? UVestigeContentCatalog::Get(GetWorld()) : nullptr;
+	return Catalog ? Catalog->Find<UFarmCropData>(Seed->GetCropId()) : nullptr;
 }

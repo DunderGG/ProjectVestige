@@ -381,7 +381,7 @@ Not in `Tick`, not in a timer that runs every frame, and not in a Slate or UMG b
 ### 12.4 Assets and loading
 
 - **A hard reference loads everything it points to, and everything those assets point to in turn.** Use `TObjectPtr` / `TSubclassOf` for assets only when the class always needs them. Content uses soft references and asset bundles ([section 7](#7-memory-pointers-and-object-lifetime), [Architecture.md, section 5](Architecture.md#5-data-and-content)).
-- **No synchronous loads during interactive play.** `LoadSynchronous`, `TryLoad`, `WaitUntilComplete` and `UVestigeContentData::LoadWithVisuals` are only for play start and loading screens, where the cost is known. Everything else loads asynchronously (`FStreamableManager`, the Asset Manager) before it is needed.
+- **No synchronous loads during interactive play.** `LoadSynchronous`, `TryLoad` and `WaitUntilComplete` are only for play start and loading screens, where the cost is known. Content definitions and their `Visuals` are loaded once per game by `UVestigeContentCatalog` before any world plays (Systems.md, section 2); find content there rather than loading it. Everything else loads asynchronously (`FStreamableManager`, the Asset Manager) before it is needed.
 - In Blueprints, a **Cast To** node or a variable of another Blueprint's type is a hard reference that loads that Blueprint and everything it references. Cast to C++ base classes or use interfaces instead.
 - Check the **Size Map** and **Reference Viewer** (right-click the asset in the Content Browser) for every new or changed Blueprint and data asset, and make sure it doesn't drag in unrelated content.
 - `ConstructorHelpers` only in constructors, and only for engine placeholder assets. Our own assets are set in a Blueprint's defaults or a data asset (`M_TileHighlight` on `BP_PlayerCharacter`'s highlight component), so code never names our content by path and the editor can move it.
@@ -447,7 +447,7 @@ Source/Vestige/
     Core/           Shared services that know no game rules: VestigeActorLookup, UVestigeFeedbackSubsystem, the save registry (UVestigeSaveRegistry, IVestigeSaveable), the module, VESTIGE_LOG and the shared log categories
     AbilitySystem/  Gameplay Ability System parts that know no farm: the stamina set and effects, ability sets, native tags
     Interaction/    The interactable interface, the interaction component and the interact ability
-    Content/        Content definitions: UVestigeContentData and its subclasses, UVestigeAssetManager
+    Content/        Content definitions: UVestigeContentData and its subclasses, UVestigeAssetManager, UVestigeContentCatalog
     Time/           The clock, its settings and save struct, and the day cycle's lighting
     Inventory/      The inventory component, its slot rules and save struct
     Farming/        Tiles and tile state, the grid, the farming, targeting, rest and highlight components, the bed, the tool abilities, their save structs

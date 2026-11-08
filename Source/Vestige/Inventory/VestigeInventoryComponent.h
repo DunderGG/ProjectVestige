@@ -34,8 +34,8 @@ struct FVestigeItemStack
 
 /**
  * The items the player carries: a fixed number of slots, each empty or holding a stack of one item. Lives on the player
- * state, so it outlives the pawn. Loads every item definition at BeginPlay, so adding an item during play never waits on
- * a load, and broadcasts OnInventoryChanged after every change. The stacking rules are in FVestigeInventory.
+ * state, so it outlives the pawn. Finds item definitions in the content catalogue (UVestigeContentCatalog), which loaded
+ * them before play, so adding an item never waits on a load, and broadcasts OnInventoryChanged after every change. The stacking rules are in FVestigeInventory.
  * The first slots are the hotbar (HotbarSlotCount): one of them is selected, and its item is the item in hand, which the
  * farming component uses. Saves its slots and the selected slot under Base.Inventory through UVestigeSaveRegistry while it
  * is in play, so the player's bag crosses a map change; it is the player's inventory, and a second inventory (a chest)
@@ -119,26 +119,23 @@ public:
 
 #if WITH_DEV_AUTOMATION_TESTS
 	/**
-	 * For tests only: empties the inventory to this many slots, selects the first hotbar slot and makes these item
-	 * definitions known, without loading. Broadcasts the hand if it changed.
+	 * For tests only: empties the inventory to this many slots and selects the first hotbar slot. Broadcasts the hand if it
+	 * changed. Test items go into the content catalogue (UVestigeContentCatalog::AddForTests).
 	 */
-	void ResetForTests(int32 InSlotCount, TConstArrayView<const UVestigeItemData*> InItems);
+	void ResetForTests(int32 InSlotCount);
 #endif
 
 protected:
-	/** Loads the item definitions, then takes its saved slots, or the starting items when there are none. */
+	/** Takes its saved slots, or the starting items when there are none. */
 	virtual void BeginPlay() override;
 
 	/** Keeps its slots for the next map before it goes. */
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 private:
-	/** Loads every item definition the Asset Manager knows into Items. */
-	void LoadItems();
-
 	void AddStartingItems();
 
-	/** The loaded definition of the item with this ID, or nullptr, with a warning, if there is none. */
+	/** The content catalogue's definition of the item with this ID, or nullptr, with a warning, if there is none. */
 	const UVestigeItemData* FindItem(const FPrimaryAssetId& ItemId) const;
 
 	/** Empties the slots to SlotCount and selects the first hotbar slot, without broadcasting. */
@@ -177,10 +174,6 @@ private:
 	/** What the inventory holds when a game starts without a save. */
 	UPROPERTY(EditDefaultsOnly, Category = "Inventory", meta = (AllowPrivateAccess = "true"))
 	TArray<FVestigeItemStack> StartingItems;
-
-	/** Every item definition, by its primary asset ID, loaded at BeginPlay. */
-	UPROPERTY()
-	TMap<FPrimaryAssetId, TObjectPtr<const UVestigeItemData>> Items;
 
 	UPROPERTY()
 	FVestigeInventory Inventory;

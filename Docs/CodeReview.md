@@ -166,6 +166,8 @@ The farming component posts "Tilled the soil." and "Watered." on every successfu
 
 **Fix.** One content catalogue, loaded once (in `UVestigeAssetManager` or a game-instance subsystem), with icons in their own bundle, loaded when a UI needs them.
 
+**Status: Resolved (2026-11-08).** `UVestigeContentCatalog`, a game-instance subsystem in `Content/`, loads every content definition (crops, tools, items: every primary asset type with a `UVestigeContentData` base class) with its `Visuals` bundle once per game, before the first map, through a preload handle it owns and releases when the game ends. The inventory, the farming component, the plant ability, the field subsystem and `BenchmarkField` find content there and load nothing, so a chest or the shipping bin will share the same definitions; `LoadWithVisuals` is gone. Icons go in an `Icons` bundle the catalogue never loads; the icon property and its loading come with the hotbar row, which is their first reader (L2). Design in [Systems.md, section 2](Systems.md#2-content-and-the-asset-manager), reasons in [Architecture.md, decision log](Architecture.md#16-decision-log).
+
 ### M6 — The template code is load-bearing
 
 `AVestigeGameMode` (which sets the HUD and the player state) and `AVestigeCharacter` (the player's base class, with Epic's camera, style and mobile touch controls) live in `Template/` under Epic's licence terms. M2 needs a game mode of our own anyway.

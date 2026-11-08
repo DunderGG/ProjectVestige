@@ -3,7 +3,6 @@
 
 #include "Content/VestigeContentData.h"
 
-#include "Content/VestigeContentLog.h"
 #include "Engine/AssetManager.h"
 
 #if WITH_EDITOR
@@ -14,27 +13,6 @@
 #define LOCTEXT_NAMESPACE "VestigeContentData"
 
 const FName UVestigeContentData::VisualsBundle(TEXT("Visuals"));
-
-const UVestigeContentData* UVestigeContentData::LoadWithVisuals(const FPrimaryAssetId& ContentAssetId)
-{
-	UAssetManager* AssetManager = UAssetManager::GetIfInitialized();
-	if (!AssetManager || !ContentAssetId.IsValid())
-	{
-		return nullptr;
-	}
-
-	if (const TSharedPtr<FStreamableHandle> Handle = AssetManager->LoadPrimaryAsset(ContentAssetId, {VisualsBundle}))
-	{
-		Handle->WaitUntilComplete();
-	}
-	const UVestigeContentData* Content = AssetManager->GetPrimaryAssetObject<UVestigeContentData>(ContentAssetId);
-	if (!Content)
-	{
-		VESTIGE_LOG(AssetManager, LogVestigeContent, Warning,
-			"No content asset has the ID {ContentId}. Check the asset's Content Id and folder.", ContentAssetId.ToString());
-	}
-	return Content;
-}
 
 FPrimaryAssetId UVestigeContentData::GetPrimaryAssetId() const
 {

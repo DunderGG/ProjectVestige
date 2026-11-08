@@ -4,7 +4,7 @@
 #include "Player/VestigeCheatManager.h"
 
 #include "Content/FarmCropData.h"
-#include "Content/VestigeContentData.h"
+#include "Content/VestigeContentCatalog.h"
 #include "Algo/AllOf.h"
 #include "Core/VestigeLog.h"
 #include "Engine/World.h"
@@ -122,9 +122,8 @@ void UVestigeCheatManager::BenchmarkField(int32 FieldSize, FName CropId)
 		return;
 	}
 
-	// A developer command typed before measuring, not play, so waiting for the crop and its meshes to load is fine.
-	const FPrimaryAssetId CropAssetId(UFarmCropData::AssetType, CropId);
-	const UFarmCropData* Crop = Cast<UFarmCropData>(UVestigeContentData::LoadWithVisuals(CropAssetId));
+	const UVestigeContentCatalog* Catalog = UVestigeContentCatalog::Get(GetWorld());
+	const UFarmCropData* Crop = Catalog ? Catalog->Find<UFarmCropData>(FPrimaryAssetId(UFarmCropData::AssetType, CropId)) : nullptr;
 	if (!Crop)
 	{
 		VESTIGE_LOG(this, LogVestige, Warning, "There is no crop {CropId}.", CropId);

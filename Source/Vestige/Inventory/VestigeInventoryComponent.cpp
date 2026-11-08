@@ -3,13 +3,12 @@
 
 #include "Inventory/VestigeInventoryComponent.h"
 
+#include "Content/VestigeContentCatalog.h"
 #include "Content/VestigeItemData.h"
 #include "Core/VestigeSaveRegistry.h"
-#include "Engine/AssetManager.h"
 #include "Engine/World.h"
 #include "Inventory/VestigeInventoryLog.h"
 #include "Inventory/VestigeInventorySaveData.h"
-#include "ProfilingDebugging/CpuProfilerTrace.h"
 
 UVestigeInventoryComponent::UVestigeInventoryComponent()
 {
@@ -21,9 +20,6 @@ void UVestigeInventoryComponent::BeginPlay()
 	Super::BeginPlay();
 
 	ResetSlots();
-	LoadItems();
-
-	// After the items load, since restoring the saved slots looks them up.
 	UVestigeSaveRegistry::RegisterWorldOwner(GetWorld(), *this);
 }
 
@@ -67,34 +63,6 @@ bool UVestigeInventoryComponent::ReadSaveRecord(const FVestigeSaveRecord& Record
 	return true;
 }
 
-void UVestigeInventoryComponent::LoadItems()
-{
-	TRACE_CPUPROFILER_EVENT_SCOPE(UVestigeInventoryComponent::LoadItems);
-
-	UAssetManager* AssetManager = UAssetManager::GetIfInitialized();
-	if (!AssetManager)
-	{
-		return;
-	}
-
-	TArray<FPrimaryAssetId> ItemIds;
-	AssetManager->GetPrimaryAssetIdList(UVestigeItemData::AssetType, ItemIds);
-
-	// Definitions have no meshes or textures, so all of them load quickly, and waiting is fine at play start.
-	if (const TSharedPtr<FStreamableHandle> Handle = AssetManager->LoadPrimaryAssets(ItemIds))
-	{
-		Handle->WaitUntilComplete();
-	}
-	for (const FPrimaryAssetId& ItemId : ItemIds)
-	{
-		if (const UVestigeItemData* Item = AssetManager->GetPrimaryAssetObject<UVestigeItemData>(ItemId))
-		{
-			Items.Add(ItemId, Item);
-		}
-	}
-	VESTIGE_LOG(this, LogVestigeInventory, Log, "Loaded {Count} item definitions.", Items.Num());
-}
-
 void UVestigeInventoryComponent::AddStartingItems()
 {
 	for (const FVestigeItemStack& Stack : StartingItems)
@@ -110,13 +78,13 @@ void UVestigeInventoryComponent::AddStartingItems()
 
 const UVestigeItemData* UVestigeInventoryComponent::FindItem(const FPrimaryAssetId& ItemId) const
 {
-	const TObjectPtr<const UVestigeItemData>* Item = Items.Find(ItemId);
+	const UVestigeContentCatalog* Catalog = UVestigeContentCatalog::Get(GetWorld());
+	const UVestigeItemData* Item = Catalog ? Catalog->Find<UVestigeItemData>(ItemId) : nullptr;
 	if (!Item)
 	{
 		VESTIGE_LOG(this, LogVestigeInventory, Warning, "No item has the ID {ItemId}.", ItemId.ToString());
-		return nullptr;
 	}
-	return *Item;
+	return Item;
 }
 
 bool UVestigeInventoryComponent::CanAddItem(const FPrimaryAssetId& ItemId, int32 Count) const
@@ -297,15 +265,10 @@ void UVestigeInventoryComponent::BroadcastItemInHandIfChanged()
 	OnItemInHandChanged.Broadcast();
 }
 #if WITH_DEV_AUTOMATION_TESTS
-void UVestigeInventoryComponent::ResetForTests(int32 InSlotCount, TConstArrayView<const UVestigeItemData*> InItems)
+void UVestigeInventoryComponent::ResetForTests(int32 InSlotCount)
 {
 	SlotCount = InSlotCount;
 	ResetSlots();
-	Items.Reset();
-	for (const UVestigeItemData* Item : InItems)
-	{
-		Items.Add(Item->GetPrimaryAssetId(), Item);
-	}
 	BroadcastItemInHandIfChanged();
 }
 #endif

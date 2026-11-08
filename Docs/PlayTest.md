@@ -454,6 +454,17 @@ Gameplay no longer writes the player's messages: it reports what happened as a t
 - [x] **Missing row**: remove the `Vestige.Feedback.Farm.CantWater` row, Play and water grass: nothing shows, and the Output Log has a `LogVestigeFeedback` warning naming the tag and `DA_FeedbackResponses`. Close the asset without saving.
 - [x] **No grid**: in a level without a `BP_FarmGrid`, Play: no message on screen, and the Output Log warns that the level has no FarmGrid.
 
+### Content catalogue, 2026-11-08
+
+Content is loaded once per game by the new content catalogue (`UVestigeContentCatalog`, [Systems.md, section 2](Systems.md#2-content-and-the-asset-manager)) instead of by the inventory, the farming component and the field one by one. Nothing should look or play differently. The commit is the one titled "Load content once in a shared content catalogue".
+
+- [ ] **Solution**: regenerate the project files (right-click `Vestige.uproject` > Generate Visual Studio project files): the solution lists `Content/VestigeContentCatalog.h` and `.cpp` and `Tests/VestigeContentCatalogTests.cpp`.
+- [ ] **Start**: Play. The Output Log, filtered on `LogVestigeContent`, has one line "Loaded 9 content definitions." and no warning or error; the HUD shows the hoe in hand and the bag as before.
+- [ ] **Tools and crops**: till, plant, water and harvest with each tool, and switch through the hotbar: the held meshes show, the turnip shows its growth stages, and nothing hitches when a tool first comes into hand.
+- [ ] **Saved field**: with turnips growing, sleep, stop and Play again: the crops come back at their stages, and the Output Log has no warning about a missing crop.
+- [ ] **Benchmark**: the console command `BenchmarkField 8 Base.Turnip` fills the field with ripe turnips at once, as before.
+- [ ] **A new item in the editor**: duplicate `DA_Item_Turnip`, give the copy the Content Id `Test.Turnip2`, save, and Play: the log says "Loaded 10 content definitions.". Delete the copy afterwards.
+
 ### Editor chores
 
 Changes only the editor can make safely. The steps are in [Roadmap.md, Housekeeping](Roadmap.md#3-housekeeping): re-saving the template Blueprints and `L_Farm`, moving `BP_FarmTile` and the materials with redirectors fixed, and regenerating the Android File Server token if it was ever used. After each one, run the [smoke test](#3-smoke-test).

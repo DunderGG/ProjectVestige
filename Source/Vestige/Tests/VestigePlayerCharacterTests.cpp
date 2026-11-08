@@ -4,6 +4,7 @@
 #if WITH_DEV_AUTOMATION_TESTS
 
 #include "Components/ActorTestSpawner.h"
+#include "Content/VestigeContentCatalog.h"
 #include "Content/VestigeItemData.h"
 #include "CQTest.h"
 #include "Farming/FarmingComponent.h"
@@ -21,6 +22,22 @@ namespace VestigePlayerCharacterTests
 	TEST_CLASS(PlayerCharacter, "Vestige")
 	{
 		FActorTestSpawner Spawner;
+
+		/** The content catalogue lives in the game instance. */
+		BEFORE_EACH() { Spawner.InitializeGameSubsystems(); }
+
+		/** An inventory with SlotCount slots on Owner, with Items made known to the content catalogue. */
+		UVestigeInventoryComponent* MakeInventory(AActor& Owner, int32 SlotCount, TConstArrayView<const UVestigeItemData*> Items)
+		{
+			UVestigeContentCatalog* Catalog = UVestigeContentCatalog::Get(&Spawner.GetWorld());
+			for (const UVestigeItemData* Item : Items)
+			{
+				Catalog->AddForTests(*Item);
+			}
+			UVestigeInventoryComponent* Inventory = NewObject<UVestigeInventoryComponent>(&Owner);
+			Inventory->ResetForTests(SlotCount);
+			return Inventory;
+		}
 
 		/** The game's character Blueprint, which names the input config and the mapping contexts the native class lacks. */
 		static UClass* LoadFarmerClass()
@@ -156,8 +173,7 @@ namespace VestigePlayerCharacterTests
 			Hoe.SetContentIdForTests(TEXT("Base.Hoe"));
 			UVestigeItemData& Can = Spawner.SpawnObject<UVestigeItemData>();
 			Can.SetContentIdForTests(TEXT("Base.WateringCan"));
-			UVestigeInventoryComponent* Inventory = NewObject<UVestigeInventoryComponent>(&Farmer);
-			Inventory->ResetForTests(12, {&Hoe, &Can});
+			UVestigeInventoryComponent* Inventory = MakeInventory(Farmer, 12, {&Hoe, &Can});
 			FVestigeInventorySaveData Bag;
 			Bag.Slots = {{0, Hoe.GetContentId(), 1}, {2, Can.GetContentId(), 1}, {10, Hoe.GetContentId(), 1}};
 			Inventory->RestoreFromSaveData(Bag);
@@ -174,8 +190,7 @@ namespace VestigePlayerCharacterTests
 			AVestigePlayerCharacter& Farmer = SpawnBlueprintFarmer();
 			UVestigeItemData& Hoe = Spawner.SpawnObject<UVestigeItemData>();
 			Hoe.SetContentIdForTests(TEXT("Base.Hoe"));
-			UVestigeInventoryComponent* Inventory = NewObject<UVestigeInventoryComponent>(&Farmer);
-			Inventory->ResetForTests(12, {&Hoe});
+			UVestigeInventoryComponent* Inventory = MakeInventory(Farmer, 12, {&Hoe});
 
 			// An empty hotbar has nothing to step through.
 			ASSERT_THAT(IsTrue(Farmer.GetHotbarKeyHints(*Inventory, EVestigeHintDevice::Gamepad).IsEmpty()));
@@ -197,8 +212,7 @@ namespace VestigePlayerCharacterTests
 			AVestigePlayerCharacter& Farmer = Spawner.SpawnActor<AVestigePlayerCharacter>();
 			UVestigeItemData& Hoe = Spawner.SpawnObject<UVestigeItemData>();
 			Hoe.SetContentIdForTests(TEXT("Base.Hoe"));
-			UVestigeInventoryComponent* Inventory = NewObject<UVestigeInventoryComponent>(&Farmer);
-			Inventory->ResetForTests(12, {&Hoe});
+			UVestigeInventoryComponent* Inventory = MakeInventory(Farmer, 12, {&Hoe});
 			FVestigeInventorySaveData Bag;
 			Bag.Slots = {{0, Hoe.GetContentId(), 1}};
 			Inventory->RestoreFromSaveData(Bag);
@@ -215,7 +229,6 @@ namespace VestigePlayerCharacterTests
 		{
 			// The setup of Vestige.Farming.AFarmerPossessedBeforeBeginPlayFollowsTheHand: the game's player state, with its
 			// inventory and ability system, and the farmer Blueprint possessed by a player controller.
-			Spawner.InitializeGameSubsystems();
 			UClass* PlayerStateClass =
 				LoadClass<AVestigePlayerState>(nullptr, TEXT("/Game/Vestige/Blueprints/BP_PlayerState.BP_PlayerState_C"));
 			ASSERT_THAT(IsNotNull(PlayerStateClass));

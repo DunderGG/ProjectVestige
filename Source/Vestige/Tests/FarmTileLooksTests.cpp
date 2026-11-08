@@ -5,7 +5,7 @@
 
 #include "Components/ActorTestSpawner.h"
 #include "Content/FarmCropData.h"
-#include "Content/VestigeContentData.h"
+#include "Content/VestigeContentCatalog.h"
 #include "CQTest.h"
 #include "Engine/StaticMesh.h"
 #include "Farming/FarmTileLooks.h"
@@ -108,7 +108,8 @@ namespace FarmTileLooksTests
 		{
 			AddSoilArt();
 			const FPrimaryAssetId TurnipId(UFarmCropData::AssetType, TEXT("Base.Turnip"));
-			const UFarmCropData* Crop = Cast<UFarmCropData>(UVestigeContentData::LoadWithVisuals(TurnipId));
+			Spawner.InitializeGameSubsystems();
+			const UFarmCropData* Crop = UVestigeContentCatalog::Get(&Spawner.GetWorld())->Find<UFarmCropData>(TurnipId);
 			ASSERT_THAT(IsNotNull(Crop));
 			ASSERT_THAT(IsNotNull(Crop->GetGrowthStageMesh(0)));
 

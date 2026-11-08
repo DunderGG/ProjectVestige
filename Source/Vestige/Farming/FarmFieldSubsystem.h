@@ -12,13 +12,15 @@
 class UFarmCropData;
 class UFarmField;
 class UVestigeClockSubsystem;
+class UVestigeContentCatalog;
 class UVestigeSaveRegistry;
 
 /**
  * The farm data of every map: one UFarmField per field, by its ID, kept for the whole run of the game. A game-instance
  * subsystem, so a field outlives its map: every field grows on the clock's new day, loaded or not, and a map opened again
  * finds its field as it was. Levels only show fields; AFarmGrid asks for its field here when it begins play.
- * Saves every field under Base.Fields through UVestigeSaveRegistry, loading the crops a save names when it restores.
+ * Saves every field under Base.Fields through UVestigeSaveRegistry, finding the crops a save names in the content catalogue
+ * when it restores.
  */
 UCLASS()
 class UFarmFieldSubsystem : public UGameInstanceSubsystem, public IVestigeSaveable
@@ -61,7 +63,7 @@ public:
 	virtual int32 GetSaveVersion() const override;
 	virtual FVestigeSaveRecord WriteSaveRecord() const override;
 
-	/** Replaces every field with the saved ones, loading the crops their tiles name (a wait, as at play start). */
+	/** Replaces every field with the saved ones, with the crops their tiles name found in the content catalogue. */
 	virtual bool ReadSaveRecord(const FVestigeSaveRecord& Record, int32& OutLeftOutCount) override;
 
 private:
@@ -75,6 +77,9 @@ private:
 
 	UPROPERTY()
 	TObjectPtr<UVestigeClockSubsystem> Clock;
+
+	UPROPERTY()
+	TObjectPtr<UVestigeContentCatalog> Catalog;
 
 	UPROPERTY()
 	TObjectPtr<UVestigeSaveRegistry> SaveRegistry;

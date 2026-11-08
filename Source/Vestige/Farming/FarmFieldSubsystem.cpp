@@ -4,7 +4,7 @@
 #include "Farming/FarmFieldSubsystem.h"
 
 #include "Content/FarmCropData.h"
-#include "Content/VestigeContentData.h"
+#include "Content/VestigeContentCatalog.h"
 #include "Core/VestigeSaveRegistry.h"
 #include "Engine/GameInstance.h"
 #include "Engine/World.h"
@@ -16,10 +16,10 @@
 
 namespace FarmFieldSaves
 {
-	/** Loads each crop the saved fields' tiles name, once, with its meshes. Crops that no longer exist are left out. */
-	TMap<FName, const UFarmCropData*> LoadSavedCrops(const TArray<FFarmFieldSaveData>& SavedFields)
+	/** Finds in Catalog each crop the saved fields' tiles name, once. Crops that no longer exist are left out. */
+	TMap<FName, const UFarmCropData*> FindSavedCrops(const UVestigeContentCatalog* Catalog, const TArray<FFarmFieldSaveData>& SavedFields)
 	{
-		TRACE_CPUPROFILER_EVENT_SCOPE(FarmFieldSaves::LoadSavedCrops);
+		TRACE_CPUPROFILER_EVENT_SCOPE(FarmFieldSaves::FindSavedCrops);
 
 		TMap<FName, const UFarmCropData*> Crops;
 		TSet<FName> Missing;
@@ -32,9 +32,8 @@ namespace FarmFieldSaves
 					continue;
 				}
 
-				// A save is restored before the map begins play, when waiting for a load is allowed.
 				const FPrimaryAssetId CropAssetId(UFarmCropData::AssetType, Tile.CropId);
-				if (const UFarmCropData* Crop = Cast<UFarmCropData>(UVestigeContentData::LoadWithVisuals(CropAssetId)))
+				if (const UFarmCropData* Crop = Catalog ? Catalog->Find<UFarmCropData>(CropAssetId) : nullptr)
 				{
 					Crops.Add(Tile.CropId, Crop);
 				}
@@ -58,6 +57,8 @@ void UFarmFieldSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
 
+	// Restoring a save finds its crops in the catalogue.
+	Catalog = Collection.InitializeDependency<UVestigeContentCatalog>();
 	Clock = Collection.InitializeDependency<UVestigeClockSubsystem>();
 	if (Clock)
 	{
@@ -181,7 +182,7 @@ bool UFarmFieldSubsystem::ReadSaveRecord(const FVestigeSaveRecord& Record, int32
 
 	// The save holds every field, so fields it doesn't name belong to another game.
 	StartNewGame();
-	OutLeftOutCount += RestoreFromSaveData(Data.Fields, FarmFieldSaves::LoadSavedCrops(Data.Fields));
+	OutLeftOutCount += RestoreFromSaveData(Data.Fields, FarmFieldSaves::FindSavedCrops(Catalog, Data.Fields));
 	return true;
 }
 

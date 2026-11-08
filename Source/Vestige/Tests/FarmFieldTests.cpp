@@ -5,9 +5,12 @@
 
 #include "Components/ActorTestSpawner.h"
 #include "Content/FarmCropData.h"
+#include "Content/VestigeContentCatalog.h"
+#include "Core/VestigeSaveRecord.h"
 #include "CQTest.h"
 #include "Farming/FarmField.h"
 #include "Farming/FarmFieldMeshesComponent.h"
+#include "Farming/FarmFieldSaveData.h"
 #include "Farming/FarmFieldSubsystem.h"
 #include "Farming/FarmGrid.h"
 #include "Time/VestigeClockSubsystem.h"
@@ -233,6 +236,32 @@ namespace FarmFieldTests
 
 			ASSERT_THAT(IsTrue(Field.GetSize() == FIntPoint(8, 8)));
 			ASSERT_THAT(IsTrue(Grid.GetTile(FIntPoint(1, 1))->GetState() == EFarmTileState::Tilled));
+		}
+
+		TEST_METHOD(ASavedCropIsFoundInTheCatalogue)
+		{
+			FFarmTileSaveData Turnip;
+			Turnip.Coordinates = FIntPoint(1, 1);
+			Turnip.State = EFarmTileState::Planted;
+			Turnip.CropId = TEXT("Base.Turnip");
+			FFarmTileSaveData Pumpkin = Turnip;
+			Pumpkin.Coordinates = FIntPoint(2, 1);
+			Pumpkin.CropId = TEXT("SomeMod.Pumpkin");
+			FFarmFieldsSaveData Data;
+			Data.Fields.Add({FarmId, FIntPoint(8, 8), {Turnip, Pumpkin}});
+			int32 LeftOut = 0;
+
+			ASSERT_THAT(IsTrue(Fields->ReadSaveRecord(FVestigeSaveRecord::Write(Data), LeftOut)));
+
+			const UVestigeContentCatalog* Catalog = UVestigeContentCatalog::Get(&Spawner.GetWorld());
+			const UFarmCropData* CatalogTurnip =
+				Catalog->Find<UFarmCropData>(FPrimaryAssetId(UFarmCropData::AssetType, TEXT("Base.Turnip")));
+			const UFarmField* Field = Fields->FindField(FarmId);
+			ASSERT_THAT(IsNotNull(Field));
+			ASSERT_THAT(IsNotNull(CatalogTurnip));
+			ASSERT_THAT(IsTrue(Field->GetTile(FIntPoint(1, 1))->GetCrop() == CatalogTurnip));
+			ASSERT_THAT(IsNull(Field->GetTile(FIntPoint(2, 1))->GetCrop()));
+			ASSERT_THAT(IsTrue(LeftOut == 1));
 		}
 
 		TEST_METHOD(ANewGameDropsEveryField)

@@ -20,12 +20,6 @@ public:
 	/** Asset bundle holding a content asset's meshes. Loading content with it loads them too. */
 	static const FName VisualsBundle;
 
-	/**
-	 * Loads the content asset with this ID and its Visuals bundle, waiting until both are in memory.
-	 * Only for play start or loading screens. Returns nullptr, with a warning, if no such asset exists.
-	 */
-	static const UVestigeContentData* LoadWithVisuals(const FPrimaryAssetId& ContentAssetId);
-
 #if WITH_EDITOR
 	/** Reports a missing or badly formed ContentId, so a mistake shows up when the asset is saved or validated. */
 	virtual EDataValidationResult IsDataValid(FDataValidationContext& Context) const override;

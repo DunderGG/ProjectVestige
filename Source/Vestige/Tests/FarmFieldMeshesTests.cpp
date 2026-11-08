@@ -5,7 +5,7 @@
 
 #include "Components/ActorTestSpawner.h"
 #include "Content/FarmCropData.h"
-#include "Content/VestigeContentData.h"
+#include "Content/VestigeContentCatalog.h"
 #include "CQTest.h"
 #include "EngineUtils.h"
 #include "Farming/FarmField.h"
@@ -123,7 +123,7 @@ namespace FarmFieldMeshesTests
 		TEST_METHOD(ANewDayMovesAGrowingCropToItsNextStagesMesh)
 		{
 			const FPrimaryAssetId TurnipId(UFarmCropData::AssetType, TEXT("Base.Turnip"));
-			const UFarmCropData* Turnip = Cast<UFarmCropData>(UVestigeContentData::LoadWithVisuals(TurnipId));
+			const UFarmCropData* Turnip = UVestigeContentCatalog::Get(&Spawner.GetWorld())->Find<UFarmCropData>(TurnipId);
 			ASSERT_THAT(IsNotNull(Turnip));
 			const UStaticMesh* Seedling = Turnip->GetGrowthStageMesh(0);
 			const UStaticMesh* NextStage = Turnip->GetGrowthStageMesh(1);

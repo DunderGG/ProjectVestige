@@ -9,6 +9,7 @@
 #include "Components/ActorTestSpawner.h"
 #include "Content/FarmCropData.h"
 #include "Content/FarmSeedFragment.h"
+#include "Content/VestigeContentCatalog.h"
 #include "Content/VestigeGameData.h"
 #include "Content/VestigeItemData.h"
 #include "Content/VestigeToolData.h"
@@ -98,6 +99,9 @@ namespace FarmingTests
 		static inline const FPrimaryAssetId TurnipSeedsId = FPrimaryAssetId(UVestigeItemData::AssetType, TEXT("Base.TurnipSeeds"));
 
 		/** A loaded base item by its ContentId. */
+		/** The content catalogue of the fixture's game instance. */
+		UVestigeContentCatalog& Catalog() { return *UVestigeContentCatalog::Get(&Spawner.GetWorld()); }
+
 		static const UVestigeItemData* GetBaseItem(FName ContentId)
 		{
 			return UAssetManager::Get().GetPrimaryAssetObject<UVestigeItemData>(FPrimaryAssetId(UVestigeItemData::AssetType, ContentId));
@@ -251,7 +255,7 @@ namespace FarmingTests
 		const UFarmCropData* GrowRipeCropAt(const FIntPoint& Coordinates)
 		{
 			UFarmField* Field = Grid->GetField();
-			const UFarmCropData* Crop = FarmingComponent->FindCrop(FPrimaryAssetId(UFarmCropData::AssetType, TEXT("Base.Turnip")));
+			const UFarmCropData* Crop = Catalog().Find<UFarmCropData>(FPrimaryAssetId(UFarmCropData::AssetType, TEXT("Base.Turnip")));
 			Field->Till(Coordinates);
 			if (!Crop || !Field->Plant(Coordinates, Crop))
 			{
@@ -727,6 +731,18 @@ namespace FarmingTests
 			ASSERT_THAT(IsTrue(GetToolAbilities().Num() == 1));
 		}
 
+		TEST_METHOD(WithoutACatalogueThereIsNoHarvestTool)
+		{
+			// A world without a game instance (an editor preview) has no catalogue.
+			FActorTestSpawner WorldWithoutAGame;
+			AActor& Owner = WorldWithoutAGame.SpawnActor<AActor>();
+			UFarmingComponent* Component = NewObject<UFarmingComponent>(&Owner);
+			ASSERT_THAT(IsNull(UVestigeContentCatalog::Get(&WorldWithoutAGame.GetWorld())));
+
+			ASSERT_THAT(IsNull(Component->GetHarvestTool()));
+			ASSERT_THAT(IsNull(Component->GetCurrentTool()));
+		}
+
 		TEST_METHOD(TheFarmerBlueprintNamesTheHarvestTool)
 		{
 			ASSERT_THAT(IsNotNull(FarmingComponent->GetHarvestTool()));
@@ -738,7 +754,7 @@ namespace FarmingTests
 			// A second kind of seed, growing a crop of its own, beside the turnip seeds.
 			UFarmCropData* Beet = NewObject<UFarmCropData>();
 			Beet->SetContentIdForTests(TEXT("Test.Beet"));
-			FarmingComponent->AddCropForTests(*Beet);
+			ASSERT_THAT(IsTrue(Catalog().AddForTests(*Beet)));
 			UVestigeItemData* BeetSeeds = NewObject<UVestigeItemData>();
 			BeetSeeds->SetContentIdForTests(TEXT("Test.BeetSeeds"));
 			UFarmSeedFragment* BeetSeed = NewObject<UFarmSeedFragment>(BeetSeeds);
@@ -749,7 +765,7 @@ namespace FarmingTests
 			BeetSeeds->AddFragmentForTests(BeetTool);
 			const UVestigeItemData* TurnipSeeds = GetBaseItem(TurnipSeedsId.PrimaryAssetName);
 			ASSERT_THAT(IsNotNull(TurnipSeeds));
-			Inventory->ResetForTests(Inventory->GetSlots().Num(), {TurnipSeeds, BeetSeeds});
+			ASSERT_THAT(IsTrue(Catalog().AddForTests(*BeetSeeds)));
 			SetBag({{0, TurnipSeedsId.PrimaryAssetName, 3}, {1, BeetSeeds->GetContentId(), 3}, {5, TurnipSeedsId.PrimaryAssetName, 3}}, 1);
 			Grid->GetField()->Till(TargetCoordinates);
 
@@ -900,13 +916,13 @@ namespace FarmingTests
 			UVestigeToolData* Tool = NewObject<UVestigeToolData>();
 			Tool->SetContentIdForTests(TEXT("Test.Tiller"));
 			Tool->SetAbilityForTests(UVestigeTestToolAbility::StaticClass());
-			FarmingComponent->AddToolForTests(*Tool);
+			ASSERT_THAT(IsTrue(Catalog().AddForTests(*Tool)));
 			UVestigeItemData* Item = NewObject<UVestigeItemData>();
 			Item->SetContentIdForTests(TEXT("Test.Tiller"));
 			UVestigeToolFragment* ToolFragment = NewObject<UVestigeToolFragment>(Item);
 			ToolFragment->SetToolIdForTests(Tool->GetPrimaryAssetId());
 			Item->AddFragmentForTests(ToolFragment);
-			Inventory->ResetForTests(Inventory->GetSlots().Num(), {Item});
+			ASSERT_THAT(IsTrue(Catalog().AddForTests(*Item)));
 			SetBag({{0, Item->GetContentId(), 1}});
 			ASSERT_THAT(IsTrue(FarmingComponent->GetCurrentTool() == Tool));
 
@@ -1084,7 +1100,7 @@ namespace FarmingTests
 
 			Grid->GetField()->Till(TargetCoordinates);
 			Grid->GetField()->Plant(
-				TargetCoordinates, FarmingComponent->FindCrop(FPrimaryAssetId(UFarmCropData::AssetType, TEXT("Base.Turnip"))));
+				TargetCoordinates, Catalog().Find<UFarmCropData>(FPrimaryAssetId(UFarmCropData::AssetType, TEXT("Base.Turnip"))));
 			ASSERT_THAT(IsTrue(TargetTile()->GetState() == EFarmTileState::Planted));
 			IVestigeInteractable::Execute_GetInteractionOptions(Grid, Farmer, Options);
 			ASSERT_THAT(IsTrue(Options.IsEmpty()));
