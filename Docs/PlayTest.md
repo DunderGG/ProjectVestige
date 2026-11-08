@@ -458,12 +458,12 @@ Gameplay no longer writes the player's messages: it reports what happened as a t
 
 Content is loaded once per game by the new content catalogue (`UVestigeContentCatalog`, [Systems.md, section 2](Systems.md#2-content-and-the-asset-manager)) instead of by the inventory, the farming component and the field one by one. Nothing should look or play differently. The commit is the one titled "Load content once in a shared content catalogue".
 
-- [ ] **Solution**: regenerate the project files (right-click `Vestige.uproject` > Generate Visual Studio project files): the solution lists `Content/VestigeContentCatalog.h` and `.cpp` and `Tests/VestigeContentCatalogTests.cpp`.
-- [ ] **Start**: Play. The Output Log, filtered on `LogVestigeContent`, has one line "Loaded 9 content definitions." and no warning or error; the HUD shows the hoe in hand and the bag as before.
-- [ ] **Tools and crops**: till, plant, water and harvest with each tool, and switch through the hotbar: the held meshes show, the turnip shows its growth stages, and nothing hitches when a tool first comes into hand.
-- [ ] **Saved field**: with turnips growing, sleep, stop and Play again: the crops come back at their stages, and the Output Log has no warning about a missing crop.
-- [ ] **Benchmark**: the console command `BenchmarkField 8 Base.Turnip` fills the field with ripe turnips at once, as before.
-- [ ] **A new item in the editor**: duplicate `DA_Item_Turnip`, give the copy the Content Id `Test.Turnip2`, save, and Play: the log says "Loaded 10 content definitions.". Delete the copy afterwards.
+- [x] **Solution**: regenerate the project files (right-click `Vestige.uproject` > Generate Visual Studio project files): the solution lists `Content/VestigeContentCatalog.h` and `.cpp` and `Tests/VestigeContentCatalogTests.cpp`.
+- [x] **Start**: Play. The Output Log, filtered on `LogVestigeContent`, has one line "Loaded 9 content definitions." and no warning or error; the HUD shows the hoe in hand and the bag as before.
+- [x] **Tools and crops**: till, plant, water and harvest with each tool, and switch through the hotbar: the held meshes show, the turnip shows its growth stages, and nothing hitches when a tool first comes into hand.
+- [x] **Saved field**: with turnips growing, sleep, stop and Play again: the crops come back at their stages, and the Output Log has no warning about a missing crop.
+- [x] **Benchmark**: the console command `BenchmarkField 8 Base.Turnip` fills the field with ripe turnips at once, as before.
+- [x] **A new item in the editor**: duplicate `DA_Item_Turnip`, give the copy the Content Id `Test.Turnip2`, save, and Play: the log says "Loaded 10 content definitions.". Delete the copy afterwards.
 
 ### Editor chores
 
