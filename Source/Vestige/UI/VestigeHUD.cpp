@@ -415,7 +415,7 @@ void AVestigeHUD::ShowFeedback(const FVestigeFeedbackReport& Report)
 		return;
 	}
 
-	// An empty message is a deliberate choice to show nothing, such as for the morning save.
+	// An empty message is a deliberate choice to show nothing for that report.
 	if (!Response->Message.IsEmpty())
 	{
 		ShowMessage(UVestigeFeedbackResponses::FormatMessage(*Response, Report));

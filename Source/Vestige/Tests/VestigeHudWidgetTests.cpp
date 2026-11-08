@@ -224,9 +224,7 @@ namespace VestigeHudWidgetTests
 				const FVestigeFeedbackResponse* Response = Responses->FindResponse(Entry.Key);
 				ASSERT_THAT(IsNotNull(Response, Entry.Key.ToString()));
 
-				// The morning save shows nothing until there is an icon for it.
-				const bool bSilent = Entry.Key == VestigeGameplayTags::Feedback_Save_Saved;
-				ASSERT_THAT(IsTrue(Response->Message.IsEmpty() == bSilent, Entry.Key.ToString()));
+				ASSERT_THAT(IsFalse(Response->Message.IsEmpty(), Entry.Key.ToString()));
 
 				const FTextFormat Format(Response->Message);
 				ASSERT_THAT(IsTrue(Format.IsValid(), Entry.Key.ToString()));

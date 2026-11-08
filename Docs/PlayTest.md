@@ -445,14 +445,14 @@ The key hints and the prompt name the keys of the device you used last, keyboard
 
 Gameplay no longer writes the player's messages: it reports what happened as a tag, and the HUD shows the text `DA_FeedbackResponses` (`Content/Vestige/UI`) gives it ([Systems.md, section 15](Systems.md#15-visual-effects-and-feedback), feedback reports). The texts are the same as before. The commit is the one titled "Report feedback as tags and let the HUD pick the text".
 
-- [ ] **Solution**: regenerate the project files (right-click `Vestige.uproject` > Generate Visual Studio project files): the solution lists `UI/VestigeFeedbackResponses.h` and `.cpp`.
-- [ ] **Quiet work**: hold E with the hoe across a row of grass, then plant, water and harvest it. No message shows for any use that worked.
-- [ ] **Reasons**: one press of E shows its reason once for each of these: the hoe on tilled soil ("Only grass can be tilled."), the watering can on grass ("Nothing to water here."), seeds on grass ("Seeds need empty tilled soil."), an empty hotbar slot ("Nothing in hand to use."), and any tool facing away from the field ("Stand facing a farm tile."). F on a ripe crop with a full bag shows "No room in your bag." and the crop stays. Holding E on such a tile shows the reason once, not again and again.
-- [ ] **Day and stamina**: sleep: "You slept. Day N begins." shows, and "Game saved." no longer does. Running out of stamina, 22:00, midnight and waking exhausted show their messages as before, and a Play with a save shows "Welcome back. Day N."
-- [ ] **Log**: the Output Log, filtered on `LogVestigeFeedback`, shows a line per report such as `UVestigeFeedbackSubsystem::Report: Vestige.Feedback.Day.Slept Day=2`, also for the save (`Vestige.Feedback.Save.Saved`), which shows nothing on screen.
-- [ ] **Edit without a build**: open `DA_FeedbackResponses` (`Content/Vestige/UI`), give the `Vestige.Feedback.Save.Saved` row the text "Game saved.", save and Play, then sleep: the text shows. Put it back afterwards, or tell the agent to keep it.
-- [ ] **Missing row**: remove the `Vestige.Feedback.Farm.CantWater` row, Play and water grass: nothing shows, and the Output Log has a `LogVestigeFeedback` warning naming the tag and `DA_FeedbackResponses`. Close the asset without saving.
-- [ ] **No grid**: in a level without a `BP_FarmGrid`, Play: no message on screen, and the Output Log warns that the level has no FarmGrid.
+- [x] **Solution**: regenerate the project files (right-click `Vestige.uproject` > Generate Visual Studio project files): the solution lists `UI/VestigeFeedbackResponses.h` and `.cpp`.
+- [x] **Quiet work**: hold E with the hoe across a row of grass, then plant, water and harvest it. No message shows for any use that worked.
+- [x] **Reasons**: one press of E shows its reason once for each of these: the hoe on tilled soil ("Only grass can be tilled."), the watering can on grass ("Nothing to water here."), seeds on grass ("Seeds need empty tilled soil."), an empty hotbar slot ("Nothing in hand to use."), and any tool facing away from the field ("Stand facing a farm tile."). F on a ripe crop with a full bag shows "No room in your bag." and the crop stays. Holding E on such a tile shows the reason once, not again and again.
+- [x] **Day and stamina**: sleep: "You slept. Day N begins." shows, and "Game saved." no longer does. (Passed; David then gave the row the text "Game Saved!", which shows after it.) Running out of stamina, 22:00, midnight and waking exhausted show their messages as before, and a Play with a save shows "Welcome back. Day N."
+- [x] **Log**: the Output Log, filtered on `LogVestigeFeedback`, shows a line per report such as `UVestigeFeedbackSubsystem::Report: Vestige.Feedback.Day.Slept Day=2`, also for the save (`Vestige.Feedback.Save.Saved`), which showed nothing on screen until David gave it a text.
+- [x] **Edit without a build**: open `DA_FeedbackResponses` (`Content/Vestige/UI`), give the `Vestige.Feedback.Save.Saved` row the text "Game saved.", save and Play, then sleep: the text shows. Put it back afterwards, or tell the agent to keep it. (Kept as "Game Saved!", 2026-11-08.)
+- [x] **Missing row**: remove the `Vestige.Feedback.Farm.CantWater` row, Play and water grass: nothing shows, and the Output Log has a `LogVestigeFeedback` warning naming the tag and `DA_FeedbackResponses`. Close the asset without saving.
+- [x] **No grid**: in a level without a `BP_FarmGrid`, Play: no message on screen, and the Output Log warns that the level has no FarmGrid.
 
 ### Editor chores
 
