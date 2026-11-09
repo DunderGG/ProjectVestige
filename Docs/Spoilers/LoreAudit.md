@@ -447,6 +447,8 @@ The naming convention for game content assets diverges across documents:
 
 **Recommended change:** Adopt a unified convention across all sheets: either `Base.Character.<Name>` for all character assets (e.g., `Base.Character.Hob`, `Base.Character.Nomad`) or `Base.<Name>`. Document the rule in [CodingGuidelines.md](../CodingGuidelines.md) and [Lore.md](Lore.md).
 
+First do roadmap item **Investigate whether `ContentId` should also allow a category segment**.
+
 ---
 
 ### Recommended correction order

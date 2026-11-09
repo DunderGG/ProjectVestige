@@ -241,6 +241,7 @@ The code changes that the slice's content depends on. Doing them first means add
 - [x] Item data assets (`UVestigeItemData`) for seeds, harvested crops and other things the player can carry, built from fragments ([Systems.md section 8](Systems.md#8-inventory-and-items)): `Base.TurnipSeeds` and `Base.Turnip`, and the turnip crop names its harvest item
    - The crop's seed and sell prices moved to items on 2026-10-30 (decision log)
 - [x] All content uses namespaced IDs (`Base.<Name>`) in a `ContentId` property that also builds the asset's primary asset ID, with data validation of the format and a startup check for duplicate IDs ([Architecture.md section 5](Architecture.md#5-data-and-content))
+- [ ] Investigate whether `ContentId` should also allow a category segment (`Base.Character.Gage`) before the first character asset is created. Decide whether primary asset types already provide enough category information; whether existing `Namespace.Name` IDs and mod IDs remain valid; and the effects on validation, duplicate detection, saves and ID redirects. If adopted, change the generic ID contract and its tests, then document the migration and mod-compatibility rules before shipping content with the new form.
 - [ ] An ID redirect list, once an ID first has to change (deferred, see the decision log)
 
 **Tiles and the farm grid**
