@@ -30,15 +30,15 @@
 
 **GAGE:** Good. Then we have a plan we can actually use.
 
-**TOWN ADMINISTRATOR:** The assembly agreed to try the shared log through the season. Then we'll ask the operators whether it's helping.
+**TOWN ADMINISTRATOR:** The assembly agreed to post the shared log on the sluice wall through the season. Then we'll see if the shift changes go smoother.
 
-**KEEPER OPERATOR:** We'll keep the pump details with the operators. The public notice can say what's running and what isn't.
+**KEEPER OPERATOR:** We log every valve turn in the dog-eared ledger by the pump. Town board out front only needs to know whether the water will flow come morning.
 
-**PLAYER:** And if it makes things worse?
+**PLAYER:** What if keeping two books just slows you down?
 
-**KEEPER OPERATOR:** Then we change it. A trial only helps if we're willing to learn from it.
+**KEEPER OPERATOR:** Then we toss the extra ledger into the boiler. No sense nursing a dry manifold just to keep ink on paper.
 
-**TOWN ADMINISTRATOR:** You helped get the idea in the room. The town decides what to do with it.
+**TOWN ADMINISTRATOR:** You gave the shift chiefs a reason to sit at the same bench. That's good enough for one morning.
 
 ## E-02 - Hob's next purpose
 
@@ -55,12 +55,12 @@
 
 **PLAYER - CHOICES**
 
-- **[Encourage Hob to decide later]** "Take your time. You can try a day and see how it feels."
-  - **HOB:** I would like to try that. A day is not a life sentence.
-- **[Offer the farm as an option]** "You can stay here, too. I don't want you to feel you have to leave."
-  - **HOB:** Thank you. I want the choice to be real, not a test of whether I am useful.
+- **[Encourage Hob to decide later]** "Take your time. Walk over with them for a morning and see how it feels."
+  - **HOB:** A morning walking the aqueduct won't rust my joints. If the machinery in town gets too loud, the path back to the garden is clear.
+- **[Offer the farm as an option]** "You can stay here, too. The farm is your home, Hob."
+  - **HOB:** Thank you. For seventy years, sunrise meant mending fences or turning compost so the pod wouldn't fail. If I sit by the hearth today, it's because the kettle is warm and the tea is steeping, not because I'm a worn-out chassis left on the shelf.
 - **[Ask what Hob wants]** "If nobody needed anything from you, what would you choose?"
-  - **HOB:** I don't know yet. But I would like to find out.
+  - **HOB:** For seventy years, an order filled every hour. Having an empty afternoon feels like looking out over an unplowed field. A little frightening... but I think I would like to choose what grows there.
 
 ## E-03 - Gage's inspection
 
@@ -187,15 +187,15 @@
 - **[Ask what a safe route looks like]** "What does a safe route there actually look like?"
   - **GAGE:** Two checks before the gate. One person on intake, one on the line. No one crosses a marked boundary without a reason and a clear signal. If the board reads high, you wait.
   - **PLAYER:** So the route has rules, not just trust.
-  - **GAGE:** Trust without rules is just a story someone tells after the fact.
+  - **GAGE:** A gasket either holds eighty bar or it shreds. Hoping it holds because you like the fellow who cut it just leaves you with steam scalds on your chest.
 - **[Ask whether he would ever trust a mistake]** "Would you trust somebody if they'd already made a mistake once?"
-  - **GAGE:** If they reported it before it spread, and if they still knew what a safe line looked like. A person who keeps their hands closed after the fault is not reliable. A person who tells the truth and fixes it is.
+  - **GAGE:** If they kill the valve and call out the blow-by before the housing cracks. A worker who hides a bad weld to save face gets people buried. A worker who owns the flaw and grinds it down can stand on my line any day.
   - **PLAYER:** That seems harsher than I expected.
-  - **GAGE:** That is not harsh. It is practical. We are not creating a place for perfect people. We are creating a place that can still function when one of them fails.
+  - **GAGE:** Steam doesn't negotiate with feelings, sleeper. You don't build a boiler room for people who never make mistakes; you build it with relief valves so a mistake doesn't blow the roof off.
 - **[Ask whether the place is frightening]** "It sounds like a place built to make people nervous."
-  - **GAGE:** Fear is not the same thing as danger. The Bastion is meant to hold the worst of the system in one place so the rest of the town does not have to carry it all at once.
-  - **PLAYER:** So the point is not to be untouched by it.
-  - **GAGE:** No. The point is to keep the damage from becoming routine.
+  - **GAGE:** It's an industrial forge, not a kitchen garden. Steam hammers rattle your teeth, and the relief stacks scream loud enough to shake loose bolts. Keeps your boots planted and your eyes on the dials. That's not terror; that's knowing where the fire is.
+  - **PLAYER:** So the point is not to look tough.
+  - **GAGE:** The point is making sure the steel holds when the storm hits.
 
 **PLAYER:** Why tell me this now?
 
@@ -226,10 +226,10 @@
 
 - **[Offer a quiet agreement]** "Then we'll keep the original wording and the copy separate."
   - **CLEO:** Thank you. That is how a good archive begins.
-- **[Ask what the record can do]** "What does a record like this change?"
-  - **CLEO:** It changes what we are allowed to say with confidence. It does not tell us what happened to the people behind the page.
-- **[Ask how she keeps the balance]** "How do you decide what is too much?"
-  - **CLEO:** By asking whose story it is, whose consent is being used and whether the file becomes a substitute for the person.
+- **[Ask what the record can do]** "What does an old piece of paper actually change?"
+  - **CLEO:** It anchors our feet. Without it, rumors drift like alkali dust across the valley. It doesn't resurrect the hands that penned it, but it keeps their work from dissolving into myth.
+- **[Ask how she keeps the balance]** "How do you know when to stop digging?"
+  - **CLEO:** When my hands start treating someone's grief like a museum artifact. If I find a ration slip with a mother's note about her sick boy, my optical sensor wants to cross-reference the name with casualty rolls. But he wasn't a data point—he was a child who needed penicillin. If I scrape through their private misery just to fill an index drawer, I'm not preserving history. I'm just looting it.
 
 ## E-08 - The nomad's first agreement
 
@@ -244,16 +244,16 @@
 
 **PLAYER:** So what do you need from me?
 
-**NOMAD:** A safe stop, clear terms and a signal that tells me whether this place is still useful.
+**NOMAD:** A dry patch of ground out of the prevailing wind, two buckets of well water if you've got them to spare, and a stone by the fence where I can drop off trade goods without half the town poking through my rucksack.
 
 **PLAYER - CHOICES**
 
-- **[Agree to a narrow stop]** "Rest and trade are possible. No names, no questions about where you came from."
-  - **NOMAD:** Good. That's a fair trade.
-- **[Ask for conditions]** "I want weather and emergency terms before we agree."
-  - **NOMAD:** That's good sense. A stop that fails in a storm is not a stop.
-- **[Decline for now]** "I can't open the farm to that yet."
-  - **NOMAD:** Understood. No one makes a promise because they feel cornered.
+- **[Agree to a narrow stop]** "Water and a dry patch by the gate. No prying into where your trail starts or ends."
+  - **NOMAD:** Deal! That's a fair swap. Fresh greens and clean grease for salt and spare brass.
+- **[Ask for conditions]** "I want terms for heavy dust storms and flash freezes before we shake on it."
+  - **NOMAD:** Smart! A shelter that leaks in a gale isn't a refuge; it's just an open coffin with a roof.
+- **[Decline for now]** "I can't open the farm to travellers yet."
+  - **NOMAD:** Fair enough! Out on the dunes, if you take in every wanderer before your own well is sealed, everyone ends up coughing dust. Gate stays shut until you say otherwise.
 
 ## E-09 - Route marker
 
@@ -289,7 +289,7 @@
 
 **PLAYER:** I don't like how that sounds.
 
-**CLEO:** Neither do I. Let's keep the sentence honest and the questions open.
+**CLEO:** Neither do I. But in the Archive, you don't burn an old logbook just because the ink smells like smoke. We take a carbon rubbing, verify the seal, and keep our boots grounded.
 
 ## E-11 - Family traces continue
 

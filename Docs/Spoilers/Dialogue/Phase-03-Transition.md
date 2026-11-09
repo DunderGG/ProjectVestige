@@ -54,7 +54,7 @@
 - **[Suggest closing the route]** "Close it now. We can decide later whether it's safe."
   - **NOMAD:** That may be right for one leg. Closing the whole circuit without warning would leave people waiting for supplies. Let's separate those decisions.
 - **[Ask who is at risk]** "Tell me the names. I could help more if I knew."
-  - **NOMAD:** You can help without a name. I won't trade someone's privacy for your good intentions.
+  - **NOMAD:** Out on the salt flats, sleeper, a loose tongue gets someone's water cache looted before sundown. You want to help? Help me change the trail signal. Leave the names where they belong—in heads that know how to keep quiet.
 
 **PLAYER:** What do you need from me?
 
@@ -77,14 +77,14 @@
 
 **PLAYER - CHOICES**
 
-- **[Offer a narrow agreement]** "Rest and trade are possible. No questions about names or destinations."
-  - **NOMAD:** That is clear. We should write down who can use the stop and what happens if someone changes their mind.
-- **[Ask for a safety plan]** "I want terms for bad weather and an emergency before we start."
-  - **NOMAD:** Good. A stop that only works on a calm day isn't much of a stop.
-- **[Decline for now]** "I can't offer the farm as a stop yet."
-  - **NOMAD:** Understood. No one should have to say yes before they're ready.
+- **[Offer a narrow agreement]** "Rest and trade are possible. No prying into who is walking the trail."
+  - **NOMAD:** Deal. A clean swap: salt, dried trail herbs, and spare brass for fresh greens, and not a whisper about which canyon I slipped out of. If either of us gets uneasy, we pull down the marker by the gatepost. Simple as that.
+- **[Ask for a safety plan]** "I want to know what happens if someone gets caught in a flash freeze or a radiation squall."
+  - **NOMAD:** Smart thinking! A shelter that leaks in a gale isn't a refuge; it's just an open ditch with a roof. We set aside two dry wool blankets in the barn and a sealed jerrycan of filtered water.
+- **[Decline for now]** "I can't offer the farm as a trail stop yet."
+  - **NOMAD:** Fair enough! Better to say no plainly than say yes and jump at every footprint in the mud. No hard feelings.
 
-**HOB:** Whatever we decide, the nomad's contacts remain theirs to protect.
+**HOB:** If you borrow a neighbor's kettle, you don't rummage through their cupboards while the water boils. The nomad's friends are their own folk; our work is keeping the gate mended and the stove warm.
 
 ## T-04 - What the clues do and do not say
 
@@ -96,11 +96,11 @@
 
 **PLAYER:** We don't know that it is active.
 
-**WELLSPRING RESIDENT:** We don't know that it isn't. I don't want anyone using that uncertainty to take a risk on the town's behalf.
+**WELLSPRING RESIDENT:** We don't know that it isn't. An unmapped cellar out in the dust is like an unexploded mortar shell. You don't tap it with a hammer just to see if the powder's dry.
 
-**CLEO:** The records give us reason to look further. They don't give us a right to dig through Wellspring's private files or put the town on a map.
+**CLEO:** Ink on old clinic vouchers gives us cause to ask questions. But an old requisition slip doesn't give us leave to pry open Wellspring's root cellars or sketch arrows pointing straight to your cisterns.
 
-**GAGE:** And they don't tell us what's in the building. We check the route first. If it isn't safe, we turn back.
+**GAGE:** A blinking signal in an abandoned bunker doesn't mean you charge in with a wrench. We scout the perimeter, test the seismic shoring, and if the concrete looks rotten, we pull back.
 
 **PLAYER:** Could these be ordinary medical transfers?
 
@@ -111,7 +111,7 @@
 - **[Suggest a careful search]** "Let's look for another source, without bringing anyone from town."
   - **WELLSPRING RESIDENT:** If the assembly agrees to that limit, I can live with it.
 - **[Prioritize the town's safety]** "We pause until we know what the institute could expose."
-  - **GAGE:** Then we gather what we can from here. No one should call caution cowardice.
+  - **GAGE:** Sound engineering. Checking your retreat line before you breach the bulkhead isn't cowardice; it's keeping your crew alive.
 - **[Ask the resident what would help]** "What conditions would make you feel safer?"
   - **WELLSPRING RESIDENT:** No public route, no town names in a report, and a way to stop if the risk changes.
 
@@ -169,13 +169,13 @@
 
 **PLAYER - CHOICES**
 
-- **[Keep the search narrow]** "We keep the search narrow. We gather one more source, then we stop and ask the town what it can carry."
-  - **CLEO:** That is the careful version. It keeps the evidence honest and the risk visible.
-- **[Pause and ask the town]** "We stop here. We tell the town what we know, and we let them decide what level of risk they will carry."
-  - **GAGE:** That is the safer move. We do not treat a warning as a command.
-- **[Push for a broader search]** "We keep looking. The pattern is already large enough that I do not want to pretend it is small."
-  - **CLEO:** Then we need a limit. We are not searching the whole world on a hunch.
+- **[Keep the search narrow]** "We keep the search narrow. One more source to confirm the trail, then we see what the town can handle."
+  - **CLEO:** Methodical and disciplined. One more source, verified under proper light, before we lay the pages on the town table.
+- **[Pause and ask the town]** "We stop here. We tell the town what we've found, and let them decide whether to brace for trouble."
+  - **GAGE:** Sound call. If the town's timbers aren't stout enough to brace the tunnel, you don't keep digging deeper.
+- **[Push for a broader search]** "We keep looking. The pattern is already large enough that I don't want to pretend it's small."
+  - **CLEO:** Then we set strict survey markers. We aren't chasing ghosts across the wasteland on a raw hunch.
 
 **PLAYER:** Then we do this carefully.
 
-**CLEO:** Yes. Carefully, and without lying to ourselves about how little we know.
+**CLEO:** Yes. With dry ink and steady hands.

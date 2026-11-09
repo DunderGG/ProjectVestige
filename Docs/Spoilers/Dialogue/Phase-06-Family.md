@@ -33,7 +33,7 @@
 
 **PLAYER:** I want to find out.
 
-**HOB:** Then we can follow this lead. We don't have to turn it into a promise.
+**HOB:** Then we look when the chores are done, one step at a time. Searching for family isn't a debt you have to pay before sunset; it's a seed you tend quietly.
 
 ## F-02 - Hob's sealed message
 
@@ -48,24 +48,24 @@
 
 **PLAYER:** What made you decide it was now?
 
-**HOB:** The house is standing, and the beds are growing. I thought that might be what they meant. I wasn't sure, so I waited.
+**HOB:** The house is standing, the hearth is warm, and the garden beds are growing. I thought that might be what they meant. I wasn't sure, so I waited.
 
 **PLAYER - CHOICES**
 
 - **[Ask for the message]** "I want to read it."
   - **HOB:** All right. Would you like me to stay while you open it?
 - **[Ask for time]** "I know it's here. I can't read it yet."
-  - **HOB:** Then I'll keep it safe. You can ask for it whenever you're ready.
+  - **HOB:** Then I'll keep it safe in the cedar box. You can ask for it whenever you're ready.
 - **[Ask Hob to read it aloud]** "Can you read it with me?"
-  - **HOB:** I can. We can stop at any point.
+  - **HOB:** I can. We can stop whenever your heart is too full.
 
 **PLAYER:** I thought this would answer more.
 
-**HOB:** It answers what they wanted you to hear. It cannot answer what they did not know.
+**HOB:** A letter is only ink on dry paper, little one. It can hold a blessing and a reminder of their love, but it cannot wrap a coat around your shoulders when the frost comes in. I miss the sound of their boots on the porch every single day.
 
 **PLAYER:** I wish they were here to tell me themselves.
 
-**HOB:** So do I. I would rather have them here too.
+**HOB:** So do I. So do I. The hearth is warm, but it has been very quiet without them.
 
 ## F-03 - The sibling remains their own person
 
@@ -78,15 +78,15 @@
 
 **SIBLING:** I wasn't sure what I'd say if you found me. I still don't know what happens next.
 
-**PLAYER:** You don't have to know yet. Do you want to talk?
+**PLAYER:** You don't have to know yet. Do you want to sit down?
 
-**SIBLING:** Not about everything. Maybe about why you came.
+**SIBLING:** Maybe for a minute. Not to explain my whole life, but... to hear why you came looking.
 
-**PLAYER:** I wanted to know if you were alive. Meeting you was my hope, not something I expected from you.
+**PLAYER:** I came because you're my family, and I spent seventy years under ice while the world broke. I had to know if you made it. But you don't owe me anything, and you don't have to pack your bags for the farm.
 
-**SIBLING:** I don't know what I feel yet.
+**SIBLING:** Seventy years... To you, breakfast at the farmhouse was yesterday morning. To me, it's a faded story about people I can barely picture. Give me some time to look at your face and figure out who's standing in front of me.
 
-**PLAYER:** That's all right.
+**PLAYER:** Take all the time you need.
 
 **PLAYER - CHOICES**
 
@@ -94,9 +94,9 @@
   - **SIBLING:** I would like that.
 - **[Ask what they want now]** "What would make today easier for you?"
   - **SIBLING:** A little space. And knowing you won't disappear if I ask for it.
-- **[Respect a request to leave]** "I'll go. You can contact me if you want."
-  - **SIBLING:** Thank you for letting that be my choice.
+- **[Respect a request to leave]** "I'll head back. The porch lantern on the farm will stay lit for you."
+  - **SIBLING:** Thank you. I think... I'd like to know that lantern is burning.
 
-**PLAYER:** Being family doesn't mean I get to decide for you.
+**PLAYER:** As much time as you need. You're home whenever you're ready.
 
-**SIBLING:** Good. I want to choose what happens now.
+**SIBLING:** Thank you. Let's start with today.

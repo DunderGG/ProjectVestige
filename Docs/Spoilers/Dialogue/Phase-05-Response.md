@@ -32,54 +32,43 @@
 **Speakers:** PLAYER, SURVIVOR, CLEO.
 **Knowledge:** Permission for a private conversation is not permission to archive or publish it.
 
-**CLEO:** You don't have to let me record this. If you do, you can read the transcript before I keep it.
+**CLEO:** My field notebook is in my pack. I won't touch the clasp unless you tell me to. If you just want someone to sit on the bench and listen, I can do that. If you want words put on paper so nobody can pretend this place never existed, you tell me which words to write—and which ones to burn.
 
-**SURVIVOR:** And if there's something I don't want in the record?
+**SURVIVOR:** The researchers used to stand behind the glass with clipboards. Every time I coughed, they made a check mark.
 
-**CLEO:** Then it stays out. I won't fill in what you don't tell me.
+**CLEO:** No clipboards here. No check marks. If you share a memory today and wake up tomorrow wishing you hadn't, the page goes straight into the stove fire.
 
 **SURVIVOR:** And who gets to read it?
 
-**CLEO:** That's up to you. We can keep it private, agree on who may read it, or remove it later.
+**CLEO:** Nobody without your say-so. We can keep it right here in your hands, share only what you approve, or tear it to shreds whenever you want.
 
-**SURVIVOR:** Even after?
+**SURVIVOR:** Even afterward?
 
-**CLEO:** Yes. You can change your mind whenever you want.
+**CLEO:** Even years from now.
 
-**CLEO:** Do you want to talk without a record, let me make a transcript, or stop here?
+**CLEO:** Do you want to talk with no paper in the room, let me take notes for you to inspect, or stop here?
 
 **SURVIVOR - CHOICES**
 
-- **[Talk without a record]** "We can talk, but don't write it down."
-  - **CLEO:** Understood. I won't record it.
-- **[Allow a transcript]** "Make a transcript. I'll read it before you keep it."
-  - **CLEO:** Yes. We'll decide what stays after you've read it.
-- **[Stop for now]** "I don't want to do this today."
-  - **CLEO:** Then we stop. Nothing has been recorded.
+- **[Talk without a record]** "We can talk, but keep the pen in your pocket."
+  - **CLEO:** The pen stays away. Just two people in a quiet room.
+- **[Allow a transcript]** "Write down what happened. But read every line back to me before you leave."
+  - **CLEO:** Word for word, under your lantern. You strike out anything that doesn't belong.
+- **[Stop for now]** "Not today. My head is pounding."
+  - **CLEO:** Then we stop right now. Nothing goes onto paper.
 
 **PLAYER:** Do you want me to stay?
 
 **SURVIVOR - CHOICES**
 
 - **[Speak with Cleo alone]** "I want to speak with Cleo alone."
-  - **PLAYER:** I'll wait outside. You can ask me back, or not.
-- **[Allow the player to stay]** "You can stay. Don't answer for me."
+  - **PLAYER:** I'll wait out on the porch. Call if you need anything.
+- **[Allow the player to stay]** "You can stay. Just don't answer for me."
   - **PLAYER:** I won't.
 
-**SURVIVOR:** That's all I want you to keep. If I ask you to remove it, you remove it.
+**SURVIVOR:** That's all I want written down. If I tell you to burn it, you burn it.
 
-**CLEO:** I'll write down the limits we agreed on. I won't send it to the Archive without asking you again.
-
-**CLEO:** Do you want this to stay here, or should I send the part you approved to the Archive?
-
-**SURVIVOR - CHOICES**
-
-- **[Keep the record private]** "Keep it here. Don't send it anywhere."
-  - **CLEO:** Understood. It stays here.
-- **[Share an approved excerpt]** "Send this excerpt to the Review Council. Leave my name out."
-  - **CLEO:** Only this excerpt, without your name. I'll note the limit in the catalog.
-- **[Withdraw permission]** "I've changed my mind. Don't keep the record."
-  - **CLEO:** All right. I'll remove my copy. Nothing goes to the Archive.
+**CLEO:** Every scrap. Not a single carbon rubbing leaves this valley without you clearing it first.
 
 ## R-03 - Specific accountability
 
@@ -87,30 +76,30 @@
 **Speakers:** PLAYER, SURVIVOR, GAGE.
 **Knowledge:** No one is accused solely for rank, faction membership or presence at a hub.
 
-**GAGE:** I found a name on the equipment order. A second log puts that person at this procedure. It doesn't tell us what else they knew.
+**GAGE:** I tracked the serial stamp on the restraint collars. Leads to a field forge out of Iron Ridge. There's a master sapper's punch mark on the hinge.
 
-**SURVIVOR:** Are you going to take me to them?
+**SURVIVOR:** Are you going to drag me in front of them?
 
-**PLAYER:** No. You don't have to meet anyone to be believed. What do you want?
+**PLAYER:** Nobody is dragging you anywhere. You never have to lay eyes on their uniforms again.
 
-**SURVIVOR:** I don't want to see them. Keep the institute records, and make sure they can't do this again.
+**SURVIVOR:** I don't want to see their faces. I just want their forge fires put out so they never cast another collar.
 
-**GAGE:** We can bring the evidence to the people with authority to review their work. I won't take you to them or put your name in the report unless you ask.
+**GAGE:** Understood. The Bastion elders respect steel and stamped manifests. I take the batch records to the engineering tribunal myself. Your name stays off the docket. You don't owe them a single breath of testimony.
 
 **PLAYER - CHOICES**
 
-- **[Support a private process]** "We'll report the evidence without identifying the person who shared it."
-  - **SURVIVOR:** Yes. Don't promise me what the review will decide.
-- **[Ask about public accountability]** "Would you want the findings shared publicly without your name?"
-  - **SURVIVOR:** Not today. Don't bring it up again unless I do.
-- **[Pause the process]** "We can keep the record safe and hold off on a report."
-  - **SURVIVOR:** Yes. No more contact about it unless I ask.
+- **[Support a private process]** "We'll report the batch numbers and logs without putting your name on the docket."
+  - **SURVIVOR:** Yes. Don't promise me what the elders will decide. Just take away their hammers.
+- **[Ask about public accountability]** "Would you want the town to know what was built out there?"
+  - **SURVIVOR:** Not today. Don't bring it up again unless I ask.
+- **[Pause the process]** "We can lock the evidence in the forge safe and hold off."
+  - **SURVIVOR:** Yes. Let the dust settle first.
 
-**GAGE [IF PRIVATE PROCESS]:** I'll submit what we have. I can't promise what the review decides, but your name won't be in it.
+**GAGE [IF PRIVATE PROCESS]:** I'll submit the manifests to high command. I can't promise how the tribunal rules, but your name won't be on the paper.
 
-**GAGE [IF PUBLIC ACCOUNTABILITY]:** We can keep the review private for now. I won't bring public release up again.
+**GAGE [IF PUBLIC ACCOUNTABILITY]:** We keep the files under lock and key. I won't bring public reports up again.
 
-**GAGE [IF THE PROCESS IS PAUSED]:** We'll keep the record safe and make no report. I won't contact you about it unless you ask.
+**GAGE [IF THE PROCESS IS PAUSED]:** The manifests stay sealed in my iron chest. No reports until you give the word.
 
 ## R-04 - Wellspring decides its own limits
 
@@ -162,24 +151,24 @@
 **Placement:** A final route scene once the town has a clearer risk boundary and the nomad can choose whether to continue their circuit.
 **Knowledge:** The nomad's decision is theirs, not the player's. This is about consent and risk, not gratitude.
 
-**NOMAD:** I've got the warning in place. The route is still open if the town wants it.
+**NOMAD:** I've got the trail cairns marked. The route is still open if Wellspring wants trade.
 
 **PLAYER:** And if you don't want to keep the route open?
 
-**NOMAD:** Then I close it. No guilt speech, no crowding. People can bear a hard choice without being told they're selfish.
+**NOMAD:** Then I kick dust over the markers and take the long loop around the salt pans. A runner who forces their way into a jittery valley doesn't get a medal—they get ambushed by scared folk with pitchforks. Out here, knowing when to pack your mule and walk away is how you live to see next spring.
 
-**PLAYER:** I only want to know where the risk sits.
+**PLAYER:** Wellspring worries that an open trail brings trouble to their doorstep.
 
-**NOMAD:** It sits where the route is visible. A quiet path is safer until the towns decide what they're ready to protect.
+**NOMAD:** Of course they do! They've got cabbage patches and kids sleeping in dry beds; I'd be suspicious of strangers in dust goggles too. That's why we don't force it. The trail will still be there when the dust settles.
 
 **PLAYER - CHOICES**
 
-- **[Respect the nomad's decision]** "Then I won't push you."
-  - **NOMAD:** Good. The route is yours to advise on, not mine to carry alone.
-- **[Ask what would make it safer]** "What would make a route appointment feel safer to you?"
-  - **NOMAD:** Specific limits, warned stops and one clear point of contact. People can manage a route if it's not pretending to be a promise.
-- **[Offer to help with warnings]** "I can help carry the warning and keep the details practical."
-  - **NOMAD:** Useful. Keep it simple and keep it honest.
+- **[Respect the nomad's decision]** "Then pack your gear when you need to. No one will blame you."
+  - **NOMAD:** Thanks, sleeper. It's good to trade with someone who knows the difference between a trail partner and a prison guard.
+- **[Ask what would make it safer]** "What would make a route stop feel safer to you?"
+  - **NOMAD:** Clear signal stones by the gate, dry straw in the barn, and one person who doesn't panic when an unfamiliar face comes down the ridge.
+- **[Offer to help with warnings]** "I can help spot storm clouds and keep the water barrels full."
+  - **NOMAD:** Now that's music to a walker's ears. Keep the well clean and I'll keep the salt coming.
 
 ## R-07 - The aquifer overhaul
 

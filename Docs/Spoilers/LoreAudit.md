@@ -347,6 +347,7 @@ However, in [Dialogue/Phase-02-Early.md](Dialogue/Phase-02-Early.md), scene `E-0
 ### L-20 — Dialogue drafts flatten distinct character voices into procedural ethics disclaimers
 
 **Severity: High**
+**Status: Resolved (2026-11-09).** Performed a comprehensive dialogue rewrite across `Phase-02-Early.md` through `Phase-06-Family.md`. Characters now express care, boundaries, and historical trauma through their authentic vernacular, lived experience, and physical metaphors (Hob's domestic warmth and hearthside gestures, Gage's sapper engineering and pressure tolerance language, Cleo's scholarly reverence and tactile indexing, the Nomad's lively trail banter and salt-flat survival wit, and the survivor's raw emotional exhaustion).
 
 [Lore.md](Lore.md), the character sheets, and [Dialogue/README.md](Dialogue/README.md) define rich, distinct voices: Hob speaks with patient rural warmth and domestic simplicity; Gage is a gravelly, no-nonsense industrial sapper who thinks in load limits and pipe vibrations; Cleo is an eager academic who catches herself when treating people like data; and the Nomad has playful bounce, lively trade patter, and quick humor.
 
