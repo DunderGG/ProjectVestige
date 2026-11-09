@@ -65,26 +65,26 @@ Cleo observes a strict schedule based on the 24-hour clock. She stays indoors du
 
 ## 4. Item Preferences & Gifting
 
-Gifts build friendship but never trigger romance on their own. Her tastes reflect her scholarly discipline and reverence for pre-war culture.
+Gifts are optional social gestures that express appreciation; consistent presence and shared research build trust, and gifting never substitutes for demonstrated respect or gates story milestones. Her tastes reflect her scholarly discipline and reverence for pre-war culture.
 
-- **Loved Gifts (+80 Friendship):**
+- **Loved Gifts:**
   - *Intact Pre-War Data Spool:* Clean magnetic tape containing uncorrupted telemetry or civic records.
   - *Precision Optical Prism:* High-purity optical glass useful for recalibrating her lens array.
   - *Uncorrupted Seed Packet:* Pre-war heirloom seeds preserved in sealed foil packaging.
   - *Filtered Aquifer Water:* Triple-distilled, pure water free of Cinderium mineral dust.
-- **Liked Gifts (+45 Friendship):**
+- **Liked Gifts:**
   - *Clean Parchment / Vellum:* Smooth, acid-free sheets suitable for archival carbon rubbings.
   - *Refined Copper Wire:* High-conductivity wiring for delicate sensor maintenance.
   - *Quartz Crystal:* Clear piezoelectric crystals used in optical and frequency instruments.
   - *Standard Solar Cell:* Reliable energy source for her field charging dock.
   - *Pressed Chamomile:* Dried herb specimen grown carefully on the player's farm.
-- **Neutral Gifts (+20 Friendship):**
+- **Neutral Gifts:**
   - Harvested standard crops (parsnip, potato, carrot, corn), timber, cut stone, clay.
-- **Disliked Gifts (-20 Friendship):**
+- **Disliked Gifts:**
   - *Corroded Metal Slag:* Unidentifiable scrap metal with zero provenance or historical utility.
   - *Industrial Solvent:* Harsh chemical cleaner that dissolves vintage paper, ink, and lens adhesives.
   - *Animal Meat / Raw Fish:* Perishable biological products (she finds them messy and irrelevant to her purpose).
-- **Hated Gifts (-50 Friendship):**
+- **Hated Gifts:**
   - *Looted Family Heirloom:* Personal trinkets scavenged from marked civilian home shelters without consent.
   - *Cinderium Residue / Irradiated Sludge:* Highly hazardous radioactive material that ruins archival paper and risks sensor meltdown.
 
@@ -99,50 +99,50 @@ Gifts build friendship but never trigger romance on their own. Her tastes reflec
 
 ## 5. Relationship Progression & Narrative Arc
 
-Friendship progresses through 10 trust tiers (Hearts), visible to the player through distinct shifts in dialogue and behavior.
+Trust develops across five distinct narrative stages grounded in careful documentation, shared historical discovery, and ethical respect. Relationship tiers reflect social closeness and personal openness, while major story events and faction hub access are earned through concrete task milestones rather than gift optimization.
 
 ```
-[0-2 Hearts: The Specimen]  -->  [3-4 Hearts: The Collaborator]  -->  [5-6 Hearts: The Confidante]
-                                                                                |
-                                 [9-10 Hearts: Commitment/Defense] <-- [7-8 Hearts: The Invitation]
+[Stage 1: The Specimen]  -->  [Stage 2: The Collaborator]  -->  [Stage 3: The Confidante]
+                                                                        |
+                              [Stage 5: Defense/Partnership]  <-- [Stage 4: The Archive Route]
 ```
 
-### Stage 1: Hearts 0–2 — The Specimen
+### Stage 1: Initial Contact — The Specimen
 - **Attitude:** Clinical, detached, polite, condescendingly curious.
 - **Dialogue:** Addresses the player as "Primary Source" or "Citizen." Takes physical notes immediately after speaking with them.
 - **Key Flavor Line:** *"Your motor reflexes remain surprisingly intact despite decades of cellular suspension. Tell me, do your pre-war memories index sequentially, or do they present as emotional impressions?"*
 
-### Stage 2: Hearts 3–4 — The Collaborator
+### Stage 2: Mutual Context — The Collaborator
 - **Attitude:** Professional respect; acknowledges that lived human context fills blind spots in written blueprints.
 - **Dialogue:** Calls the player by their chosen name. Asks what things *meant* to people rather than just how they functioned.
 - **Key Event 1 — The Request:**
-  - *Trigger:* Enter the Aquifer Station after reaching 3 Hearts on a clear day.
+  - *Trigger:* Enter the Aquifer Station after initial introductions in Wellspring on a clear day.
   - *Scene:* Before asking, Cleo states that she wants the pod's suspension and utility diagnostics and may also ask about the family's water-rationing cards. She explains that she would keep a temporary encrypted copy in her field folio, erase the raw scan after transcription, and submit only an excerpt the sleeper has reviewed and approved to the Archive Review Council and assigned water-systems researchers. Approved excerpts remain in the Archive's research collection only while permission stands; the sleeper can stop the scan or withdraw permission later, and Cleo will erase her copy and have the Archive remove its copies.
   - *Choice:* The sleeper can allow technical diagnostics only, also agree to a voluntary interview about the family's rationing, or refuse all access. Either permission allows review of the proposed excerpt before it is shared; refusal does not count as withheld testimony.
   - *Outcome:* Cleo follows the chosen scope and sharing limits. Her disclosure is careful but procedural: she still treats consent as a condition for valid collection rather than fully understanding the sleeper's ownership of the record. The encounter begins her shift from extracting data toward stewardship.
 - **Key Event 2 — The Incomplete Archive:**
-  - *Trigger:* Reach 4 Hearts; speak with Cleo at the Town Hall records desk.
+  - *Trigger:* Follows The Request; speak with Cleo at the Town Hall records desk when discrepancies appear in the pre-war diagrams.
   - *Scene:* Cleo discovers that pre-war Civitas engineering diagrams of the pump do not match the physical pipe junctions in the ground. The manuals show a bypass valve that does not exist.
   - *Player Role:* The sleeper introduces Cleo to an elderly Keeper pump operator. The operator explains that fifty years ago, local robots bypassed the automated regulator with hand-beaten lead pipe because replacement Civitas chips had run out.
   - *Outcome:* Cleo realizes that physical records without living oral context produce false conclusions. She formally credits the Keeper operator in her notes.
 
-### Stage 3: Hearts 5–6 — The Confidante
+### Stage 3: Ethical Context — The Confidante
 - **Attitude:** Candid, vulnerable, openly questioning Index orthodoxy.
 - **Dialogue:** Admits her anxiety about peer review and fear of letting down the Archive. She stops taking field notes during casual conversations.
 - **Key Event 3 — The Privacy Dispute:**
-  - *Trigger:* Reach 6 Hearts; enter Wellspring town square between 12:00 and 15:00.
+  - *Trigger:* Enter Wellspring town square between 12:00 and 15:00 when the town assembly reviews Cleo's draft records.
   - *Scene:* A heated confrontation. Wellspring town council robots discover that Cleo’s drafts contain personal logs describing past water-rationing riots and internal town security vulnerabilities. They demand that she redact those files before taking them to the Archive, fearing that armed Iron Creed raiding parties or Index researchers will exploit the information.
   - *Conflict:* Cleo argues that withholding facts damages historical accuracy. The council counters that their current survival outweighs her academic curiosity.
   - *Player Choice:* The player can support the town's right to redaction, argue for unconditional academic preservation, or help mediate a compromise where technical schematics are preserved while personal identifying vulnerabilities are permanently sealed.
   - *Outcome:* Cleo chooses to redact the sensitive sections with her own stylus, honoring the community's trust over institutional greed. She confides to the sleeper that she risks academic censure at the Archive for doing so.
 
-### Stage 4: Hearts 7–8 — The Invitation & Hub Reveal
+### Stage 4: Ethical Stewardship & Hub Invitation — The Archive Route
 - **Attitude:** Deep mutual trust, emotional warmth, intellectual companionship.
 - **Key Event 4 — The Route to the Archive:**
-  - *Trigger:* Reach 8 Hearts; visit Cleo's workbench after 19:00.
+  - *Trigger:* Follows Event 3 (The Privacy Dispute); visit Cleo's workbench after 19:00 when she completes the community-approved Wellspring Monograph.
   - *Scene:* Cleo finishes compiling her Wellspring Monograph, complete with community-approved redactions, Keeper oral credits, and the sleeper's verified annotations. She must travel to the Archive to submit the work to the Review Council.
   - *The Reveal:* Cleo provides the sleeper with an encrypted navigation key and maps a verified safe route through the wasteland that avoids active curfew enforcers and feral machine corridors.
-  - *Hub Unlock:* Unlocks **The Archive** as a visitable location on the world map. This unlock is purely story- and trust-driven; it does **not** require entering a romance.
+  - *Hub Unlock:* Unlocks **The Archive** as a visitable location on the world map. This unlock is earned through completing the records exchange and honoring the community's redaction limits; it does **not** require gift-grinding or entering a romance.
 - **Romance Opt-In (Explicit Choice):**
   - Following the hub reveal, during a quiet walk by the farm perimeter at sunset (19:30), Cleo pauses to adjust her optical turret, visibly nervous.
   - She admits that observing the sleeper has fundamentally altered her internal algorithms—not as a researcher observing a subject, but as a person desiring to be known by another.
@@ -151,9 +151,9 @@ Friendship progresses through 10 trust tiers (Hearts), visible to the player thr
     - `[Friendship]` *"You're my closest friend here, Cleo. I'm honored to work alongside you."*
   - If romance is chosen, she confesses her affection with quiet joy, acknowledging that loving a human will confuse and challenge her Index colleagues, but stating she has never been more certain of a deduction.
 
-### Stage 5: Hearts 9–10 — Defense of the Record & Partnership
+### Stage 5: Lasting Partnership — Defense of the Record
 - **Key Event 5 — The Review Council Hearing:**
-  - *Trigger:* Reach 10 Hearts; attend Cleo's monograph defense at the Archive Hub's Great Chamber.
+  - *Trigger:* Attend Cleo's monograph defense at the Archive Hub's Great Chamber after visiting the Archive.
   - *Scene:* Cleo faces a panel of senior Index Archons who accuse her of compromising objective science by allowing "unqualified biologicals and obsolete service models" to redact historical records.
   - *Player Role:* The sleeper testifies alongside Cleo. Cleo delivers an impassioned defense: an archive that exploits its subjects ceases to be a record of truth and becomes an instrument of conquest.
   - *Outcome:* The Council grudgingly accepts the monograph with its ethical limits intact, establishing a revolutionary precedent for future Index expeditions.

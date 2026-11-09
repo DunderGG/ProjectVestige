@@ -304,8 +304,13 @@ However, the assumption that "all findings have been fixed" is not supported by 
 ### L-18 — Faction hub unlocking mechanics directly violate GameDesign.md core pillars
 
 **Severity: High**
+**Status: Resolved (2026-11-09).** [Engineer.md](Characters/Engineer.md), [Archivist.md](Characters/Archivist.md), and [Nomad.md](Characters/Nomad.md) now decouple hub access, route progression, and relationship stages from numeric heart/gift grinding. Major milestones and hub invitations are anchored to concrete narrative achievements:
+- **The Bastion:** Unlocked after completing the manifold pressure test and submitting Gage's joint report to Bastion High Command.
+- **The Archive:** Unlocked after completing the pod record verification and establishing a shared agreement with Cleo over community privacy boundaries.
+- **The Route:** Route ledger and safe-stop additions are anchored to demonstrating reliability across route windows and resolving the compromised marker crisis, rather than heart thresholds.
+Gifting has been reframed as a qualitative, thoughtful secondary expression that never acts as a gate to story progress or locations.
 
-In [Engineer.md](Characters/Engineer.md) (lines 144–151) and [Archivist.md](Characters/Archivist.md) (lines 139–145), unlocking the major faction hubs (**The Bastion** and **The Archive**) is gated behind reaching **8 Hearts** on a 10-tier relationship track powered by item gifting (+80 Friendship for loved gifts like Tungsten-Carbide Drill Bits or Pre-War Data Spools, +45 for liked gifts, with disliked/hated penalties).
+In [Engineer.md](Characters/Engineer.md) (lines 144–151) and [Archivist.md](Characters/Archivist.md) (lines 139–145), unlocking the major faction hubs (**The Bastion** and **The Archive**) was gated behind reaching **8 Hearts** on a 10-tier relationship track powered by item gifting (+80 Friendship for loved gifts like Tungsten-Carbide Drill Bits or Pre-War Data Spools, +45 for liked gifts, with disliked/hated penalties).
 
 **Why it matters:** This directly contradicts the core pillars and design rules in [GameDesign.md](../GameDesign.md):
 - Pillar 2 ([GameDesign.md](../GameDesign.md#2-pillars)): *"Earned relationships. Trust is built through consistent presence and genuine interaction, not through gift optimization."*

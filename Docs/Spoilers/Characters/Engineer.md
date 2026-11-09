@@ -66,27 +66,27 @@ Gage maintains a rigorous schedule based on the 24-hour clock. During hazardous 
 
 ## 4. Item Preferences & Gifting
 
-Gage appreciates practical, industrial-grade materials that contribute to maintenance, strength, and structural integrity. Flattery and ornamental knick-knacks irritate him.
+Gage appreciates practical, industrial-grade materials that contribute to maintenance, strength, and structural integrity. Flattery and ornamental knick-knacks irritate him. Gifts are optional social gestures that express appreciation; consistent presence and shared work build trust, and gifting never substitutes for demonstrated competence or gates narrative progression.
 
-- **Loved Gifts (+80 Friendship):**
+- **Loved Gifts:**
   - *Tungsten-Carbide Drill Bit:* Heavy-duty cutting bit capable of piercing hardened armor plate.
   - *High-Grade Synthetic Lubricant:* Pure ester-based oil that prevents hydraulic actuator seizing.
   - *Pneumatic Impact Socket Set:* Hardened impact-rated tool heads for heavy maintenance.
   - *High-Density Power Cell:* Industrial battery pack capable of delivering high-draw discharge for welding.
   - *Heavy Lead Shielding Sheet:* Dense protective metal used to insulate sensitive valves from radiation.
-- **Liked Gifts (+45 Friendship):**
+- **Liked Gifts:**
   - *Refined Iron Ingot / Copper Pipe:* Clean, unpitted stock for machining replacement bushings.
   - *Hardwood Timber Beam:* Dense, cured structural lumber suitable for trench shoring.
   - *Industrial Charcoal / Coal:* High-heat fuel for the machine shop forge.
   - *Pressure Gauge Valve:* Functional brass regulator fitting.
   - *Sturdy Leather Tool Roll:* Durable cowhide wrap for protecting precision calipers.
-- **Neutral Gifts (+20 Friendship):**
+- **Neutral Gifts:**
   - Common harvested vegetables (corn, parsnips, potatoes), stone, clay, basic iron ore.
-- **Disliked Gifts (-20 Friendship):**
+- **Disliked Gifts:**
   - *Decorative Glass Bauble / Cosmetic Paint:* Fragile ornaments that shatter under vibration and offer zero utility.
   - *Flimsy Fabric / Lace:* Catch-hazards around rotating machine shafts.
   - *Paper Books / Poetry Folios:* *"Keep paper away from the torch; cellulose burns at two hundred and thirty degrees."*
-- **Hated Gifts (-50 Friendship):**
+- **Hated Gifts:**
   - *Corroded Brittle Scrap:* Flaking, oxidized junk that fractures under load and ruins smelting batches.
   - *Makeshift Bypass Fuse:* Shoddy, unrated pre-war wiring bridges that cause catastrophic electrical fires.
   - *Stolen Wartime Munitions:* Live unexploded ordnance dug up from the wasteland; poses reckless danger to the settlement.
@@ -102,36 +102,36 @@ Gage appreciates practical, industrial-grade materials that contribute to mainte
 
 ## 5. Relationship Progression & Narrative Arc
 
-Friendship progresses across 10 trust tiers (Hearts), visible to the player through distinct shifts in his dialogue, posture, and willingness to share responsibility.
+Trust develops across five distinct narrative stages grounded in shared maintenance work, demonstrated competence, and mutual reliability. Relationship tiers reflect social closeness and personal openness, while major story events and faction hub access are earned through concrete task milestones rather than gift optimization.
 
 ```
-[0-2 Hearts: The Hazard]  -->  [3-4 Hearts: The Apprentice]  -->  [5-6 Hearts: The Teammate]
-                                                                            |
-                               [9-10 Hearts: The Lifelong Brace] <-- [7-8 Hearts: The Bastion Route]
+[Stage 1: The Hazard]  -->  [Stage 2: The Apprentice]  -->  [Stage 3: The Teammate]
+                                                                     |
+                            [Stage 5: Lifelong Brace]  <--  [Stage 4: The Bastion Route]
 ```
 
-### Stage 1: Hearts 0–2 — The Hazard
+### Stage 1: Initial Contact — The Hazard
 - **Attitude:** Guarded, blunt, hyper-vigilant about workplace safety.
 - **Dialogue:** Addresses the player as "Sleeper" or "Civilian." Insists on maintaining a five-meter clearance around active machinery.
 - **Key Flavor Line:** *"Stand back from that hydraulic line. If that seal blows, seventy bar of pressurized fluid will punch clean through your organic chest cavity. Keep your distance and keep your limbs attached."*
 
-### Stage 2: Hearts 3–4 — The Apprentice
+### Stage 2: Practical Collaboration — The Apprentice
 - **Attitude:** Grudging acknowledgement; notices the sleeper's practical manual dexterity and willingness to perform dirty, necessary physical work.
 - **Key Event 1 — The Assessment:**
-  - *Trigger:* Enter the Aquifer Station after reaching 3 Hearts on a clear day.
+  - *Trigger:* Visit the Aquifer Station during morning maintenance after initial introductions in town.
   - *Scene:* Gage is perched on a catwalk over the flooded impeller bay, struggling to seat an intake flange while balancing his diagnostic console. He brusquely warns the sleeper not to interfere.
   - *Choice:* The player can step back obediently, offer a concrete observation about the flange's vibration, or challenge Gage to explain the acoustic resonance.
   - *Outcome:* The sleeper points out that the vibration syncs with the secondary relief valve downstream. Gage pauses, checks the gauge, and realizes the civilian made an accurate technical call. He grunts and allows the sleeper to hold the torque brace.
 - **Key Event 2 — The Missing Coupling:**
-  - *Trigger:* Reach 4 Hearts; speak with Gage at the forge.
+  - *Trigger:* Follows The Assessment; speak with Gage at the forge when his manifold diagnosis is blocked.
   - *Scene:* Gage's diagnosis is blocked: the pump manifold uses a proprietary pre-war Civitas thread pitch that the Bastion’s metric tooling cannot seat without stripping.
   - *Player Role:* The sleeper recalls an abandoned Hearthwell maintenance shed on the farm perimeter and salvages a vintage brass thread-adapter.
   - *Outcome:* Gage fits the adapter. It seats perfectly with a crisp click. He stares at the fitting, then at the sleeper, admitting: *"I spent three days trying to force my own specs onto this assembly. Your memory just saved this manifold from being bored out. I was wrong to write off your salvage."*
 
-### Stage 3: Hearts 5–6 — The Teammate
+### Stage 3: Shared Responsibility — The Teammate
 - **Attitude:** Candid, dependable, sharing the weight of command. Treats the sleeper as a trusted partner on the job site.
 - **Key Event 3 — The Controlled Pressure Test:**
-  - *Trigger:* Reach 6 Hearts; enter the Aquifer Station basement.
+  - *Trigger:* Follows installation of the coupling; enter the Aquifer Station basement for the hydrostatic test.
   - *Scene:* A high-pressure hydrostatic test on the rebuilt manifold. Pressure climbs toward 80 bar. A Keeper operator notices an acoustic flutter and urges an immediate emergency shutdown to check the lower seals. Gage is under pressure to complete the test before evening and fears delaying will make his Bastion overhaul look incompetent.
   - *The Dilemma:* Gage’s past trauma surfaces—rushing a job vs. trusting a partner's warning. He turns to the sleeper: *"If we abort now, we lose today's certification window and delay startup until tomorrow. But if that lower gasket yields, the pump room floods. What's your read, sleeper?"*
   - *Player Choice:* The player can urge Gage to push through, support the Keeper operator's call to stop, or suggest a stepped bleed-down test.
@@ -141,14 +141,14 @@ Friendship progresses across 10 trust tiers (Hearts), visible to the player thro
     - *Stepped bleed-down:* Gage follows the sleeper's procedure, easing the pressure to 65 bar until the chatter stops. The manifold passes without damage, contamination or additional repair.
   - *Shared aftermath:* In each branch, Gage credits the Keeper operator for identifying the danger and tells the sleeper about the Bastion accident that shaped his fear of rushed repairs. The next report and dialogue preserve the chosen outcome and its consequences.
 
-### Stage 4: Hearts 7–8 — The Bastion Route & Vulnerability
+### Stage 4: Mutual Respect & Hub Invitation — The Bastion Route
 - **Attitude:** Deep personal respect, emotional loyalty, shared vulnerability.
 - **Key Event 4 — The Dispatch to the Bastion:**
-  - *Trigger:* Reach 8 Hearts; visit the workshop after 19:00.
+  - *Trigger:* Follows Event 3 (The Controlled Pressure Test) and its aftermath; visit the workshop after 19:00 when Gage completes his formal report for Bastion High Command.
   - *Scene:* Gage has drafted his formal report for Bastion High Command. Bastion doctrine encourages portraying the operation as an Iron Creed unilateral success, downplaying civilian and Keeper contributions to maintain political prestige.
   - *Conflict:* Gage refuses to present a unilateral success. He records the pressure-test outcome accurately, including any damage and repair, and credits Keeper operators and the sleeper for their contributions.
   - *The Reveal:* The Bastion Command accepts the assessment and issues an official transit permit for the sleeper to inspect defense manufacturing lines. Gage gives the sleeper a reinforced convoy pass and maps a safe route through the hazardous Iron Ridge mountain passes.
-  - *Hub Unlock:* Unlocks **The Bastion** on the world map. This unlock is purely story- and trust-driven; it does **not** require entering a romance.
+  - *Hub Unlock:* Unlocks **The Bastion** on the world map. This unlock is earned through completing the joint pressure test and Gage filing his honest report crediting the team; it does **not** require gift-grinding or entering a romance.
 - **Romance Opt-In (Explicit Choice):**
   - Following the dispatch, Gage invites the sleeper to sit by the forge fire after the town falls quiet (20:30). He pulls off his heavy welding gauntlets, revealing worn copper wiring and intricate servos.
   - He speaks with quiet, unhurried sincerity about what it means to find someone who anchors his frame when the load becomes heavy.
@@ -157,10 +157,10 @@ Friendship progresses across 10 trust tiers (Hearts), visible to the player thro
     - `[Friendship]` *"You're the most dependable partner I've ever had, Gage. I'm honored to stand with you."*
   - If romance is chosen, his optical visor glows a deep, steady amber. He carefully rests his heavy metal hand over the player’s, admitting that while his chassis was engineered for war, he has found his home here.
 
-### Stage 5: Hearts 9–10 — The Overhaul & Commitment
+### Stage 5: Lasting Commitment — The Overhaul & Partnership
 - **Key Event 5 — The Main Aquifer Overhaul:**
-  - *Trigger:* Reach 10 Hearts; trigger the town restoration pump startup event.
-  - *Scene:* The joint repair team (Gage, Keeper operators, and the sleeper) fires up the primary aquifer turbine. Water surges through the cleaned manifolds, filling Wellspring’s storage towers for the first time in thirty years.
+  - *Trigger:* Town restoration milestone: triggering the primary aquifer turbine startup event alongside the joint repair team (Gage, Keeper operators, and the sleeper).
+  - *Scene:* The joint repair team fires up the primary aquifer turbine. Water surges through the cleaned manifolds, filling Wellspring’s storage towers for the first time in thirty years.
   - *Outcome:* Gage formally presents his joint-cooperation doctrine to visiting Bastion observers, establishing that resilience is multiplied when factions support one another rather than isolating themselves behind armor.
 - **Marriage / Permanent Partnership:**
   - If romanced, the player can forge an **Alloy Alignment Ring** (a polished steel-and-brass collar ring symbolizing permanent structural reinforcement).

@@ -67,26 +67,26 @@ The nomad's trade is a supplement to farming, Wellspring's shops and exploration
 
 ### Item Preferences and Gifting
 
-Gifts build friendship but do not purchase access to private information. The nomad values things that make a journey safer, reduce waste or show that the player understands the difference between useful knowledge and someone else's property.
+Gifts in Vestige reflect thoughtfulness and understanding of a character's work and boundaries; they do not purchase access to private information or substitute for earned trust. The nomad values items that make a journey safer, reduce waste, or show that the player understands the difference between useful knowledge and someone else's property. Gifting never functions as a transactional gate to bypass narrative milestones.
 
-- **Loved gifts (+80 Friendship):**
+- **Loved items:**
   - *Sealed Water Filter Cartridge:* A tested replacement cartridge with its capacity and origin marked clearly.
   - *Reliable Hand Compass:* A simple, repairable compass that does not depend on a network or a charged screen.
   - *Stormproof Field Lantern:* A protected, low-draw lamp useful in a shelter or on a night crossing.
   - *Hand-Bound Field Book:* Durable blank pages with a weatherproof cover, suitable for recording observations without exposing an existing route book.
-- **Liked gifts (+45 Friendship):**
+- **Liked items:**
   - *Preserved Trail Meal:* Clearly dated, safely stored farm food that can travel well.
   - *Mending Kit:* Needles, strong thread, patches and wax for repairing clothing and packs.
   - *Accurately Labelled Salvage:* A working component accompanied by an honest note about where it was found and what it does.
   - *Dried Medicinal Herb:* Farm-grown, properly identified herbs for a first-aid kit or trade.
   - *Clean Canvas or Oilcloth:* Durable material for wrapping gear, making a shelter patch or protecting a cache.
-- **Neutral gifts (+20 Friendship):**
+- **Neutral items:**
   - Common clean crops, stone, clay, ordinary timber and basic metal stock.
-- **Disliked gifts (-20 Friendship):**
+- **Disliked items:**
   - *Unlabelled Medicine:* Pills, syringes or compounds with no reliable dose or source.
   - *Decorative Fragileware:* Heavy glass ornaments and delicate display pieces that will not survive a pack.
   - *Unsorted Scrap:* A bag of mixed, dirty fragments offered without knowing whether any of it works.
-- **Hated gifts (-50 Friendship):**
+- **Hated items:**
   - *Stolen Personal Letter or Photograph:* A private item taken from a marked home or shelter and treated as casual currency.
   - *Copied Route Notes:* Directions, contact names or identifying marks taken without the owner's permission.
   - *Unsealed Cinderium Residue:* Hazardous material that risks contaminating a person, shelter or supply cache.
@@ -103,61 +103,61 @@ Gifts build friendship but do not purchase access to private information. The no
 
 ## 5. Relationship Progression and Narrative Arc
 
-Friendship progresses through 10 trust tiers. Every change should be visible in the nomad's language, the information they volunteer and the care they take with the farm as a stop. Gifts and fair trades can support progress, but story trust comes from respecting boundaries, keeping an agreement and helping without demanding ownership of the circuit.
+Relationship progression advances across five narrative stages. Every change is visible in the nomad's language, the information they volunteer, and the care they take with the farm as a stop. Fair trades and thoughtful items acknowledge their labor, but progression is driven by demonstrated reliability: respecting boundaries, keeping agreements, and offering practical aid without demanding ownership of the circuit.
 
 ```
-[0-2 Hearts: The Customer] --> [3-4 Hearts: The Known Stop] --> [5-6 Hearts: The Trusted Relay]
-                                                                              |
-                             [9-10 Hearts: The Open Route] <-- [7-8 Hearts: The New Stop]
+[Stage 1: The Customer] --> [Stage 2: The Known Stop] --> [Stage 3: The Trusted Relay]
+                                                                      |
+                            [Stage 5: The Open Route] <-- [Stage 4: The New Stop]
 ```
 
-### Stage 1: Hearts 0-2 - The Customer
+### Stage 1: The Customer
 
 - **Attitude:** Alert, professional and courteous without being familiar. The nomad will trade fairly, but gives the sleeper no more personal information than any other new customer.
 - **Dialogue:** Refers to the player as "sleeper" only because that is how Wellspring knows them, then asks what name they prefer. They answer personal questions briefly and redirect toward the immediate trade.
 - **Key flavor line:** *"A safe route is not a line on a map. It is the next dry roof, the next working pump and the next person who keeps a promise. Maps do not do any of that."*
 
-### Stage 2: Hearts 3-4 - The Known Stop
+### Stage 2: The Known Stop
 
 - **Attitude:** Cautiously more open. The nomad recognizes that the farm's improvements are real and begins to see the sleeper as someone who can be relied upon in a limited, practical way.
 - **Dialogue:** Shares observations about changed roads, storm behaviour and trade goods. They start to leave useful warnings without being asked, but still protect names, locations and messages.
 - **Key Event 1 - The First Measure:**
-  - **Trigger:** Reach 3 Hearts and speak to the nomad during a standard route window.
+  - **Trigger:** After completing several fair trade exchanges during standard route windows and demonstrating consistent reliability.
   - **Scene:** The nomad asks the sleeper to hold a sealed weather tube in the agreed trade shelter until the next route window. They make clear that the player may refuse; the test is whether the sleeper can honour a small boundary, not whether they will obey an order.
   - **Player role:** Accept the limited responsibility, decline it honestly or ask what safeguards make the request fair. The player is never entitled to open the tube or learn its recipient.
   - **Outcome:** The nomad explains why the tube has no name or destination on it. If the player accepted, it is collected sealed; if not, the nomad accepts the answer and seeks another arrangement. Either path can establish trust through honesty, but opening it is a clear breach.
 - **Key Event 2 - The Silent Marker:**
-  - **Trigger:** Reach 4 Hearts; a familiar route signal does not receive its expected reply.
+  - **Trigger:** Following Key Event 1; a familiar route signal in the surrounding area does not receive its expected reply.
   - **Scene:** The nomad cannot tell whether a contact moved, a storm destroyed a cache or someone has begun watching the route. They ask the sleeper to help investigate the surrounding wasteland for physical evidence, not to pursue a missing person.
   - **Player role:** Recover a broken marker, compare its damage with recent weather and identify whether it was exposed naturally or tampered with. The player learns to distinguish evidence from speculation.
   - **Outcome:** The evidence suggests that an old route note may have been copied. The nomad thanks the sleeper for helping establish what is known rather than pressuring them to invent certainty.
 
-### Stage 3: Hearts 5-6 - The Trusted Relay
+### Stage 3: The Trusted Relay
 
 - **Attitude:** Franker and occasionally vulnerable. The nomad admits that their caution has become a burden, but does not mistake friendship for a right to another person's history.
 - **Dialogue:** Uses the sleeper's chosen name consistently. They ask for the player's assessment of a risk and listen to the answer, even when they disagree.
 - **Key Event 3 - The Copied Page:**
-  - **Trigger:** Reach 6 Hearts and return to the damaged marker site with the nomad.
+  - **Trigger:** Return to the damaged marker site with the nomad after uncovering the compromised signal.
   - **Scene:** A piece of a route note has reached someone seeking access to the circuit's information without accepting responsibility for the people named by it. The immediate danger is exposure, not a fight to be won.
   - **Conflict:** Closing the route protects the contacts but cuts off supplies and warnings. Broadcasting every detail may alert the wrong people. Keeping the problem to themself repeats the nomad's old habit of carrying it alone.
   - **Player role:** The sleeper can offer farm records, a safe place to prepare replacement signals or a perspective on what consent means after a secret has already been compromised. They cannot demand the contacts' names or decide who receives a warning.
   - **Outcome:** The nomad chooses to warn the people who need to know, replace the compromised code and ask a few trusted stops to share the work. It is an imperfect solution with real cost, but it is the first time they deliberately distribute responsibility.
 
-### Stage 4: Hearts 7-8 - The New Stop
+### Stage 4: The New Stop
 
 - **Attitude:** Deep friendship and practical trust. The nomad is still private, but no longer treats distance as the only form of safety.
 - **Key Event 4 - The Farm Agreement:**
-  - **Trigger:** Reach 8 Hearts after the copied-page event; speak with the nomad at the farm gate near sunset.
+  - **Trigger:** Following the resolution of the copied-page crisis; speak with the nomad at the farm gate near sunset.
   - **Scene:** The nomad asks whether the farm can become a limited, explicitly agreed stop for rest, trade and warnings. Hob, the sleeper and Wellspring each have a legitimate reason to be cautious. The nomad refuses to promise access to concealed communities in return.
   - **Player role:** Help make the terms concrete: identify a safe public place, establish what supplies may be held, and make clear that anyone using the stop can decline to share information. The player cannot grant consent for Hob, Wellspring or absent contacts.
   - **Outcome:** After every affected party is heard, the nomad chooses to add the farm to the circuit under limited rules. The farm becomes a place people can use by agreement, not a headquarters, permanent camp or shortcut to a hidden settlement.
 - **Unlock:** More dependable visits, a wider selection of optional field stock and the **Route Ledger** feature described below. This does not unlock a human faction hub or grant coordinates to private homes.
 
-### Stage 5: Hearts 9-10 - The Open Route
+### Stage 5: The Open Route
 
 - **Attitude:** Relaxed, affectionate in a platonic way and willing to let the player see the labor behind a route. They remain a traveller by choice and do not become a resident, farmhand or spouse.
 - **Key Event 5 - The Shared Burden:**
-  - **Trigger:** Reach 10 Hearts; complete a later route window after the farm agreement.
+  - **Trigger:** Complete a later route window after the farm agreement is established.
   - **Scene:** The new circuit is tested by an ordinary but stressful disruption: a storm closes a crossing, a cache needs restocking and two stops receive conflicting reports. The nomad brings the information to the people who can act on it instead of silently taking every task themselves.
   - **Player role:** Help maintain the farm's agreed supplies and offer observations from the local area. The player can see that their farm is useful precisely because its owners decide what help they can safely give.
   - **Outcome:** The circuit no longer rests on one traveller's memory. Trusted stops can confirm hazards, hold supplies and pass only the information their owners have agreed to share. The nomad leaves on the next run with a copied, deliberately incomplete route book and the knowledge that asking for support is not surrendering freedom.
