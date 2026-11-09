@@ -260,3 +260,185 @@ In [Engineer.md](Characters/Engineer.md), the arc summary says Gage chooses caut
 - **L-17 — Partially addressed:** [StoryTimeline.md](StoryTimeline.md) establishes provisional phases, reveals and knowledge guardrails. Exact quest prerequisites and final character-specific outcomes still need the playable story slice.
 
 **Review limits:** This is a cross-document narrative and world-rule audit, not a technical or scientific validation of Cinderium, a gameplay playtest, or a judgment on final dialogue. The branch and agency findings identify authoring risks; testing whether their eventual treatment lands will require a playable story slice.
+
+## Follow-up audit (2026-11-09)
+
+**Scope:** A comprehensive critical audit of the expanded lore suite following the addition of the six-phase story flow diagrams ([StoryFlow/README.md](StoryFlow/README.md)), all six phase dialogue drafts ([Dialogue/README.md](Dialogue/README.md), [Dialogue/Phase-01-Opening.md](Dialogue/Phase-01-Opening.md) through [Dialogue/Phase-06-Family.md](Dialogue/Phase-06-Family.md)), character sheets ([Characters/Hob.md](Characters/Hob.md), [Characters/Engineer.md](Characters/Engineer.md), [Characters/Archivist.md](Characters/Archivist.md), [Characters/Nomad.md](Characters/Nomad.md)), faction sheets ([Factions/IronCreed.md](Factions/IronCreed.md), [Factions/Index.md](Factions/Index.md), [Factions/Keepers.md](Factions/Keepers.md)), and [StoryTimeline.md](StoryTimeline.md), cross-checked against [Lore.md](Lore.md) and [GameDesign.md](../GameDesign.md).
+
+### Executive assessment
+
+**Overall: 6/10.** The narrative architecture has expanded substantially since October 30. Having a structured six-phase progression, visual story flow diagrams, character sheets with schedules and item affinities, and complete draft dialogue for all phases represents genuine progress. The thematic spine—mutual care, post-war interdependence, and accountability—remains strong.
+
+However, the assumption that "all findings have been fixed" is not supported by the documents. Several core narrative findings from the first review (L-08, L-10, L-11) remain open, and L-07, L-09, and L-17 are only partially addressed. More critically, the recent additions introduce serious new defects:
+1. **Core pillar violation:** Faction hub unlocks and relationship progression in character sheets have adopted a transactional 10-tier "Heart" and gift-optimization system that directly violates [GameDesign.md](../GameDesign.md)'s explicit pillars.
+2. **Branch regression:** A key branching outcome (Gage's pressure test) that was previously resolved has been flattened into a single canonical branch in the dialogue drafts, resurrecting L-13.
+3. **Dialogue voice flattening:** Spoken dialogue across all characters has been homogenized into didactic, procedural disclaimers about consent, agency, and boundaries, stripping characters of their distinct post-war voices, flaws, and grit.
+4. **Narrative vacuum at the climax:** The central mystery of the sleeper's parents and their sealed message remains intentionally unwritten, delivering an anticlimax in Phase 6.
+
+### Status of previous findings
+
+| Finding | Severity | Status on 2026-11-09 | Notes |
+|---|---|---|---|
+| **L-01** (Objective history vs robot belief) | High | **Resolved** | Canon/belief distinction maintained. |
+| **L-02** (Environmental science) | High | **Resolved** | Particle and soil remediation rules remain consistent. |
+| **L-03** (Infrastructure maintenance model) | High | **Resolved** | Maintenance divide between Keepers and advanced hubs maintained. |
+| **L-04** (Caretaker order vs town crisis) | Medium | **Resolved** | Hob's order boundary remains clear. |
+| **L-05** (Human population scale) | Medium | **Resolved** | 4–6 survivor target and global census uncertainty maintained. |
+| **L-06** (Faction social structure) | Medium | **Resolved** | Faction institutions and internal disputes well established. |
+| **L-07** (Playable character arcs) | High | **Partially addressed / Stalled** | Detailed sheets exist for Hob, Gage, Cleo, and Nomad, but the sibling, living exhibit, and town residents remain one-line hooks. No arc is implemented or tested in a playable build. |
+| **L-08** (Family mystery & sealed message) | Medium | **Open** | Explicitly unwritten in [Lore.md](Lore.md) (line 391), [Hob.md](Characters/Hob.md) (line 34), [StoryTimeline.md](StoryTimeline.md) (line 316), and [Phase-06-Family.md](Dialogue/Phase-06-Family.md) (lines 3, 42). See L-22. |
+| **L-09** (Tone guidance for dark material) | Medium | **Partially addressed** | Faction safeguards protect trial subjects, but [Lore.md](Lore.md) still lacks shared tone rules balancing dark themes with absurd pre-war corporate satire and comic relief. |
+| **L-10** (Sleeper identity and agency) | Medium | **Open** | The sleeper remains a blank slate who mostly prompts NPCs with procedural questions. No distinct pre-war attachments, personal wants, or emotional choices are defined. |
+| **L-11** (Working names and stable IDs) | Low | **Open** | Names marked *(working name)* persist throughout. Content ID conventions diverge between `Base.Character.<Name>` and `Base.<Name>`. See L-24. |
+| **L-12** (Cleo consent disclosure) | Medium | **Resolved** | Resolved in [Archivist.md](Characters/Archivist.md), though divergence exists in dialogue drafts (see L-21). |
+| **L-13** (Gage pressure test branching) | Medium | **Regressed in Dialogue** | Resolved in [Engineer.md](Characters/Engineer.md), but hard-coded to a single outcome in [Phase-02-Early.md](Dialogue/Phase-02-Early.md) (see L-19). |
+| **L-14** (Gage accident chronology) | Low | **Resolved** | Chronology consistent at ~5.5 decades post-war. |
+| **L-15** (Frame-conversion rationale) | Medium | **Resolved** | Maintained across Lore and Iron Creed sheets. |
+| **L-16** (Crop toxicity & food safety) | Medium | **Resolved** | Food safety and non-food cleanup boundaries maintained. |
+| **L-17** (Paced reveal timeline) | High | **Partially addressed** | Pacing phases and drafts exist, but mechanical prerequisites, quest gates, and survivor identities remain undecided. |
+
+---
+
+### New findings
+
+### L-18 — Faction hub unlocking mechanics directly violate GameDesign.md core pillars
+
+**Severity: High**
+
+In [Engineer.md](Characters/Engineer.md) (lines 144–151) and [Archivist.md](Characters/Archivist.md) (lines 139–145), unlocking the major faction hubs (**The Bastion** and **The Archive**) is gated behind reaching **8 Hearts** on a 10-tier relationship track powered by item gifting (+80 Friendship for loved gifts like Tungsten-Carbide Drill Bits or Pre-War Data Spools, +45 for liked gifts, with disliked/hated penalties).
+
+**Why it matters:** This directly contradicts the core pillars and design rules in [GameDesign.md](../GameDesign.md):
+- Pillar 2 ([GameDesign.md](../GameDesign.md#2-pillars)): *"Earned relationships. Trust is built through consistent presence and genuine interaction, not through gift optimization."*
+- Section 8.1 ([GameDesign.md](../GameDesign.md#8-robots-and-people)): *"Characters are not vending machines. Relationship progress does not come from optimizing gift-giving... Trust is built through demonstrated character, not through gifts or flattery."*
+- [StoryTimeline.md](StoryTimeline.md) (lines 7–8, 13): *"The phases describe story progression, not years, seasons, heart levels or playtime... Hub visits may happen in different orders. The player should not need romance, every optional investigation or every possible character to understand the central revelations."*
+- [Lore.md](Lore.md) (lines 206, 357–358): Access to the Bastion and Archive is earned through the engineer's joint repair report and the archivist's records exchange, respectively.
+
+Gating world exploration and major faction hubs behind an 8-heart gift-grind turns deep characters into the exact "vending machines" the game design prohibits, and creates an artificial barrier between story progression and world access.
+
+**Recommended change:** Remove heart requirements as prerequisites for unlocking faction hubs. Anchor hub invitations to concrete story and task milestones (e.g., completing the aquifer manifold pressure test and submitting the joint report for the Bastion; completing the records exchange and resolving the community privacy dispute for the Archive). Keep gifting as an optional, secondary expression of affection that provides small social perks, not a gate for major story locations.
+
+---
+
+### L-19 — Dialogue draft E-05 invalidates choice branching and reintroduces L-13
+
+**Severity: High**
+
+Finding L-13 established that the aquifer manifold pressure test must support three distinct, consequence-carrying outcomes (emergency abort, push ahead, stepped bleed-down), and that Gage's subsequent report and reflections must vary by branch. [Engineer.md](Characters/Engineer.md) correctly authored branch-specific dialogue for all three in Event 4.
+
+However, in [Dialogue/Phase-02-Early.md](Dialogue/Phase-02-Early.md), scene `E-05` ("Gage's report", lines 197–203), the draft dialogue hard-codes the emergency abort as the only canon:
+> **PLAYER:** "Why tell me this now?"  
+> **GAGE:** "Because you stopped the test when it was going wrong. That's not the same as knowing the whole system, but it is enough to start."
+
+**Why it matters:** If the player chose to push ahead (resulting in a blown gasket) or proposed a stepped bleed-down (which passed cleanly without stopping), Gage's dialogue line is false and nonsensical. It completely erases player agency and resurrects the exact flaw L-13 was written to fix.
+
+**Recommended change:** Update scene `E-05` in [Dialogue/Phase-02-Early.md](Dialogue/Phase-02-Early.md) to include branch-conditional dialogue matching [Engineer.md](Characters/Engineer.md):
+- If abort: *"Because you backed the operator and made me stop before the flange failed."*
+- If pushed ahead: *"Because you stood by the line even when my call blew a gasket, and helped clean up the mess."*
+- If stepped bleed-down: *"Because you found the third option when the rest of us were about to break the manifold."*
+
+---
+
+### L-20 — Dialogue drafts flatten distinct character voices into procedural ethics disclaimers
+
+**Severity: High**
+
+[Lore.md](Lore.md), the character sheets, and [Dialogue/README.md](Dialogue/README.md) define rich, distinct voices: Hob speaks with patient rural warmth and domestic simplicity; Gage is a gravelly, no-nonsense industrial sapper who thinks in load limits and pipe vibrations; Cleo is an eager academic who catches herself when treating people like data; and the Nomad has playful bounce, lively trade patter, and quick humor.
+
+In the actual dialogue drafts across Phases 2 through 6, however, virtually every character's dialogue has been homogenized into formal, modern institutional ethics discourse. Characters constantly recite disclaimers about consent, agency, boundaries, and dispassionate risk:
+- Cleo: *"By asking whose story it is, whose consent is being used and whether the file becomes a substitute for the person."* (`E-07`)
+- Nomad: *"I won't trade someone's privacy for your good intentions."* (`T-02`)
+- Hob: *"Whatever we decide, the nomad's contacts remain theirs to protect."* (`T-03`)
+- Living Exhibit / Survivor: *"A medic can look at the equipment. Not me. No questions about my body."* (`R-01`)
+- Town Administrator: *"The assembly can decide what Wellspring shares. It cannot decide what the survivor shares."* (`R-04`)
+- Sibling: *"Being family doesn't mean I get to decide for you." / "Good. I want to choose what happens now."* (`F-03`)
+- Gage: *"We are not creating a place for perfect people. We are creating a place that can still function when one of them fails."* (`E-05`)
+
+**Why it matters:** The dialogue drafts read like modern compliance guidelines or a committee meeting rather than living people and robots surviving in a ruined, post-apocalyptic world. When an old sapper, a rural homebot, a wasteland wanderer, an abused captive, and a town council robot all use identical terminology and analytical detachment, character depth vanishes and emotional scenes feel sterile.
+
+**Recommended change:** Rewrite dialogue turns across Phases 2–6 so ethical principles are expressed through action, personality, and vernacular rather than clinical HR/IRB vocabulary:
+- Let Gage express respect for boundaries through physical machinery metaphors and sapper discipline, not abstract lectures on perfection.
+- Give the Nomad back their trade banter, colorful wasteland expressions, and natural deflection rather than immediate boundary declarations.
+- Let Hob express care through quiet, habitual physical gestures ("Tea is on the stove; sit down") rather than legalistic statements about contact networks.
+- Let the survivor's trauma and self-protection sound raw, tired, and guarded, not like a formal medical intake waiver.
+
+---
+
+### L-21 — Contradictory event design and sequencing between character sheets and dialogue drafts
+
+**Severity: Medium**
+
+There is significant drift and duplication between the key narrative events designed in the character sheets and the scenes drafted in [Dialogue/](Dialogue/):
+1. **Cleo's Request:** In [Archivist.md](Characters/Archivist.md) (Event 1, lines 118–128, 212–239), Cleo explicitly asks for the sleeper's cryo-pod technical logs and an interview regarding pre-war family water-rationing cards, with detailed parameters on local storage, raw scan erasure, and excerpt approval. In [Dialogue/Phase-02-Early.md](Dialogue/Phase-02-Early.md) scene `E-07`, this pivotal moment is replaced by a vague discussion about copying an unspecified "original page," with no mention of cryo-pod logs or family rationing.
+2. **Nomad's Farm Agreement Duplication:** In [Dialogue/Phase-02-Early.md](Dialogue/Phase-02-Early.md) scene `E-08`, the player and Nomad agree to establish the farm as a route stop (*"Rest and trade are possible. No names, no questions... / Good. That's a fair trade"*). Then in [Dialogue/Phase-03-Transition.md](Dialogue/Phase-03-Transition.md) scene `T-03`, the Nomad arrives and asks the exact same question from scratch (*"I want to ask whether this farm could be a stop on the route..."*), and the player choice and dialogue lines are practically identical. Meanwhile, [Nomad.md](Characters/Nomad.md) places this agreement in Stage 4 (Hearts 7–8) after the copied-page crisis.
+3. **Gage's Forge Reflection:** [Engineer.md](Characters/Engineer.md) scripts Event 4 as a detailed scene at the town forge at night where Gage reviews the transit permit dispatch and reflects on the pressure test, offering a clear Romance/Friendship choice. Scene `E-05` in [Dialogue/Phase-02-Early.md](Dialogue/Phase-02-Early.md) takes place outdoors, cuts the report dispatch, and flattens the reflection into a brief discussion about the Bastion's harshness.
+
+**Why it matters:** Writers and implementers have two conflicting source-of-truth scripts for the same narrative beats, with incompatible prerequisites, settings, and dialogue.
+
+**Recommended change:** Reconcile the character sheets and dialogue drafts. Ensure `E-07` includes Cleo's specific request for the cryo-pod diagnostic logs and rationing interview; eliminate the duplicate farm agreement in `E-08` (keeping `E-08` focused on initial trade and acquaintance, and reserving the farm-stop agreement for `T-03` after trust has been established); and bring Gage's forge reflection and report dispatch into the dialogue file.
+
+---
+
+### L-22 — Unresolved parents' fate and empty message delivery undermines the game's emotional climax
+
+**Severity: High**
+
+In [Lore.md](Lore.md) section 8 and [Hob.md](Characters/Hob.md), the sleeper's central personal arc is uncovering what happened to their parents, culminating in Hob delivering a sealed message left by the parents "when the farm is whole again."
+
+In [Dialogue/Phase-06-Family.md](Dialogue/Phase-06-Family.md) scene `F-02`, however, this climax delivers no answers:
+- Hob hands over the message after noting vaguely: *"The house is standing, and the beds are growing. I thought that might be what they meant."*
+- The player reads the message off-screen.
+- The player says: *"I thought this would answer more."*
+- Hob replies: *"It answers what they wanted you to hear. It cannot answer what they did not know."*
+And the scene abruptly ends. The parents' actual fate—how they died, whether they remained on the farm, where they are buried—remains entirely unknown.
+
+**Why it matters:** A player who spends 80+ in-game days restoring a derelict farm and building relationships to fulfill a seventy-year-old promise will experience this as an empty mystery box. Having the player character explicitly state *"I thought this would answer more"* directly mirrors the player's inevitable frustration. While leaving some questions open preserves atmosphere, withholding the emotional core of the protagonist's personal mystery turns the narrative payoff into an anticlimax.
+
+**Recommended change:** Commit to a canonical resolution for the parents' story. For example, have the message reveal their love, their conscious choice to stay and maintain the shelter for the sleeper despite knowing Cinderium exposure was shortening their lives, and where they buried their personal keepsakes or where Hob laid them to rest on the farm. Give the player closure on their family, even if regional mysteries (such as the sibling's survival or global population) remain unresolved.
+
+---
+
+### L-23 — Internal contradictions in Lore.md Section 14 (Open Questions)
+
+**Severity: Low**
+
+In [Lore.md](Lore.md) section 14 (Open questions, lines 387–388), the following are still listed as unresolved:
+- *"The engineer: their name and model."*
+- *"The Index archivist: their name and model."*
+
+In the exact same document, both characters were formally named and detailed in Section 10 (lines 284, 288) and in the Decision Log (lines 350, 352): Gage (Ironside Pioneer PR-520) and Cleo (Civitas Lexis CL-840).
+
+**Why it matters:** Internal contradictions within the primary lore bible create confusion for new writers and contributors attempting to distinguish open questions from established canon.
+
+**Recommended change:** Remove lines 387 and 388 from Section 14 of [Lore.md](Lore.md).
+
+---
+
+### L-24 — Asset ID and naming scheme inconsistencies across character and lore files
+
+**Severity: Low**
+
+The naming convention for game content assets diverges across documents:
+- [Engineer.md](Characters/Engineer.md) (line 203): `UVestigeCharacterData asset Base.Character.Gage`
+- [Archivist.md](Characters/Archivist.md) (line 199): `UVestigeCharacterData asset Base.Character.Cleo`
+- [Nomad.md](Characters/Nomad.md) (line 193): `Base.Nomad` (omits `Character` category)
+- [Hob.md](Characters/Hob.md) (line 11) & [Lore.md](Lore.md) (line 333): `Base.Hob`
+- [Lore.md](Lore.md) (line 333): `Base.IronCreed`
+
+**Why it matters:** When these data assets are implemented in Unreal Engine, inconsistent namespace paths make asset registry lookups and save-data serialization error-prone.
+
+**Recommended change:** Adopt a unified convention across all sheets: either `Base.Character.<Name>` for all character assets (e.g., `Base.Character.Hob`, `Base.Character.Nomad`) or `Base.<Name>`. Document the rule in [CodingGuidelines.md](../CodingGuidelines.md) and [Lore.md](Lore.md).
+
+---
+
+### Recommended correction order
+
+1. **Align Hub Unlocks with Design Pillars (L-18):** Decouple Bastion and Archive unlocks from the 8-heart gift grind in [Engineer.md](Characters/Engineer.md) and [Archivist.md](Characters/Archivist.md). Anchor them to the completed pump pressure test and monograph/privacy dispute milestones.
+2. **Fix Dialogue Branch Regression (L-19):** Restore branch-specific dialogue in scene `E-05` of [Dialogue/Phase-02-Early.md](Dialogue/Phase-02-Early.md) to preserve the player's pressure-test choices from L-13.
+3. **Re-voice and De-sanitize Dialogue Drafts (L-20):** Revise spoken lines across Phases 2–6 to restore character-specific voices, humor, grit, and mechanical flavor, stripping out repetitive institutional compliance jargon.
+4. **Reconcile Scene Divergence and Duplication (L-21):** Align Cleo's Event 1 in `E-07` with [Archivist.md](Characters/Archivist.md), and remove the redundant farm agreement from `E-08` so `T-03` remains the true milestone.
+5. **Author the Parents' Message and Fate (L-08, L-22):** Decide the parents' actual fate and write the emotional substance of their sealed message in `F-02` so the Phase 6 climax delivers real narrative closure.
+6. **Clean Up Canon Discrepancies and IDs (L-23, L-24):** Remove resolved names from [Lore.md](Lore.md) Section 14 and standardize character content IDs to `Base.Character.<Name>`.
+
+### Review limits
+
+This audit evaluates the internal consistency, character voice, thematic alignment, and pillar compliance across all written lore, dialogue drafts, and design documentation. It does not replace gameplay testing of dialogue flow, UI readability, or player emotional response once scenes are implemented in the engine.
