@@ -327,6 +327,7 @@ Gating world exploration and major faction hubs behind an 8-heart gift-grind tur
 ### L-19 — Dialogue draft E-05 invalidates choice branching and reintroduces L-13
 
 **Severity: High**
+**Status: Resolved (2026-11-09).** Updated scenes `E-05` and `E-06` in [Dialogue/Phase-02-Early.md](Dialogue/Phase-02-Early.md) with branch-conditional dialogue covering all three pressure-test outcomes (emergency abort, pushed ahead, and stepped bleed-down), preserving player agency and aligning with [Engineer.md](Characters/Engineer.md).
 
 Finding L-13 established that the aquifer manifold pressure test must support three distinct, consequence-carrying outcomes (emergency abort, push ahead, stepped bleed-down), and that Gage's subsequent report and reflections must vary by branch. [Engineer.md](Characters/Engineer.md) correctly authored branch-specific dialogue for all three in Event 4.
 

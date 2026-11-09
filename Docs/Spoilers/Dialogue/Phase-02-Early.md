@@ -150,7 +150,10 @@
 - **[Ask about the Bastion invitation]** "Does this mean I can visit?"
   - **GAGE:** It means I can request a route and vouch for the work. That is not the same thing as a wide-open door.
 - **[Ask whether he trusts the player]** "Why me?"
-  - **GAGE:** Because you noticed the fit and you stopped the test when it went wrong. That's enough to start with.
+  - **GAGE:**
+    - *(If emergency abort)* "Because you noticed the fit and backed the operator to stop the line before the flange failed. That's enough to start with."
+    - *(If pushed ahead)* "Because you noticed the fit and stood by the line even when my call blew a gasket, and helped clean up the mess. That's enough to start with."
+    - *(If stepped bleed-down)* "Because you noticed the fit and found the third option when the rest of us were about to break the manifold. That's enough to start with."
 
 ## E-06 - Bastion readiness
 
@@ -196,7 +199,10 @@
 
 **PLAYER:** Why tell me this now?
 
-**GAGE:** Because you stopped the test when it was going wrong. That's not the same as knowing the whole system, but it is enough to start.
+**GAGE:**
+- *(If emergency abort)* "Because you backed the operator and made me stop before the flange failed. That's not the same as knowing the whole system, but it is enough to start."
+- *(If pushed ahead)* "Because you stood by the line even when my call blew a gasket, and helped clean up the mess. That's not the same as knowing the whole system, but it is enough to start."
+- *(If stepped bleed-down)* "Because you found the third option when the rest of us were about to break the manifold. That's not the same as knowing the whole system, but it is enough to start."
 
 **PLAYER:** That is a strange standard.
 
