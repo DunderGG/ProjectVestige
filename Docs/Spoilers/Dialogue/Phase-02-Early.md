@@ -120,155 +120,138 @@
   - **KEEPER OPERATOR:** Pressure is settling. No silt in the reservoir. No new damage.
   - **GAGE:** Good. We stop here and record exactly what the test did—and did not—prove.
 
-## E-05 - Gage's report
+## E-05 - Gage's report and Bastion dispatch
 
-**Placement:** After the pressure-test outcome, Gage explains his own past failure and prepares a report for the Bastion.
-**Knowledge:** This is Gage's experience, not a statement about all Iron Creed members or the pressure-test researchers.
+**Placement:** Workshop after the pressure test. Gage prepares his formal technical report for Bastion High Command.
+**Knowledge:** Bastion doctrine favors unilateral Iron Creed success stories, but Gage files an unvarnished account crediting the whole repair crew.
 
 **GAGE:** I used to think a failed repair was the worst thing I could report.
 
 **PLAYER:** What changed?
 
-**GAGE:** At the Bastion, I rushed a turbine repair because command wanted the line back that day. I missed a stress crack. The housing went, and the slag pinned my lower frame.
+**GAGE:** At the Bastion, I rushed a turbine overhaul because high command wanted the line certified before dusk. I ignored a micro-fracture in the casing. The housing blew, and three tons of hot slag pinned my lower frame.
 
 **PLAYER:** Someone got you out?
 
-**GAGE:** Another engineer. They were ordered to pull back. They ignored it, cut me free, and we went back to rebuild the housing properly.
+**GAGE:** Another engineer. Command ordered an immediate evacuation. She ignored the siren, cut through the slag with a handheld torch, and hauled me out before the secondary line ruptured. Then we went back in together and rebuilt the housing properly.
 
 **PLAYER:** They came back for you.
 
-**GAGE:** I hadn't thought a human could be a partner in that kind of work.
+**GAGE:** I hadn't thought a human could be that kind of partner. Until today.
 
-**PLAYER:** What will you put in the report?
+**PLAYER:** What will you put in the dispatch to the Bastion?
 
-**GAGE:** What we found. Who made each call. What failed, if anything, and what the next crew needs to know. No polishing the numbers to protect my standing.
+**GAGE:** The unvarnished truth. The exact pressure spikes, the seal failure if it happened, and the names of the Keeper operators who manned the valves. Bastion doctrine wants me to sign this as a unilateral Iron Creed operation to polish our standing. I won't do it. A report that erases the crew who held the wrenches is cowardice.
 
 **PLAYER - CHOICES**
 
-- **[Ask him to credit the whole team]** "Make sure the operators and the people who checked the coupling are named."
-  - **GAGE:** They will be. A report that leaves out the people who did the work is a bad report.
-- **[Ask about the Bastion invitation]** "Does this mean I can visit?"
-  - **GAGE:** It means I can request a route and vouch for the work. That is not the same thing as a wide-open door.
-- **[Ask whether he trusts the player]** "Why me?"
+- **[Ask about the Bastion's reaction]** "Will your command penalize you for an honest report?"
+  - **GAGE:** Let them try. High Command respects numbers that hold under pressure more than pretty excuses. In fact... the return dispatch just cleared. They accepted the assessment and issued an official transit pass for you through Iron Ridge.
+- **[Ask whether he trusts the player]** "Why vouch for me?"
   - **GAGE:**
-    - *(If emergency abort)* "Because you noticed the fit and backed the operator to stop the line before the flange failed. That's enough to start with."
-    - *(If pushed ahead)* "Because you noticed the fit and stood by the line even when my call blew a gasket, and helped clean up the mess. That's enough to start with."
-    - *(If stepped bleed-down)* "Because you noticed the fit and found the third option when the rest of us were about to break the manifold. That's enough to start with."
+    - *(If emergency abort)* "Because you backed the operator and made me stop before the flange failed. That's not the same as knowing the whole system, but it's enough to start."
+    - *(If pushed ahead)* "Because you stood by the line even when my call blew a gasket, and helped clean up the mess. That's not the same as knowing the whole system, but it's enough to start."
+    - *(If stepped bleed-down)* "Because you found the third option when the rest of us were about to break the manifold. That's not the same as knowing the whole system, but it's enough to start."
+    - **GAGE (CONTINUED):** Here. A reinforced convoy pass. You've earned the right to inspect our manufacturing lines at the Bastion.
 
-## E-06 - Bastion readiness
+## E-06 - Evening by the forge
 
-**Placement:** Optional scene after Gage has seen the sleeper act carefully around risky systems. It works as a trust beat before any route is approved.
-**Knowledge:** The town is not yet at the center of a crisis. This is about trust, route discipline and the difference between fear and risk.
+**Placement:** Late evening (20:30) by the forge fire after the town falls quiet. Gage pulls off his heavy welding gauntlets, revealing worn copper wiring and intricate servos.
+**Knowledge:** Gage reflects on what partnership means to an old sapper, presenting an explicit choice between romance and deep friendship.
 
-**GAGE:** The Bastion doesn't open its gates because someone is impressive. It opens them when the route is clear and the people on it know what they are doing.
+**GAGE:** Fire's dying down to embers. Good heat for tempering tool steel.
 
-**PLAYER:** That sounds like a very strict way to make a friend.
+**PLAYER:** You usually keep those heavy gauntlets on.
 
-**GAGE:** The rule is simple: we do not let people wander in because they are curious. The gear is older than the town, and it does not forgive carelessness.
+**GAGE:** Actuators overheat after twelve hours under load. Even tungsten needs to cool off once in a while.
 
-**PLAYER:** So the gate is a warning, not a challenge.
+**GAGE:** The Bastion doesn't open its gates because someone is charming, sleeper. We build behind thick stone and reinforced bulkheads because out there, the world broke. But sitting here... looking at this pump and watching you work... I realize you don't survive a collapse by turning yourself into a solitary fortress.
 
-**GAGE:** Exactly. If you ever visit, remember that. We build for what can fail, not for what we want to believe about ourselves.
+**PLAYER:** That sounds like a big admission for an Iron Creed sapper.
 
-**PLAYER:** That sounds like a very different kind of pride.
-
-**GAGE:** That is the difference. We do not build to look untouchable. We build so the next person does not die because we assumed the system was safe.
-
-**PLAYER:** And nobody gets a free pass because they're important?
-
-**GAGE:** No. Not even the engineers who signed the route. Clear work, clean reports and a line you can explain when the pressure spikes. That's what gets respect.
-
-**PLAYER:** I thought the Bastion was just a place with a lot of old machines.
-
-**GAGE:** The Bastion is full of old machines, and they do not care whether you are useful, frightened or in a hurry. They only care whether your hands are slow enough to listen.
+**GAGE:** It's an engineer's admission. When an anchor carries a shifting load, it needs a brace that won't shear. It takes real strength to admit you need someone beside you.
 
 **PLAYER - CHOICES**
 
-- **[Ask what a safe route looks like]** "What does a safe route there actually look like?"
-  - **GAGE:** Two checks before the gate. One person on intake, one on the line. No one crosses a marked boundary without a reason and a clear signal. If the board reads high, you wait.
-  - **PLAYER:** So the route has rules, not just trust.
-  - **GAGE:** A gasket either holds eighty bar or it shreds. Hoping it holds because you like the fellow who cut it just leaves you with steam scalds on your chest.
-- **[Ask whether he would ever trust a mistake]** "Would you trust somebody if they'd already made a mistake once?"
-  - **GAGE:** If they kill the valve and call out the blow-by before the housing cracks. A worker who hides a bad weld to save face gets people buried. A worker who owns the flaw and grinds it down can stand on my line any day.
-  - **PLAYER:** That seems harsher than I expected.
-  - **GAGE:** Steam doesn't negotiate with feelings, sleeper. You don't build a boiler room for people who never make mistakes; you build it with relief valves so a mistake doesn't blow the roof off.
-- **[Ask whether the place is frightening]** "It sounds like a place built to make people nervous."
-  - **GAGE:** It's an industrial forge, not a kitchen garden. Steam hammers rattle your teeth, and the relief stacks scream loud enough to shake loose bolts. Keeps your boots planted and your eyes on the dials. That's not terror; that's knowing where the fire is.
-  - **PLAYER:** So the point is not to look tough.
-  - **GAGE:** The point is making sure the steel holds when the storm hits.
+- **[Romance]** "You don't have to carry the weight alone anymore, Gage. Let's brace each other."
+  - **GAGE:** *(His optical visor glows a deep, steady amber. He carefully rests his heavy metal hand over yours, his servos settling with a soft hiss.)* "My frame was cast for war and heavy salvage, sleeper. But standing beside you... I think I've finally found a foundation worth building on."
+- **[Friendship]** "You're the most dependable partner I've ever had, Gage. I'm honored to stand on your line."
+  - **GAGE:** *(Gives a firm, respectful nod, his grip tightening briefly in camaraderie.)* "Right back at you. Any time the pressure spikes in this valley, you and I hold the valve together. That's a sapper's promise."
+- **[Ask about the road ahead]** "What should I expect when I travel to the Bastion?"
+  - **GAGE:** Heavy steam hammers, iron discipline, and people who measure your worth by your grip on a wrench. Keep your boots planted and show them the convoy pass. They'll know you stand with me.
 
-**PLAYER:** Why tell me this now?
+## E-07 - Cleo's request and pod telemetry
 
-**GAGE:**
-- *(If emergency abort)* "Because you backed the operator and made me stop before the flange failed. That's not the same as knowing the whole system, but it is enough to start."
-- *(If pushed ahead)* "Because you stood by the line even when my call blew a gasket, and helped clean up the mess. That's not the same as knowing the whole system, but it is enough to start."
-- *(If stepped bleed-down)* "Because you found the third option when the rest of us were about to break the manifold. That's not the same as knowing the whole system, but it is enough to start."
+**Placement:** Aquifer Pumping Station exterior. Cleo is scanning an exposed intake pipe with her optical turret.
+**Knowledge:** Cleo discovers an 84% discrepancy between pre-war Civitas blueprints and the actual manifold, and asks to examine the sleeper's pod telemetry.
 
-**PLAYER:** That is a strange standard.
+**CLEO:** Ah. Citizen—forgive me, my indexing subroutines default to pre-war civic designations. Your timing is fortuitous.
 
-**GAGE:** This is the only standard we have that does not break under pressure.
-## E-07 - Cleo's request and record limits
+**PLAYER:** What are you looking at?
 
-**Placement:** The player spends time with Cleo after collecting early records.
-**Knowledge:** Cleo has not found evidence of trials yet. The issue is about record boundaries, not accusations.
+**CLEO:** An eighty-four percent discrepancy between the Civitas municipal schematics and this intake manifold. The historical plan routes twenty thousand hectoliters daily to residential blocks, yet the physical pipe terminates in a hand-beaten cap.
 
-**CLEO:** I want to keep a copy of the original page. I can mark the uncertainty. I won't call it evidence until it is.
+**PLAYER:** You think the blueprint was wrong?
 
-**PLAYER:** Why not just keep it all?
+**CLEO:** Blueprints record intentions; physical metal records what people actually built when supplies ran short. Your Hearthwell home cryo-pod holds seventy years of utility and suspension telemetry. Those logs would show exactly when municipal pressure dropped before the Four Days.
 
-**CLEO:** Because a record is not the same thing as a conclusion. If I merge the copies too early, I lose the difference between a clue and a fact.
+**CLEO:** I would like to scan those technical logs. And... if you are willing, I would like to ask about your family's water-rationing cards from that final month.
 
-**PLAYER:** You don't trust the people who made the copies.
+**PLAYER:** That sounds personal.
 
-**CLEO:** I trust the evidence more than the people who made it. That is not the same as trusting the people who were there.
+**CLEO:** It is. That is why I state the scope before touching a dial. I would keep an encrypted copy locally while comparing it with station records, then erase the raw scan after transcription. You would review any excerpt before I submitted it to the Archive Review Council. If you refuse, I will use non-invasive ground radar, and your refusal will not be noted as a gap in testimony.
 
 **PLAYER - CHOICES**
 
-- **[Offer a quiet agreement]** "Then we'll keep the original wording and the copy separate."
-  - **CLEO:** Thank you. That is how a good archive begins.
-- **[Ask what the record can do]** "What does an old piece of paper actually change?"
-  - **CLEO:** It anchors our feet. Without it, rumors drift like alkali dust across the valley. It doesn't resurrect the hands that penned it, but it keeps their work from dissolving into myth.
-- **[Ask how she keeps the balance]** "How do you know when to stop digging?"
-  - **CLEO:** When my hands start treating someone's grief like a museum artifact. If I find a ration slip with a mother's note about her sick boy, my optical sensor wants to cross-reference the name with casualty rolls. But he wasn't a data point—he was a child who needed penicillin. If I scrape through their private misery just to fill an index drawer, I'm not preserving history. I'm just looting it.
+- **[Technical diagnostics only]** "You may read the pod's technical logs, but my family's rationing cards stay private. I'll review any excerpt before you share it."
+  - **CLEO:** Understood: technical logs only. I will not examine personal memories or family cards. You may withdraw or narrow that permission at any time, and Archive copies will be removed upon request.
+- **[Technical logs and interview]** "You can scan the pod telemetry and ask about the rationing cards. But I inspect the exact excerpt before it leaves this valley."
+  - **CLEO:** Agreed. Word for word under your own lamp. Lived human memory gives weight to numbers that otherwise remain cold.
+- **[Refusal]** "No. Don't scan my pod, and don't dig into my family's records."
+  - **CLEO:** *(Steps back, her optical visor dimming fractionally as she caps her stylus.)* Understood. I will rely on ground-penetrating radar. Your boundary is recorded without judgment.
 
-## E-08 - The nomad's first agreement
+## E-08 - The nomad's first arrival and trade
 
-**Placement:** First trade and route conversation with the nomad.
-**Knowledge:** This is a practical agreement about a stop, not a promise of private information.
+**Placement:** Sunset near the farm perimeter. The nomad arrives on their regular route window with a dust-scuffed pack and trail rig.
+**Knowledge:** This is an initial trading encounter and introduction, establishing trade terms and personal boundaries. It is not an official route-stop agreement.
 
-**NOMAD:** I'll keep the route markers honest. I won't ask for names unless you choose to give them.
+**NOMAD:** Afternoon! Well, nearly dusk. Don't mind me—just catching my breath before the valley wind turns chilly.
 
-**PLAYER:** That's a rare offer.
+**PLAYER:** You travel alone out here?
 
-**NOMAD:** It is. I like to keep my routes from turning into a confession booth.
+**NOMAD:** Me, my boots, and twenty pounds of dried fruit, rock salt, and replacement filter screens. You must be the sleeper everyone in Wellspring is whispering about.
 
-**PLAYER:** So what do you need from me?
+**PLAYER:** What are they saying?
 
-**NOMAD:** A dry patch of ground out of the prevailing wind, two buckets of well water if you've got them to spare, and a stone by the fence where I can drop off trade goods without half the town poking through my rucksack.
+**NOMAD:** That you walked out of a freezer after seventy years and immediately started weeding turnips! I respect that. Best way to clear cold blood out of your head is honest dirt under your fingernails.
+
+**PLAYER:** What brings you to this fence line?
+
+**NOMAD:** Trade! Plain, simple bartering. I trade clean produce, preserved trail rations, and accurate salvage for whatever spare brass or repaired tools you've got lying around. I don't ask what your surname was before the war, and you don't ask which canyon I slipped out of. Clean swap, fair count.
 
 **PLAYER - CHOICES**
 
-- **[Agree to a narrow stop]** "Water and a dry patch by the gate. No prying into where your trail starts or ends."
-  - **NOMAD:** Deal! That's a fair swap. Fresh greens and clean grease for salt and spare brass.
-- **[Ask for conditions]** "I want terms for heavy dust storms and flash freezes before we shake on it."
-  - **NOMAD:** Smart! A shelter that leaks in a gale isn't a refuge; it's just an open coffin with a roof.
-- **[Decline for now]** "I can't open the farm to travellers yet."
-  - **NOMAD:** Fair enough! Out on the dunes, if you take in every wanderer before your own well is sealed, everyone ends up coughing dust. Gate stays shut until you say otherwise.
+- **[Trade goods]** "Let's see what you have in those packs."
+  - **NOMAD:** That's what I like to hear! Rock salt from the flats, sealed wire spools, and dried wild mint. Take your pick—your cabbage looks crisp enough to fetch a handsome price down south.
+- **[Ask about the wasteland routes]** "How do you manage to travel through the dust without getting lost?"
+  - **NOMAD:** You watch the clouds, you listen to the radio static, and you never stay in one place long enough to make a target. A good trail runner is half compass and half jackrabbit.
+- **[Ask them to move along]** "I'm not looking for traders tonight."
+  - **NOMAD:** No trouble at all! Out on the salt flats, pushing your goods on a tired person is a quick way to get bit. I'll make camp by the dry creek bed outside town. Holler if you need salt come morning.
 
-## E-09 - Route marker
+## E-09 - Route marker (Advance arrival signal)
 
-**Placement:** The nomad posts or changes a route marker at the farm gate.
-**Knowledge:** The marker is a practical agreement, not a location map.
+**Placement:** The nomad hangs a simple signal marker at the farm gatepost before setting out.
+**Knowledge:** The marker is a practical advance signal for the next trade window, not a location map or a public hub claim.
 
-**NOMAD:** This marker means the stop is active. It tells the next caravan that they can rest here without guessing what they're walking into.
+**NOMAD:** I carved a small notch into the gatepost and hung this slate marker. When you see it turned face-out, it means I'll be swinging by on my next circuit in three days with fresh trade goods. If a storm kicks up or you want privacy, turn the slate to the wall, and I'll pass on by.
 
-**PLAYER:** That's all it tells them?
+**PLAYER:** That's all it signals?
 
-**NOMAD:** That and the weather threshold. No names. No route map. If the conditions change, the marker changes with it.
+**NOMAD:** That's all it needs to signal. No names, no coordinates, no signs pointing at your farmhouse. Just a simple 'all clear' between two people who know how to keep their word.
 
 **PLAYER:** You trust me with that?
 
-**NOMAD:** I trust you with the rules we set. That's not the same thing as trusting every person who happens to pass through.
+**NOMAD:** I trust you to flip the slate if you need space. Out here, respecting a boundary is how trade partners stay friends.
 
 ## E-10 - Town life, forecast, festival and first irregularity
 

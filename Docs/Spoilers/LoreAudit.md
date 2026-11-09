@@ -373,6 +373,11 @@ In the actual dialogue drafts across Phases 2 through 6, however, virtually ever
 ### L-21 — Contradictory event design and sequencing between character sheets and dialogue drafts
 
 **Severity: Medium**
+**Status: Resolved (2026-11-09).** Reconciled character sheet narrative events with the dialogue drafts in [Dialogue/Phase-02-Early.md](Dialogue/Phase-02-Early.md):
+- `E-05` and `E-06` now incorporate Gage's honest Bastion dispatch crediting the team, the issuance of the Bastion transit permit (unlocking the hub), and his late-evening forge reflection with the explicit `[Romance]` and `[Friendship]` opt-ins from [Engineer.md](Characters/Engineer.md).
+- `E-07` scripts Cleo's specific request for the sleeper's cryo-pod utility logs and voluntary interview regarding family water-rationing cards, matching [Archivist.md](Characters/Archivist.md) Key Event 1.
+- `E-08` reframes the Nomad's first arrival around basic trading and barter, eliminating the premature duplicate farm-stop agreement which is now cleanly reserved for the summit in `T-03` ([Dialogue/Phase-03-Transition.md](Dialogue/Phase-03-Transition.md)).
+- `E-09` clarifies the gatepost marker as an advance signal for upcoming trade windows rather than an activated caravan hub.
 
 There is significant drift and duplication between the key narrative events designed in the character sheets and the scenes drafted in [Dialogue/](Dialogue/):
 1. **Cleo's Request:** In [Archivist.md](Characters/Archivist.md) (Event 1, lines 118–128, 212–239), Cleo explicitly asks for the sleeper's cryo-pod technical logs and an interview regarding pre-war family water-rationing cards, with detailed parameters on local storage, raw scan erasure, and excerpt approval. In [Dialogue/Phase-02-Early.md](Dialogue/Phase-02-Early.md) scene `E-07`, this pivotal moment is replaced by a vague discussion about copying an unspecified "original page," with no mention of cryo-pod logs or family rationing.
