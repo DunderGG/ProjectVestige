@@ -13,7 +13,7 @@ The six phase files follow the timeline's story order. Each scene has a stable d
 - Keep each character's knowledge local to the scene. A character only refers to evidence they personally saw or were told about.
 - Choices can differ in tone or boundary without changing facts the scene has established. Mark consequence branches explicitly.
 - Treat consent to care, an interview, recordkeeping, sharing, or confrontation as separate decisions. Refusal and silence are valid.
-- The identity and wishes of the living exhibit, other possible survivors, the sibling's path, and the parents' sealed message are undecided. Drafts leave those details open.
+- The identity and wishes of the living exhibit, other possible survivors, and the sibling's path are undecided. Drafts leave those details open; the parents' fate and sealed message are established in the Phase 6 family thread.
 - Use only relative references to the Four Days; do not state an absolute in-world year.
 - Do not read faction membership as proof of knowledge or guilt. The Index's cognitive integrations and Iron Creed's frame conversions are separate programs.
 - Silence, pauses, interruptions, and practical actions are part of the dialogue. A good line often does less rather than more.

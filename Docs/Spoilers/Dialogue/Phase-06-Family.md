@@ -1,6 +1,6 @@
 # Phase 6 - Late, parallel thread: The family message
 
-> **Spoilers.** These drafts keep the family's emotional story separate from the Continuance Trials. They do not decide the parents' full fate, the sibling's survival path or the message's contents.
+> **Spoilers.** These drafts keep the family's emotional story separate from the Continuance Trials. The late message resolves the parents' fate; the sibling's survival path remains separate and undecided.
 
 ## F-01 - The family in fragments
 
@@ -37,8 +37,8 @@
 
 ## F-02 - Hob's sealed message
 
-**Placement:** Late in the family thread, when the farm has visibly been restored enough to meet the still-undecided meaning of "whole again."
-**Knowledge:** The message's text and the restoration threshold are open. This scene does not reveal the parents' complete fate or the sibling's location.
+**Placement:** Late in the family thread, after the farmhouse is weather-safe, clean water runs, the garden produces food, and Hob has chosen a future alongside the sleeper.
+**Knowledge:** The parents stayed to keep the sleeper's shelter running, became fatally ill through repeated Cinderium exposure, and died at the farm. The message gives their own account of that choice; Hob confirms that it laid them to rest beneath the old pear tree. The sibling's location remains unknown.
 
 **HOB:** Your parents left you a message. They asked me to give it to you when the farm was whole again.
 
@@ -48,24 +48,47 @@
 
 **PLAYER:** What made you decide it was now?
 
-**HOB:** The house is standing, the hearth is warm, and the garden beds are growing. I thought that might be what they meant. I wasn't sure, so I waited.
+**HOB:** The roof keeps the rain out. Clean water runs at the sink. The garden feeds you. And when I asked what you wanted, you gave me room to answer. I think that is a whole farm.
 
 **PLAYER - CHOICES**
 
 - **[Ask for the message]** "I want to read it."
-  - **HOB:** All right. Would you like me to stay while you open it?
+  - **HOB:** All right. I'll be in the kitchen if you want me.
 - **[Ask for time]** "I know it's here. I can't read it yet."
   - **HOB:** Then I'll keep it safe in the cedar box. You can ask for it whenever you're ready.
 - **[Ask Hob to read it aloud]** "Can you read it with me?"
   - **HOB:** I can. We can stop whenever your heart is too full.
 
-**PLAYER:** I thought this would answer more.
+**Production note:** For either reading choice, show the complete message below as a readable letter. When the player asks Hob to read it aloud, Hob reads the same text. Choosing time ends this scene without marking the message read; the player can return to it later.
 
-**HOB:** A letter is only ink on dry paper, little one. It can hold a blessing and a reminder of their love, but it cannot wrap a coat around your shoulders when the frost comes in. I miss the sound of their boots on the porch every single day.
+> **THE PARENTS' MESSAGE**
+>
+> Our dear child,
+>
+> If this has reached you, then you woke to a world we could not make safe for you. We are sorry we were not there to open the door.
+>
+> After the sky burned, we kept the water running, the batteries charged, and your room below ground warm. We thought about the roads and another shelter. Then the dust made us sick. We stayed because your shelter still worked, and because we could keep it working for one more day, then another.
+>
+> That was our choice. Do not carry it as a debt. Do not keep this place exactly as we left it for our sake. Plant what you like. Move the furniture. Let the house be noisy. Make a home that belongs to you.
+>
+> We asked Hob to lay us beneath the old pear tree, together. The cedar box is at its roots. Keep it, open it, leave it there, or add your own things when you are ready. We loved you before the sirens, and we love you beyond them.
+>
+> Always,
+>
+> Your parents
 
-**PLAYER:** I wish they were here to tell me themselves.
+**PLAYER:** They stayed. They knew they were sick and stayed anyway.
 
-**HOB:** So do I. So do I. The hearth is warm, but it has been very quiet without them.
+**HOB:** They did. They wrote this while they could still write together. When they were gone, I carried them to the pear tree and put the cedar box where they asked. I remember that clearly.
+
+**PLAYER - CHOICES**
+
+- **[Visit the resting place]** "Take me to them."
+  - **HOB:** I will. The path is clear enough now. We can go slowly.
+- **[Stay inside]** "Not yet. Stay with me a while."
+  - **HOB:** Of course. I'll put the kettle on and sit at the table.
+- **[Ask for space]** "I need to be alone."
+  - **HOB:** I understand. I'll leave the porch light on. Call if you want company.
 
 ## F-03 - The sibling remains their own person
 

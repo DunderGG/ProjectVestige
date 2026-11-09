@@ -83,7 +83,7 @@ Expands each response lane into its specific permissions, possible outcomes, and
 
 ## Parallel family thread
 
-Family evidence appears in flexible order; the message threshold and sibling path remain open.
+Family evidence appears in flexible order. The late message has a visible delivery threshold and resolves the parents' fate; the sibling's path remains open.
 
 ![Family story flow](Family.svg)
 

@@ -522,4 +522,4 @@ Collected from the other documents. Each one is settled in its own document and 
 - **Knock-out penalty:** what exactly is lost. ([GameDesign.md](GameDesign.md#15-open-questions))
 - **Multiplayer:** shared farm or separate farms, shared clock and sleep. ([GameDesign.md](GameDesign.md#15-open-questions))
 - **Names:** the game, the world, the town, the coin, the caretaker, the robot makers. ([Lore.md](Spoilers/Lore.md#14-open-questions))
-- **Story:** what the sealed message says, whether the sibling exists, and whether the story ever says who struck first. ([Lore.md](Spoilers/Lore.md#14-open-questions))
+- **Story:** the sibling's survival path, role and whether the story ever says who struck first. ([Lore.md](Spoilers/Lore.md#14-open-questions))

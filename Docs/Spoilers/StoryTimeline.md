@@ -277,15 +277,15 @@ No branch should treat withholding testimony as failure, force reconciliation wi
 
 ### Evidence across the story
 
-Family traces appear from the opening onward in the farm, old addresses, letters, photographs, recordings and Hob's damaged memory. Their order can vary with exploration. Each item should provide a credible piece of the family's history without requiring the player to find every item to understand a later message.
+Family traces appear from the opening onward in the farm, old addresses, letters, photographs, recordings and Hob's damaged memory. Their order can vary with exploration. Each item should provide a credible piece of the family's history without requiring the player to find every item to understand the late message.
 
-The known facts remain limited: the parents stayed above ground and are gone; the sleeper entered the pod because only one family pod arrived before the war; the sibling was away when the war began and may still be alive. How the parents died or left, the sibling's survival path and whether the sleeper meets them remain undecided.
+The player learns only gradually that the parents stayed above ground and are gone; the sleeper entered the pod because only one family pod arrived before the war; and the sibling was away when the war began and may still be alive. At the message scene, the family thread resolves: the parents stayed to maintain the farm's shelter, became fatally ill through repeated Cinderium exposure, and died at the farm. Hob laid them to rest beneath the old pear tree at the garden's edge. The sibling's survival path and whether the sleeper meets them remain undecided.
 
 ### Hob's sealed message
 
-Hob holds a message from the parents with the instruction to deliver it "when the farm is whole again." The message is planned as a late-story beat, but both its contents and the visible threshold for "whole again" are open. Define the threshold through understandable restoration or relationship progress rather than an arbitrary hidden completion percentage.
+Hob holds a message the parents wrote together after the Four Days, with the instruction to deliver it "when the farm is whole again." The visible threshold is a weather-safe farmhouse, clean running water, a food-producing garden, and Hob's freely chosen commitment to a future alongside the sleeper. These are understandable restoration and relationship milestones, not a hidden completion percentage, a day count, town completion, or faction progress.
 
-The message should reflect what the parents could plausibly know when they left it. It may add emotional context or clarify part of the family's decision, but it should not magically establish the parents' full fate, reveal a surviving sibling's location, settle the world's human population or explain the Continuance Trials unless those facts are independently supported.
+The message explains the parents' informed choice to keep the sleeper's shelter running despite the danger to themselves, their love, their wish to be laid to rest beneath the old pear tree, and their wish that the farm become a living home. Hob then confirms that it fulfilled the burial request. This preserves what the parents could plausibly know while giving the player a complete answer about their fate. The message does not reveal a surviving sibling's location, settle the world's human population or explain the Continuance Trials.
 
 ### The sibling remains a separate question
 
@@ -295,7 +295,7 @@ If the sibling is encountered, they are a person with their own history, boundar
 
 ### Closing the family thread
 
-The family-message payoff can offer emotional closure without pretending every question has an answer. The sleeper may learn what their parents hoped, feared or chose, while still not knowing every detail of what happened afterward. This leaves room for the family story to be meaningful even if the sibling's future remains open.
+The family-message payoff gives the sleeper closure: the parents chose to stay, the reason they died, where Hob laid them to rest, and the freedom to make a future without turning the farm into a shrine. It leaves room for the sibling's future to remain open and does not answer unrelated regional mysteries.
 
 ## Reveal and knowledge guardrails
 
@@ -313,7 +313,6 @@ The family-message payoff can offer emotional closure without pretending every q
 - Exact quest, friendship and hub prerequisites for the middle reveal and optional investigations.
 - The identity, history, wishes and future of the living exhibit and other harmed people.
 - Which researchers or institutional leaders are identified, what they knew, and what accountability the affected people want.
-- The final content of the parents' message and what visibly makes the farm "whole again".
 - The sibling's survival path, role and whether or when the sleeper meets them.
 - How much the player can learn from optional investigations without making them necessary to understand the main story.
 - Which character arcs are implemented in the first playable story slice, and how the broader town-restoration arc interleaves with them.

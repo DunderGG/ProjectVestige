@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1500" height="1280" viewBox="0 0 1500 1280" role="img" aria-labelledby="title description">
 	<title id="title">Parallel family story flow</title>
-	<desc id="description">Family artifacts and memories appear in flexible order, and their emotional weight is independent of the larger political truth. Hob's sealed message is a late, optional personal payoff when an open-ended farm-restoration threshold feels right, and it should not be used to over-explain the wider world. A sibling encounter is a separate optional path; it is not guaranteed by the letter or message.</desc>
+	<desc id="description">Family artifacts and memories appear in flexible order, and their emotional weight is independent of the larger political truth. Hob's late sealed message resolves that the parents stayed to maintain the sleeper's shelter, died after Cinderium exposure, and were laid to rest beneath the old pear tree. Its visible home-restoration threshold is not a completion percentage. A sibling encounter is a separate optional path and is not guaranteed by the message.</desc>
 	<defs>
 		<marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="strokeWidth">
 			<path d="M 0 0 L 10 5 L 0 10 z" fill="#435466"/>
@@ -37,38 +37,38 @@
 	<text text-anchor="middle" x="750" y="106">
 		<tspan class="title">FAMILY TRACES BEGIN WITH OPENING RESTORATION</tspan>
 		<tspan class="copy" x="750" dy="27">Letters, photographs, recordings and Hob's damaged memories</tspan>
-		<tspan class="copy" x="750" dy="21">Can be found in different orders; no single item solves the mystery</tspan>
+		<tspan class="copy" x="750" dy="21">Can be found in different orders; early traces do not give every answer</tspan>
 	</text>
 
 	<rect class="card" x="420" y="245" width="660" height="145" rx="12"/>
 	<text text-anchor="middle" x="750" y="281">
 		<tspan class="title">F-01 · THE FAMILY IN FRAGMENTS</tspan>
-		<tspan class="copy" x="750" dy="27">Parents stayed above ground and are gone; exactly how or when is unknown</tspan>
+		<tspan class="copy" x="750" dy="27">The player knows the parents are gone; early traces keep the exact fate unclear</tspan>
 		<tspan class="copy" x="750" dy="21">A recovered letter says the sibling was away when the war began</tspan>
 		<tspan class="copy" x="750" dy="21">The sibling may be alive; this lead is not a promise or location</tspan>
 	</text>
 
-	<rect class="open" x="420" y="455" width="660" height="145" rx="12"/>
+	<rect class="card" x="420" y="455" width="660" height="145" rx="12"/>
 	<text text-anchor="middle" x="750" y="491">
-		<tspan class="title">OPEN QUESTION · WHAT MAKES THE FARM “WHOLE AGAIN”?</tspan>
-		<tspan class="copy" x="750" dy="27">Hob keeps the parents' sealed message until the farm feels safe enough to open it</tspan>
-		<tspan class="copy" x="750" dy="21">The exact threshold and message content remain undecided</tspan>
-		<tspan class="copy" x="750" dy="21">Do not turn this into a hidden completion percentage</tspan>
+		<tspan class="title">DELIVERY CONDITION · A HOME MADE WHOLE</tspan>
+		<tspan class="copy" x="750" dy="27">Weather-safe house, clean water, a food garden, and Hob's freely chosen future</tspan>
+		<tspan class="copy" x="750" dy="21">Visible milestones, not a hidden completion percentage</tspan>
+		<tspan class="copy" x="750" dy="21">Town completion and faction progress are not required</tspan>
 	</text>
 
-	<rect class="optional" x="420" y="665" width="660" height="115" rx="12"/>
+	<rect class="card" x="420" y="665" width="660" height="115" rx="12"/>
 	<text text-anchor="middle" x="750" y="702">
 		<tspan class="title">F-02 · HOB'S SEALED MESSAGE · LATE PAYOFF</tspan>
-		<tspan class="copy" x="750" dy="27">Player may read, wait, or ask Hob to read it aloud</tspan>
-		<tspan class="copy" x="750" dy="21">Can be stopped or deferred; no forced reveal</tspan>
+		<tspan class="copy" x="750" dy="27">Player may read, wait, or ask Hob to read it aloud; the letter is shown in full</tspan>
+		<tspan class="copy" x="750" dy="21">It may be deferred; reading reveals the parents' choice and resting place</tspan>
 	</text>
 
 	<rect class="card" x="420" y="850" width="560" height="130" rx="12"/>
 	<text text-anchor="middle" x="700" y="887">
 		<tspan class="title">FAMILY THREAD PAYOFF</tspan>
-		<tspan class="copy" x="700" dy="27">Emotional context from what the parents could know</tspan>
-		<tspan class="copy" x="700" dy="21">Does not settle the parents' full fate, world population</tspan>
-		<tspan class="copy" x="700" dy="21">or the Continuance Trials</tspan>
+		<tspan class="copy" x="700" dy="27">Parents chose to maintain the sleeper's shelter despite the danger</tspan>
+		<tspan class="copy" x="700" dy="21">Hob laid them to rest beneath the old pear tree with the cedar box</tspan>
+		<tspan class="copy" x="700" dy="21">Does not settle world population or the Continuance Trials</tspan>
 	</text>
 
 	<rect class="optional" x="1100" y="850" width="360" height="130" rx="12"/>

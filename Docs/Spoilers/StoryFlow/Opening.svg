@@ -68,7 +68,7 @@
 	<rect class="side" x="50" y="205" width="350" height="100" rx="12"/>
 	<text text-anchor="middle" x="225" y="241">
 		<tspan class="title">O-05 · FIRST FAMILY TRACE</tspan>
-		<tspan class="copy" x="225" dy="28">An ordinary object; parents' fate stays unknown</tspan>
+		<tspan class="copy" x="225" dy="28">An ordinary object; the parents' fate is still unknown to the player</tspan>
 		<tspan class="copy" x="225" dy="21">Can surface during restoration; player may defer</tspan>
 	</text>
 

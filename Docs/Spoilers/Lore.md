@@ -261,8 +261,9 @@ Three pre-war companies made most of the robots still running. Each has its own 
 
 ### What happened to the family
 
-- It is a mystery the player uncovers over the whole game, through letters, recordings, photographs and the caretaker's patchy memory, found on the farm and in the wasteland.
-- What is fixed: the parents stayed above ground, and they are gone. Whether they died on the farm, left for a shelter or went looking for a second pod is told piece by piece.
+- It is a mystery the player uncovers over the whole game, through letters, recordings, photographs and the caretaker's patchy memory, found on the farm and in the wasteland. Early traces establish only that the parents stayed above ground and are gone.
+- **Confirmed history:** After the Four Days, the parents kept the farm's water, power and shelter working rather than risk the contaminated roads in search of another pod or shelter. Repeated Cinderium exposure made them fatally ill. Knowing they would not recover, they wrote a joint message asking Hob to deliver it when the farm was a safe home again. After they died, Hob laid them to rest together beneath the old pear tree at the edge of the garden and buried their cedar box of keepsakes at its roots.
+- The message is the family's emotional closure, not a debt: the parents chose to stay, did not ask the sleeper to preserve the farm unchanged, and wanted the sleeper to make a living home of it. The player learns the exact fate and resting place at the late message scene, while the sibling remains a separate question.
 - **Optional story thread:** a sibling who was away when the war started may still be alive as one of the [humans](#humans).
 
 ## 10. Characters
@@ -340,6 +341,7 @@ Newest first. Add an entry whenever a lore choice is made or reversed. Never del
 
 | Date | Decision | Why |
 |---|---|---|
+| 2026-11-09 | The sleeper's parents stayed at the farm after the Four Days, became fatally ill through repeated Cinderium exposure while maintaining its shelter, and died there; Hob laid them to rest beneath the old pear tree with their cedar box of keepsakes | Gives the family mystery a truthful, intimate ending. The parents' message can explain their informed choice and burial wish, while Hob confirms what happened afterward without making the message predict the future. |
 | 2026-10-30 | The Iron Creed's frame-conversion researchers drew on its strength-and-readiness ideals, but their affiliation with the dominationist current is unknown; any response follows the harmed people's wishes | Keeps their stated survival rationale distinct from the anti-human radicals' ideology and makes Gage's role supportive rather than taking control of survivors' choices |
 | 2026-10-30 | In-world chronology is expressed relative to the Four Days; the exact current year, including the current Continuance year, is unspecified | Keeps dates useful for story continuity without fixing an absolute calendar year for the setting |
 | 2026-10-30 | Gage's formative turbine accident happened roughly five and a half decades after the war, after the Iron Creed and Bastion had formed | Places his early Bastion service within the established post-war timeline while keeping the accident formative to his maintenance ethic |
@@ -388,5 +390,4 @@ Newest first. Add an entry whenever a lore choice is made or reversed. Never del
 - **The Index archivist:** their name and model.
 - **The nomad:** their name, gender and pronouns, and which circuit contacts become named on-screen characters.
 - **Whether Wellspring is the final town name**, along with the region's name, the world's name and the game title (shared with GameDesign).
-- **The sealed message:** what the parents' message says.
 - **The sibling:** their role, survival path, and when or whether the player meets them.

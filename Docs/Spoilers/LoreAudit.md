@@ -112,6 +112,8 @@ Hob has a last order, history and story beat. The administrator, clinic robot an
 
 **Severity: Medium**
 
+**Status: Resolved (2026-11-09).** The parents' fate and message are now canonical, and `F-02` makes its delivery condition visible: a weather-safe house, clean water, a food-producing garden, and Hob's freely chosen future alongside the sleeper.
+
 The parents' fate is described as a mystery uncovered through letters, recordings, photographs and Hob's recovering memories. Hob has a sealed message that is delivered only “when the farm is whole again,” but the content is an open question and “whole” has no defined threshold.
 
 **Why it matters:** This is the sleeper's central personal mystery and a late-game promise, yet the condition for revealing it could become an arbitrary completion gate. If restoration is open-ended or the player does not understand what “whole” means, the story may withhold its emotional payoff indefinitely.
@@ -164,7 +166,7 @@ The file correctly marks many names as working names, but also uses them through
 1. [x] Separate established fact from faction belief and propaganda (L-01; resolved 2026-10-27).
 2. [x] Define the fictional rules of Cinderium dust, radiation and land recovery (L-02; resolved 2026-10-27).
 3. [x] Explain infrastructure failure and Hob's maintenance limits (L-03; resolved 2026-10-27). Reconcile Hob's order and the town's crisis (L-04; resolved 2026-10-27).
-4. [ ] **L-07 partially addressed:** Character sheets outline the engineer's and archivist's arcs; implement and validate a complete arc once a playable story slice exists, and develop other characters as they become planned content. Clarify the sleeper's agency (L-10) and the family mystery payoff (L-08).
+4. [ ] **L-07 partially addressed:** Character sheets outline the engineer's and archivist's arcs; implement and validate a complete arc once a playable story slice exists, and develop other characters as they become planned content. Clarify the sleeper's agency (L-10).
 5. [x] Set the human cast target and define why encounters are rare while global numbers remain unknown (L-05; resolved 2026-10-27). Define faction institutions and membership (L-06; resolved 2026-10-27). [ ] Add shared tone guidance before expanding the cast (L-09; partially addressed by faction-specific safeguards).
 6. Establish a working-name and stable-ID policy before terms become content or save data (L-11).
 
@@ -242,7 +244,7 @@ In [Engineer.md](Characters/Engineer.md), the arc summary says Gage chooses caut
 
 **Severity: High**
 
-**Status: Partially addressed (2026-10-30).** The new [StoryTimeline.md](StoryTimeline.md) establishes provisional early, middle and late phases, emotional pacing, knowledge guardrails, optionality and the parallel family thread. Exact quest prerequisites, survivor identities and wishes, and the final family-message payoff remain open until a playable story slice defines them.
+**Status: Partially addressed (2026-10-30; updated 2026-11-09).** The new [StoryTimeline.md](StoryTimeline.md) establishes provisional early, middle and late phases, emotional pacing, knowledge guardrails, optionality and the parallel family thread. Exact quest prerequisites, survivor identities and wishes remain open; the final family-message payoff is now resolved in L-22.
 
 [Lore.md](Lore.md) says the Continuance Trials become hard to deny in the middle of the story, and the faction sheets describe optional investigation areas such as the Frame Conversion Wing and Cognitive Wing. The documents do not establish when the player first encounters these subjects, how early clues differ from later evidence, or how the reveals fit the opening's cozy farming and relationship experience. The [Gage sheet](Characters/Engineer.md) also introduces the frame-conversion investigation as a hub hook without a clear story-stage boundary.
 
@@ -250,10 +252,10 @@ In [Engineer.md](Characters/Engineer.md), the arc summary says Gage chooses caut
 
 **Recommended change:** Treat discovery of the darker history as a long-term story goal. Keep the opening light and cozy, then let gameplay gradually complicate that impression through notes, recordings and other contextual clues before any full reveal. Set up a story-event timeline soon: identify the early, middle and late-game emotional tone; place the first hints, corroborating evidence and full disclosures; define the prerequisites and optionality of each reveal; and track what the player and characters know at each stage. The timeline should coordinate the frame conversions, cognitive integrations, living exhibit, family mystery and other major revelations without requiring every player to pursue every optional investigation.
 
-### Previous findings still open
+### Previous findings
 
 - **L-07 — Partially addressed:** Faction and character sheets now provide substantially more writing direction; implementation and playtesting of a complete arc, and development of the remaining planned cast, are still outstanding.
-- **L-08 — Open:** The parents' message and the observable threshold for the farm being “whole again” remain undecided.
+- **L-08 — Resolved (2026-11-09):** The parents' message, their fate, and the visible threshold for the farm being whole are now canonical in the family thread.
 - **L-09 — Partially addressed:** The faction sheets' trial-specific safeguards do not yet establish shared tone rules for humor and other dark material.
 - **L-10 — Open:** The sleeper's personal wants, initial assumptions and player-expressed growth remain less defined than the surrounding characters' views of them.
 - **L-11 — Open:** Working names remain in use and there is still no concise policy distinguishing changeable display names from stable, save-facing IDs.
@@ -269,11 +271,11 @@ In [Engineer.md](Characters/Engineer.md), the arc summary says Gage chooses caut
 
 **Overall: 6/10.** The narrative architecture has expanded substantially since October 30. Having a structured six-phase progression, visual story flow diagrams, character sheets with schedules and item affinities, and complete draft dialogue for all phases represents genuine progress. The thematic spine—mutual care, post-war interdependence, and accountability—remains strong.
 
-However, the assumption that "all findings have been fixed" is not supported by the documents. Several core narrative findings from the first review (L-08, L-10, L-11) remain open, and L-07, L-09, and L-17 are only partially addressed. More critically, the recent additions introduce serious new defects:
+However, the assumption that "all findings have been fixed" is not supported by the documents. Core narrative findings L-10 and L-11 remain open, and L-07, L-09, and L-17 are only partially addressed. More critically, the recent additions introduce serious new defects:
 1. **Core pillar violation:** Faction hub unlocks and relationship progression in character sheets have adopted a transactional 10-tier "Heart" and gift-optimization system that directly violates [GameDesign.md](../GameDesign.md)'s explicit pillars.
 2. **Branch regression:** A key branching outcome (Gage's pressure test) that was previously resolved has been flattened into a single canonical branch in the dialogue drafts, resurrecting L-13.
 3. **Dialogue voice flattening:** Spoken dialogue across all characters has been homogenized into didactic, procedural disclaimers about consent, agency, and boundaries, stripping characters of their distinct post-war voices, flaws, and grit.
-4. **Narrative vacuum at the climax:** The central mystery of the sleeper's parents and their sealed message remains intentionally unwritten, delivering an anticlimax in Phase 6.
+4. **Narrative vacuum at the climax:** Resolved after this audit as L-22. The parents' fate, the readable sealed message, and an observable delivery threshold are now canonical.
 
 ### Status of previous findings
 
@@ -286,7 +288,7 @@ However, the assumption that "all findings have been fixed" is not supported by 
 | **L-05** (Human population scale) | Medium | **Resolved** | 4–6 survivor target and global census uncertainty maintained. |
 | **L-06** (Faction social structure) | Medium | **Resolved** | Faction institutions and internal disputes well established. |
 | **L-07** (Playable character arcs) | High | **Partially addressed / Stalled** | Detailed sheets exist for Hob, Gage, Cleo, and Nomad, but the sibling, living exhibit, and town residents remain one-line hooks. No arc is implemented or tested in a playable build. |
-| **L-08** (Family mystery & sealed message) | Medium | **Open** | Explicitly unwritten in [Lore.md](Lore.md) (line 391), [Hob.md](Characters/Hob.md) (line 34), [StoryTimeline.md](StoryTimeline.md) (line 316), and [Phase-06-Family.md](Dialogue/Phase-06-Family.md) (lines 3, 42). See L-22. |
+| **L-08** (Family mystery & sealed message) | Medium | **Resolved (2026-11-09)** | The parents' fate, readable message and visible delivery condition are defined in [Lore.md](Lore.md), [Hob.md](Characters/Hob.md), [StoryTimeline.md](StoryTimeline.md), and `F-02`. See L-22. |
 | **L-09** (Tone guidance for dark material) | Medium | **Partially addressed** | Faction safeguards protect trial subjects, but [Lore.md](Lore.md) still lacks shared tone rules balancing dark themes with absurd pre-war corporate satire and comic relief. |
 | **L-10** (Sleeper identity and agency) | Medium | **Open** | The sleeper remains a blank slate who mostly prompts NPCs with procedural questions. No distinct pre-war attachments, personal wants, or emotional choices are defined. |
 | **L-11** (Working names and stable IDs) | Low | **Open** | Names marked *(working name)* persist throughout. Content ID conventions diverge between `Base.Character.<Name>` and `Base.<Name>`. See L-24. |
@@ -304,6 +306,7 @@ However, the assumption that "all findings have been fixed" is not supported by 
 ### L-18 — Faction hub unlocking mechanics directly violate GameDesign.md core pillars
 
 **Severity: High**
+
 **Status: Resolved (2026-11-09).** [Engineer.md](Characters/Engineer.md), [Archivist.md](Characters/Archivist.md), and [Nomad.md](Characters/Nomad.md) now decouple hub access, route progression, and relationship stages from numeric heart/gift grinding. Major milestones and hub invitations are anchored to concrete narrative achievements:
 - **The Bastion:** Unlocked after completing the manifold pressure test and submitting Gage's joint report to Bastion High Command.
 - **The Archive:** Unlocked after completing the pod record verification and establishing a shared agreement with Cleo over community privacy boundaries.
@@ -394,7 +397,9 @@ There is significant drift and duplication between the key narrative events desi
 
 **Severity: High**
 
-In [Lore.md](Lore.md) section 8 and [Hob.md](Characters/Hob.md), the sleeper's central personal arc is uncovering what happened to their parents, culminating in Hob delivering a sealed message left by the parents "when the farm is whole again."
+**Status: Resolved (2026-11-09).** The parents' canonical fate is now that they remained at the farm to maintain the sleeper's shelter, became fatally ill through repeated Cinderium exposure, and died there. Their readable message explains that choice and burial wish; Hob confirms it laid them to rest beneath the old pear tree with their cedar box of keepsakes. The visible delivery condition is a weather-safe farmhouse, clean water, a food-producing garden, and Hob's freely chosen future alongside the sleeper. The sibling, global population and Continuance Trials remain separate questions.
+
+In [Lore.md](Lore.md) section 9 and [Hob.md](Characters/Hob.md), the sleeper's central personal arc is uncovering what happened to their parents, culminating in Hob delivering a sealed message left by the parents "when the farm is whole again."
 
 In [Dialogue/Phase-06-Family.md](Dialogue/Phase-06-Family.md) scene `F-02`, however, this climax delivers no answers:
 - Hob hands over the message after noting vaguely: *"The house is standing, and the beds are growing. I thought that might be what they meant."*
@@ -448,7 +453,7 @@ The naming convention for game content assets diverges across documents:
 2. **Fix Dialogue Branch Regression (L-19):** Restore branch-specific dialogue in scene `E-05` of [Dialogue/Phase-02-Early.md](Dialogue/Phase-02-Early.md) to preserve the player's pressure-test choices from L-13.
 3. **Re-voice and De-sanitize Dialogue Drafts (L-20):** Revise spoken lines across Phases 2–6 to restore character-specific voices, humor, grit, and mechanical flavor, stripping out repetitive institutional compliance jargon.
 4. **Reconcile Scene Divergence and Duplication (L-21):** Align Cleo's Event 1 in `E-07` with [Archivist.md](Characters/Archivist.md), and remove the redundant farm agreement from `E-08` so `T-03` remains the true milestone.
-5. **Author the Parents' Message and Fate (L-08, L-22):** Decide the parents' actual fate and write the emotional substance of their sealed message in `F-02` so the Phase 6 climax delivers real narrative closure.
+5. [x] **Author the Parents' Message and Fate (L-08, L-22):** Defined the parents' fate and a full readable message in `F-02`, with a visible delivery condition and Hob's confirmation of their resting place (resolved 2026-11-09).
 6. **Clean Up Canon Discrepancies and IDs (L-23, L-24):** Remove resolved names from [Lore.md](Lore.md) Section 14 and standardize character content IDs to `Base.Character.<Name>`.
 
 ### Review limits
