@@ -418,7 +418,9 @@ And the scene abruptly ends. The parents' actual fate—how they died, whether t
 
 **Severity: Low**
 
-In [Lore.md](Lore.md) section 14 (Open questions, lines 387–388), the following are still listed as unresolved:
+**Status: Resolved (2026-11-09).** Removed the already established Gage and Cleo names and models from [Lore.md](Lore.md)'s open questions. Their canonical identities remain in the character overview and decision log.
+
+Before this correction, [Lore.md](Lore.md) section 14 (Open questions, lines 387–388) listed the following as unresolved:
 - *"The engineer: their name and model."*
 - *"The Index archivist: their name and model."*
 
@@ -454,7 +456,7 @@ The naming convention for game content assets diverges across documents:
 3. **Re-voice and De-sanitize Dialogue Drafts (L-20):** Revise spoken lines across Phases 2–6 to restore character-specific voices, humor, grit, and mechanical flavor, stripping out repetitive institutional compliance jargon.
 4. **Reconcile Scene Divergence and Duplication (L-21):** Align Cleo's Event 1 in `E-07` with [Archivist.md](Characters/Archivist.md), and remove the redundant farm agreement from `E-08` so `T-03` remains the true milestone.
 5. [x] **Author the Parents' Message and Fate (L-08, L-22):** Defined the parents' fate and a full readable message in `F-02`, with a visible delivery condition and Hob's confirmation of their resting place (resolved 2026-11-09).
-6. **Clean Up Canon Discrepancies and IDs (L-23, L-24):** Remove resolved names from [Lore.md](Lore.md) Section 14 and standardize character content IDs to `Base.Character.<Name>`.
+6. [ ] **Standardize Character Content IDs (L-24):** Adopt `Base.Character.<Name>` or `Base.<Name>` consistently, and document the rule in [CodingGuidelines.md](../CodingGuidelines.md) and [Lore.md](Lore.md). L-23 is resolved.
 
 ### Review limits
 

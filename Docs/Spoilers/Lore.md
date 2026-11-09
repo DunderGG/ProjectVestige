@@ -386,8 +386,6 @@ Newest first. Add an entry whenever a lore choice is made or reversed. Never del
 ## 14. Open questions
 
 - **Final names** for everything marked *(working name)*, in particular the coin, the caretaker and the robot makers.
-- **The engineer:** their name and model.
-- **The Index archivist:** their name and model.
 - **The nomad:** their name, gender and pronouns, and which circuit contacts become named on-screen characters.
 - **Whether Wellspring is the final town name**, along with the region's name, the world's name and the game title (shared with GameDesign).
 - **The sibling:** their role, survival path, and when or whether the player meets them.
