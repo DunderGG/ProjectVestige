@@ -463,3 +463,93 @@ First do roadmap item **Investigate whether `ContentId` should also allow a cate
 ### Review limits
 
 This audit evaluates the internal consistency, character voice, thematic alignment, and pillar compliance across all written lore, dialogue drafts, and design documentation. It does not replace gameplay testing of dialogue flow, UI readability, or player emotional response once scenes are implemented in the engine.
+
+## Follow-up audit (2026-11-10)
+
+**Scope:** Reviewed the current [Lore.md](Lore.md), [StoryTimeline.md](StoryTimeline.md), all character and faction sheets, the dialogue drafts and their index, the story-flow diagrams and their guide, plus the relevant relationship and progression rules in [GameDesign.md](../GameDesign.md). This follow-up records new findings; it does not repeat earlier findings that have already been resolved.
+
+The story bible and character work now make the central themes, knowledge limits and character voices much clearer. The remaining problems are not missing atmosphere: they are specific places where a scene lets someone consent on another person's behalf, a refusal does not actually stop the scene, or two writer-facing references assign different meanings to the same scene label. There are also proposed character rewards that exceed the game's stated progression rules, and one important piece of evidence is more precise than its established source can support.
+
+### L-25 — The farm-stop scene treats a provisional discussion as everyone's consent
+
+**Severity: Medium**
+
+**Status: Open.**
+
+In [Phase-03-Transition.md](Dialogue/Phase-03-Transition.md), scene `T-03`, the Wellspring representative says the assembly must discuss the risks, and Hob says the farm is not theirs alone to offer. The player's “Offer a narrow agreement” choice nevertheless gets the nomad's “Deal” and describes a trade arrangement as settled. The “Ask for a safety plan” choice also sets aside supplies without a clear agreement from Hob, the sleeper or the assembly. No later line in the scene records the assembly's decision or gets Hob's explicit agreement.
+
+[StoryTimeline.md](StoryTimeline.md) and [Nomad.md](Characters/Nomad.md) say the stop requires each affected party's say, and that Wellspring's decision is separate from the farm's. The dialogue currently skips that safeguard at the moment it should demonstrate it.
+
+**Why it matters:** The scene's central relationship promise is that the nomad will not treat hospitality as owed and the sleeper cannot offer other people's consent. As drafted, the player can commit the town and Hob to a public-facing arrangement with one answer. That makes the scene's ethics depend on what the prose says the characters believe, not what the player is allowed to do.
+
+**Recommended change:** Make the meeting agree only on proposed terms, then show Hob's decision and the assembly's decision before the marker, supplies or route-stop status become active. Keep “safety plan” separate from “yes”: a player can ask about contingencies without accepting the stop. If any party declines, the nomad should accept that and the route should remain inactive.
+
+### L-26 — The survivor's “stop” and “no record” choices continue into lines that assume a transcript
+
+**Severity: Medium**
+
+**Status: Open.**
+
+In [Phase-05-Response.md](Dialogue/Phase-05-Response.md), scene `R-02`, the survivor can choose **“Talk without a record”** or **“Stop for now.”** Cleo explicitly agrees to keep the pen away in the first branch and says nothing will go onto paper in the second. The scene then continues into another presence choice and unconditionally gives the survivor the line, “That's all I want written down,” followed by Cleo's promise about burning “every scrap” and keeping carbon rubbings from leaving the valley.
+
+The story-flow guide says refusal and stopping are valid, and [LateResponse.svg](StoryFlow/LateResponse.svg) correctly separates a no-record conversation from the transcript path. The scripted scene does not preserve that distinction.
+
+**Why it matters:** A choice to stop should end the interview, not merely change the next line before the interview resumes. Likewise, a private conversation without a record should not create implied notes or require the survivor to correct an assumption that anything was written. This quietly turns a boundary into participation and weakens the credibility of Cleo's consent arc.
+
+**Recommended change:** End `R-02` immediately when the survivor stops, with no follow-up question. In the no-record branch, keep the conversation and presence choice if desired, but remove every line that implies notes, pages or copies. Reserve transcript review, storage, destruction and any separate permission to share for the transcript branch only.
+
+### L-27 — Story-flow diagrams and the dialogue index assign conflicting scene IDs
+
+**Severity: Medium**
+
+**Status: Open.**
+
+The writer-facing references use scene-like IDs for different material:
+
+- [Early.svg](StoryFlow/Early.svg) labels an optional Bastion-readiness beat `E-06`; the dialogue index assigns `E-06` to **“Evening by the forge,”** and there is no drafted Bastion-readiness scene in that index.
+- [Middle.svg](StoryFlow/Middle.svg) labels beats `M-05`, `M-06` and `M-07`; the dialogue index lists only `M-01` through `M-04`.
+- [LateResponse.svg](StoryFlow/LateResponse.svg) says it covers `R-01` through `R-08` and labels “Possible responses” as `R-04`, while the dialogue index has `R-01` through `R-07` and uses `R-04` for **“Wellspring decides its own limits.”**
+
+[StoryFlow/README.md](StoryFlow/README.md) explains that a drafted beat has a voice-ready scene, but it does not explain that these ID ranges are provisional, reused or intentionally different from the dialogue IDs.
+
+**Why it matters:** Writers and implementers use IDs to find the authoritative version of a scene and to track which branches exist. Reusing an ID for different events can make a diagram appear to point to a script that says something else; unindexed IDs make outline beats look like drafted, approved scenes.
+
+**Recommended change:** Establish one scene-ID index. Reserve IDs for actual scripted scenes and use descriptive, non-ID labels for undrafted outline beats; alternatively, assign the missing beats unique IDs and list them as undrafted in the index. Then reconcile the diagrams, dialogue index and phase files so each ID refers to one event everywhere.
+
+### L-28 — Character-partner rewards exceed the stated relationship progression boundary
+
+**Severity: Medium**
+
+**Status: Open.**
+
+[GameDesign.md](../GameDesign.md) says relationships gate that character's story, recipes, recruiting and romance, “never core machines”; skills provide only small bonuses. The partner rewards in [Engineer.md](Characters/Engineer.md) and [Archivist.md](Characters/Archivist.md) go much further: Gage makes processing machines 15% faster, removes their jam risk, prevents storm damage to farm structures and reduces tool stamina costs by 15%; Cleo increases the charge rate of all farm solar panels and batteries by 10%.
+
+The character sheets present these as concrete benefits of marriage or permanent partnership, not as optional concepts awaiting design approval. Calling the hub facilities “no core tool gates” does not resolve the separate problem: these rewards directly improve core machine, power, storm and tool systems through the relationship track.
+
+**Why it matters:** These bonuses can make romance or marriage feel like an efficiency purchase, contradict the game's stated separation of progression tracks, and promise balance-sensitive mechanics before the tech tree, skills and farm systems have defined their limits.
+
+**Recommended change:** Keep relationship rewards focused on the character's story, recipes, recruitment and nonessential content. If a mechanical benefit is desired, route it through the appropriate progression track and keep it modest, or clearly mark it as an unapproved proposal until the design is reconciled. Check the other character sheets for similar system-wide bonuses.
+
+### L-29 — Cleo's pod-telemetry deduction asserts a measurement the lore has not established
+
+**Severity: Low**
+
+**Status: Open.**
+
+In [Phase-02-Early.md](Dialogue/Phase-02-Early.md), scene `E-07`, Cleo says the sleeper's home cryo pod contains “seventy years of utility and suspension telemetry” and that it “would show exactly when municipal pressure dropped before the Four Days.” [Lore.md](Lore.md) establishes the pod's suspension and all-clear behavior, but does not establish that it measured municipal water pressure, was connected to that network, or could retain and date that external data for seventy years. The character-sheet request describes access to pod diagnostics, but does not establish those additional sensors or records either.
+
+**Why it matters:** Cleo presents a specific conclusion as if the pod's data can prove it. Without a stated sensor or source, a reader cannot tell whether this is sound evidence, an inference, or a new piece of technology introduced only to make the scene work. That also risks making her careful distinction between observation and interpretation feel arbitrary.
+
+**Recommended change:** Specify which utility inputs the pod monitored, how the telemetry survived, and what the readings can actually establish. If it only records the pod's own power or suspension state, let Cleo treat it as a lead to compare with municipal records rather than proof of when town pressure changed.
+
+## Follow-up correction order
+
+1. **L-25 and L-26:** Make the route-stop and survivor-record scenes honor the consent choices they offer.
+2. **L-27:** Reconcile the scene IDs across the flow diagrams and dialogue index before using them to plan implementation.
+3. **L-28:** Bring relationship rewards back within the progression boundaries in [GameDesign.md](../GameDesign.md), or explicitly mark them as proposals for design review.
+4. **L-29:** Define the pod telemetry source or soften Cleo's conclusion to match the evidence.
+5. **L-24 remains open:** Standardize character content IDs after investigating the category-segment question noted in the previous follow-up.
+
+## Review limits
+
+This is a writer-facing consistency and design-alignment review, not a line edit, technical validation of fictional science, or test of implemented dialogue. The flow diagrams and drafts are provisional; the findings identify where that provisional status is not clear enough for contributors to distinguish an outline from an approved scene.
