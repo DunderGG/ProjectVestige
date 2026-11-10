@@ -536,20 +536,20 @@ The character sheets present these as concrete benefits of marriage or permanent
 
 **Severity: Low**
 
-**Status: Open.**
+**Status: Resolved (2026-11-10).** Revised E-07 in [Phase-02-Early.md](Dialogue/Phase-02-Early.md) so Cleo asks whether the pod retained logs of its own suspension and utility status. She now treats any surviving timestamps as material to compare with station records and the family's rationing account, and explicitly says they cannot directly establish municipal pressure. Aligned Cleo's request in [Archivist.md](Characters/Archivist.md) with the same evidentiary limits; no unestablished sensor or seventy-year data-retention capability is added.
 
 In [Phase-02-Early.md](Dialogue/Phase-02-Early.md), scene `E-07`, Cleo says the sleeper's home cryo pod contains “seventy years of utility and suspension telemetry” and that it “would show exactly when municipal pressure dropped before the Four Days.” [Lore.md](Lore.md) establishes the pod's suspension and all-clear behavior, but does not establish that it measured municipal water pressure, was connected to that network, or could retain and date that external data for seventy years. The character-sheet request describes access to pod diagnostics, but does not establish those additional sensors or records either.
 
 **Why it matters:** Cleo presents a specific conclusion as if the pod's data can prove it. Without a stated sensor or source, a reader cannot tell whether this is sound evidence, an inference, or a new piece of technology introduced only to make the scene work. That also risks making her careful distinction between observation and interpretation feel arbitrary.
 
-**Recommended change:** Specify which utility inputs the pod monitored, how the telemetry survived, and what the readings can actually establish. If it only records the pod's own power or suspension state, let Cleo treat it as a lead to compare with municipal records rather than proof of when town pressure changed.
+**Correction made:** Cleo now treats the pod's potential logs as a possible lead, not direct proof of a municipal pressure drop. The scene leaves whether the pod retained logs unresolved and does not invent an external pressure sensor or guarantee that records survived for seventy years.
 
 ## Follow-up correction order
 
 1. **L-25 remains open:** Make the route-stop scene honor each affected party's consent. [L-26 is resolved (2026-11-10).](#l-26--the-survivors-stop-and-no-record-choices-continue-into-lines-that-assume-a-transcript)
 2. [x] **L-27 — Scene IDs:** Reconciled the phase diagrams with the dialogue index and documented the ID rule (resolved 2026-11-10).
 3. [x] **L-28 — Relationship rewards:** Removed system-wide partner buffs and clarified the progression boundary in [GameDesign.md](../GameDesign.md) (resolved 2026-11-10).
-4. **L-29:** Define the pod telemetry source or soften Cleo's conclusion to match the evidence.
+4. [x] **L-29 — Pod telemetry:** Limited Cleo's claim to potential pod logs that require comparison with independent evidence (resolved 2026-11-10).
 5. **L-24 remains open:** Standardize character content IDs after investigating the category-segment question noted in the previous follow-up.
 
 ## Review limits

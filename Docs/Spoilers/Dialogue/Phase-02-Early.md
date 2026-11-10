@@ -183,7 +183,7 @@
 ## E-07 - Cleo's request and pod telemetry
 
 **Placement:** Aquifer Pumping Station exterior. Cleo is scanning an exposed intake pipe with her optical turret.
-**Knowledge:** Cleo discovers an 84% discrepancy between pre-war Civitas blueprints and the actual manifold, and asks to examine the sleeper's pod telemetry.
+**Knowledge:** Cleo discovers an 84% discrepancy between pre-war Civitas blueprints and the actual manifold. She asks whether the sleeper will let her check for the pod's own suspension and utility logs, which might be compared with station records and the family's rationing account.
 
 **CLEO:** Ah. Citizen—forgive me, my indexing subroutines default to pre-war civic designations. Your timing is fortuitous.
 
@@ -193,9 +193,9 @@
 
 **PLAYER:** You think the blueprint was wrong?
 
-**CLEO:** Blueprints record intentions; physical metal records what people actually built when supplies ran short. Your Hearthwell home cryo-pod holds seventy years of utility and suspension telemetry. Those logs would show exactly when municipal pressure dropped before the Four Days.
+**CLEO:** Blueprints record intentions; physical metal records what people actually built when supplies ran short. Your Hearthwell pod may have kept logs of its own suspension and utility status. If any survived, their timestamps might help us compare the pod's operation with this station's records and your family's rationing cards. They could not tell us municipal pressure directly.
 
-**CLEO:** I would like to scan those technical logs. And... if you are willing, I would like to ask about your family's water-rationing cards from that final month.
+**CLEO:** I would like to check whether those technical logs survived. And... if you are willing, I would like to ask about your family's water-rationing cards from that final month.
 
 **PLAYER:** That sounds personal.
 
@@ -203,9 +203,9 @@
 
 **PLAYER - CHOICES**
 
-- **[Technical diagnostics only]** "You may read the pod's technical logs, but my family's rationing cards stay private. I'll review any excerpt before you share it."
+- **[Technical diagnostics only]** "You may check for the pod's technical logs, but my family's rationing cards stay private. I'll review any excerpt before you share it."
   - **CLEO:** Understood: technical logs only. I will not examine personal memories or family cards. You may withdraw or narrow that permission at any time, and Archive copies will be removed upon request.
-- **[Technical logs and interview]** "You can scan the pod telemetry and ask about the rationing cards. But I inspect the exact excerpt before it leaves this valley."
+- **[Technical logs and interview]** "You can check for the pod's technical logs and ask about the rationing cards. But I inspect the exact excerpt before it leaves this valley."
   - **CLEO:** Agreed. Word for word under your own lamp. Lived human memory gives weight to numbers that otherwise remain cold.
 - **[Refusal]** "No. Don't scan my pod, and don't dig into my family's records."
   - **CLEO:** *(Steps back, her optical visor dimming fractionally as she caps her stylus.)* Understood. I will rely on ground-penetrating radar. Your boundary is recorded without judgment.
