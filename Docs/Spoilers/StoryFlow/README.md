@@ -8,6 +8,8 @@ The most important rule for this folder is emotional causality: every beat shoul
 
 “Drafted” means a voice-ready scene draft exists; it does not mean the scene, branch or quest is implemented. Optional and undecided story material is labeled as such rather than drawn as required content.
 
+Numbered scene labels in a phase diagram refer to the matching scene in the [dialogue index](../Dialogue/README.md). A beat without a scene ID is an outline or relationship between scenes, not a separate drafted scene. Do not assign a dialogue ID to an outline-only beat; add a scene to the dialogue index first if it is drafted.
+
 ## Legend and reading guide
 
 The colors describe the **role of a box in that diagram**, not implementation status, quest completion, or a required player choice. Read the label inside each box for its specific meaning.

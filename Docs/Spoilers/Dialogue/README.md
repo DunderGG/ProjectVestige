@@ -14,6 +14,7 @@ The six phase files follow the timeline's story order. Each scene has a stable d
 - Choices can differ in tone or boundary without changing facts the scene has established. Mark consequence branches explicitly.
 - Treat consent to care, an interview, recordkeeping, sharing, or confrontation as separate decisions. Refusal and silence are valid.
 - A choice to stop ends the scene; do not follow it with another question or a request to reconsider. A no-record choice creates no transcript, notes, or recording and must not flow into review, storage, or sharing.
+- Keep each scene ID unique and use the same ID only for that scene in the phase diagram. Outline-only beats do not receive dialogue IDs.
 - The identity and wishes of the living exhibit, other possible survivors, and the sibling's path are undecided. Drafts leave those details open; the parents' fate and sealed message are established in the Phase 6 family thread.
 - Use only relative references to the Four Days; do not state an absolute in-world year.
 - Do not read faction membership as proof of knowledge or guilt. The Index's cognitive integrations and Iron Creed's frame conversions are separate programs.

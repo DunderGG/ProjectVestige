@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1840" viewBox="0 0 1800 1840" role="img" aria-labelledby="title description">
 	<title id="title">Early story flow by independent downward story lane</title>
-	<desc id="description">Eleven drafted early scenes are grouped into six independent story lanes. Each lane reads from top to bottom. Gage's inspection, repair test and report form one arc, followed by optional Bastion readiness after route access. Cleo's records work and the nomad's route visits have their own downward progression. The first clinic irregularity is ambiguous and stays unresolved until corroborated; it should not feel like a solved secret.</desc>
+	<desc id="description">Eleven drafted early scenes are grouped into six independent story lanes. Each lane reads from top to bottom. Gage's inspection, repair test, report and evening conversation form one arc, followed by an optional, undrafted Bastion-readiness outline beat after route access. Cleo's records work and the nomad's route visits have their own downward progression. The first clinic irregularity is ambiguous and stays unresolved until corroborated; it should not feel like a solved secret.</desc>
 	<defs>
 		<marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="strokeWidth">
 			<path d="M 0 0 L 10 5 L 0 10 z" fill="#435466"/>
@@ -59,7 +59,8 @@
 	<text class="lane-title" x="1235" y="98">Gage and the Iron Creed</text>
 	<path class="path" d="M 1490 250 V 285"/>
 	<path class="path" d="M 1490 470 V 505"/>
-	<path class="branch" d="M 1490 645 V 680"/>
+	<path class="path" d="M 1490 595 V 610"/>
+	<path class="branch" d="M 1490 700 V 715"/>
 	<rect class="card" x="1245" y="125" width="490" height="125" rx="10"/>
 	<text text-anchor="middle" x="1490" y="159">
 		<tspan class="title">E-03 · INSPECTION</tspan>
@@ -75,19 +76,21 @@
 		<tspan class="copy" x="1490" dy="20">Stepped bleed-down → no new damage</tspan>
 		<tspan class="copy" x="1490" dy="20">Chosen consequence carries into the report</tspan>
 	</text>
-	<rect class="card" x="1245" y="505" width="490" height="140" rx="10"/>
-	<text text-anchor="middle" x="1490" y="540">
+	<rect class="card" x="1245" y="505" width="490" height="90" rx="10"/>
+	<text text-anchor="middle" x="1490" y="535">
 		<tspan class="title">E-05 · GAGE'S REPORT</tspan>
-		<tspan class="copy" x="1490" dy="25">Gage owns his past failure</tspan>
-		<tspan class="copy" x="1490" dy="20">Report reflects the actual test outcome</tspan>
-		<tspan class="copy" x="1490" dy="20">He may request a route; Bastion decides</tspan>
+		<tspan class="copy" x="1490" dy="25">Past failure, honest report and route pass</tspan>
 	</text>
-	<rect class="optional" x="1245" y="680" width="490" height="100" rx="10"/>
-	<text text-anchor="middle" x="1490" y="715">
-		<tspan class="title">E-06 · BASTION READINESS · OPTIONAL</tspan>
-		<tspan class="copy" x="1490" dy="25">Only after route access; threat and outcome open</tspan>
+	<rect class="card" x="1245" y="610" width="490" height="90" rx="10"/>
+	<text text-anchor="middle" x="1490" y="640">
+		<tspan class="title">E-06 · EVENING BY THE FORGE</tspan>
+		<tspan class="copy" x="1490" dy="25">Gage reflects; the player chooses romance or friendship</tspan>
 	</text>
-	<text class="small" x="1490" y="666" text-anchor="middle">after route is granted</text>
+	<rect class="optional" x="1245" y="715" width="490" height="85" rx="10"/>
+	<text text-anchor="middle" x="1490" y="745">
+		<tspan class="title">OPTIONAL BASTION READINESS · OUTLINE ONLY</tspan>
+		<tspan class="copy" x="1490" dy="25">After route access; threat and outcome remain open</tspan>
+	</text>
 
 	<rect class="lane" x="35" y="850" width="550" height="750" rx="14"/>
 	<text class="lane-title" x="55" y="883">Cleo and the Index</text>
@@ -127,11 +130,10 @@
 	<path class="path" d="M 900 1095 V 1130"/>
 	<rect class="card" x="655" y="915" width="490" height="180" rx="10"/>
 	<text text-anchor="middle" x="900" y="949">
-		<tspan class="title">E-08 · FIRST AGREEMENT</tspan>
-		<tspan class="copy" x="900" dy="25">Keep the weather tube dry and sealed</tspan>
-		<tspan class="copy" x="900" dy="20">Player may accept or decline freely</tspan>
-		<tspan class="copy" x="900" dy="20">No names or destinations inside</tspan>
-		<tspan class="copy" x="900" dy="20">Trust is limited to this small agreement</tspan>
+		<tspan class="title">E-08 · FIRST ARRIVAL AND TRADE</tspan>
+		<tspan class="copy" x="900" dy="25">Meet the nomad and set fair trade terms</tspan>
+		<tspan class="copy" x="900" dy="20">Personal questions and route details stay private</tspan>
+		<tspan class="copy" x="900" dy="20">No farm-stop agreement is made here</tspan>
 	</text>
 	<rect class="card" x="655" y="1130" width="490" height="165" rx="10"/>
 	<text text-anchor="middle" x="900" y="1165">

@@ -504,7 +504,7 @@ The story-flow guide says refusal and stopping are valid, and [LateResponse.svg]
 
 **Severity: Medium**
 
-**Status: Open.**
+**Status: Resolved (2026-11-10).** Aligned the [Early](StoryFlow/Early.svg), [Middle](StoryFlow/Middle.svg) and [Late response](StoryFlow/LateResponse.svg) diagrams with the scene IDs and titles in [Dialogue/README.md](Dialogue/README.md): the forge scene is now E-06, undrafted outline beats are unnumbered, and the M- and R-phase labels point to the matching drafted scenes. Added the shared ID rule to [StoryFlow/README.md](StoryFlow/README.md) and [Dialogue/README.md](Dialogue/README.md).
 
 The writer-facing references use scene-like IDs for different material:
 
@@ -516,7 +516,7 @@ The writer-facing references use scene-like IDs for different material:
 
 **Why it matters:** Writers and implementers use IDs to find the authoritative version of a scene and to track which branches exist. Reusing an ID for different events can make a diagram appear to point to a script that says something else; unindexed IDs make outline beats look like drafted, approved scenes.
 
-**Recommended change:** Establish one scene-ID index. Reserve IDs for actual scripted scenes and use descriptive, non-ID labels for undrafted outline beats; alternatively, assign the missing beats unique IDs and list them as undrafted in the index. Then reconcile the diagrams, dialogue index and phase files so each ID refers to one event everywhere.
+**Correction made:** The dialogue index remains the source of truth for scene IDs. Diagrams now use those IDs only for the corresponding drafted scenes and descriptive labels for outline-only beats.
 
 ### L-28 — Character-partner rewards exceed the stated relationship progression boundary
 
@@ -547,7 +547,7 @@ In [Phase-02-Early.md](Dialogue/Phase-02-Early.md), scene `E-07`, Cleo says the 
 ## Follow-up correction order
 
 1. **L-25 remains open:** Make the route-stop scene honor each affected party's consent. [L-26 is resolved (2026-11-10).](#l-26--the-survivors-stop-and-no-record-choices-continue-into-lines-that-assume-a-transcript)
-2. **L-27:** Reconcile the scene IDs across the flow diagrams and dialogue index before using them to plan implementation.
+2. [x] **L-27 — Scene IDs:** Reconciled the phase diagrams with the dialogue index and documented the ID rule (resolved 2026-11-10).
 3. **L-28:** Bring relationship rewards back within the progression boundaries in [GameDesign.md](../GameDesign.md), or explicitly mark them as proposals for design review.
 4. **L-29:** Define the pod telemetry source or soften Cleo's conclusion to match the evidence.
 5. **L-24 remains open:** Standardize character content IDs after investigating the category-segment question noted in the previous follow-up.
