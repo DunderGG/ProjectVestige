@@ -81,34 +81,34 @@
 	<rect class="card" x="485" y="285" width="390" height="145" rx="10"/>
 	<text text-anchor="middle" x="680" y="319">
 		<tspan class="title">R-02 · CHOOSE WHETHER TO SPEAK</tspan>
-		<tspan class="copy" x="680" dy="24">Talk without a record</tspan>
-		<tspan class="copy" x="680" dy="19">Approve a transcript · or stop today</tspan>
-		<tspan class="copy" x="680" dy="19">Choose who may be present</tspan>
-	</text>
+		<tspan class="copy" x="680" dy="24">Choose who may be present:</tspan>
+		<tspan class="copy" x="680" dy="19">no record · private transcript · or stop</tspan>
+		<tspan class="copy" x="680" dy="19">Stop ends now; no-record means no notes</tspan>
+		<tspan class="copy" x="680" dy="19">or copies and skips transcript review</tspan>
+		</text>
 	<path class="branch" d="M 680 430 V 470"/>
-	<text class="small" x="700" y="455">if transcript is chosen</text>
+		<text class="small" x="700" y="455">only if transcript is chosen</text>
 	<rect class="optional" x="485" y="470" width="390" height="150" rx="10"/>
 	<text text-anchor="middle" x="680" y="505">
-		<tspan class="title">ONLY IF TRANSCRIPT IS CHOSEN</tspan>
-		<tspan class="copy" x="680" dy="24">Survivor defines exact scope and exclusions</tspan>
-		<tspan class="copy" x="680" dy="19">Survivor reviews what Cleo will keep</tspan>
-		<tspan class="copy" x="680" dy="19">No gap is filled in by inference</tspan>
+		<tspan class="title">PRIVATE TRANSCRIPT · ONLY IF CHOSEN</tspan>
+		<tspan class="copy" x="680" dy="24">Survivor sets scope and reviews exact wording</tspan>
+		<tspan class="copy" x="680" dy="19">Correct or destroy if the wording is wrong</tspan>
+		<tspan class="copy" x="680" dy="19">Approval to keep is a separate choice</tspan>
 	</text>
 	<path class="branch" d="M 680 620 V 660"/>
 	<rect class="card" x="485" y="660" width="390" height="170" rx="10"/>
-	<text text-anchor="middle" x="680" y="695">
-		<tspan class="title">ARCHIVE PERMISSION IS A NEW CHOICE</tspan>
-		<tspan class="copy" x="680" dy="24">Keep record private</tspan>
-		<tspan class="copy" x="680" dy="19">Share only an approved, possibly redacted excerpt</tspan>
-		<tspan class="copy" x="680" dy="19">Withdraw permission; remove Cleo's copy</tspan>
-		<tspan class="copy" x="680" dy="19">Nothing is sent without asking again</tspan>
-	</text>
+		<text text-anchor="middle" x="680" y="695">
+		<tspan class="title">KEEP OR DESTROY? · AFTER REVIEW</tspan>
+		<tspan class="copy" x="680" dy="24">Survivor keeps the page, asks Cleo to hold it</tspan>
+		<tspan class="copy" x="680" dy="19">sealed until requested, or destroys it now</tspan>
+		<tspan class="copy" x="680" dy="19">Keeping it does not permit a copy or sharing</tspan>
+		</text>
 	<rect class="open" x="485" y="875" width="390" height="145" rx="10"/>
 	<text text-anchor="middle" x="680" y="910">
-		<tspan class="title">PRIVATE ACCOUNT ≠ PUBLIC TESTIMONY</tspan>
-		<tspan class="copy" x="680" dy="24">Permission to speak does not grant permission</tspan>
-		<tspan class="copy" x="680" dy="19">to record, retain, archive or disclose</tspan>
-		<tspan class="copy" x="680" dy="19">Each needs its own agreement</tspan>
+		<tspan class="title">SHARING IS A LATER, SEPARATE CHOICE</tspan>
+		<tspan class="copy" x="680" dy="24">The private page is not Archive testimony</tspan>
+		<tspan class="copy" x="680" dy="19">Later sharing needs new permission for the</tspan>
+		<tspan class="copy" x="680" dy="19">exact material and intended audience</tspan>
 	</text>
 
 	<rect class="lane" x="915" y="230" width="410" height="1110" rx="14"/>

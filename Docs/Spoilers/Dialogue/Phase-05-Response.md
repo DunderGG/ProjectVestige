@@ -30,45 +30,74 @@
 
 **Placement:** Only if a survivor chooses to discuss a record or account with Cleo.
 **Speakers:** PLAYER, SURVIVOR, CLEO.
-**Knowledge:** Permission for a private conversation is not permission to archive or publish it.
+**Knowledge:** Permission to speak is not permission to record, keep, copy, or share. Each requires its own choice.
 
-**CLEO:** My field notebook is in my pack. I won't touch the clasp unless you tell me to. If you just want someone to sit on the bench and listen, I can do that. If you want words put on paper so nobody can pretend this place never existed, you tell me which words to write—and which ones to burn.
-
-**SURVIVOR:** The researchers used to stand behind the glass with clipboards. Every time I coughed, they made a check mark.
-
-**CLEO:** No clipboards here. No check marks. If you share a memory today and wake up tomorrow wishing you hadn't, the page goes straight into the stove fire.
-
-**SURVIVOR:** And who gets to read it?
-
-**CLEO:** Nobody without your say-so. We can keep it right here in your hands, share only what you approve, or tear it to shreds whenever you want.
-
-**SURVIVOR:** Even afterward?
-
-**CLEO:** Even years from now.
-
-**CLEO:** Do you want to talk with no paper in the room, let me take notes for you to inspect, or stop here?
-
-**SURVIVOR - CHOICES**
-
-- **[Talk without a record]** "We can talk, but keep the pen in your pocket."
-  - **CLEO:** The pen stays away. Just two people in a quiet room.
-- **[Allow a transcript]** "Write down what happened. But read every line back to me before you leave."
-  - **CLEO:** Word for word, under your lantern. You strike out anything that doesn't belong.
-- **[Stop for now]** "Not today. My head is pounding."
-  - **CLEO:** Then we stop right now. Nothing goes onto paper.
-
-**PLAYER:** Do you want me to stay?
+**PLAYER:** Cleo can listen, if you want. I can stay or step outside. You can also stop here.
 
 **SURVIVOR - CHOICES**
 
 - **[Speak with Cleo alone]** "I want to speak with Cleo alone."
-  - **PLAYER:** I'll wait out on the porch. Call if you need anything.
-- **[Allow the player to stay]** "You can stay. Just don't answer for me."
+  - **PLAYER:** I'll wait outside. I won't ask Cleo what you said.
+  - **Production note:** Continue with Cleo and the survivor only.
+- **[Allow the player to stay]** "You can stay. Don't answer for me."
   - **PLAYER:** I won't.
+  - **Production note:** Continue with all three characters.
+- **[Stop before talking]** "I don't want to talk today."
+  - **CLEO:** All right. We can leave it there.
+  - **Production note:** End the scene immediately. Do not ask again, take notes, or arrange another contact unless invited.
 
-**SURVIVOR:** That's all I want written down. If I tell you to burn it, you burn it.
+**SURVIVOR:** The researchers used to stand behind the glass with clipboards. Every time I coughed, they made a check mark.
 
-**CLEO:** Every scrap. Not a single carbon rubbing leaves this valley without you clearing it first.
+**CLEO:** My notebook is shut. I haven't written that down or made a recording. Do you want to keep talking without a record, ask me to write a short account for you to review, or stop?
+
+**SURVIVOR:** And who gets to read it?
+
+**CLEO:** No one. I haven't made a record. If you ask me to write one, deciding whether I keep it—and whether anyone else sees it—will be separate choices.
+
+**SURVIVOR - CHOICES**
+
+- **[Talk without a record]** "I want to talk, but I don't want it written down."
+  - **CLEO:** Understood. The notebook stays shut. I won't take notes or make a copy.
+  - **SURVIVOR:** Then just listen. I don't want to explain it twice.
+  - **Production note:** Continue only as a private conversation. No transcript, notes, recording, or implied record is created. End when the survivor says they are done; do not ask them to approve or store anything.
+- **[Allow a transcript]** "Write only what I choose to tell you. Read it back before you keep anything."
+  - **CLEO:** I will. Writing it down doesn't give me permission to keep or share it.
+  - **Production note:** Continue to the read-back and separate retention choice below.
+- **[Stop for now]** "No. I don't want to continue."
+  - **CLEO:** All right. We stop here.
+  - **Production note:** End the scene immediately. Do not ask who should stay, ask another question, write anything, or arrange another contact unless invited.
+
+**IF TRANSCRIPT CHOSEN**
+
+**SURVIVOR:** Write this: "They watched from behind the glass and marked each time I coughed." No name, no medical details.
+
+**CLEO:** I'll read it back exactly: "They watched from behind the glass and marked each time I coughed." Is that what you want on the page?
+
+**SURVIVOR - CHOICES**
+
+- **[Approve the exact wording]** "That's right."
+- **[Correct the wording]** "Change it to: 'They watched from behind the glass and marked my coughs.' Read it back again."
+  - **CLEO:** "They watched from behind the glass and marked my coughs." Is that right?
+  - **Production note:** Return to the wording choices. Repeat until the survivor approves the exact text or chooses to destroy it.
+- **[Destroy the draft]** "No. Tear it up. I don't want a copy kept."
+  - **CLEO:** I will.
+  - **Production note:** Show Cleo destroying the only page without copying or recording it. End the scene; do not ask the survivor to reconsider.
+
+**IF THE SURVIVOR APPROVES THE WORDING**
+
+**CLEO:** The words are yours. You can take the page, ask me to keep it sealed until you ask for it back, or have me destroy it now. I won't copy it or share it.
+
+**SURVIVOR - CHOICES**
+
+- **[Keep the page]** "Give it to me. I'll decide what to do with it."
+  - **CLEO:** Of course.
+- **[Ask Cleo to hold it]** "Keep it sealed in your folio until I ask for it back. Don't copy or show it to anyone."
+  - **CLEO:** I will. I won't send it to the Archive unless you make that choice separately.
+- **[Destroy the page]** "Destroy it. I don't want a copy kept."
+  - **CLEO:** I will.
+  - **Production note:** Show Cleo destroying the only page without copying or recording it.
+
+**Production note:** The only record in this scene is the single handwritten page in the transcript branch. It is not testimony for the Archive. Any later decision to share it requires a new, specific request and approval of the exact material and audience. No-record and stop branches never reach transcript review, storage, or sharing.
 
 ## R-03 - Specific accountability
 

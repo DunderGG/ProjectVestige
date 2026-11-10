@@ -488,7 +488,7 @@ In [Phase-03-Transition.md](Dialogue/Phase-03-Transition.md), scene `T-03`, the 
 
 **Severity: Medium**
 
-**Status: Open.**
+**Status: Resolved (2026-11-10).** Rewrote `R-02` in [Phase-05-Response.md](Dialogue/Phase-05-Response.md): presence is chosen before the account; stopping ends the scene immediately; the no-record path keeps Cleo's notebook shut and never enters transcript handling; and the transcript path includes an exact read-back, explicit permission to keep one private page, and destruction as a valid outcome. Sharing with the Archive is a separate future decision. Updated [Dialogue/README.md](Dialogue/README.md) with the stop/no-record rule and revised [LateResponse.svg](StoryFlow/LateResponse.svg) to show these branches.
 
 In [Phase-05-Response.md](Dialogue/Phase-05-Response.md), scene `R-02`, the survivor can choose **“Talk without a record”** or **“Stop for now.”** Cleo explicitly agrees to keep the pen away in the first branch and says nothing will go onto paper in the second. The scene then continues into another presence choice and unconditionally gives the survivor the line, “That's all I want written down,” followed by Cleo's promise about burning “every scrap” and keeping carbon rubbings from leaving the valley.
 
@@ -496,7 +496,7 @@ The story-flow guide says refusal and stopping are valid, and [LateResponse.svg]
 
 **Why it matters:** A choice to stop should end the interview, not merely change the next line before the interview resumes. Likewise, a private conversation without a record should not create implied notes or require the survivor to correct an assumption that anything was written. This quietly turns a boundary into participation and weakens the credibility of Cleo's consent arc.
 
-**Recommended change:** End `R-02` immediately when the survivor stops, with no follow-up question. In the no-record branch, keep the conversation and presence choice if desired, but remove every line that implies notes, pages or copies. Reserve transcript review, storage, destruction and any separate permission to share for the transcript branch only.
+**Correction made:** The revised scene ends on either stop choice, creates no record on the no-record path, and only enters review and storage choices after the survivor explicitly requests a transcript. Archive sharing requires a later, separate opt-in.
 
 ### L-27 — Story-flow diagrams and the dialogue index assign conflicting scene IDs
 
@@ -544,7 +544,7 @@ In [Phase-02-Early.md](Dialogue/Phase-02-Early.md), scene `E-07`, Cleo says the 
 
 ## Follow-up correction order
 
-1. **L-25 and L-26:** Make the route-stop and survivor-record scenes honor the consent choices they offer.
+1. **L-25 remains open:** Make the route-stop scene honor each affected party's consent. [L-26 is resolved (2026-11-10).](#l-26--the-survivors-stop-and-no-record-choices-continue-into-lines-that-assume-a-transcript)
 2. **L-27:** Reconcile the scene IDs across the flow diagrams and dialogue index before using them to plan implementation.
 3. **L-28:** Bring relationship rewards back within the progression boundaries in [GameDesign.md](../GameDesign.md), or explicitly mark them as proposals for design review.
 4. **L-29:** Define the pod telemetry source or soften Cleo's conclusion to match the evidence.
