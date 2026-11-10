@@ -522,7 +522,7 @@ The writer-facing references use scene-like IDs for different material:
 
 **Severity: Medium**
 
-**Status: Open.**
+**Status: Resolved (2026-11-10).** Removed Gage's farm-wide machine-speed, jam-risk, storm-damage and tool-stamina bonuses from [Engineer.md](Characters/Engineer.md); his workshop and maintenance routines are now character presentation, not automated services or upgrades. Removed Cleo's solar-charge bonus from [Archivist.md](Characters/Archivist.md), retaining optional decorative, journal and seed content without production effects. Updated [GameDesign.md](../GameDesign.md) to clarify that relationships unlock character content, not robot, farm or player performance upgrades; robot upgrades belong to the tech tree.
 
 [GameDesign.md](../GameDesign.md) says relationships gate that character's story, recipes, recruiting and romance, “never core machines”; skills provide only small bonuses. The partner rewards in [Engineer.md](Characters/Engineer.md) and [Archivist.md](Characters/Archivist.md) go much further: Gage makes processing machines 15% faster, removes their jam risk, prevents storm damage to farm structures and reduces tool stamina costs by 15%; Cleo increases the charge rate of all farm solar panels and batteries by 10%.
 
@@ -530,7 +530,7 @@ The character sheets present these as concrete benefits of marriage or permanent
 
 **Why it matters:** These bonuses can make romance or marriage feel like an efficiency purchase, contradict the game's stated separation of progression tracks, and promise balance-sensitive mechanics before the tech tree, skills and farm systems have defined their limits.
 
-**Recommended change:** Keep relationship rewards focused on the character's story, recipes, recruitment and nonessential content. If a mechanical benefit is desired, route it through the appropriate progression track and keep it modest, or clearly mark it as an unapproved proposal until the design is reconciled. Check the other character sheets for similar system-wide bonuses.
+**Correction made:** The other character sheets were checked for comparable system-wide bonuses. The Nomad's listed rewards are optional trade stock, route information, visual safe-stop details and nonessential items; no other partner sheet grants a farm-wide or player-wide performance bonus.
 
 ### L-29 — Cleo's pod-telemetry deduction asserts a measurement the lore has not established
 
@@ -548,7 +548,7 @@ In [Phase-02-Early.md](Dialogue/Phase-02-Early.md), scene `E-07`, Cleo says the 
 
 1. **L-25 remains open:** Make the route-stop scene honor each affected party's consent. [L-26 is resolved (2026-11-10).](#l-26--the-survivors-stop-and-no-record-choices-continue-into-lines-that-assume-a-transcript)
 2. [x] **L-27 — Scene IDs:** Reconciled the phase diagrams with the dialogue index and documented the ID rule (resolved 2026-11-10).
-3. **L-28:** Bring relationship rewards back within the progression boundaries in [GameDesign.md](../GameDesign.md), or explicitly mark them as proposals for design review.
+3. [x] **L-28 — Relationship rewards:** Removed system-wide partner buffs and clarified the progression boundary in [GameDesign.md](../GameDesign.md) (resolved 2026-11-10).
 4. **L-29:** Define the pod telemetry source or soften Cleo's conclusion to match the evidence.
 5. **L-24 remains open:** Standardize character content IDs after investigating the category-segment question noted in the previous follow-up.
 

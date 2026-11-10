@@ -212,7 +212,7 @@ Robots fill every role a human would. They don't see themselves as servants: mos
 - The caretaker robot is the exception: it is loyal to the family, so it starts as a dutiful servant rather than a sceptic. Its arc is about choosing a purpose of its own (**Lore hook:** see its character sheet).
 - Every change in trust has a reason the player can see: the character says or does something different.
 - Friendship grows by talking, giving gifts, helping with requests and taking part in events.
-- Higher friendship unlocks: the robot's backstory and personal events, gifts and recipes, upgrades for that robot, recruiting it to the farm, and romance with eligible characters.
+- Higher friendship unlocks the character's backstory and personal events, gifts and optional recipes, recruiting them to the farm, and romance with eligible characters. It does not unlock robot, farm, or player performance upgrades; robot upgrades belong to the tech tree. Relationship rewards do not grant system-wide bonuses to farm production, power, durability, weather protection, survival, or tool efficiency.
 - Romance leads to dating and marriage. A partner moves to the farm.
 - Romance is always opt-in through an explicit dialogue choice, and the character can decline. Gifts alone never lead to romance.
 - **Vertical slice:** one complete arc with the caretaker robot. Trust grows when the player works alongside it and asks for its opinion instead of giving orders. It responds visibly by helping on its own initiative, and the payoff is a story moment, not an item.
@@ -226,7 +226,7 @@ The player grows along several tracks at once. Each track has one job, so no rew
 |---|---|---|
 | Town restoration | The main story | New shops, robots, areas and mechanics |
 | Tech tree | Engineering | Machines, automation, tool tiers and robot upgrades |
-| Relationships | Characters | That character's story, recipes, recruiting and romance; never core machines |
+| Relationships | Characters | That character's story, gifts, optional recipes, recruiting and romance; never robot upgrades, core machines or system-wide performance bonuses |
 | Skills | Getting better by doing | Small bonuses only, never a gate |
 
 - **Skills:** farming, engineering, scavenging and combat. They level up by doing, and each level gives a small bonus.
@@ -344,6 +344,7 @@ Newest first. Add an entry whenever a design choice is made or reversed. Never d
 
 | Date | Decision | Why |
 |---|---|---|
+| 2026-11-10 | Clarifies the 2026-10-28 relationship decision: relationships unlock character content, gifts and optional recipes, not robot, farm or player performance upgrades; robot upgrades belong to the tech tree ([sections 8](#relationships) and [9](#9-progression)) | Keeps each reward on one progression track, prevents romance and friendship from becoming an efficiency purchase, and leaves production, power, weather, survival and tool balance to their owning systems |
 | 2026-11-02 | The late-night rules in detail ([section 5](#5-time-days-and-seasons)): going to bed at 00:00 or later is late; the night ends at 06:00, when a player who never slept starts the next day where they stand, exhausted; from midnight stamina drains about 10 an hour until sleep | Something has to end a night nobody sleeps through, or the farm stops; sunrise is the latest bedtime there can be, and needs no faint or teleport. There is no daytime drain, so the faster drain is one that starts at midnight, which pushes toward bed even when the player only walks around |
 | 2026-10-30 | Walking eases in from a press instead of waiting for a tap to end: a tap turns the farmer smoothly with a nudge of a few centimetres (about 2 cm for a 100 ms tap with the tuned 0.25 s ease-in), where it used to turn him in place, and after stopping he turns to face the targeted tile ([section 6](#tiles)). Replaces "a tap turns the farmer in place" from the entry below | In play-testing, turning in place snapped the farmer round in one frame and made him stand still before walking, and shortening the wait made most taps step anyway. Easing in removes the pause, and a nudge that small almost never leaves his tile, so tapping still picks a neighbour |
 | 2026-10-30 | Crop toxicity is explicit per crop, not inferred from mutation or soil; cleanup crops are non-food and their harvest must be contained. Any harmful food must be identified before consumption; the exact warning mechanic remains open | Keeps farming and food rules consistent without making all mutated or irradiated-soil produce hazardous, and prevents cleanup from returning captured contamination to the farm |

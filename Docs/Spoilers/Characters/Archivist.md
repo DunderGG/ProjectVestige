@@ -165,11 +165,11 @@ Trust develops across five distinct narrative stages grounded in careful documen
 
 ## 6. Farm Partnership & Daily Support
 
-When Cleo moves to the farm as a committed partner, she respects the player's farming autonomy and provides unique, character-specific benefits rather than standard field labor:
+When Cleo moves to the farm as a committed partner, she respects the player's farming autonomy. Her partnership adds optional character content, not a system-wide efficiency bonus: it does not change solar output, stored charge, crop production, or other farm-system values.
 
-- **Blueprint Decryption:** Translates degraded pre-war technical slates recovered from the wasteland, unlocking unique historic furniture and antique building skins.
-- **Solar Calibration:** Uses her optical spectrometer to calculate exact atmospheric haze density, granting a passive +10% charge rate to all solar panels and battery banks on the farm.
-- **Heirloom Conservation:** Occasionally gifts the player rare, non-mutated heirloom seeds that she synthesizes from pre-war botanical tissue samples.
+- **Blueprint Decryption:** Translates degraded pre-war technical slates recovered from the wasteland, unlocking optional historic furniture and antique building skins.
+- **Field Journal:** Records observations from her optical spectrometer in an optional field-journal entry or a decorative haze chart. The readings do not change solar output or stored charge.
+- **Heirloom Conservation:** May occasionally share optional, non-mutated heirloom seeds from preserved pre-war plant material. These are content and gifts, not a requirement for farm progression or a bonus to crop performance.
 - **Farm Routine:** Spends early mornings at her drafting table, walks the fields in the afternoon taking soil readings, and sits on the porch at night observing the stars through the haze.
 
 ---

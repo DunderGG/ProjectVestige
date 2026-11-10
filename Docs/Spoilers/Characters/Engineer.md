@@ -170,12 +170,11 @@ Trust develops across five distinct narrative stages grounded in shared maintena
 
 ## 6. Farm Partnership & Daily Support
 
-When Gage moves to the farm as a committed partner, he brings his immense mechanical knowledge to bear on the farm’s physical systems:
+When Gage moves to the farm as a committed partner, he shares the home and its daily life. Partnership is not an efficiency upgrade: it does not change farm production, machine jam chance, building durability, storm protection, or tool stamina costs.
 
-- **Heavy Machine Overhaul:** Modifies farm machinery (processing kegs, seed makers, smelters, mills). All processing machines on the farm operate +15% faster and have zero risk of mechanical jam.
-- **Structural Storm-Proofing:** Reinforces the framework of all farm buildings, sheds, and greenhouses. Farm structures take zero durability damage during violent radiation storms.
-- **Tool Balancing & Ergonomics:** Tunes the player's primary farm tools (pickaxe, hoe, axe) with balanced pneumatic counterweights, reducing player stamina consumption by 15%.
-- **Farm Routine:** Spends early mornings at his farm anvil sharpening blades, spends afternoons inspecting irrigation pumps and fence lines, and sits on the porch at dusk watching over the fields.
+- **Workshop:** The Heavy Maintenance & Forge Workshop is Gage's personal space and a setting for character scenes, not a processing station, automatic repair service, or source of equipment upgrades.
+- **Shared upkeep:** Gage may be seen checking his own tools or inspecting a fence and irrigation line. These routines are character moments, not automatic farm maintenance or storm protection.
+- **Farm routine:** He spends early mornings at his anvil, afternoons walking the irrigation lines and fence, and evenings on the porch. These visible habits do not change machine output, tool costs, or building durability.
 
 ---
 
