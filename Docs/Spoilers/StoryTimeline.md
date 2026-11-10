@@ -154,7 +154,7 @@ Potential sources include:
 
 These are possible paths, not a checklist. No single character should be the sole keeper of the truth, and the nomad must not disclose a contact's identity or location without permission.
 
-The nomad's route arc can reach the farm-agreement stage here or later: the nomad, Hob, the sleeper and Wellspring discuss whether the farm can be a limited rest, trade and warning stop. Each affected party sets their own terms. Agreeing to the stop does not expose a concealed refuge, make the farm a human headquarters or grant the player access to the nomad's contacts.
+The nomad's route arc can reach the farm-agreement stage here or later: the nomad, Hob, the sleeper and Wellspring discuss whether the farm can be a limited rest, trade and warning stop. The discussion is only a proposal; the sleeper, Hob, the assembly and the nomad each decide separately. The stop activates only if all four agree, and any refusal leaves the marker down and supplies uncommitted. Agreeing to the stop does not expose a concealed refuge, make the farm a human headquarters or grant the player access to the nomad's contacts.
 
 ### What the player may infer
 

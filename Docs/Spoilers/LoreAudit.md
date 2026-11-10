@@ -476,7 +476,7 @@ The story bible and character work now make the central themes, knowledge limits
 
 **Severity: Medium**
 
-**Status: Open.**
+**Status: Resolved (2026-11-10).** Rewrote `T-03` in [Phase-03-Transition.md](Dialogue/Phase-03-Transition.md) so the initial conversation only develops a proposal. The sleeper, Hob, Wellspring's assembly and the nomad each make a separate decision; safety planning does not itself commit supplies or accept the stop. The stop activates only after all four agree, and any refusal or withdrawal leaves the marker down and supplies uncommitted. Aligned the route milestone in [Nomad.md](Characters/Nomad.md) and [StoryTimeline.md](StoryTimeline.md).
 
 In [Phase-03-Transition.md](Dialogue/Phase-03-Transition.md), scene `T-03`, the Wellspring representative says the assembly must discuss the risks, and Hob says the farm is not theirs alone to offer. The player's “Offer a narrow agreement” choice nevertheless gets the nomad's “Deal” and describes a trade arrangement as settled. The “Ask for a safety plan” choice also sets aside supplies without a clear agreement from Hob, the sleeper or the assembly. No later line in the scene records the assembly's decision or gets Hob's explicit agreement.
 
@@ -484,7 +484,7 @@ In [Phase-03-Transition.md](Dialogue/Phase-03-Transition.md), scene `T-03`, the 
 
 **Why it matters:** The scene's central relationship promise is that the nomad will not treat hospitality as owed and the sleeper cannot offer other people's consent. As drafted, the player can commit the town and Hob to a public-facing arrangement with one answer. That makes the scene's ethics depend on what the prose says the characters believe, not what the player is allowed to do.
 
-**Recommended change:** Make the meeting agree only on proposed terms, then show Hob's decision and the assembly's decision before the marker, supplies or route-stop status become active. Keep “safety plan” separate from “yes”: a player can ask about contingencies without accepting the stop. If any party declines, the nomad should accept that and the route should remain inactive.
+**Correction made:** The revised scene distinguishes safety questions from agreement, separates the sleeper's and Hob's decisions, and makes the assembly's response a later, independent decision. The route becomes active only after each party—including the nomad—accepts the terms; otherwise there is no marker or committed supply.
 
 ### L-26 — The survivor's “stop” and “no record” choices continue into lines that assume a transcript
 
@@ -546,7 +546,7 @@ In [Phase-02-Early.md](Dialogue/Phase-02-Early.md), scene `E-07`, Cleo says the 
 
 ## Follow-up correction order
 
-1. **L-25 remains open:** Make the route-stop scene honor each affected party's consent. [L-26 is resolved (2026-11-10).](#l-26--the-survivors-stop-and-no-record-choices-continue-into-lines-that-assume-a-transcript)
+1. [x] **L-25 — Farm stop:** Separated the proposal from each party's decision and made activation contingent on every party's agreement (resolved 2026-11-10).
 2. [x] **L-27 — Scene IDs:** Reconciled the phase diagrams with the dialogue index and documented the ID rule (resolved 2026-11-10).
 3. [x] **L-28 — Relationship rewards:** Removed system-wide partner buffs and clarified the progression boundary in [GameDesign.md](../GameDesign.md) (resolved 2026-11-10).
 4. [x] **L-29 — Pod telemetry:** Limited Cleo's claim to potential pod logs that require comparison with independent evidence (resolved 2026-11-10).

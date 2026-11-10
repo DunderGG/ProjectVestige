@@ -150,7 +150,7 @@ Relationship progression advances across five narrative stages. Every change is 
   - **Trigger:** Following the resolution of the copied-page crisis; speak with the nomad at the farm gate near sunset.
   - **Scene:** The nomad asks whether the farm can become a limited, explicitly agreed stop for rest, trade and warnings. Hob, the sleeper and Wellspring each have a legitimate reason to be cautious. The nomad refuses to promise access to concealed communities in return.
   - **Player role:** Help make the terms concrete: identify a safe public place, establish what supplies may be held, and make clear that anyone using the stop can decline to share information. The player cannot grant consent for Hob, Wellspring or absent contacts.
-  - **Outcome:** After every affected party is heard, the nomad chooses to add the farm to the circuit under limited rules. The farm becomes a place people can use by agreement, not a headquarters, permanent camp or shortcut to a hidden settlement.
+  - **Outcome:** The first discussion only makes a proposal. The sleeper, Hob and the Wellspring assembly each give a separate answer, and the nomad must accept the resulting terms. Only if all four agree does the nomad add the farm to the circuit; otherwise the stop stays inactive, no supplies are committed and no marker is raised. The farm becomes a place people can use by agreement, not a headquarters, permanent camp or shortcut to a hidden settlement.
 - **Unlock:** More dependable visits, a wider selection of optional field stock and the **Route Ledger** feature described below. This does not unlock a human faction hub or grant coordinates to private homes.
 
 ### Stage 5: The Open Route

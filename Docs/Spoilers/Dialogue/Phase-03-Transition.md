@@ -62,8 +62,8 @@
 
 ## T-03 - The farm as a limited stop
 
-**Placement:** The nomad, Hob, the sleeper and a Wellspring representative discuss a possible rest and trade stop.
-**Knowledge:** No names, locations or contact list are shared. The assembly and each host retain their own say.
+**Placement:** The nomad, Hob, the sleeper and a Wellspring representative discuss a possible rest and trade stop. A later confirmation follows the assembly's own discussion.
+**Knowledge:** No names, locations or contact list are shared. The farm's residents, the assembly and the nomad each decide for themselves. This meeting can produce only a proposal; it cannot activate the stop.
 
 **NOMAD:** I want to ask whether this farm could be a stop on the route. Rest, water if you have it, and trade. Nothing more unless everyone agrees later.
 
@@ -73,19 +73,52 @@
 
 **NOMAD:** Nothing about where they came from or where they're going. A stop should not demand a map as its price.
 
-**WELLSPRING REPRESENTATIVE:** The farm's call is separate from the town's. I can take a proposal to the assembly, but they'll want to talk through the risks.
+**WELLSPRING REPRESENTATIVE:** The farm's call is separate from the town's. I can take a proposal to the assembly, but they'll decide for themselves after talking through the risks.
 
 **PLAYER - CHOICES**
 
-- **[Offer a narrow agreement]** "Rest and trade are possible. No prying into who is walking the trail."
-  - **NOMAD:** Deal. A clean swap: salt, dried trail herbs, and spare brass for fresh greens, and not a whisper about which canyon I slipped out of. If either of us gets uneasy, we pull down the marker by the gatepost. Simple as that.
-- **[Ask for a safety plan]** "I want to know what happens if someone gets caught in a flash freeze or a radiation squall."
-  - **NOMAD:** Smart thinking! A shelter that leaks in a gale isn't a refuge; it's just an open ditch with a roof. We set aside two dry wool blankets in the barn and a sealed jerrycan of filtered water.
-- **[Decline for now]** "I can't offer the farm as a trail stop yet."
+- **[Discuss safety first]** "What happens if someone gets caught in a flash freeze or a radiation squall?"
+  - **NOMAD:** Smart thinking. We can write down what a safe stop would need. Blankets and water are ideas for the list, not supplies anyone has promised.
+- **[Discuss privacy first]** "Visitors shouldn't have to tell us where they came from or where they're going."
+  - **NOMAD:** Right. No names, no map, no questions they don't want to answer. Trade stays a fair swap, not an entry fee.
+- **[Decline for now]** "I can't offer the farm as a trail stop."
   - **NOMAD:** Fair enough! Better to say no plainly than say yes and jump at every footprint in the mud. No hard feelings.
+  - **Outcome:** The proposal ends here. No supplies are set aside, no marker is raised, and the route does not use the farm as a stop.
+
+After discussing the terms, each person answers separately. The sleeper's choice speaks only for them:
+
+**PLAYER - CHOICES**
+
+- **[Agree to the proposal]** "I'm willing to offer a limited rest and trade stop, if Hob agrees and Wellspring makes its own decision."
+- **[Decline]** "I don't want the farm to host a route stop."
+
+**HOB - IF THE SLEEPER AGREES, HOB'S OWN ANSWER IS STILL SEPARATE:**
+
+**HOB:** I would be glad to share the farm as a rest and trade stop, if that is what you want too. I won't offer your home for you.
+
+**HOB - IF HOB DECLINES:**
+
+**HOB:** I know the farm could help, but I don't want to make it a route stop. Please leave the marker down.
+
+**HOB - IF THE SLEEPER DECLINES:**
+
+**HOB:** Then the farm is not a stop. A warm stove is only hospitality when the people who live here choose it.
+
+Hob's answer is an independent authored yes-or-no branch, never inferred from the sleeper's choice. If either the sleeper or Hob declines, the nomad accepts the answer and the proposal ends. No supplies are set aside, no marker is raised, and the route does not use the farm as a stop. If both agree, the representative takes the proposed terms to the assembly; that referral is not town approval.
+
+**FOLLOW-UP - AFTER THE ASSEMBLY HAS DECIDED**
+
+**WELLSPRING REPRESENTATIVE - IF THE ASSEMBLY APPROVES:** The assembly agrees to a limited public rest and trade stop, under the terms we discussed. No route details or private destinations are part of it.
+
+**WELLSPRING REPRESENTATIVE - IF THE ASSEMBLY DECLINES:** The assembly isn't willing to make the town part of this stop. That's their decision. The farm's choice is separate, but this joint route proposal cannot go ahead without the town's agreement.
+
+The nomad then decides whether the approved terms work for the route:
+
+- **If the assembly declines:** The nomad thanks the representative and does not activate a town-facing stop. No supplies are set aside and no marker is raised.
+- **If the assembly approves and the sleeper and Hob both agreed:** The nomad may accept the terms: "Then, if you both still mean it, I'll add this stop to the route. Nobody owes me a bed, a story or a map." Only after all four parties have agreed may the group choose which supplies to set aside and raise the marker by the gatepost.
+- **If any party withdraws or declines before activation:** The nomad accepts the change. The stop remains inactive; no supplies are committed and the marker stays down.
 
 **HOB:** If you borrow a neighbor's kettle, you don't rummage through their cupboards while the water boils. The nomad's friends are their own folk; our work is keeping the gate mended and the stove warm.
-
 ## T-04 - What the clues do and do not say
 
 **Placement:** After at least two independent clues have been found. The group discusses whether to continue toward the institute.
