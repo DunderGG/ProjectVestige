@@ -291,7 +291,7 @@ However, the assumption that "all findings have been fixed" is not supported by 
 | **L-08** (Family mystery & sealed message) | Medium | **Resolved (2026-11-09)** | The parents' fate, readable message and visible delivery condition are defined in [Lore.md](Lore.md), [Hob.md](Characters/Hob.md), [StoryTimeline.md](StoryTimeline.md), and `F-02`. See L-22. |
 | **L-09** (Tone guidance for dark material) | Medium | **Partially addressed** | Faction safeguards protect trial subjects, but [Lore.md](Lore.md) still lacks shared tone rules balancing dark themes with absurd pre-war corporate satire and comic relief. |
 | **L-10** (Sleeper identity and agency) | Medium | **Open** | The sleeper remains a blank slate who mostly prompts NPCs with procedural questions. No distinct pre-war attachments, personal wants, or emotional choices are defined. |
-| **L-11** (Working names and stable IDs) | Low | **Open** | Names marked *(working name)* persist throughout. Content ID conventions diverge between `Base.Character.<Name>` and `Base.<Name>`. See L-24. |
+| **L-11** (Working names and stable IDs) | Low | **Open** | Names marked *(working name)* persist throughout. Content IDs now follow one convention, `Base.<Name>` of the content's type (L-24, resolved). |
 | **L-12** (Cleo consent disclosure) | Medium | **Resolved** | Resolved in [Archivist.md](Characters/Archivist.md), though divergence exists in dialogue drafts (see L-21). |
 | **L-13** (Gage pressure test branching) | Medium | **Regressed in Dialogue** | Resolved in [Engineer.md](Characters/Engineer.md), but hard-coded to a single outcome in [Phase-02-Early.md](Dialogue/Phase-02-Early.md) (see L-19). |
 | **L-14** (Gage accident chronology) | Low | **Resolved** | Chronology consistent at ~5.5 decades post-war. |
@@ -436,6 +436,8 @@ In the exact same document, both characters were formally named and detailed in 
 
 **Severity: Low**
 
+**Status: Resolved (2026-11-10).** Content IDs get no category segment ([Architecture.md, section 5](../Architecture.md#5-data-and-content), decision log 2026-11-10): every character is `Base.<Name>` of primary asset type `VestigeCharacter` (`VestigeCharacter:Base.Gage`). [Engineer.md](Characters/Engineer.md) and [Archivist.md](Characters/Archivist.md) now say `Base.Gage` and `Base.Cleo`, [Nomad.md](Characters/Nomad.md) names the type, and [Lore.md](Lore.md) refers to content across types by primary asset ID. The rule lives in Architecture.md, the source of truth for content IDs, rather than in CodingGuidelines.md; Lore.md links to it.
+
 The naming convention for game content assets diverges across documents:
 - [Engineer.md](Characters/Engineer.md) (line 203): `UVestigeCharacterData asset Base.Character.Gage`
 - [Archivist.md](Characters/Archivist.md) (line 199): `UVestigeCharacterData asset Base.Character.Cleo`
@@ -458,7 +460,7 @@ First do roadmap item **Investigate whether `ContentId` should also allow a cate
 3. **Re-voice and De-sanitize Dialogue Drafts (L-20):** Revise spoken lines across Phases 2–6 to restore character-specific voices, humor, grit, and mechanical flavor, stripping out repetitive institutional compliance jargon.
 4. **Reconcile Scene Divergence and Duplication (L-21):** Align Cleo's Event 1 in `E-07` with [Archivist.md](Characters/Archivist.md), and remove the redundant farm agreement from `E-08` so `T-03` remains the true milestone.
 5. [x] **Author the Parents' Message and Fate (L-08, L-22):** Defined the parents' fate and a full readable message in `F-02`, with a visible delivery condition and Hob's confirmation of their resting place (resolved 2026-11-09).
-6. [ ] **Standardize Character Content IDs (L-24):** Adopt `Base.Character.<Name>` or `Base.<Name>` consistently, and document the rule in [CodingGuidelines.md](../CodingGuidelines.md) and [Lore.md](Lore.md). L-23 is resolved.
+6. [x] **Standardize Character Content IDs (L-24):** Adopted `Base.<Name>` of type `VestigeCharacter` for every character; the rule is in [Architecture.md, section 5](../Architecture.md#5-data-and-content), with a link from [Lore.md](Lore.md) (resolved 2026-11-10). L-23 is resolved.
 
 ### Review limits
 

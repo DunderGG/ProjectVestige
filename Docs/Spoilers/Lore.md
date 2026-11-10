@@ -331,7 +331,7 @@ A post-war-born human who carries salvage and carefully verified news along a sm
 
 ## 12. Lore and mods
 
-- Characters, factions, makers, festivals and zones are content, so mods can add more of them. Lore entries refer to content by namespaced ID (`Base.Hob`, `Base.IronCreed`).
+- Characters, factions, makers, festivals and zones are content, so mods can add more of them. Lore entries refer to content by its primary asset ID, which names the content's type as well as its namespaced ID (`VestigeCharacter:Base.Hob`, and `Base.IronCreed` under the faction type once there is one), because one entry can name characters, factions and places alike and a bare ID is unique only within its type. Content IDs have no category segment ([Architecture.md, section 5](../Architecture.md#5-data-and-content)).
 - Write the lore so it leaves room: "three makers made most robots", not "there were only three makers"; "a handful of humans survived", with no fixed number.
 - The core history (the war, Cinderium, the Continuance, the sleeper, the sibling and Hob) is fixed. Mods add to it rather than change it.
 

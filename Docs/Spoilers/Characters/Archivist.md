@@ -196,7 +196,7 @@ Visiting the Archive through Cleo’s storyline opens unique facilities that adh
 
 ## 8. Technical & Implementation Notes
 
-- **Data Asset:** Defined as `UVestigeCharacterData` asset `Base.Character.Cleo`.
+- **Data Asset:** Defined as `UVestigeCharacterData` asset `Base.Cleo` (primary asset ID `VestigeCharacter:Base.Cleo`; content IDs have no category segment, [Architecture.md, section 5](../../Architecture.md#5-data-and-content)).
 - **Dialogue Tables:** Stored in `Content/Vestige/Dialogue/DT_Dialogue_Cleo.uasset`.
 - **Audio Cue Requirements:**
   - Ambient mechanical clicks when her focal lens cycles.

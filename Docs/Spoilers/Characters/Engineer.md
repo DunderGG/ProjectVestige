@@ -200,7 +200,7 @@ Visiting the Bastion through Gage’s storyline opens unique facilities that adh
 
 ## 8. Technical & Implementation Notes
 
-- **Data Asset:** Defined as `UVestigeCharacterData` asset `Base.Character.Gage`.
+- **Data Asset:** Defined as `UVestigeCharacterData` asset `Base.Gage` (primary asset ID `VestigeCharacter:Base.Gage`; content IDs have no category segment, [Architecture.md, section 5](../../Architecture.md#5-data-and-content)).
 - **Dialogue Tables:** Stored in `Content/Vestige/Dialogue/DT_Dialogue_Gage.uasset`.
 - **Audio Cue Requirements:**
   - Heavy, resonant footsteps with metallic impact sound.
