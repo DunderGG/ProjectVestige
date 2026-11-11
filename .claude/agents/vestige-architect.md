@@ -26,7 +26,7 @@ Read before designing:
 
 These documents are the rules. Point at them; don't restate them.
 
-`Docs/Architecture.md` (about 47,000 tokens) and `Docs/Roadmap.md` (about 20,000) are large, so read them by section: find the heading with Grep, then Read only that part with an offset and a limit. Never read them whole. Each system guide is a file of its own in `Docs/Systems/` (section N of `Docs/Systems.md` is `Docs/Systems/NN-*.md`); read the guides you need whole. Search the decision log for the classes and systems involved instead of reading it.
+`Docs/Architecture.md` (about 50,000 tokens) and `Docs/Roadmap.md` (about 20,000) are large, so read them by section: find the heading with Grep, then Read only that part with an offset and a limit. Never read them whole. Each system guide is a file of its own in `Docs/Systems/` (section N of `Docs/Systems.md` is `Docs/Systems/NN-*.md`); read the guides you need whole. Search the decision log for the classes and systems involved instead of reading it.
 
 ## Sources to check against
 
