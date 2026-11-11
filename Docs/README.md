@@ -13,6 +13,7 @@ This folder contains project documentation for setting up, designing, building, 
 | [`GameDesign.md`](GameDesign.md) | Describe the game's premise, intended experience, and gameplay design. |
 | [`Roadmap.md`](Roadmap.md) | Track completed work and planned milestones. |
 | [`PlayTest.md`](PlayTest.md) | List pending in-editor checks and the project's manual smoke test. |
+| [`PerformanceBaseline.md`](PerformanceBaseline.md) | Record the performance baseline: each run on the benchmark scene, how it is measured and what it found. |
 
 ## Reviews and audits
 
