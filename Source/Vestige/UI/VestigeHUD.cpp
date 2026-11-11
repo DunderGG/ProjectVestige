@@ -31,16 +31,18 @@
 
 namespace VestigeHudClock
 {
-	constexpr int32 MinutesPerHour = 60;
 	constexpr int32 HoursPerDay = 24;
 
 	/** The clock moves in steps of this many minutes, so it doesn't flicker every game minute. */
 	constexpr int32 StepMinutes = 10;
 
-	/** Hours since midnight, rounded down to the clock's step, in minutes. */
+	/**
+	 * Hours since midnight, rounded down to the clock's step, in minutes. Counted as the clock counts its minutes, so the shown
+	 * time agrees with the clock's events.
+	 */
 	int32 ToShownMinutes(float Hours)
 	{
-		return FMath::FloorToInt(Hours * MinutesPerHour / StepMinutes) * StepMinutes;
+		return VestigeClock::ToWholeMinutes(Hours) / StepMinutes * StepMinutes;
 	}
 
 	/** A 24-hour clock, like "18:40". Minutes past midnight of the next day wrap around to 00:00. */
@@ -49,8 +51,8 @@ namespace VestigeHudClock
 		FNumberFormattingOptions TwoDigits;
 		TwoDigits.SetMinimumIntegralDigits(2).SetUseGrouping(false);
 		return FText::FormatNamed(LOCTEXT("Clock", "{Hours}:{Minutes}"), TEXT("Hours"),
-			FText::AsNumber((Minutes / MinutesPerHour) % HoursPerDay, &TwoDigits), TEXT("Minutes"),
-			FText::AsNumber(Minutes % MinutesPerHour, &TwoDigits));
+			FText::AsNumber((Minutes / VestigeClock::MinutesPerHour) % HoursPerDay, &TwoDigits), TEXT("Minutes"),
+			FText::AsNumber(Minutes % VestigeClock::MinutesPerHour, &TwoDigits));
 	}
 }
 

@@ -24,7 +24,6 @@ namespace VestigeCheats
 	constexpr int32 MaxBenchmarkFieldSize = 100;
 
 	constexpr int32 HoursPerDay = 24;
-	constexpr int32 MinutesPerHour = 60;
 
 	/** A clock time typed as digits: up to two are the hour (19), three or four the hour and minutes (930, 1930). */
 	constexpr int32 MaxHourDigits = 2;
@@ -32,7 +31,7 @@ namespace VestigeCheats
 	constexpr int32 HourMinuteSplit = 100;
 
 	/** Half a game minute, in hours. */
-	constexpr float HalfMinuteHours = 0.5f / MinutesPerHour;
+	constexpr float HalfMinuteHours = 0.5f / VestigeClock::MinutesPerHour;
 
 	/** Reads "1930" (19:30), "930" (09:30) or "19" (19:00) as hours since midnight, up to 24:00. False for anything else. */
 	bool ParseClockTime(const FString& Text, float& OutHours)
@@ -51,12 +50,12 @@ namespace VestigeCheats
 		const bool bHasMinutes = Text.Len() > MaxHourDigits;
 		const int32 Hours = bHasMinutes ? Number / HourMinuteSplit : Number;
 		const int32 Minutes = bHasMinutes ? Number % HourMinuteSplit : 0;
-		const int32 TotalMinutes = Hours * MinutesPerHour + Minutes;
-		if (Minutes >= MinutesPerHour || TotalMinutes > HoursPerDay * MinutesPerHour)
+		const int32 TotalMinutes = Hours * VestigeClock::MinutesPerHour + Minutes;
+		if (Minutes >= VestigeClock::MinutesPerHour || TotalMinutes > HoursPerDay * VestigeClock::MinutesPerHour)
 		{
 			return false;
 		}
-		OutHours = static_cast<float>(TotalMinutes) / MinutesPerHour;
+		OutHours = static_cast<float>(TotalMinutes) / VestigeClock::MinutesPerHour;
 		return true;
 	}
 }
