@@ -22,7 +22,7 @@ One of the [system guides](../Systems.md); read [How to use this document](../Sy
   | `LogVestigeFeedback` | Every feedback report for the player (its tag and values), written by `UVestigeFeedbackSubsystem::Report`, and the HUD's warning for a report without a response | `Core/VestigeLog.h` |
   | `LogVestigeAbilitySystem` | Ability sets, stamina, abilities | `AbilitySystem/VestigeAbilitySystemLog.h` |
   | `LogVestigeContent` | Loading content, content IDs, the Asset Manager's checks | `Content/VestigeContentLog.h` |
-  | `LogVestigeTime` | The clock and the day cycle | `Time/VestigeTimeLog.h` |
+  | `LogVestigeTime` | The clock and the sky lighting | `Time/VestigeTimeLog.h` |
   | `LogVestigeInventory` | Items and the inventory | `Inventory/VestigeInventoryLog.h` |
   | `LogVestigeInput` | The input config and the player's bindings | `Player/VestigeInputLog.h` |
   | `LogFarm` | The farm: grid, tiles, crops, tools | `Farming/FarmLog.h` |
