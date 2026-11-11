@@ -128,6 +128,7 @@ Small things to finish before milestone 2 starts.
    - Let a system be prototyped and played before its `Systems.md` guide; keep guide approval for adopting engine frameworks (rule 3)
    - Build what is right for the game even when it needs an editor asset; David makes the asset or the agent writes the steps (rule 6)
    - One class prefix, `Vestige`, for new types, and no more renames of existing `Farm` classes ([L1](CodeReview.md#low))
+- [ ] Trim the documents the AI agents read for every task, so a task costs fewer tokens (asked by David, 2026-11-11): `Systems.md` is about 59,000 tokens, `Architecture.md` about 49,000 and `PlayTest.md` about 20,000, and each specialist agent in `AGENTS.md`, "How work is done", starts by reading parts of them. Goes with M8's cut of `Architecture.md` above. To decide, through the architect and the reviewer: splitting `Systems.md` into one file per system guide so an agent opens only the guides it needs, moving older decision log entries and finished play-test checks to archive files, and dropping text that restates the code. Measure the token counts before and after
 
 ## 4. Milestone 2: vertical slice
 
