@@ -395,6 +395,7 @@ To be decided later. Move each one into the relevant section and the decision lo
 - **Mutated crops:** exactly which effects are good and which are risky, and how often normal crops mutate.
 - **Death and knock-out penalty:** what exactly is lost.
 - **Final public game title** and the world's name. The current internal codename is Project Vestige.
+- **Art direction and bought assets:** [section 12](#12-presentation) aims for a more realistic look and plans to lean on Quixel Megascans and marketplace assets, while [CONTRIBUTING.md](../CONTRIBUTING.md#5-contributing-art) asks for low-poly, stylized art and accepts only CC0, public domain and CC BY 4.0 assets. Store-licensed assets (Fab, Megascans) are licensed for use in a game, generally not for sharing in a public repository under CC BY-NC-SA, so using them needs a plan for keeping them out of the repository. Until this is settled, new art matches the existing low-poly assets.
 
 ## 16. Mechanics glossary
 
