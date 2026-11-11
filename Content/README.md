@@ -26,4 +26,4 @@ This folder contains the Unreal Engine assets used by Project Vestige: maps, Blu
 | `Meshes/` | Project static meshes, including crop stages, tilled soil, and the watering can. |
 | `Tools/` | Tool definition data assets scanned by the Asset Manager. |
 
-Asset naming conventions and instructions for adding crops, tools, and items are in [Content and Asset Naming](../CONTRIBUTING.md#142-content-and-asset-naming) and [Adding Content the Data-Driven Way](../CONTRIBUTING.md#7-adding-content-the-data-driven-way).
+Asset naming conventions and instructions for adding crops, tools, and items are in [Content and Asset Naming](../Docs/CodingGuidelines.md#142-content-and-asset-naming) and [Adding Content the Data-Driven Way](../CONTRIBUTING.md#7-adding-content-the-data-driven-way).
