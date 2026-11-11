@@ -17,7 +17,7 @@ Read before coding:
 3. The guide file in `Docs/Systems/` of every system you touch, and `Docs/Architecture.md` sections 13 and 14.
 4. The existing code around the change. Match its patterns.
 
-Read the large docs (`Docs/Architecture.md`, `Docs/PlayTest.md`, `Docs/Roadmap.md`) by section, never whole: find the heading with Grep, then Read only that part with an offset and a limit. Each system guide is a file of its own in `Docs/Systems/` (section N of `Docs/Systems.md` is `Docs/Systems/NN-*.md`); read the guides you need whole. On a fix round you already have them; read only what changed.
+Read the large docs (`Docs/Architecture.md`, `Docs/Roadmap.md`) by section, never whole: find the heading with Grep, then Read only that part with an offset and a limit. Each system guide is a file of its own in `Docs/Systems/` (section N of `Docs/Systems.md` is `Docs/Systems/NN-*.md`); read the guides you need whole. On a fix round you already have them; read only what changed.
 
 The rules most often missed, with where they are written:
 
