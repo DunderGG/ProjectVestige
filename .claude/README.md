@@ -4,7 +4,7 @@ Claude Code subagents that take the specialist roles in Project Vestige's work, 
 
 | Agent | Role | Writes |
 |---|---|---|
-| [`vestige-architect`](agents/vestige-architect.md) | Designs each change and owns the technical decisions | `Docs/Systems.md` guides, `Docs/Architecture.md`, the ownership list in `AGENTS.md` |
+| [`vestige-architect`](agents/vestige-architect.md) | Designs each change and owns the technical decisions | `Docs/Systems/` guides, `Docs/Architecture.md`, the ownership list in `AGENTS.md` |
 | [`vestige-reviewer`](agents/vestige-reviewer.md) | Senior Unreal C++ reviewer of designs, code and art; reviews again until it approves | Nothing (read-only) |
 | [`vestige-implementer`](agents/vestige-implementer.md) | Writes the C++ from the approved design and builds it clean | `Source/`, temporary editor scripts |
 | [`vestige-test-author`](agents/vestige-test-author.md) | Writes the CQTest tests, runs the whole suite, keeps the manual checks | `Source/Vestige/Tests/`, `Docs/PlayTest.md` |

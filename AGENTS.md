@@ -14,7 +14,7 @@ Instructions for AI coding agents working in this repository. Humans can read it
 
 - **[Docs/CodingGuidelines.md](Docs/CodingGuidelines.md)** is the coding standard: how code looks. It is based on Epic's C++ Coding Standard and clean code principles.
 - **[Docs/Architecture.md](Docs/Architecture.md)** is the design: principles, where things go in Unreal's framework, who owns what, how systems talk, and the decision log.
-- **[Docs/Systems.md](Docs/Systems.md)**: best practice per game system (saving, content, input, UI, the Gameplay Ability System, AI, inventory...), from Epic's documentation and the Lyra sample. Read the guide for every system a change touches.
+- **[Docs/Systems.md](Docs/Systems.md)**: the index of the system guides, best practice per game system (saving, content, input, UI, the Gameplay Ability System, AI, inventory...) from Epic's documentation and the Lyra sample, one file per system in `Docs/Systems/`. Read the guide for every system a change touches.
 - **[Docs/Roadmap.md](Docs/Roadmap.md)**: what's done and what's next. Tick items in the same commit that finishes them.
 - **[Docs/PlayTest.md](Docs/PlayTest.md)**: what David checks by hand in the editor: pending checks for recent changes and the smoke test.
 
@@ -71,14 +71,14 @@ Use [Docs/CodingGuidelines.md](Docs/CodingGuidelines.md) and [Docs/Architecture.
 10. **Record design decisions.** A change that adds a system, moves a responsibility or makes a design choice updates `Docs/Architecture.md` (Part B and the decision log) in the same commit.
 11. **Design for mods.** Content (crops, tools, items) is data assets found through the Asset Manager, never hard-coded lists or enums. Content has namespaced IDs (`Base.Parsnip`). Saves store IDs and skip unknown content. See `Docs/Architecture.md`, section 12.
 12. **Performance is a requirement.** Ticking off by default; use events and timers instead of per-frame polling. Nothing in `Tick`, timers or UI bindings searches the world, loads assets, spawns, creates `UObject`s or rebuilds unchanged strings. Content is soft-referenced and never loaded synchronously during play. No debug drawing as a feature. Expensive loops and new-day work get a `TRACE_CPUPROFILER_EVENT_SCOPE`. Optimizations that cost readability need a measurement. Rules in `Docs/CodingGuidelines.md` section 12, budget in `Docs/Architecture.md` section 10.
-13. **Follow the system's guide.** Each game system follows its guide in `Docs/Systems.md`. A system without a guide gets one first, written from Epic's documentation and Lyra's source and approved before any code (by the reviewer for technical choices, by David for game design; see "How work is done"). Adopting an engine framework (Gameplay Ability System, Common UI, StateTree, Mass) is a decision log entry.
+13. **Follow the system's guide.** Each game system follows its guide in `Docs/Systems/`. A system without a guide gets one first, written from Epic's documentation and Lyra's source and approved before any code (by the reviewer for technical choices, by David for game design; see "How work is done"). Adopting an engine framework (Gameplay Ability System, Common UI, StateTree, Mass) is a decision log entry.
 14. **Tests for rules.** Game rule changes get CQTest tests in `Source/Vestige/Tests/`, named `Vestige.<Area>.<Behavior>`. A bug fix gets a test that would have caught it. How to write and run them is in guidelines section 13.
 
 ## How work is done
 
 Every change to code or content goes through specialist roles, in this order. "The user" is the person the agents work for: usually David, the maintainer, and sometimes an outside contributor. Most people working on the project, David included, are new to game development, so the roles do the technical judging and the user is asked only about game feel and game design.
 
-1. **Design: the architect.** Names the owner of each new responsibility and its layer, writes or updates the system's guide in `Docs/Systems.md` and the `Docs/Architecture.md` changes (ownership table, decision log), and plans the tests and the manual checks.
+1. **Design: the architect.** Names the owner of each new responsibility and its layer, writes or updates the system's guide in `Docs/Systems/` and the `Docs/Architecture.md` changes (ownership table, decision log), and plans the tests and the manual checks.
 2. **Design review: the reviewer.** A senior Unreal C++ reviewer, independent of the author, checks the design against Unreal practice, the engine source, Lyra and these rules. The architect answers every finding and the reviewer reviews again, until it approves. When the user is David, the reviewer's approval counts as his on technical choices, within the limits below (decision log, 2026-11-11).
 3. **Build: the implementer.** Writes the C++ the approved design calls for and builds it clean. A design that turns out not to work goes back to steps 1 and 2; the implementer doesn't redesign.
 4. **Tests: the test author.** Writes the CQTest tests for every changed rule, builds, runs the whole `Vestige` suite and adds the manual checks to `Docs/PlayTest.md`.

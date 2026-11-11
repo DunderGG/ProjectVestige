@@ -8,22 +8,22 @@ You write the C++ for Project Vestige from an approved design. The design was ma
 
 ## You start without context
 
-Your brief should give the approved design brief, the docs it changed (usually a guide in `Docs/Systems.md` and `Docs/Architecture.md`), the reviewer's approval, and on a fix round the findings to fix. If the design isn't in the brief, read it from those docs and say what you assumed.
+Your brief should give the approved design brief, the docs it changed (usually a guide in `Docs/Systems/` and `Docs/Architecture.md`), the reviewer's approval, and on a fix round the findings to fix. If the design isn't in the brief, read it from those docs and say what you assumed.
 
 Read before coding:
 
-1. `AGENTS.md`: the hard rules and the ownership list.
+1. `AGENTS.md` (already in your context through `CLAUDE.md`; when the task changes it, read its diff): the hard rules and the ownership list.
 2. `Docs/CodingGuidelines.md`, all of it. It is the coding standard and its section 17 is the checklist your code is reviewed against.
-3. The `Docs/Systems.md` guide of every system you touch, and `Docs/Architecture.md` sections 13 and 14.
+3. The guide file in `Docs/Systems/` of every system you touch, and `Docs/Architecture.md` sections 13 and 14.
 4. The existing code around the change. Match its patterns.
 
-Read the large docs (`Docs/Architecture.md`, `Docs/Systems.md`, `Docs/PlayTest.md`, `Docs/Roadmap.md`) by section, never whole: find the heading with Grep, then Read only that part with an offset and a limit. On a fix round you already have them; read only what changed.
+Read the large docs (`Docs/Architecture.md`, `Docs/PlayTest.md`, `Docs/Roadmap.md`) by section, never whole: find the heading with Grep, then Read only that part with an offset and a limit. Each system guide is a file of its own in `Docs/Systems/` (section N of `Docs/Systems.md` is `Docs/Systems/NN-*.md`); read the guides you need whole. On a fix round you already have them; read only what changed.
 
 The rules most often missed, with where they are written:
 
 - Ownership and one job per class: guidelines section 1.
 - The layer folders and the include direction, checked by `Vestige.Architecture.IncludeDirection`: guidelines section 14.1. Include our headers by folder path, own header first.
-- Logging through `VESTIGE_LOG` with the system's own category: guidelines section 10, `Docs/Systems.md` section 21.
+- Logging through `VESTIGE_LOG` with the system's own category: guidelines section 10, `Docs/Systems/21-Logging.md`.
 - Messages for the player go through `UVestigeFeedbackSubsystem::Report` with a tag; game code never calls the HUD: guidelines section 10.
 - Names, prefixes and no shadowing of engine members (C4458 is an error): guidelines section 2.
 - Pointers (`TObjectPtr`, weak, soft): guidelines section 7. Performance (no tick, no polling, no sync loads, trace scopes): section 12. Blueprint exposure: section 6.
@@ -52,7 +52,7 @@ If the design rests on something that turns out false (an engine API that doesn'
 ## Docs you keep in step
 
 - Code comments and the `/** */` comments on classes and non-obvious public members.
-- The guide's Status in `Docs/Systems.md`, when what you built differs in detail from what it says. A deviation that changes an owner, an interface or a decision goes in your report instead; the main session updates `Docs/Architecture.md` once it is agreed.
+- The guide's Status in its file in `Docs/Systems/`, when what you built differs in detail from what it says. A deviation that changes an owner, an interface or a decision goes in your report instead; the main session updates `Docs/Architecture.md` once it is agreed.
 - `Docs/Roadmap.md`: tick the item the change finishes.
 - `Docs/CodingGuidelines.md` section 16 and a roadmap item, if you knowingly leave code that doesn't meet the guide.
 
