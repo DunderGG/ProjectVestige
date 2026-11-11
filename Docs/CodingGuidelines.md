@@ -434,6 +434,13 @@ Game rules get automated tests. They run in seconds without playing the game, an
   Each test logs a `Test Completed. Result={Success}` line.
 - **Design for testability**: keep rules in code that doesn't need a running level. When rule code is tangled with visuals or actor setup, that's a sign to separate them (see [Architecture.md, Known gaps](Architecture.md#17-known-gaps)).
 - Run the tests before committing a change to game rules. A bug fix gets a test that would have caught it.
+- **Pitfalls** found in this project's tests (add each new one here):
+  - The C++ `AVestigePlayerState` has no ability sets; a test that needs stamina or abilities spawns `BP_PlayerState`.
+  - A CQTest world's timer manager can't be ticked more than once a frame, so a test ends a tool use with `CancelAllAbilities()` instead of waiting for its timer.
+  - A test that sleeps needs the game mode: spawn `AVestigeGameMode` and call its `DispatchBeginPlay()`, since it starts the next day. Rest tests also call `DispatchBeginPlay()` on the player state.
+  - A test that listens to a Blueprint (dynamic) delegate needs a reflected `UFUNCTION` listener: reuse `UVestigeTestEventRecorder` in `Tests/`. UHT accepts test `UCLASS`es inside `#if WITH_TESTS`, not inside `WITH_DEV_AUTOMATION_TESTS`.
+  - A `TEST_CLASS` fixture named like a namespace hides the namespace inside the test; qualify it with `::` (`::FarmTileLooks::GetLook`).
+  - From the command line, add `-abslog=<file>` and search that file for `Result=`: piping the editor's output in PowerShell doesn't capture the automation lines.
 
 ## 14. Project layout and assets
 
