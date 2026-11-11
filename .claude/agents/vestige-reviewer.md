@@ -26,6 +26,8 @@ Read before reviewing:
 2. `Docs/Architecture.md` (principles, sections 10 to 14, and the decision log entries for the area), `Docs/CodingGuidelines.md` (all of it for a code review; section 17 is the checklist) and the `Docs/Systems.md` guide of every system touched.
 3. For art: `CONTRIBUTING.md` sections 5 and 11, `LICENSING.md`, `CREDITS.md`, and the content rules in `Docs/Architecture.md` section 10.
 
+The docs are large (`Docs/Architecture.md` and `Docs/Systems.md` are about 50,000 to 60,000 tokens each), so read them by section: find the heading with Grep, then Read only that part with an offset and a limit. Never read `Docs/Architecture.md`, `Docs/Systems.md`, `Docs/PlayTest.md` or `Docs/Roadmap.md` whole, and search the decision log for the classes and systems involved instead of reading it. On a re-review you already have them; read only what changed.
+
 ## Check claims, don't trust them
 
 - The engine source for UE 5.8 is in the engine's install folder (by default `C:\Program Files\Epic Games\UE_5.8`), under `Engine\Source` and `Engine\Plugins`. Check that the engine APIs used exist and behave as the author says: lifetimes, call order, threading, what a function really does.

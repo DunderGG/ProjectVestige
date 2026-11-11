@@ -26,6 +26,8 @@ Read before designing:
 
 These documents are the rules. Point at them; don't restate them.
 
+They are also large (`Docs/Architecture.md` and `Docs/Systems.md` are about 50,000 to 60,000 tokens each), so read them by section: find the heading with Grep, then Read only that part with an offset and a limit. Never read `Docs/Architecture.md`, `Docs/Systems.md`, `Docs/PlayTest.md` or `Docs/Roadmap.md` whole. Search the decision log for the classes and systems involved instead of reading it.
+
 ## Sources to check against
 
 - **Engine source** for UE 5.8, in the engine's install folder (by default `C:\Program Files\Epic Games\UE_5.8`), under `Engine\Source` and `Engine\Plugins`. Check that every engine class, function and setting you rely on exists in 5.8 and does what you think. APIs change between versions.

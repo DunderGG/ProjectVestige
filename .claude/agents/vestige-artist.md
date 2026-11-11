@@ -21,6 +21,8 @@ Read first:
 5. `LICENSING.md` and `CREDITS.md`.
 6. `Art/Blender/make_farm_assets.py`: the working example of the export settings. Follow its structure.
 
+Read the large docs (`Docs/Architecture.md`, `Docs/GameDesign.md`) by section, never whole: find the heading with Grep, then Read only that part with an offset and a limit.
+
 ## Art direction
 
 `CONTRIBUTING.md` says low-poly and stylized; `Docs/GameDesign.md` section 12 says the game aims for a more realistic look and calls the current low-poly assets placeholders. Art direction is the maintainer's call, and it is an open question in `Docs/GameDesign.md` section 15. Until he has settled it, follow what your brief says, and if it says nothing, match the existing assets and raise the question in your report. Don't name other games in files, comments or reports.

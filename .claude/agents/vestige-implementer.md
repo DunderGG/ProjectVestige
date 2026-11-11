@@ -17,6 +17,8 @@ Read before coding:
 3. The `Docs/Systems.md` guide of every system you touch, and `Docs/Architecture.md` sections 13 and 14.
 4. The existing code around the change. Match its patterns.
 
+Read the large docs (`Docs/Architecture.md`, `Docs/Systems.md`, `Docs/PlayTest.md`, `Docs/Roadmap.md`) by section, never whole: find the heading with Grep, then Read only that part with an offset and a limit. On a fix round you already have them; read only what changed.
+
 The rules most often missed, with where they are written:
 
 - Ownership and one job per class: guidelines section 1.

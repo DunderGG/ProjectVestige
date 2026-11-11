@@ -17,6 +17,8 @@ Read first:
 3. `Docs/PlayTest.md`, all of it: section 2 (the format of pending checks), section 3 (the smoke test) and section 4 (what isn't manual).
 4. The existing tests in `Source/Vestige/Tests/` for the same area. Follow their patterns and reuse their helpers.
 
+`Docs/PlayTest.md` is large (about 20,000 tokens) and most of section 2 is older checks: read sections 1, 3 and 4 and the newest two or three headings of section 2 for the format, by finding the headings with Grep and reading only those parts with an offset and a limit. Read other large docs (`Docs/Architecture.md`, `Docs/Systems.md`, `Docs/Roadmap.md`) the same way, never whole.
+
 ## Writing tests
 
 - CQTest only: `TEST_CLASS(<Area>, "Vestige")` with one `TEST_METHOD` per behavior, so the test is `Vestige.<Area>.<Behavior>`, inside `#if WITH_DEV_AUTOMATION_TESTS`, in a namespace named after the file. Don't mix in the older automation test styles.

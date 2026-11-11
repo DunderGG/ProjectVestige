@@ -21,7 +21,7 @@ Instructions for AI coding agents working in this repository. Humans can read it
 - **[LICENSING.md](LICENSING.md)**: code is GPL-3.0-or-later with an Unreal Engine linking permission, assets are CC BY-NC-SA 4.0, Epic template material is under the UE EULA. New source files start with the SPDX license header shown there. Never add third-party code or assets without checking they are under a license CONTRIBUTING.md accepts, and record their source and license in CREDITS.md and the path table in LICENSING.md.
 - **[CONTRIBUTING.md](CONTRIBUTING.md)** covers setup, art and audio pipelines, and the workflow for outside contributors.
 
-Use [Docs/CodingGuidelines.md](Docs/CodingGuidelines.md) and [Docs/Architecture.md](Docs/Architecture.md) as the baseline for every change. Also follow the relevant system guide in [Docs/Systems.md](Docs/Systems.md), update [Docs/Roadmap.md](Docs/Roadmap.md) when completing a listed item, and add required manual checks to [Docs/PlayTest.md](Docs/PlayTest.md). The hard rules below summarize the requirements most often missed; the linked documents provide the full guidance.
+Use [Docs/CodingGuidelines.md](Docs/CodingGuidelines.md) and [Docs/Architecture.md](Docs/Architecture.md) as the baseline for every change. Also follow the relevant system guide in [Docs/Systems.md](Docs/Systems.md), update [Docs/Roadmap.md](Docs/Roadmap.md) when completing a listed item, and add required manual checks to [Docs/PlayTest.md](Docs/PlayTest.md). The hard rules below summarize the requirements most often missed; the linked documents provide the full guidance. Several of them are long, so read the sections a change needs, found by their headings, rather than whole files.
 
 ## Hard rules
 
