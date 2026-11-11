@@ -17,13 +17,12 @@ Build/Windows/FileOpenOrder/
 *.sdf
 *.blend1
 
-# Local AI coding agent instructions and configuration.
-AGENTS.md
-CLAUDE.md
+# Personal AI coding agent configuration. The project's shared agent instructions (AGENTS.md, CLAUDE.md and
+# .claude/, except each developer's own settings) are committed.
 GEMINI.md
 COPILOT.md
 .cursorrules
-.claude/
+.claude/settings.local.json
 .cursor/
 .aider*
 

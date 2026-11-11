@@ -1,0 +1,54 @@
+@startuml agent-flow
+' Project Vestige agent flow. The rules behind it are in AGENTS.md, "How work is done".
+' Render: right-click in VS Code > Preview Current Diagram (PlantUML extension), or
+' java -jar plantuml.jar -tpng .claude/agent-flow.puml
+skinparam shadowing false
+skinparam defaultFontName Segoe UI
+skinparam ActivityBorderColor #555555
+skinparam ArrowColor #555555
+skinparam NoteBackgroundColor #FFF4E5
+skinparam NoteBorderColor #C98A3A
+
+title Project Vestige: from task to done
+
+start
+:**Task picked up**
+Main session: roadmap item, David's words;
+
+repeat
+  #E8E0F7:**Architect**
+  Owner, layer, guide, test plan;
+  note right
+    Questions for David:
+    game feel and design,
+    rule changes, licensing,
+    money, anything that
+    can't be undone
+  end note
+repeat while (**Design review** by the reviewer) is (changes needed) not (approved)
+
+repeat
+  fork
+    #DCEBFA:**Implementer**
+    Writes the C++, builds clean;
+    #DDF3EE:**Test author**
+    Tests, build, full suite, PlayTest.md;
+  fork again
+    #F9E1EC:**Artist** (when art is needed)
+    Blender models, import;
+  end fork
+repeat while (**Code review** by the reviewer\ncode, tests, art, docs) is (changes needed) not (approved)
+
+:**Commit** (main session)
+Clean build and full suite after the last change, checklist;
+#E2F2DF:**Done**
+Report to David lists each technical decision;
+stop
+
+legend bottom left
+  **Shortcuts**
+  Bug fix: the test author writes a failing test first, then the implementer fixes it, then the code review.
+  No design choice: skip the architect and the design review.
+  Lore, story and typo fixes: no flow.
+endlegend
+@enduml
