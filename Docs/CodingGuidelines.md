@@ -439,6 +439,7 @@ Game rules get automated tests. They run in seconds without playing the game, an
   - A CQTest world's timer manager can't be ticked more than once a frame, so a test ends a tool use with `CancelAllAbilities()` instead of waiting for its timer.
   - A test that sleeps needs the game mode: spawn `AVestigeGameMode` and call its `DispatchBeginPlay()`, since it starts the next day. Rest tests also call `DispatchBeginPlay()` on the player state.
   - A test that listens to a Blueprint (dynamic) delegate needs a reflected `UFUNCTION` listener: reuse `UVestigeTestEventRecorder` in `Tests/`. UHT accepts test `UCLASS`es inside `#if WITH_TESTS`, not inside `WITH_DEV_AUTOMATION_TESTS`.
+  - A multicast delegate calls its listeners in reverse order of binding, and removing one reorders them, so a test never asserts the order between listeners of one delegate.
   - A `TEST_CLASS` fixture named like a namespace hides the namespace inside the test; qualify it with `::` (`::FarmTileLooks::GetLook`).
   - From the command line, add `-abslog=<file>` and search that file for `Result=`: piping the editor's output in PowerShell doesn't capture the automation lines.
 

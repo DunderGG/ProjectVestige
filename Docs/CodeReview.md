@@ -182,6 +182,8 @@ The farming component posts "Tilled the soil." and "Watered." on every successfu
 
 **Fix.** Drain on the clock's own minute or hour events.
 
+**Status: Resolved (2026-11-11).** The clock broadcasts `OnMinuteStarted` for every whole game minute, and the rest component applies `GE_LateNightDrain`, now an instant effect, on each minute after midnight with a minute's share of the drain per game hour. Skips drain as if the time had passed, a stopped clock drains nothing, and the drain keeps no state. Reasons in [Architecture.md, decision log](Architecture.md#16-decision-log).
+
 ### M8 — The documents outweigh the code
 
 `Docs/` is about 508 KB against about 273 KB of source (7,800 lines). [Architecture.md](Architecture.md) alone is 119 KB; its ownership table restates the class comments, and its decision log records tweaks such as Details panel category names and a Visual Studio plugin flag. From 24 October to this review, 41 commits touched `Docs/` and 15 touched `Source/`. Every change can update five documents, which slows work and invites drift. See rule 5 below.

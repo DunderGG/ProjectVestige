@@ -43,14 +43,11 @@ EDataValidationResult UVestigeGameData::IsDataValid(FDataValidationContext& Cont
 
 	if (LateNightDrainEffect)
 	{
-		const UGameplayEffect* Drain = GetDefault<UGameplayEffect>(LateNightDrainEffect);
-		const bool bInfiniteAndPeriodic = Drain->DurationPolicy == EGameplayEffectDurationType::Infinite
-			&& Drain->Period.GetValueAtLevel(1.f) > UGameplayEffect::NO_PERIOD;
-		if (!bInfiniteAndPeriodic)
+		if (LateNightDrainEffect.GetDefaultObject()->DurationPolicy != EGameplayEffectDurationType::Instant)
 		{
-			Context.AddError(FText::Format(LOCTEXT("DrainNotPeriodic",
-											   "Late Night Drain Effect {0} must be infinite with a period above 0: the rest component "
-											   "drains with it until the day ends."),
+			Context.AddError(FText::Format(LOCTEXT("DrainNotInstant",
+											   "Late Night Drain Effect {0} must be instant: the rest component applies it once every "
+											   "game minute of the late night."),
 				FText::FromString(LateNightDrainEffect->GetName())));
 			Result = EDataValidationResult::Invalid;
 		}

@@ -11,6 +11,8 @@
 #include "Time/VestigeClockSubsystem.h"
 #include "UObject/StrongObjectPtr.h"
 
+#include <cmath>
+
 // A namespace keeps the fixture's short name from hiding other declarations in unity builds.
 namespace VestigeClockTests
 {
@@ -385,6 +387,141 @@ namespace VestigeClockTests
 
 			const TArray<int32> Expected = {25};
 			ASSERT_THAT(IsTrue(Hours == Expected));
+			ASSERT_THAT(IsTrue(GameClock->GetCurrentDay() == 2));
+			ASSERT_THAT(IsTrue(GameClock->GetTimeOfDay() == GameClock->GetDayStartHour()));
+		}
+
+		/** Records every minute, hour and day end the clock broadcasts, in order, as "M420", "H7" and "End". */
+		void RecordTime(TArray<FString>& Events)
+		{
+			GameClock->OnMinuteStarted.AddLambda(
+				[&Events](int32 Minute)
+				{
+					Events.Add(FString::Printf(TEXT("M%d"), Minute));
+				});
+			GameClock->OnHourStarted.AddLambda(
+				[&Events](int32 Hour)
+				{
+					Events.Add(FString::Printf(TEXT("H%d"), Hour));
+				});
+			GameClock->OnDayEnded.AddLambda(
+				[&Events](const FVestigeDayEnd& DayEnd)
+				{
+					Events.Add(TEXT("End"));
+				});
+		}
+
+		TEST_METHOD(EachWholeMinuteIsBroadcastOnceInOrder)
+		{
+			TArray<int32> Minutes;
+			GameClock->OnMinuteStarted.AddLambda(
+				[&Minutes](int32 Minute)
+				{
+					Minutes.Add(Minute);
+				});
+			const int32 StartMinute = VestigeClock::ToWholeMinutes(GameClock->GetDayStartHour());
+
+			PassHours(0.5f / VestigeClock::MinutesPerHour);
+			ASSERT_THAT(IsTrue(Minutes.IsEmpty()));
+
+			PassHours(3.f / VestigeClock::MinutesPerHour);
+			const TArray<int32> Expected = {StartMinute + 1, StartMinute + 2, StartMinute + 3};
+			ASSERT_THAT(IsTrue(Minutes == Expected));
+		}
+
+		TEST_METHOD(AMinuteThatStartsAnHourComesBeforeTheHour)
+		{
+			TArray<FString> Events;
+			RecordTime(Events);
+			GameClock->RestoreFromSaveData(MakeClock(1, 6.99f));
+
+			PassHours(0.02f);
+
+			const TArray<FString> Expected = {TEXT("M420"), TEXT("H7")};
+			ASSERT_THAT(IsTrue(Events == Expected));
+		}
+
+		TEST_METHOD(TheLastMinuteAndHourComeBeforeTheDayEnds)
+		{
+			TArray<FString> Events;
+			RecordTime(Events);
+			GameClock->RestoreFromSaveData(MakeClock(1, GameClock->GetDayEndHour() - 0.01f));
+
+			PassHours(1.f);
+
+			const int32 EndHour = FMath::FloorToInt32(GameClock->GetDayEndHour());
+			const TArray<FString> Expected = {
+				FString::Printf(TEXT("M%d"), EndHour * VestigeClock::MinutesPerHour), FString::Printf(TEXT("H%d"), EndHour), TEXT("End")};
+			ASSERT_THAT(IsTrue(Events == Expected));
+		}
+
+		TEST_METHOD(AClockJustBeforeAnHourBroadcastsNoHour)
+		{
+			TArray<FString> Events;
+			RecordTime(Events);
+			GameClock->RestoreFromSaveData(MakeClock(1, 6.99f));
+
+			ASSERT_THAT(IsTrue(GameClock->AdvanceTo(std::nextafter(7.f, 0.f))));
+
+			ASSERT_THAT(IsTrue(Events.IsEmpty()));
+		}
+
+		TEST_METHOD(AdvancingTheClockBroadcastsEachMinuteItPasses)
+		{
+			TArray<int32> Minutes;
+			GameClock->OnMinuteStarted.AddLambda(
+				[&Minutes](int32 Minute)
+				{
+					Minutes.Add(Minute);
+				});
+			const float From = GameClock->GetTimeOfDay();
+
+			ASSERT_THAT(IsTrue(GameClock->AdvanceTo(From + 2.f)));
+
+			ASSERT_THAT(IsTrue(Minutes.Num() == 2 * VestigeClock::MinutesPerHour));
+			ASSERT_THAT(IsTrue(Minutes[0] == VestigeClock::ToWholeMinutes(From) + 1));
+			ASSERT_THAT(IsTrue(Minutes.Last() == VestigeClock::ToWholeMinutes(From + 2.f)));
+		}
+
+		TEST_METHOD(RestoringOrStartingADayBroadcastsNoMinute)
+		{
+			PassHours(2.5f);
+			int32 Broadcasts = 0;
+			CountBroadcasts(GameClock->OnMinuteStarted, Broadcasts);
+
+			GameClock->StartNextDay();
+			GameClock->RestoreFromSaveData(MakeClock(3, 20.f));
+
+			ASSERT_THAT(IsTrue(Broadcasts == 0));
+		}
+
+		TEST_METHOD(AMinuteThatEndsTheDayIsTheLastTimeBroadcast)
+		{
+			// A rule that ends the day at a minute, with the next day started at once as the game mode does.
+			TArray<int32> Minutes;
+			GameClock->OnMinuteStarted.AddLambda(
+				[this, &Minutes](int32 Minute)
+				{
+					Minutes.Add(Minute);
+					if (Minute == 510)
+					{
+						GameClock->EndDay();
+					}
+				});
+			int32 Hours = 0;
+			CountBroadcasts(GameClock->OnHourStarted, Hours);
+			GameClock->OnDayEnded.AddLambda(
+				[this](const FVestigeDayEnd& DayEnd)
+				{
+					GameClock->StartNextDay();
+				});
+			GameClock->RestoreFromSaveData(MakeClock(1, 8.42f));
+
+			PassHours(3.f);
+
+			const TArray<int32> Expected = {506, 507, 508, 509, 510};
+			ASSERT_THAT(IsTrue(Minutes == Expected));
+			ASSERT_THAT(IsTrue(Hours == 0));
 			ASSERT_THAT(IsTrue(GameClock->GetCurrentDay() == 2));
 			ASSERT_THAT(IsTrue(GameClock->GetTimeOfDay() == GameClock->GetDayStartHour()));
 		}

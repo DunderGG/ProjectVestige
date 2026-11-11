@@ -139,6 +139,9 @@ void UVestigeClockSubsystem::RestoreFromSaveData(const FVestigeClockSaveData& Da
 
 bool UVestigeClockSubsystem::AdvanceTo(float NewTimeOfDay)
 {
+	// A long jump broadcasts every minute it passes.
+	TRACE_CPUPROFILER_EVENT_SCOPE(UVestigeClockSubsystem::AdvanceTo);
+
 	if (bDayEndReached || NewTimeOfDay <= TimeOfDay)
 	{
 		return false;
@@ -157,9 +160,9 @@ void UVestigeClockSubsystem::RunTo(float NewTimeOfDay)
 	const float PreviousTimeOfDay = TimeOfDay;
 	TimeOfDay = FMath::Min(NewTimeOfDay, DayEndHour);
 	const int32 Day = CurrentDay;
-	BroadcastHoursStartedSince(PreviousTimeOfDay);
+	BroadcastTimeStartedSince(PreviousTimeOfDay);
 
-	// An hour's listener may have ended the day, and the game mode may already have started the next one.
+	// A minute's or an hour's listener may have ended the day, and the game mode may already have started the next one.
 	if (CurrentDay != Day || bDayEndReached || TimeOfDay < DayEndHour)
 	{
 		return;
@@ -208,13 +211,23 @@ TStatId UVestigeClockSubsystem::GetStatId() const
 	RETURN_QUICK_DECLARE_CYCLE_STAT(UVestigeClockSubsystem, STATGROUP_Tickables);
 }
 
-void UVestigeClockSubsystem::BroadcastHoursStartedSince(float PreviousTimeOfDay)
+void UVestigeClockSubsystem::BroadcastTimeStartedSince(float PreviousTimeOfDay)
 {
 	const int32 Day = CurrentDay;
-	const int32 LastHour = FMath::FloorToInt32(TimeOfDay);
-	for (int32 Hour = FMath::FloorToInt32(PreviousTimeOfDay) + 1; Hour <= LastHour; ++Hour)
+	const int32 LastMinute = VestigeClock::ToWholeMinutes(TimeOfDay);
+	for (int32 Minute = VestigeClock::ToWholeMinutes(PreviousTimeOfDay) + 1; Minute <= LastMinute; ++Minute)
 	{
-		OnHourStarted.Broadcast(Hour);
+		// The minute first, so its listeners count the minute that led up to the hour before the hour's listeners run.
+		OnMinuteStarted.Broadcast(Minute);
+		if (bDayEndReached || CurrentDay != Day)
+		{
+			return;
+		}
+		if (Minute % VestigeClock::MinutesPerHour != 0)
+		{
+			continue;
+		}
+		OnHourStarted.Broadcast(Minute / VestigeClock::MinutesPerHour);
 		if (bDayEndReached || CurrentDay != Day)
 		{
 			return;

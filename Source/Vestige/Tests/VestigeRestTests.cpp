@@ -35,6 +35,9 @@ namespace VestigeRestTests
 
 		FPlayerSetup Player;
 
+		/** How far a drained amount may be off: an hour's drain is 60 small float steps. */
+		static constexpr float DrainTolerance = 0.01f;
+
 		BEFORE_EACH()
 		{
 			// The stamina effects are GE_ assets named by the game data, which the asset manager loaded at startup.
@@ -188,23 +191,28 @@ namespace VestigeRestTests
 			SetClock(*Setup.Clock, 21.5f);
 
 			PassHours(*Setup.Clock, 2.f);
-			ASSERT_THAT(IsFalse(Setup.RestComponent->IsDrainingStamina()));
+			ASSERT_THAT(IsTrue(GetStamina(Setup) == GetMaxStamina(Setup)));
 
 			PassHours(*Setup.Clock, 1.f);
-			ASSERT_THAT(IsTrue(Setup.RestComponent->IsDrainingStamina()));
+			ASSERT_THAT(IsTrue(FMath::IsNearlyEqual(GetStamina(Setup), GetMaxStamina(Setup) - 5.f, DrainTolerance)));
 		}
 
 		TEST_METHOD(APlayerArrivingAfterMidnightDrainsStamina)
 		{
-			// A map opened after midnight: the new map's player state never hears the hour the drain starts at.
+			// A map opened after midnight: the new map's player state never hears the midnight hour.
 			SetClock(*Player.Clock, 25.f);
 			UClass* PlayerStateClass =
 				LoadClass<AVestigePlayerState>(nullptr, TEXT("/Game/Vestige/Blueprints/BP_PlayerState.BP_PlayerState_C"));
 			AVestigePlayerState& NewPlayer = Spawner.SpawnActor<AVestigePlayerState>(FActorSpawnParameters(), PlayerStateClass);
-
 			NewPlayer.DispatchBeginPlay();
+			const UAbilitySystemComponent* NewAbilitySystem = NewPlayer.GetAbilitySystemComponent();
+			ASSERT_THAT(IsNotNull(NewAbilitySystem));
 
-			ASSERT_THAT(IsTrue(NewPlayer.FindComponentByClass<UVestigeRestComponent>()->IsDrainingStamina()));
+			PassHours(*Player.Clock, 0.5f);
+
+			const float NewStamina = NewAbilitySystem->GetNumericAttribute(UVestigeStaminaSet::GetStaminaAttribute());
+			const float NewMaxStamina = NewAbilitySystem->GetNumericAttribute(UVestigeStaminaSet::GetMaxStaminaAttribute());
+			ASSERT_THAT(IsTrue(FMath::IsNearlyEqual(NewStamina, NewMaxStamina - 5.f, DrainTolerance)));
 		}
 
 		TEST_METHOD(ANightWithoutABodyStillRefillsStaminaAndSetsExhaustion)
@@ -235,27 +243,41 @@ namespace VestigeRestTests
 			ASSERT_THAT(IsNull(UVestigeRestComponent::Find(nullptr)));
 		}
 
-		TEST_METHOD(TheDrainTakesItsRatePerGameHourWhateverTheClockSpeed)
+		TEST_METHOD(TheLateNightDrainsItsRatePerGameHour)
 		{
 			const FPlayerSetup& Setup = Player;
 			SetClock(*Setup.Clock, 23.5f);
+
+			// Nothing drains at the midnight instant, only for the game minutes after it.
+			PassHours(*Setup.Clock, 0.5f);
+			ASSERT_THAT(IsTrue(GetStamina(Setup) == GetMaxStamina(Setup)));
+
+			// The rest component's default of 10 stamina per game hour.
 			PassHours(*Setup.Clock, 1.f);
+			ASSERT_THAT(IsTrue(FMath::IsNearlyEqual(GetStamina(Setup), GetMaxStamina(Setup) - 10.f, DrainTolerance)));
+		}
+
+		TEST_METHOD(ASkipPastMidnightDrainsAsIfTheTimePassed)
+		{
+			const FPlayerSetup& Setup = Player;
+			SetClock(*Setup.Clock, 23.f);
+
+			ASSERT_THAT(IsTrue(Setup.Clock->AdvanceTo(26.f)));
+
+			ASSERT_THAT(IsTrue(FMath::IsNearlyEqual(GetStamina(Setup), GetMaxStamina(Setup) - 20.f, DrainTolerance)));
+		}
+
+		TEST_METHOD(TheLateNightLeavesNoActiveEffect)
+		{
+			// The drain follows the clock's minutes; an active effect would drain on a real-time period of its own.
+			const FPlayerSetup& Setup = Player;
+			SetClock(*Setup.Clock, 23.5f);
+
+			PassHours(*Setup.Clock, 1.5f);
 
 			FGameplayEffectQuery DrainQuery;
 			DrainQuery.EffectDefinition = UVestigeGameData::Get().GetLateNightDrainEffect();
-			const TArray<FActiveGameplayEffectHandle> Drains = Setup.AbilitySystem->GetActiveEffects(DrainQuery);
-			ASSERT_THAT(IsTrue(Drains.Num() == 1));
-			const FActiveGameplayEffect* Drain = Setup.AbilitySystem->GetActiveGameplayEffect(Drains[0]);
-			ASSERT_THAT(IsNotNull(Drain));
-
-			// The first drain comes one period after midnight, not when the drain starts.
-			ASSERT_THAT(IsTrue(FMath::IsNearlyEqual(GetStamina(Setup), GetMaxStamina(Setup))));
-
-			// The rest component's default of 10 stamina per game hour, spread over the periods in one game hour.
-			ASSERT_THAT(IsTrue(Drain->Spec.GetPeriod() > 0.f));
-			const float PeriodsPerGameHour = Setup.Clock->GetRealSecondsPerGameHour() / Drain->Spec.GetPeriod();
-			const float PerPeriod = Drain->Spec.GetSetByCallerMagnitude(VestigeGameplayTags::Data_StaminaDrain, false);
-			ASSERT_THAT(IsTrue(FMath::IsNearlyEqual(PerPeriod * PeriodsPerGameHour, -10.f)));
+			ASSERT_THAT(IsTrue(Setup.AbilitySystem->GetActiveEffects(DrainQuery).IsEmpty()));
 		}
 
 		TEST_METHOD(TheDrainStopsWhenTheNextDayStarts)
@@ -263,13 +285,35 @@ namespace VestigeRestTests
 			const FPlayerSetup& Setup = Player;
 			SetClock(*Setup.Clock, 23.5f);
 			PassHours(*Setup.Clock, 1.f);
-
 			Setup.RestComponent->Sleep();
+			const float MorningStamina = GetStamina(Setup);
 
-			FGameplayEffectQuery DrainQuery;
-			DrainQuery.EffectDefinition = UVestigeGameData::Get().GetLateNightDrainEffect();
-			ASSERT_THAT(IsFalse(Setup.RestComponent->IsDrainingStamina()));
-			ASSERT_THAT(IsTrue(Setup.AbilitySystem->GetActiveEffects(DrainQuery).IsEmpty()));
+			PassHours(*Setup.Clock, 1.f);
+
+			ASSERT_THAT(IsTrue(Setup.Clock->GetCurrentDay() == 2));
+			ASSERT_THAT(IsTrue(GetStamina(Setup) == MorningStamina));
+		}
+
+		TEST_METHOD(AMinuteThatEndsTheDayDrainsNothingAfterTheRefill)
+		{
+			// A rule that ends the day at a minute: the new morning's stamina is the refill, whichever listener hears the minute first.
+			const FPlayerSetup& Setup = Player;
+			SpendAllStamina(Setup);
+			SetClock(*Setup.Clock, 24.5f);
+			const int32 EndMinute = VestigeClock::ToWholeMinutes(24.5f) + 1;
+			Setup.Clock->OnMinuteStarted.AddLambda(
+				[&Setup, EndMinute](int32 Minute)
+				{
+					if (Minute == EndMinute)
+					{
+						Setup.Clock->EndDay();
+					}
+				});
+
+			PassHours(*Setup.Clock, 1.f);
+
+			ASSERT_THAT(IsTrue(Setup.Clock->GetCurrentDay() == 2));
+			ASSERT_THAT(IsTrue(FMath::IsNearlyEqual(GetStamina(Setup), 0.75f * GetMaxStamina(Setup))));
 		}
 
 		TEST_METHOD(ThePlayerIsWarnedAtTenAndAtMidnight)

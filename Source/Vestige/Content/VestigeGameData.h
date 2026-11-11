@@ -31,14 +31,17 @@ public:
 	/** Sets stamina once to the amount set as Vestige.Data.StaminaRefill. Applied when the player wakes up. */
 	TSubclassOf<UGameplayEffect> GetStaminaRefillEffect() const { return StaminaRefillEffect; }
 
-	/** Drains stamina each period by the amount set as Vestige.Data.StaminaDrain (negative), from midnight until the day ends. */
+	/**
+	 * Drains stamina once by the amount set as Vestige.Data.StaminaDrain (negative). Applied each game minute from midnight
+	 * until the day ends.
+	 */
 	TSubclassOf<UGameplayEffect> GetLateNightDrainEffect() const { return LateNightDrainEffect; }
 
 	/** Grants Vestige.State.Exhausted while it is active. Applied after a late night, removed after an early one. */
 	TSubclassOf<UGameplayEffect> GetExhaustedEffect() const { return ExhaustedEffect; }
 
 #if WITH_EDITOR
-	/** Reports an unset effect, and a late-night drain that isn't infinite with a period. */
+	/** Reports an unset effect, and a late-night drain that isn't instant. */
 	virtual EDataValidationResult IsDataValid(FDataValidationContext& Context) const override;
 #endif
 
@@ -55,7 +58,7 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Stamina", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UGameplayEffect> StaminaRefillEffect;
 
-	/** Must be infinite and periodic: the rest component removes it when the day ends, and spreads the drain per game hour over its periods. */
+	/** Must be instant: the rest component applies it once per game minute of the late night, following the clock. */
 	UPROPERTY(EditDefaultsOnly, Category = "Stamina", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UGameplayEffect> LateNightDrainEffect;
 

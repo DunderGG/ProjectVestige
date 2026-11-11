@@ -10,7 +10,7 @@
 #include "GameplayEffect.h"
 #include "VestigeTestTimedDrainEffect.generated.h"
 
-/** A periodic effect with a duration, for tests: a late-night drain that would expire on its own before the day ends. */
+/** A periodic effect with a duration, for tests: a late-night drain that isn't instant. */
 UCLASS(NotBlueprintable, HideDropdown)
 class UVestigeTestTimedDrainEffect : public UGameplayEffect
 {

@@ -13,6 +13,7 @@
 #include "Engine/World.h"
 #include "Farming/FarmLog.h"
 #include "Farming/VestigeRestSaveData.h"
+#include "GameplayEffect.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerState.h"
 #include "Time/VestigeClockSubsystem.h"
@@ -54,13 +55,12 @@ void UVestigeRestComponent::BeginPlay()
 	if (Clock)
 	{
 		Clock->OnHourStarted.AddUObject(this, &UVestigeRestComponent::ReactToHour);
-		Clock->OnDayEnded.AddUObject(this, &UVestigeRestComponent::EndNight);
 		Clock->OnNewDay.AddUObject(this, &UVestigeRestComponent::WakeUp);
 
-		// A map opened after midnight never hears the hour the drain starts at, so it starts here.
-		if (Clock->GetTimeOfDay() >= LateNightHour)
+		// The game data is loaded at startup and doesn't change during play, so it is checked once.
+		if (HasUsableLateNightDrain())
 		{
-			StartLateNightDrain();
+			Clock->OnMinuteStarted.AddUObject(this, &UVestigeRestComponent::DrainLateMinute);
 		}
 	}
 	UVestigeSaveRegistry::RegisterWorldOwner(GetWorld(), *this);
@@ -70,12 +70,10 @@ void UVestigeRestComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	UVestigeSaveRegistry::UnregisterWorldOwner(GetWorld(), *this);
 
-	// The drain runs on the ability system, which may outlive this component.
-	StopLateNightDrain();
 	if (Clock)
 	{
 		Clock->OnHourStarted.RemoveAll(this);
-		Clock->OnDayEnded.RemoveAll(this);
+		Clock->OnMinuteStarted.RemoveAll(this);
 		Clock->OnNewDay.RemoveAll(this);
 		Clock = nullptr;
 	}
@@ -157,19 +155,25 @@ void UVestigeRestComponent::ReactToHour(int32 Hour)
 	if (Hour == LateNightHour)
 	{
 		UVestigeFeedbackSubsystem::Report(GetWorld(), VestigeGameplayTags::Feedback_Rest_PastMidnight);
-		StartLateNightDrain();
 	}
 }
 
-void UVestigeRestComponent::EndNight(const FVestigeDayEnd& DayEnd)
+void UVestigeRestComponent::DrainLateMinute(int32 Minute)
 {
-	StopLateNightDrain();
+	// Minute ends the game minute just passed, so the first late one ends a minute after LateNightHour. A minute later than
+	// the clock is the old day's, heard after another listener of it ended the day and the next one started.
+	if (!Clock || Minute <= LateNightHour * VestigeClock::MinutesPerHour || Minute > VestigeClock::ToWholeMinutes(Clock->GetTimeOfDay()))
+	{
+		return;
+	}
+	if (UAbilitySystemComponent* AbilitySystem = GetAbilitySystem())
+	{
+		ApplyLateNightDrain(*AbilitySystem);
+	}
 }
 
 void UVestigeRestComponent::WakeUp(int32 NewDay)
 {
-	// Also stopped here, for a day started without ending first.
-	StopLateNightDrain();
 	UAbilitySystemComponent* AbilitySystem = GetAbilitySystem();
 	if (!Clock || !AbilitySystem)
 	{
@@ -229,46 +233,37 @@ void UVestigeRestComponent::RefillStamina(UAbilitySystemComponent& AbilitySystem
 	AbilitySystem.ApplyGameplayEffectSpecToSelf(*Spec.Data);
 }
 
-void UVestigeRestComponent::StartLateNightDrain()
+bool UVestigeRestComponent::HasUsableLateNightDrain() const
 {
-	UAbilitySystemComponent* AbilitySystem = GetAbilitySystem();
-	if (!AbilitySystem || !Clock || IsDrainingStamina())
+	const TSubclassOf<UGameplayEffect> Drain = UVestigeGameData::Get().GetLateNightDrainEffect();
+	if (!Drain)
 	{
-		return;
+		return false;
 	}
 
-	const FGameplayEffectSpecHandle Spec = AbilitySystem->MakeOutgoingSpec(
-		UVestigeGameData::Get().GetLateNightDrainEffect(), VestigeRest::EffectLevel, AbilitySystem->MakeEffectContext());
+	// The clock's minutes are the drain's period, so the effect must be instant: an infinite one would add another
+	// active effect every minute.
+	if (Drain.GetDefaultObject()->DurationPolicy != EGameplayEffectDurationType::Instant)
+	{
+		VESTIGE_LOG(this, LogFarm, Error,
+			"The late-night drain effect {Effect} isn't instant, so the night doesn't drain stamina. Make its Duration Policy "
+			"Instant.",
+			GetNameSafe(Drain.Get()));
+		return false;
+	}
+	return true;
+}
+
+void UVestigeRestComponent::ApplyLateNightDrain(UAbilitySystemComponent& AbilitySystem) const
+{
+	const FGameplayEffectSpecHandle Spec = AbilitySystem.MakeOutgoingSpec(
+		UVestigeGameData::Get().GetLateNightDrainEffect(), VestigeRest::EffectLevel, AbilitySystem.MakeEffectContext());
 	if (!Spec.IsValid())
 	{
 		return;
 	}
-
-	// This component removes the drain when the day ends, so it must last until then; and it drains once per period of
-	// real time, so the amount per period follows the clock's speed.
-	const float PeriodSeconds = Spec.Data->GetPeriod();
-	if (Spec.Data->Def->DurationPolicy != EGameplayEffectDurationType::Infinite || PeriodSeconds <= UGameplayEffect::NO_PERIOD)
-	{
-		VESTIGE_LOG(this, LogFarm, Error,
-			"The late-night drain effect {Effect} isn't infinite with a period, so the night doesn't drain stamina. Make it infinite and "
-			"give it a period.",
-			GetNameSafe(Spec.Data->Def.Get()));
-		return;
-	}
-	const float GameHoursPerPeriod = PeriodSeconds / Clock->GetRealSecondsPerGameHour();
-	Spec.Data->SetSetByCallerMagnitude(VestigeGameplayTags::Data_StaminaDrain, -LateNightDrainPerGameHour * GameHoursPerPeriod);
-	LateNightDrain = AbilitySystem->ApplyGameplayEffectSpecToSelf(*Spec.Data);
-	DrainedAbilitySystem = AbilitySystem;
-}
-
-void UVestigeRestComponent::StopLateNightDrain()
-{
-	if (UAbilitySystemComponent* AbilitySystem = DrainedAbilitySystem.Get())
-	{
-		AbilitySystem->RemoveActiveGameplayEffect(LateNightDrain);
-	}
-	LateNightDrain.Invalidate();
-	DrainedAbilitySystem.Reset();
+	Spec.Data->SetSetByCallerMagnitude(VestigeGameplayTags::Data_StaminaDrain, -LateNightDrainPerGameHour / VestigeClock::MinutesPerHour);
+	AbilitySystem.ApplyGameplayEffectSpecToSelf(*Spec.Data);
 }
 
 UAbilitySystemComponent* UVestigeRestComponent::GetAbilitySystem() const

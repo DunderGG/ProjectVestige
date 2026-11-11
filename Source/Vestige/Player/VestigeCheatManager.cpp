@@ -31,6 +31,9 @@ namespace VestigeCheats
 	constexpr int32 MaxTimeDigits = 4;
 	constexpr int32 HourMinuteSplit = 100;
 
+	/** Half a game minute, in hours. */
+	constexpr float HalfMinuteHours = 0.5f / MinutesPerHour;
+
 	/** Reads "1930" (19:30), "930" (09:30) or "19" (19:00) as hours since midnight, up to 24:00. False for anything else. */
 	bool ParseClockTime(const FString& Text, float& OutHours)
 	{
@@ -98,7 +101,10 @@ void UVestigeCheatManager::SkipToTime(const FString& Time)
 
 	// The clock counts on past midnight (25 is 01:00), and the day starts in the morning, so earlier hours are tonight's.
 	const float TimeOfDay = Hours < Clock->GetDayStartHour() ? Hours + VestigeCheats::HoursPerDay : Hours;
-	if (!Clock->AdvanceTo(TimeOfDay))
+
+	// Land inside the typed minute: in float hours a time such as 00:10 falls just short of it, and the clock would stop a
+	// minute early, before that minute's events.
+	if (!Clock->AdvanceTo(TimeOfDay + VestigeCheats::HalfMinuteHours))
 	{
 		VESTIGE_LOG(this, LogVestige, Warning, "The clock only runs forward and stops at the day's end; {Time} isn't later today.", Time);
 	}

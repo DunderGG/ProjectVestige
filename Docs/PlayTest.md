@@ -465,6 +465,17 @@ Content is loaded once per game by the new content catalogue (`UVestigeContentCa
 - [x] **Benchmark**: the console command `BenchmarkField 8 Base.Turnip` fills the field with ripe turnips at once, as before.
 - [x] **A new item in the editor**: duplicate `DA_Item_Turnip`, give the copy the Content Id `Test.Turnip2`, save, and Play: the log says "Loaded 10 content definitions.". Delete the copy afterwards.
 
+### Late-night drain on game time, 2026-11-11
+
+After midnight stamina now drains a little every game minute, following the clock, instead of once per real second ([CodeReview.md, M7](CodeReview.md#m7--game-time-events-run-on-real-time)). The commit is the one titled "Drain stamina on the clock's game minutes".
+
+- [ ] **The effect asset**: open `Content/Vestige/Abilities/GE_LateNightDrain`. Its Duration Policy is **Instant**, it has one modifier (Stamina, Add, Set By Caller `Vestige.Data.StaminaDrain`), and **Compile** shows no warning or error.
+- [ ] **Steady drain**: Play, run `SkipToTime 2355` in the console and watch the stamina line. Nothing drains before 00:00; after it the number falls by about 1 every 6 game minutes (about every 4 real seconds), and the "past midnight" message appears at 00:00 as before.
+- [ ] **A skip drains**: from 00:00 run `SkipToTime 0300`: stamina drops by about 30 at once, and the clock shows 03:00.
+- [ ] **Slomo**: after midnight run `slomo 4`: the clock and the drain both go four times as fast, so stamina still falls about 10 per game hour. `slomo 1` afterwards.
+- [ ] **Sleep stops it**: go to bed after midnight. You wake exhausted at 75%, and stamina doesn't fall during the new day.
+- [ ] **Output Log**: no warning or error from `LogFarm` or `LogGameplayEffects` during the night.
+
 ### Editor chores
 
 Changes only the editor can make safely. The steps are in [Roadmap.md, Housekeeping](Roadmap.md#3-housekeeping): re-saving the template Blueprints and `L_Farm`, moving `BP_FarmTile` and the materials with redirectors fixed, and regenerating the Android File Server token if it was ever used. After each one, run the [smoke test](#3-smoke-test).

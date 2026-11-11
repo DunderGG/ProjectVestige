@@ -17,7 +17,7 @@ namespace VestigeGameplayTags
 	/** The set-by-caller magnitude code sets on the stamina cost effect (GE_StaminaCost): the stamina one use takes, as a negative amount. */
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Data_StaminaCost);
 
-	/** The set-by-caller magnitude code sets on the late-night drain effect (GE_LateNightDrain): the stamina each period takes, as a negative amount. */
+	/** The set-by-caller magnitude code sets on the late-night drain effect (GE_LateNightDrain): the stamina one game minute takes, as a negative amount. */
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Data_StaminaDrain);
 
 	/** The set-by-caller magnitude code sets on the stamina refill effect (GE_StaminaRefill): the stamina it sets, before the set's clamp. */

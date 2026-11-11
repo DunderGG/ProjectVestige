@@ -4,20 +4,18 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "ActiveGameplayEffectHandle.h"
 #include "Components/ActorComponent.h"
 #include "Core/VestigeSaveable.h"
 #include "VestigeRestComponent.generated.h"
 
 class UAbilitySystemComponent;
 class UVestigeClockSubsystem;
-struct FVestigeDayEnd;
 struct FVestigeRestSaveData;
 
 /**
  * Owns the player's side of the end of the day and the late-night rules (GameDesign.md, section 5): asking the clock to
- * end the day when going to sleep, the warnings at LateWarningHour and LateNightHour, the stamina drain from
- * LateNightHour until the day ends, and waking up. A day that ends at LateNightHour or later (staying up until the
+ * end the day when going to sleep, the warnings at LateWarningHour and LateNightHour, the stamina drain over
+ * each game minute from LateNightHour until the day ends, and waking up. A day that ends at LateNightHour or later (staying up until the
  * day's end included) starts the next day exhausted, with stamina refilled to ExhaustedRefillFraction of the maximum; an
  * earlier one refills it fully and clears exhaustion. Starting the next day is the game mode's job (AVestigeGameMode).
  * Lives on the player state, so the night happens with or without a body, and changes stamina through gameplay
@@ -44,9 +42,6 @@ public:
 	/** Whether the owner is exhausted from a late night. False without an ability system. */
 	bool IsExhausted() const;
 
-	/** Whether stamina is draining for the late night. */
-	bool IsDrainingStamina() const { return LateNightDrain.IsValid(); }
-
 	/** Whether the day started exhausted, for saving. */
 	FVestigeRestSaveData GetSaveData() const;
 
@@ -62,18 +57,22 @@ public:
 	virtual void StartNewGame() override;
 
 protected:
-	/** Follows the clock, starts the drain if the late night has already begun, then takes its saved part. */
+	/** Follows the clock, and its minutes if the game data has a usable late-night drain, then takes its saved part. */
 	virtual void BeginPlay() override;
 
-	/** Keeps its saved part for the next map, then stops the late-night drain and the clock. */
+	/** Keeps its saved part for the next map, then stops following the clock. */
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 private:
-	/** Warns at LateWarningHour, and warns and starts the drain at LateNightHour. Bound to UVestigeClockSubsystem::OnHourStarted. */
+	/** Warns at LateWarningHour and at LateNightHour. Bound to UVestigeClockSubsystem::OnHourStarted. */
 	void ReactToHour(int32 Hour);
 
-	/** Stops the late-night drain once the day is over, in bed or not. Bound to UVestigeClockSubsystem::OnDayEnded. */
-	void EndNight(const FVestigeDayEnd& DayEnd);
+	/**
+	 * Drains one game minute's share of LateNightDrainPerGameHour for the minute that ends at Minute, if it is after
+	 * LateNightHour. Bound to UVestigeClockSubsystem::OnMinuteStarted, so the drain follows game time: a skip drains as if
+	 * the time had passed, and a stopped clock drains nothing.
+	 */
+	void DrainLateMinute(int32 Minute);
 
 	/**
 	 * Refills stamina and sets or clears exhaustion by how late the last day ended (the clock's GetLastDayEnd). Bound to
@@ -93,8 +92,11 @@ private:
 	/** Sets the owner's stamina to Fraction of its maximum through the game data's stamina refill effect. */
 	void RefillStamina(UAbilitySystemComponent& AbilitySystem, float Fraction) const;
 
-	void StartLateNightDrain();
-	void StopLateNightDrain();
+	/** Whether the game data's late-night drain can drain once a minute: set and instant. Logs an error if it is set and isn't. */
+	bool HasUsableLateNightDrain() const;
+
+	/** Applies the game data's late-night drain once, for one game minute. */
+	void ApplyLateNightDrain(UAbilitySystemComponent& AbilitySystem) const;
 
 	/** The ability system of the player state this component is on, or nullptr. */
 	UAbilitySystemComponent* GetAbilitySystem() const;
@@ -110,7 +112,7 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Rest", meta = (AllowPrivateAccess = "true", ClampMin = 0, ClampMax = 30))
 	int32 LateNightHour = 24;
 
-	/** Stamina the late night drains per game hour, whatever the clock's speed. */
+	/** Stamina the late night drains per game hour, a game minute's share at a time, whatever the clock's speed. */
 	UPROPERTY(EditDefaultsOnly, Category = "Rest", meta = (AllowPrivateAccess = "true", ClampMin = 0))
 	float LateNightDrainPerGameHour = 10.f;
 
@@ -121,10 +123,4 @@ private:
 	/** The game's clock, found at BeginPlay. It outlives the pawn, so EndPlay stops listening to it. */
 	UPROPERTY()
 	TObjectPtr<UVestigeClockSubsystem> Clock;
-
-	/** The late-night drain while it runs, on the owner's ability system. */
-	FActiveGameplayEffectHandle LateNightDrain;
-
-	/** The ability system the drain runs on, to remove it from even after the pawn has lost its player state. */
-	TWeakObjectPtr<UAbilitySystemComponent> DrainedAbilitySystem;
 };

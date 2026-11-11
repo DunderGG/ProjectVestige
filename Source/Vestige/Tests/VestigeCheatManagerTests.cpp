@@ -102,18 +102,37 @@ namespace VestigeCheatManagerTests
 			return *Clock;
 		}
 
+		/** The clock's whole minutes since midnight at the start of the day. */
+		int32 GetMinute() { return VestigeClock::ToWholeMinutes(GetClock().GetTimeOfDay()); }
+
 		TEST_METHOD(SkipToTimeTakesTheTimeAsDigits)
 		{
 			UVestigeCheatManager* Cheats = SpawnCheats();
 
 			Cheats->SkipToTime(TEXT("945"));
-			ASSERT_THAT(IsTrue(GetClock().GetTimeOfDay() == 9.75f));
+			ASSERT_THAT(IsTrue(GetMinute() == 9 * 60 + 45));
 
 			Cheats->SkipToTime(TEXT("1930"));
-			ASSERT_THAT(IsTrue(GetClock().GetTimeOfDay() == 19.5f));
+			ASSERT_THAT(IsTrue(GetMinute() == 19 * 60 + 30));
 
 			Cheats->SkipToTime(TEXT("21"));
-			ASSERT_THAT(IsTrue(GetClock().GetTimeOfDay() == 21.f));
+			ASSERT_THAT(IsTrue(GetMinute() == 21 * 60));
+		}
+
+		TEST_METHOD(SkipToTimeReachesTheTypedMinuteAfterMidnight)
+		{
+			// 00:10 is 24.1666... hours, which a float holds just short of the minute.
+			int32 LastMinute = 0;
+			GetClock().OnMinuteStarted.AddLambda(
+				[&LastMinute](int32 Minute)
+				{
+					LastMinute = Minute;
+				});
+
+			SpawnCheats()->SkipToTime(TEXT("0010"));
+
+			ASSERT_THAT(IsTrue(LastMinute == 24 * 60 + 10));
+			ASSERT_THAT(IsTrue(GetMinute() == 24 * 60 + 10));
 		}
 
 		TEST_METHOD(SkipToTimeBeforeTheDayStartIsAfterMidnight)
@@ -123,19 +142,20 @@ namespace VestigeCheatManagerTests
 
 			SpawnCheats()->SkipToTime(TEXT("0100"));
 
-			ASSERT_THAT(IsTrue(GetClock().GetTimeOfDay() == 25.f));
+			ASSERT_THAT(IsTrue(GetMinute() == 25 * 60));
 		}
 
 		TEST_METHOD(SkipToTimeIgnoresEarlierAndUnreadableTimes)
 		{
 			UVestigeCheatManager* Cheats = SpawnCheats();
 			Cheats->SkipToTime(TEXT("2000"));
+			const float Skipped = GetClock().GetTimeOfDay();
 
 			for (const TCHAR* Time : {TEXT("1900"), TEXT(""), TEXT("evening"), TEXT("2175"), TEXT("25"), TEXT("2401"), TEXT("21:30"),
 					 TEXT("-2100"), TEXT("21000")})
 			{
 				Cheats->SkipToTime(Time);
-				ASSERT_THAT(IsTrue(GetClock().GetTimeOfDay() == 20.f));
+				ASSERT_THAT(IsTrue(GetClock().GetTimeOfDay() == Skipped));
 			}
 		}
 	};

@@ -12,9 +12,25 @@
 struct FVestigeClockSaveData;
 class UVestigeSaveRegistry;
 
+namespace VestigeClock
+{
+	/** Game minutes in a game hour. */
+	constexpr int32 MinutesPerHour = 60;
+
+	/**
+	 * The whole game minutes in Hours (GetTimeOfDay's hours), worked out in double: a float times 60 is exact there, so a
+	 * minute count is a whole hour exactly when FloorToInt32(Hours) is that hour.
+	 */
+	inline int32 ToWholeMinutes(float Hours)
+	{
+		return FMath::FloorToInt32(static_cast<double>(Hours) * MinutesPerHour);
+	}
+}
+
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnVestigeNewDay, int32 /* Day */);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnVestigeNewDayBlueprint, int32, Day);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnVestigeHourStarted, int32 /* Hour */);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnVestigeMinuteStarted, int32 /* Minute */);
 
 /** How the last day ended, kept by UVestigeClockSubsystem from that day's end until the next day ends. */
 struct FVestigeDayEnd
@@ -83,8 +99,8 @@ public:
 	void RestoreFromSaveData(const FVestigeClockSaveData& Data);
 
 	/**
-	 * Runs the clock forward to NewTimeOfDay at once, as if the time had passed: OnHourStarted is broadcast for every whole
-	 * hour on the way, and OnDayEnded if it reaches the day's end, where it stops. For developer commands.
+	 * Runs the clock forward to NewTimeOfDay at once, as if the time had passed: OnMinuteStarted and OnHourStarted are broadcast
+	 * for every whole minute and hour on the way, and OnDayEnded if it reaches the day's end, where it stops. For developer commands.
 	 * NewTimeOfDay is in GetTimeOfDay's hours (25 is 01:00 after midnight). Returns false, and changes nothing, when
 	 * NewTimeOfDay isn't later than the clock or the clock has stopped at the day's end.
 	 */
@@ -154,20 +170,33 @@ public:
 
 	/**
 	 * Broadcast each time the running clock reaches a whole hour, with the hour since midnight at the start of the day: 22
-	 * is 22:00, 24 is the next midnight. Once per hour even when a long frame passes several. Not broadcast for the hour a
-	 * new day starts at, nor when the clock is restored from a save.
+	 * is 22:00, 24 is the next midnight. Once per hour even when a long frame passes several, after that hour's
+	 * OnMinuteStarted. Not broadcast for the hour a new day starts at, nor when the clock is restored from a save. When a
+	 * listener ends the day, the later hours and minutes aren't broadcast, but the other listeners of that hour still hear it,
+	 * possibly in the new day. Listeners must not run the clock forward (AdvanceTo).
 	 */
 	FOnVestigeHourStarted OnHourStarted;
 
+	/**
+	 * Broadcast each time the running clock reaches a whole game minute, with the minutes since midnight at the start of the
+	 * day: 1441 is 00:01 after midnight. Once per minute, in order, even when a long frame or AdvanceTo passes several; a
+	 * minute that is also a whole hour comes before that hour's OnHourStarted. Something that goes on steadily over game time
+	 * (the late-night drain) listens here. Not broadcast for the minute a new day starts at, nor when the clock is restored
+	 * from a save. When a listener ends the day, the later minutes and hours aren't broadcast, but the other listeners of that
+	 * minute still hear it, possibly in the new day. Listeners must not run the clock forward (AdvanceTo).
+	 */
+	FOnVestigeMinuteStarted OnMinuteStarted;
+
 private:
-	/** Sets the clock to NewTimeOfDay, no later than the day's end, and broadcasts the hours passed and the day's end. */
+	/** Sets the clock to NewTimeOfDay, no later than the day's end, and broadcasts the minutes and hours passed and the day's end. */
 	void RunTo(float NewTimeOfDay);
 
 	/**
-	 * Broadcasts OnHourStarted for every whole hour after PreviousTimeOfDay, up to and including TimeOfDay. Stops early
-	 * when a listener ends the day, so the new day never hears the old day's hours.
+	 * Broadcasts OnMinuteStarted for every whole minute after PreviousTimeOfDay, up to and including TimeOfDay, and
+	 * OnHourStarted after each minute that is a whole hour. Stops early when a listener ends the day, so the new day never
+	 * hears the old day's minutes and hours.
 	 */
-	void BroadcastHoursStartedSince(float PreviousTimeOfDay);
+	void BroadcastTimeStartedSince(float PreviousTimeOfDay);
 
 	/** Stops the clock at the current time, keeps how the day ended in LastDayEnd, and broadcasts OnDayEnded. */
 	void EndDayNow();

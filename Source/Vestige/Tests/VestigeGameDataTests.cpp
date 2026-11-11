@@ -34,24 +34,31 @@ namespace VestigeGameDataTests
 			FDataValidationContext Context;
 			ASSERT_THAT(IsTrue(Loaded->IsDataValid(Context) != EDataValidationResult::Invalid));
 			ASSERT_THAT(AreEqual(Context.GetNumErrors(), 0u));
+
+			// The drain is applied once per game minute, and the asset itself is valid (warnings allowed).
+			const UGameplayEffect* Drain = Loaded->GetLateNightDrainEffect().GetDefaultObject();
+			ASSERT_THAT(IsTrue(Drain->DurationPolicy == EGameplayEffectDurationType::Instant));
+			FDataValidationContext DrainContext;
+			Drain->IsDataValid(DrainContext);
+			ASSERT_THAT(AreEqual(DrainContext.GetNumErrors(), 0u));
 #endif
 		}
 
 #if WITH_EDITOR
-		TEST_METHOD(ADrainThatIsntInfiniteAndPeriodicIsInvalid)
+		TEST_METHOD(ADrainThatIsntInstantIsInvalid)
 		{
 			const UVestigeGameData& Loaded = UVestigeGameData::Get();
-			ASSERT_THAT(IsNotNull(Loaded.GetStaminaCostEffect().Get()));
+			ASSERT_THAT(IsNotNull(Loaded.GetExhaustedEffect().Get()));
 
-			// The instant cost effect has no period, so it can't drain over the night.
-			UVestigeGameData* InstantDrain = NewObject<UVestigeGameData>();
-			InstantDrain->SetEffectsForTests(
-				Loaded.GetStaminaCostEffect(), Loaded.GetStaminaRefillEffect(), Loaded.GetStaminaCostEffect(), Loaded.GetExhaustedEffect());
-			FDataValidationContext InstantContext;
-			ASSERT_THAT(IsTrue(InstantDrain->IsDataValid(InstantContext) == EDataValidationResult::Invalid));
-			ASSERT_THAT(AreEqual(InstantContext.GetNumErrors(), 1u));
+			// Applied every game minute, an infinite effect would leave one more active effect each minute.
+			UVestigeGameData* InfiniteDrain = NewObject<UVestigeGameData>();
+			InfiniteDrain->SetEffectsForTests(
+				Loaded.GetStaminaCostEffect(), Loaded.GetStaminaRefillEffect(), Loaded.GetExhaustedEffect(), Loaded.GetExhaustedEffect());
+			FDataValidationContext InfiniteContext;
+			ASSERT_THAT(IsTrue(InfiniteDrain->IsDataValid(InfiniteContext) == EDataValidationResult::Invalid));
+			ASSERT_THAT(AreEqual(InfiniteContext.GetNumErrors(), 1u));
 
-			// A drain with a duration would expire before the rest component removes it at the end of the day.
+			// A periodic drain with a duration would drain on real time, on top of the clock's minutes.
 			UVestigeGameData* TimedDrain = NewObject<UVestigeGameData>();
 			TimedDrain->SetEffectsForTests(Loaded.GetStaminaCostEffect(), Loaded.GetStaminaRefillEffect(),
 				UVestigeTestTimedDrainEffect::StaticClass(), Loaded.GetExhaustedEffect());
