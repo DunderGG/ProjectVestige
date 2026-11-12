@@ -8,11 +8,11 @@ One of the [system guides](../Systems.md); read [How to use this document](../Sy
 
 **Rules:**
 
-- One `UVestigeContentData` subclass per kind of content, one asset per piece of content, registered as a primary asset type in `Config/DefaultGame.ini` and found through the Asset Manager ([Architecture.md, sections 5 and 12](../Architecture.md#5-data-and-content)).
+- One `UVestigeContentData` subclass per kind of content, one asset per piece of content, registered as a primary asset type in `Config/DefaultGame.ini` and found through the Asset Manager ([Architecture.md, sections 5 and 12](../Architecture.md#5-data-and-content)). Each type is scanned in its own folder and always cooked: `FarmCrop` in `Content/Vestige/Crops`, `VestigeTool` in `Content/Vestige/Tools`, `VestigeItem` in `Content/Vestige/Items`; the global game data is the one asset `Content/Vestige/DA_GameData`.
 - Definitions hold no runtime state. Per-instance state (a crop's growth, an item's durability) lives on the owner of the instance.
 - Meshes, materials, sounds and effects in a content asset are soft references in an asset bundle (`Visuals`, later `Audio`), loaded with the asset when it's needed.
 - **Data validation:** each content class overrides `IsDataValid` to check its ID format and required fields, so mistakes show up in the editor (right-click > Asset Actions > Validate Assets) instead of at play time.
-- When the game needs global data at startup (lists of starting items, default settings), `UVestigeAssetManager` loads it once, as `ULyraAssetManager` does, rather than having each system load its own.
+- When the game needs global data at startup (lists of starting items, default settings), `UVestigeAssetManager`, the project's Asset Manager (`AssetManagerClassName` in `Config/DefaultEngine.ini`), loads it once, as `ULyraAssetManager` does, rather than having each system load its own.
 
 **Pitfalls:**
 
