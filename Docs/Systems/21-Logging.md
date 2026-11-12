@@ -33,30 +33,30 @@ One of the [system guides](../Systems.md); read [How to use this document](../Sy
 - **Every line goes through `VESTIGE_LOG(Sender, Category, Verbosity, Format, ...)`** in `Core/VestigeLog.h`, a thin macro over `UE_LOGFMT`. The sender comes first, as in Epic's `UE_VLOG`. It puts the sender's name and the function in front of the message:
 
   ```cpp
-  VESTIGE_LOG(this, LogFarm, Warning, "No Tile Class is set, so the field is empty.");
+  VESTIGE_LOG(this, LogFarm, Warning, "The Harvest Tool Id ({ToolId}) names no tool, so nothing can be harvested.", HarvestToolId.ToString());
   VESTIGE_LOG(this, LogVestigeSave, Error, "Couldn't write the save to slot {Slot}. The previous save is kept.", SlotName);
   ```
 
   prints
 
   ```
-  LogFarm: Warning: [FarmGrid_1] AFarmGrid::SpawnTiles: No Tile Class is set, so the field is empty.
-  LogVestigeSave: Error: [VestigeSaveSubsystem_0] UVestigeSaveSubsystem::SaveFarm: Couldn't write the save to slot Farm. The previous save is kept.
+  LogFarm: Warning: [BP_PlayerCharacter_C_0.Farming] UFarmingComponent::BeginPlay: The Harvest Tool Id (VestigeTool:Base.Hand) names no tool, so nothing can be harvested.
+  LogVestigeSave: Error: [VestigeSaveSubsystem_0] UVestigeSaveSubsystem::SaveGame: Couldn't write the save to slot Farm. The previous save is kept.
   ```
 
    - The sender is any `UObject`: `this` in members; in a static or free function the object the line is about (the world for `VestigeActorLookup::FindSingle`), or `nullptr`. Its name comes from `VestigeLog::GetSenderName`: an actor's or subsystem's own name (`FarmGrid_1`), a component's owner and name (`BP_PlayerCharacter_C_0.FarmingComponent`, since a component's name alone isn't unique), `None` for `nullptr`.
-   - The function is the compiler's `__FUNCTION__`, which on MSVC includes the class (`AFarmGrid::SpawnTiles`).
+   - The function is the compiler's `__FUNCTION__`, which on MSVC includes the class (`UFarmingComponent::BeginPlay`).
    - The format is a plain string literal (no `TEXT()`), with fields in braces named after what they hold (`{Slot}`, `{ItemId}`) and given in order after it. Named fields can't be mixed with the macro's own, so they aren't used.
    - Field values are numbers, `bool`, `FString`, `FName` and the engine's ID types. Pass an `FText` as `.ToString()`, an `FIntPoint` or vector as `.ToString()`, and an object as `GetNameSafe(Object)`.
    - `UE_LOG`, `UE_LOGFMT` and their conditional forms aren't called directly outside `Template/` and the macro. A source test checks it.
-- **The message** is a full sentence that says what happened and what follows from it, as the lines do today: "The save has a crop {CropId} that no longer exists, so tile {Tile} is empty." It doesn't repeat the sender's name, which the macro already prints.
+- **The message** is a full sentence that says what happened and what follows from it: "The save has a crop {CropId} that no longer exists, so tile {Tile} is empty." It doesn't repeat the sender's name, which the macro already prints.
 - **Verbosity:**
 
   | Verbosity | Use it for | Today's examples |
   | --- | --- | --- |
   | `Fatal` | Never. It crashes the game; use `check` for programmer errors ([CodingGuidelines.md, section 10](../CodingGuidelines.md#10-errors-logging-and-assertions)) | |
   | `Error` | Broken state someone must fix: the game carries on, but something is lost or turned off. Fails an automation test that logs it, unless the test expects it | Duplicate content IDs, a save that couldn't be written or read, two grids in a level |
-  | `Warning` | A setup or content problem the game works around: a missing setting, an unknown ID in a save, a fallback spawn | No Tile Class, an unknown item ID, no room for saved items |
+  | `Warning` | A setup or content problem the game works around: a missing setting, an unknown ID in a save | A Harvest Tool Id that names no tool, an unknown item ID, no room for saved items |
   | `Display` | Rare: a line for someone reading the console window of a packaged game, where `Log` lines don't show | None yet. Later: which mods were loaded |
   | `Log` | Notable one-off events, a handful per day of play | A save loaded, a backup made, item definitions loaded, a feedback report |
   | `Verbose` | Tracing one action: a tool use, an interaction, a tile changing state. Off by default | None yet |
@@ -72,7 +72,7 @@ One of the [system guides](../Systems.md); read [How to use this document](../Sy
 - **Reading a line.** In the log file and the console window a line looks like this (the Output Log window leaves out the first two parts, unless its Output Log Window Timestamp Mode, on the same preferences page, adds a time):
 
   ```
-  [2026.11.02-19.56.43:858][647]LogFarm: Warning: [BP_PlayerCharacter_C_0.Farming] UFarmingComponent::HandleItemInHandChanged: The item SomeMod.Scythe names the tool VestigeTool:SomeMod.Scythe, which doesn't exist, so the hand is used.
+  [2026.11.02-19.56.43:858][647]LogFarm: Warning: [BP_PlayerCharacter_C_0.Farming] UFarmingComponent::ReportNothingInHand: The item SomeMod.Scythe names the tool VestigeTool:SomeMod.Scythe, which doesn't exist, so it can't be used.
   ```
 
   | Part | Written by | What it is |
@@ -82,7 +82,7 @@ One of the [system guides](../Systems.md); read [How to use this document](../Sy
   | `LogFarm:` | The engine | The category: which system wrote it |
   | `Warning:` | The engine | The verbosity. Left out for `Log` lines |
   | `[BP_PlayerCharacter_C_0.Farming]` | `VESTIGE_LOG` | The sender: the object that wrote the line (here the `Farming` component on the player character), the level's world for code that has no object (`[L_Farm]`), or `None` |
-  | `UFarmingComponent::HandleItemInHandChanged:` | `VESTIGE_LOG` | The C++ function the line comes from, with its class |
+  | `UFarmingComponent::ReportNothingInHand:` | `VESTIGE_LOG` | The C++ function the line comes from, with its class |
   | The rest | The line itself | The message, with its fields (`SomeMod.Scythe`) filled in |
 - **The Visual Logger** (Tools > Debug > Visual Logger, `UE_VLOG` and its shape macros) records lines and shapes per actor over time and plays them back on a timeline. It is for gameplay that moves: the robots' AI gets Visual Logger output with its Gameplay Debugger categories when it is built ([section 19](19-DebuggingAndCheats.md)). The farm doesn't need it today; its rules are tested instead.
 - **Logs aren't feedback.** A line in the log is for developers and modders. What the player must know is reported as a feedback tag through `UVestigeFeedbackSubsystem::Report` ([CodingGuidelines.md, section 10](../CodingGuidelines.md#10-errors-logging-and-assertions), [section 15](15-EffectsAndFeedback.md)), which also logs it to `LogVestigeFeedback`.
@@ -90,7 +90,7 @@ One of the [system guides](../Systems.md); read [How to use this document](../Sy
 
 **Pitfalls:**
 
-- One category for everything (as `LogVestige` was until 2026-11-02): the Output Log's category filter can't show one system's story.
+- One category for everything: the Output Log's category filter can't show one system's story.
 - A category per class: a filter for one system means ticking a dozen boxes, and the colours stop meaning anything.
 - `Warning` or `Error` for something that is normal play (no seeds left, the inventory full). Those are player feedback, maybe a `Verbose` line.
 - `Error` in code that tests run on purpose: the test fails unless it declares the error it expects.
