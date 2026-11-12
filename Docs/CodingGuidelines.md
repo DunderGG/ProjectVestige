@@ -145,9 +145,9 @@ bool FFarmTileState::Till()
 
 ## 4. Architecture
 
-Architecture lives in its own document, [Architecture.md](Architecture.md): design principles, where things go in Unreal's gameplay framework, lifetimes and initialization order, communication between systems, data, saving, presentation, the C++/Blueprint split, the Lyra patterns we use, Project Vestige's current design and the decision log.
+Architecture lives in its own document, [Architecture.md](Architecture.md): design principles, where things go in Unreal's gameplay framework, lifetimes and initialization order, communication between systems, data, saving, presentation, the C++/Blueprint split, the Lyra patterns we use, and Project Vestige's current design; its decision log is [DecisionLog.md](DecisionLog.md).
 
-Code that changes the design must follow it, and update its Part B and decision log in the same commit.
+Code that changes the design must follow it, and update its Part B and the [decision log](DecisionLog.md) in the same commit.
 
 ## 5. Classes and headers
 
@@ -523,7 +523,7 @@ Add an entry here when code is committed that doesn't meet the guide, with what 
 Before committing, check:
 
 - [ ] Each change lives on the class that owns that responsibility ([section 1](#1-ownership-and-separation-of-concerns)).
-- [ ] Design changes are reflected in [Architecture.md](Architecture.md) (ownership table, decision log).
+- [ ] Design changes are reflected in [Architecture.md](Architecture.md) (ownership table) and [DecisionLog.md](DecisionLog.md).
 - [ ] The change follows the guide in [Systems.md](Systems.md) for each system it touches, and the guide is updated if the system changed.
 - [ ] Names follow the prefixes, the `Vestige` or `Farm` project prefix and PascalCase, and nothing shadows a base class member.
 - [ ] Changed files are formatted with clang-format.

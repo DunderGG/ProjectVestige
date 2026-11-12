@@ -18,7 +18,7 @@ You don't see the conversation that started you. Your brief should name the task
 Read before designing:
 
 1. `AGENTS.md` (already in your context through `CLAUDE.md`; when the task changes it, read its diff): the hard rules and "How work is done".
-2. `Docs/Architecture.md`: Part A (principles, where things go in the framework, lifetimes, how systems talk, performance budget in section 10, mods in section 12), section 13 (ownership), section 14 (layers), the decision log (section 16) entries for the area, and sections 17 and 18 (known gaps, expected changes).
+2. `Docs/Architecture.md`: Part A (principles, where things go in the framework, lifetimes, how systems talk, performance budget in section 10, mods in section 12), section 13 (ownership), section 14 (layers), and sections 17 and 18 (known gaps, expected changes); then the `Docs/DecisionLog.md` entries for the area.
 3. `Docs/Systems.md`: "How to use this document", then the guide file in `Docs/Systems/` for every system the change touches.
 4. `Docs/CodingGuidelines.md`: sections 1, 12 and 14.1.
 5. `Docs/GameDesign.md` for what the feature has to do for the player, and `Docs/CodeReview.md` for findings about the same code.
@@ -26,7 +26,7 @@ Read before designing:
 
 These documents are the rules. Point at them; don't restate them.
 
-`Docs/Architecture.md` (about 50,000 tokens) and `Docs/Roadmap.md` (about 20,000) are large, so read them by section: find the heading with Grep, then Read only that part with an offset and a limit. Never read them whole. Each system guide is a file of its own in `Docs/Systems/` (section N of `Docs/Systems.md` is `Docs/Systems/NN-*.md`); read the guides you need whole. Search the decision log for the classes and systems involved instead of reading it.
+`Docs/Architecture.md` (about 18,500 tokens) can be read whole, or by the sections you need. `Docs/Roadmap.md` (about 20,000) and `Docs/DecisionLog.md` (about 29,000) are large: find the heading with Grep, then Read only that part with an offset and a limit, never the whole file. Search the decision log for the classes and systems involved instead of reading it. Each system guide is a file of its own in `Docs/Systems/` (section N of `Docs/Systems.md` is `Docs/Systems/NN-*.md`); read the guides you need whole.
 
 ## Sources to check against
 
@@ -52,7 +52,8 @@ If a source isn't on this machine, say so and say what you relied on instead.
 Edit the docs in the working tree (don't commit; the main session does):
 
 - the system's guide in `Docs/Systems/` (a new system gets the next `NN-Name.md` and its heading in the `Docs/Systems.md` index);
-- `Docs/Architecture.md`: the ownership table (section 13), the dependency notes (section 14) and a decision log entry of about 100 words: the decision, why, and each rejected option in a line, linking the guide for the detail (newest first; never delete an old entry, add one that reverses it). A choice with no real alternative goes in the commit message instead. When your entry changes what an older entry decided, mark the older one with a lead at the start of its decision: "*(Replaced by the YYYY-MM-DD entry: ...)*", "*(Partly replaced by the YYYY-MM-DD entry: ...; still in force: ...)*" or "*(Carried out by the YYYY-MM-DD entry.)*". A row is marked when a later entry changed what it decided; a rename alone doesn't count.
+- `Docs/Architecture.md`: the ownership table (section 13) and the dependency notes (section 14);
+- `Docs/DecisionLog.md`: an entry of about 100 words: the decision, why, and each rejected option in a line, linking the guide for the detail (newest first; never delete an old entry, add one that reverses it). A choice with no real alternative goes in the commit message instead. When your entry changes what an older entry decided, mark the older one with a lead at the start of its decision: "*(Replaced by the YYYY-MM-DD entry: ...)*", "*(Partly replaced by the YYYY-MM-DD entry: ...; still in force: ...)*" or "*(Carried out by the YYYY-MM-DD entry.)*". A row is marked when a later entry changed what it decided; a rename alone doesn't count.
 
 Another session may be working in the same checkout. Touch only the files your task needs, and never undo changes you didn't make.
 

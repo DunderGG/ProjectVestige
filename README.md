@@ -29,7 +29,8 @@ Then double-click `Vestige.uproject`, let Unreal build the C++ modules, open `Co
 | Document | What's in it |
 |---|---|
 | [Docs/Setup.md](Docs/Setup.md) | Setting up a new Windows PC to build and run the project, step by step |
-| [Docs/Architecture.md](Docs/Architecture.md) | How the code fits together, who owns what, and the decision log |
+| [Docs/Architecture.md](Docs/Architecture.md) | How the code fits together and who owns what |
+| [Docs/DecisionLog.md](Docs/DecisionLog.md) | Every design decision, with its reasons |
 | [Docs/GameDesign.md](Docs/GameDesign.md) | What the game is, how it plays and why |
 | [Docs/Systems.md](Docs/Systems.md) | How the game systems work, and how to add new ones |
 | [Docs/CodingGuidelines.md](Docs/CodingGuidelines.md) | How the code looks |

@@ -7,7 +7,8 @@ This folder contains project documentation for setting up, designing, building, 
 | Document | Purpose |
 |---|---|
 | [`Setup.md`](Setup.md) | Set up a Windows development PC, build the project, and troubleshoot common problems. |
-| [`Architecture.md`](Architecture.md) | Explain system ownership, dependencies, data flow, and recorded design decisions. |
+| [`Architecture.md`](Architecture.md) | Explain the design principles, system ownership, dependencies and data flow. |
+| [`DecisionLog.md`](DecisionLog.md) | Record every design decision with its reasons, newest first. |
 | [`Systems.md`](Systems.md) | Index of the system guides, one file per system in [`Systems/`](Systems/): implementation guidance for the game's systems and the Unreal Engine features they use. |
 | [`CodingGuidelines.md`](CodingGuidelines.md) | Define C++ conventions, asset naming, testing, and code review expectations. |
 | [`GameDesign.md`](GameDesign.md) | Describe the game's premise, intended experience, and gameplay design. |

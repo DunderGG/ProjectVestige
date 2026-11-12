@@ -4,7 +4,7 @@ Claude Code subagents that take the specialist roles in Project Vestige's work, 
 
 | Agent | Role | Writes |
 |---|---|---|
-| [`vestige-architect`](agents/vestige-architect.md) | Designs each change and owns the technical decisions | `Docs/Systems/` guides, `Docs/Architecture.md` (the ownership table, the decision log) |
+| [`vestige-architect`](agents/vestige-architect.md) | Designs each change and owns the technical decisions | `Docs/Systems/` guides, `Docs/Architecture.md` (the ownership table), `Docs/DecisionLog.md` |
 | [`vestige-reviewer`](agents/vestige-reviewer.md) | Senior Unreal C++ reviewer of designs, code and art; reviews again until it approves | Nothing (read-only) |
 | [`vestige-implementer`](agents/vestige-implementer.md) | Writes the C++ from the approved design and builds it clean | `Source/`, temporary editor scripts |
 | [`vestige-test-author`](agents/vestige-test-author.md) | Writes the CQTest tests, runs the whole suite, keeps the manual checks | `Source/Vestige/Tests/`, `Docs/PlayTest.md` |
@@ -20,4 +20,4 @@ The diagram's source is [`agent-flow.puml`](agent-flow.puml) (PlantUML). After c
 
 A "No design choice" change is one with no new owner, interface, data, save format or engine feature.
 
-The agents need Claude Code; they are picked up from `.claude/agents/` when Claude Code runs in this repository. With another AI tool, follow the same roles from "How work is done" in `AGENTS.md`. The reasons for the workflow are in the decision log entry of 2026-11-11 in `Docs/Architecture.md`. Personal Claude Code settings go in `.claude/settings.local.json`, which Git ignores.
+The agents need Claude Code; they are picked up from `.claude/agents/` when Claude Code runs in this repository. With another AI tool, follow the same roles from "How work is done" in `AGENTS.md`. The reasons for the workflow are in the decision log entry of 2026-11-11 in `Docs/DecisionLog.md`. Personal Claude Code settings go in `.claude/settings.local.json`, which Git ignores.

@@ -17,7 +17,7 @@ Read first:
 3. `Docs/PlayTest.md`, all of it: section 2 (the format of pending checks), section 3 (the smoke test) and section 4 (what isn't manual).
 4. The existing tests in `Source/Vestige/Tests/` for the same area. Follow their patterns and reuse their helpers.
 
-`Docs/PlayTest.md` (about 6,000 tokens) holds the open checks; headings whose checks have all passed are in `Docs/PlayTestArchive.md`, which you don't need to read. Read `Docs/PlayTest.md` whole. Read the large docs (`Docs/Architecture.md`, `Docs/Roadmap.md`) by section, never whole: find the heading with Grep, then Read only that part with an offset and a limit. Each system guide is a file of its own in `Docs/Systems/` (section N of `Docs/Systems.md` is `Docs/Systems/NN-*.md`); read the guides you need whole.
+`Docs/PlayTest.md` (about 6,000 tokens) holds the open checks; headings whose checks have all passed are in `Docs/PlayTestArchive.md`, which you don't need to read. Read `Docs/PlayTest.md` whole. Read `Docs/Roadmap.md` by section, never whole: find the heading with Grep, then Read only that part with an offset and a limit. Search `Docs/DecisionLog.md` for the classes and systems involved instead of reading it. Each system guide is a file of its own in `Docs/Systems/` (section N of `Docs/Systems.md` is `Docs/Systems/NN-*.md`); read the guides you need whole.
 
 ## Writing tests
 
