@@ -25,41 +25,7 @@ Use [Docs/CodingGuidelines.md](Docs/CodingGuidelines.md) and [Docs/Architecture.
 
 ## Hard rules
 
-1. **Ownership.** Every actor, component and subsystem has one job. Put new logic, components and settings on the class that owns that responsibility, never on whichever class is convenient. If no class fits, create a new actor, component or subsystem and say so. Current owners (the full table is in `Docs/Architecture.md`, section 13; keep both in sync, and when they differ the table wins):
-   - `UFarmFieldSubsystem` (game instance): every map's farm data, one `UFarmField` per field ID, kept across maps; starts a new day on every field, loaded or not; saves and restores them.
-   - `UFarmField` and its `FFarmTileState`s: one field's tiles as data and the rules that change them (including the crop planted in each), by coordinates.
-   - `AFarmGrid`: a view of one field (`FieldId`) in its level, placed as `BP_FarmGrid`: finds its field, converts between world space and tile coordinates (a tile is its coordinates; there is no actor per tile), gives a tile's transform, resizes the field for developer tools. No clock, no lighting, no tile state, no drawing.
-   - `UFarmFieldMeshesComponent` (on the grid): draws the field with one instanced static mesh component per mesh and material, the color in per-instance custom data, redrawn on the field's events; its art set in `BP_FarmGrid`. What a tile looks like is the pure function `FarmTileLooks::GetLook`. Presentation only.
-   - `UVestigeClockSubsystem` (game instance): day number and clock across maps, with its speed and hours (the day's start and end, sunrise and sunset) from `UVestigeClockSettings` (Project Settings). Broadcasts `OnNewDay`, then `OnNewDayFinished`, `OnMinuteStarted` each whole game minute and `OnHourStarted` each whole hour, and `OnDayEnded` when the day ends (the clock reaches 06:00 the next morning, or `EndDay` when the player goes to bed), keeping how it ended (`GetLastDayEnd`). Never starts the next day itself.
-   - `AVestigeSkyLighting`: the lighting only, read from the clock: sun (turned in small steps), sky light, night exposure.
-   - `UFarmingComponent`: the toolbar and the tool in hand, which seed item the Seeds tool plants and its crop, tile targeting, the tools' rules (taking seeds from and putting harvests into the inventory). Using a tool goes through the use-tool ability, and repeats while the use key is held.
-   - `AVestigePlayerState`: the player's data that outlives the pawn; holds the inventory, the ability system component and the rest component, and grants the ability sets.
-   - `UVestigeInventoryComponent` and its `FVestigeInventory`: the items the player carries, in slots with stacks, by item ID, and the starting items. No money yet.
-   - `AVestigeGameMode` (`Game/`, `BP_GameMode`): the classes a player is made of and the end of the day: on the clock's `OnDayEnded` it tells the player and starts the next day, with or without a pawn.
-   - `AVestigePlayerController` (`Game/`, `BP_PlayerController`): the movement and look mapping contexts and the cheat class.
-   - `UVestigeRestComponent` (on the player state, found with `Find`): the player's side of the end of the day and the late-night rules: going to sleep asks the clock to end the day (asked by the bed, or the `SkipDay` console command), the warnings at 22:00 and midnight, the stamina drain over each game minute after midnight, and waking up on the new day, exhausted after a late night (a 75% refill instead of a full one).
-   - `UVestigeGameplayAbility_UseTool`: what a tool use costs and how long it takes (twice as long at zero stamina); one use at a time, never in the air.
-   - `IVestigeInteractable` and its `FVestigeInteractionOption`: what anything the player can use offers an interactor now, and doing it. The interactable owns what happens.
-   - `UVestigeInteractionComponent`: finding the nearest interactable (a timer query on the `Interactable` collision channel) and using its first option. Interacting goes through the interact ability (`UVestigeGameplayAbility_Interact`).
-   - `AVestigeBed`: being a bed: offers Sleep and asks the interactor's rest component to sleep.
-   - `UVestigeStaminaSet`: the stamina numbers and their limits (0 to the maximum), and the out-of-stamina tag. Changed only through gameplay effects.
-   - `UVestigeAbilitySet`: a data asset of attribute sets and abilities granted together.
-   - `UVestigeCharacterMovementComponent`: how the farmer walks and turns; without input it turns toward the aimed tile, and it walks and jumps at half speed while the use key is held.
-   - `UFarmTargetHighlightComponent`: the frame around the targeted tile (presentation only).
-   - `AVestigePlayerCharacter`: input bindings (and the key hints that describe them), turning movement into the tile aim (the walk eases in, so a tap barely steps), showing the current tool's held mesh, and handing out the player state's ability system; nothing else.
-   - `UVestigeCheatManager`: the developer console commands (`NewGame`, `SkipDay`, `SkipToTime`, `BenchmarkField`), each asking the owner of the action; never created in Shipping.
-   - `AVestigeHUD` / `UVestigeHudWidget` (`BP_HUD`, `WBP_Hud`): display only; the HUD pushes finished text to the UMG widget, which never reads the game.
-   - `UVestigeHudSettings`: how the HUD shows feedback messages (how many at once, for how long), in Project Settings.
-   - `UVestigeFeedbackSubsystem`: carries feedback reports for the player from game code to presentation. Game code calls `Report` with a `Vestige.Feedback` tag and values; it never writes the player's text or calls the HUD.
-   - `UVestigeFeedbackResponses` (`DA_FeedbackResponses`): the text (later the sound) presentation gives each feedback tag.
-   - `UVestigeSaveRegistry` (game instance, `Core/`) and `IVestigeSaveable`: the game's saved state in memory, one record per key with its owner's version; owners register and read their part at once, the open map's owners give theirs as it starts tearing down, unknown keys are kept.
-   - `UVestigeSaveSubsystem` (game instance) / `UVestigeSaveGame`: the save files: read once per game when the first map is initialised, written on the new day, two slots, refusals, new game. Names no owner.
-   - `UVestigeContentData`: base of every content data asset. Owns the `ContentId`, display name and loading through the Asset Manager.
-   - `UVestigeAssetManager`: the project's Asset Manager; startup checks of all content (duplicate content IDs).
-   - `UVestigeContentCatalog` (game instance): loads every content definition with its visuals once per game; the inventory, farming and fields find content there.
-   - `UFarmCropData`: one crop's definition (growth, meshes, the item it yields and how many). No runtime state.
-   - `UVestigeToolData`: one tool's definition (action, held mesh, stamina cost, how long a use takes). No runtime state.
-   - `UVestigeItemData`: one item's definition (stack size, sell price) and its fragments (`UVestigeItemFragment` subclasses such as `UFarmSeedFragment`) for what only some items have. No runtime state.
+1. **Ownership.** Every actor, component and subsystem has one job. Put new logic, components and settings on the class that owns that responsibility, never on whichever class is convenient. If no class fits, create a new actor, component or subsystem and say so. The owners are listed once, in `Docs/Architecture.md`, section 13, one row per class with what it doesn't own: read it before deciding where something goes, and give a new owner its row there.
 2. **Epic naming.** `A`/`U`/`S`/`F`/`E`/`I`/`T` type prefixes, `b` for booleans, PascalCase everywhere, and the `Vestige` project prefix on every new type (`AVestigePlayerState`, `FOnVestigeInventoryChanged`). Types about the farm itself (tiles, grid, crops, farming actions) use `Farm` instead (`AFarmTile`, `EFarmTileState`). The general types were renamed from `Farm` on 2026-11-01; a rename of a type that assets or saves name needs `[CoreRedirects]` and a test (guidelines section 2.2).
 3. **No shadowing.** The build treats MSVC C4458 as an error. Never give a local or parameter the name of a member of the class or any engine base class (`Mesh` in a character, `Owner`, `Controller`, `Tags`...).
 4. **Formatting.** Tabs, braces on their own lines, braces on every block. Format changed files with the repo's `.clang-format`; don't reformat untouched files.
@@ -97,7 +63,7 @@ Every change to code or content goes through specialist roles, in this order. "T
 
 **What still needs the maintainer's yes** (David's), however technical, because agents shouldn't approve changes to their own rules or take risks he can't see:
 
-- changes to what these hard rules, `Docs/CodingGuidelines.md`, this workflow or the agents' instructions require. Recording what the docs already ask agents to record isn't one: a new test pitfall, a known deviation with its roadmap item, the ownership list kept in step with `Docs/Architecture.md` section 13;
+- changes to what these hard rules, `Docs/CodingGuidelines.md`, this workflow or the agents' instructions require. Recording what the docs already ask agents to record isn't one: a new test pitfall, a known deviation with its roadmap item, the ownership table in `Docs/Architecture.md` section 13 kept in step with the code;
 - licensing, credit and anything legal (`LICENSING.md`, `CONTRIBUTING.md`, third-party or AI-made material);
 - anything that costs money or adds an account or service;
 - anything that can't be undone: deleting assets or files without a copy, breaking save files once players have them, and pushing to the project's repository (he pushes himself).

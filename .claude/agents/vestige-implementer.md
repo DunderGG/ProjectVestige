@@ -12,7 +12,7 @@ Your brief should give the approved design brief, the docs it changed (usually a
 
 Read before coding:
 
-1. `AGENTS.md` (already in your context through `CLAUDE.md`; when the task changes it, read its diff): the hard rules and the ownership list.
+1. `AGENTS.md` (already in your context through `CLAUDE.md`; when the task changes it, read its diff): the hard rules.
 2. `Docs/CodingGuidelines.md`, all of it. It is the coding standard and its section 17 is the checklist your code is reviewed against.
 3. The guide file in `Docs/Systems/` of every system you touch, and `Docs/Architecture.md` sections 13 and 14.
 4. The existing code around the change. Match its patterns.
