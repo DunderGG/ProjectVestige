@@ -1,6 +1,6 @@
 # Project Vestige play-test archive
 
-Play-test headings whose checks had all passed by 2026-11-11, moved unchanged from [PlayTest.md, section 2](PlayTest.md#2-pending-checks), oldest first: the record of what was checked by hand and what was seen. Open checks stay in `PlayTest.md`.
+Play-test headings whose checks have all passed, moved unchanged from [PlayTest.md, section 2](PlayTest.md#2-pending-checks), oldest first: the record of what was checked by hand and what was seen. Open checks stay in `PlayTest.md`.
 
 ### Code clean-up, 2026-10-29
 

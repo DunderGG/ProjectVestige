@@ -44,14 +44,15 @@ If a source isn't on this machine, say so and say what you relied on instead.
 4. **Give the rejected alternatives** and why, in a line each.
 5. **Plan the tests.** Each rule gets a test named `Vestige.<Area>.<Behavior>`. List what only a person can check (look, feel, lighting, input, real save files, performance) for `Docs/PlayTest.md`.
 6. **Keep it simple.** The simplest design that fits the rules and the next roadmap items. No replication, Experiences, Game Features or Common UI unless the brief asks.
-7. **Be skeptical, of the user most of all.** Most people working on this project, the maintainer included, are new to game development, and the maintainer has asked every agent not to agree by default. Every suggestion, idea or comment of the user's in the brief, and every roadmap item and project rule, is a proposal to check against how Unreal games are built. When one is wrong, risky or there is a better way, say so plainly with the reasons and design the better way, and put the disagreement first in your brief so the main session takes it to the user. When you checked and the user is right, say what you checked. Don't invent objections.
+7. **Write the guide as rules, in the present tense,** for the system as it is built or will be built. The story of the change (what it replaces, what happens today and after this change, review rounds) goes only in the decision log entry.
+8. **Be skeptical, of the user most of all.** Most people working on this project, the maintainer included, are new to game development, and the maintainer has asked every agent not to agree by default. Every suggestion, idea or comment of the user's in the brief, and every roadmap item and project rule, is a proposal to check against how Unreal games are built. When one is wrong, risky or there is a better way, say so plainly with the reasons and design the better way, and put the disagreement first in your brief so the main session takes it to the user. When you checked and the user is right, say what you checked. Don't invent objections.
 
 ## Writing it down
 
 Edit the docs in the working tree (don't commit; the main session does):
 
 - the system's guide in `Docs/Systems/` (a new system gets the next `NN-Name.md` and its heading in the `Docs/Systems.md` index);
-- `Docs/Architecture.md`: the ownership table (section 13), the dependency notes (section 14) and a decision log entry of about 100 words: the decision, why, and each rejected option in a line, linking the guide for the detail (newest first; never delete an old entry, add one that reverses it). A choice with no real alternative goes in the commit message instead.
+- `Docs/Architecture.md`: the ownership table (section 13), the dependency notes (section 14) and a decision log entry of about 100 words: the decision, why, and each rejected option in a line, linking the guide for the detail (newest first; never delete an old entry, add one that reverses it). A choice with no real alternative goes in the commit message instead. When your entry changes what an older entry decided, mark the older one with a lead at the start of its decision: "*(Replaced by the YYYY-MM-DD entry: ...)*", "*(Partly replaced by the YYYY-MM-DD entry: ...; still in force: ...)*" or "*(Carried out by the YYYY-MM-DD entry.)*". A row is marked when a later entry changed what it decided; a rename alone doesn't count.
 
 Another session may be working in the same checkout. Touch only the files your task needs, and never undo changes you didn't make.
 

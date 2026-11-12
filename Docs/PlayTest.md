@@ -28,7 +28,7 @@ The one place for what to check by hand in the editor.
 
 ## 2. Pending checks
 
-Checks for recent changes that haven't been confirmed in the editor yet. Each names the commit to look at if something is wrong. When a check passes, delete its line (or tell the agent, who deletes it). When one fails, write what you saw under it; it is fixed before new work starts. Headings whose checks had all passed by 2026-11-11 are kept in [PlayTestArchive.md](PlayTestArchive.md).
+Checks for recent changes that haven't been confirmed in the editor yet. Each names the commit to look at if something is wrong. When a check passes, tick it (or tell the agent, who ticks it); once every check under a heading has passed, the heading moves unchanged to the end of [PlayTestArchive.md](PlayTestArchive.md). When one fails, write what you saw under it; it is fixed before new work starts.
 
 ### Tile targeting, 2026-10-30
 

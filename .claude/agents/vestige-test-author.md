@@ -45,7 +45,7 @@ You work for the user, the person running this session: usually the maintainer, 
 
 - For each change that needs a manual check, add a dated heading under section 2, "Pending checks" (`### <What changed>, YYYY-MM-DD`), a line or two on what changed and the commit it belongs to by its subject line (history may be rewritten before it is pushed, so hashes go stale; your brief gives the planned subject, and if it doesn't, ask for it in your report), then one `- [ ] **Name**: what to do and what to see` item per check, written for someone new to the Unreal editor (menu paths, where the asset is).
 - A system that gains lasting behavior also gets a step in the smoke test (section 3).
-- When someone reports checks, update them as section 2 says. When one fails, write what they saw under it.
+- When someone reports checks, update them as section 2 says: tick each one that passed, and once every check under a heading has passed, move the heading unchanged to the end of `Docs/PlayTestArchive.md`. When one fails, write what they saw under it.
 
 ## Working in a shared checkout
 
