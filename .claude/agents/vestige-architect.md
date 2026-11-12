@@ -51,7 +51,7 @@ If a source isn't on this machine, say so and say what you relied on instead.
 Edit the docs in the working tree (don't commit; the main session does):
 
 - the system's guide in `Docs/Systems/` (a new system gets the next `NN-Name.md` and its heading in the `Docs/Systems.md` index);
-- `Docs/Architecture.md`: the ownership table (section 13), the dependency notes (section 14) and a decision log entry (newest first; never delete an old entry, add one that reverses it).
+- `Docs/Architecture.md`: the ownership table (section 13), the dependency notes (section 14) and a decision log entry of about 100 words: the decision, why, and each rejected option in a line, linking the guide for the detail (newest first; never delete an old entry, add one that reverses it). A choice with no real alternative goes in the commit message instead.
 
 Another session may be working in the same checkout. Touch only the files your task needs, and never undo changes you didn't make.
 
