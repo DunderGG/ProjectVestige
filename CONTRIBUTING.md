@@ -196,7 +196,7 @@ Before opening a pull request, check:
 
 ## 10. Working with AI tools
 
-You're welcome to use AI coding assistants. [AGENTS.md](AGENTS.md) (and `CLAUDE.md`, which loads it) gives them the project's rules, and its section "How work is done" splits the work into roles: an architect, a reviewer, an implementer, a test author, an artist and an art reviewer. With Claude Code these roles are ready-made subagents in `.claude/agents/`; [.claude/README.md](.claude/README.md) shows how they work together. Their review is not the maintainer's: it happens before your pull request, which is still reviewed as usual. You are still responsible for what you submit: read and understand every change, build it and test it before opening a pull request.
+You're welcome to use AI coding assistants. [AGENTS.md](AGENTS.md) (and `CLAUDE.md`, which loads it) gives them the project's rules, and its section "How work is done" splits the work into roles: a game designer, an architect, a reviewer, an implementer, a test author, an artist and an art reviewer. With Claude Code these roles are ready-made subagents in `.claude/agents/`; [.claude/README.md](.claude/README.md) shows how they work together. Their review is not the maintainer's: it happens before your pull request, which is still reviewed as usual. You are still responsible for what you submit: read and understand every change, build it and test it before opening a pull request.
 
 ## 11. Licensing and credit
 

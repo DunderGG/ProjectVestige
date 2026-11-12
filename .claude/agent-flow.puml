@@ -15,12 +15,21 @@ start
 :**Task picked up**
 Main session: roadmap item, the user's words;
 
+#FFF1D6:**Game designer** (when how the game plays changes)
+Checks GameDesign.md, prepares questions
+with options and a recommendation;
+note right
+  The user decides game feel
+  and design; the designer
+  records the answers
+end note
+
 repeat
   #E8E0F7:**Architect**
   Owner, layer, guide, test plan;
   note right
-    Questions for the user:
-    game feel and design.
+    Design questions go to the
+    user through the designer.
     For the maintainer's yes:
     rule changes, licensing,
     money, anything that
@@ -57,6 +66,7 @@ legend bottom left
   **Shortcuts**
   Bug fix: the test author writes a failing test first, then the implementer fixes it, then the code review.
   Working for a contributor: nothing stands in for the maintainer's review of the pull request.
+  No change to how the game plays: skip the game designer.
   No design choice: skip the architect and the design review.
   Lore, story and typo fixes: no flow.
 endlegend
