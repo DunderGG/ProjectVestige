@@ -326,6 +326,7 @@ The code changes that the slice's content depends on. Doing them first means add
 - [x] The HUD keeps its references instead of searching the world every frame
 - [x] Trace scopes on the new day, loading and saving
 - First performance baseline: moved to [4.0](#40-structure-from-the-code-review) (code review, 2026-11-04)
+- [ ] Add a performance analyst agent (`vestige-performance`) by the end of milestone 2, when real art and bigger fields arrive: it profiles the packaged build with Unreal Insights and CSV captures, compares the frame against the budget in [Architecture.md, section 10](Architecture.md#10-performance-by-design) and [PerformanceBaseline.md](PerformanceBaseline.md), and finds what costs the most ([CodeReview.md, H8](CodeReview.md#h8--rendering-is-unreals-maximum-feature-set-unmeasured-on-the-target)). Made like the other agents, with David's yes on its instructions (asked by David, 2026-11-12)
 
 ### 4.2 Farming depth
 
@@ -445,6 +446,7 @@ Roughly in the order from [GameDesign.md section 13](GameDesign.md#13-scope-and-
 
 - [ ] Separate maps with loading between them: the farm, the town, later the wasteland zones. Opened with `OpenLevel` as [Architecture.md, section 2](Architecture.md#2-unreals-gameplay-framework-where-things-go) decides: an owner for travel in the game instance, zones and hubs as data assets naming their maps, and a loading screen
 - [ ] The robot town map
+- [ ] Add a level designer agent (`vestige-level-designer`) with the second map: it lays out maps from the design (paths, landmarks, where things are placed, sight lines from the game camera), within the performance budget and the content rules. Made like the other agents, with David's yes on its instructions (asked by David, 2026-11-12)
 - [ ] Townsfolk with schedules, likes and dislikes, and their own backstories (starting with the administrator, the clinic robot, the mail carrier, the engineer and the weather broadcaster)
 - [ ] Gifts, requests and personal events
 - [ ] Romance, dating and marriage with robots and humans; a partner moves to the farm
@@ -483,6 +485,7 @@ Roughly in the order from [GameDesign.md section 13](GameDesign.md#13-scope-and-
 
 ### Story
 
+- [ ] Add a lore and story agent (`vestige-lore-keeper`) for the documents in `Docs/Spoilers/`: it keeps the lore, the story timeline, the characters, the factions and the dialogue consistent with each other and with `Docs/GameDesign.md`, writes and edits them in the project's tone, and turns [LoreAudit.md](Spoilers/LoreAudit.md) findings into fixes. Lore stays out of the code flow (it skips the steps in "How work is done"), but story content that reaches the game (dialogue, item texts, quests) is written or checked by this agent before it goes through the flow. It also keeps spoilers out of everything that must stay spoiler-free (the other docs, code comments and commit messages, as [Spoilers/README.md](Spoilers/README.md) says). Made like the other agents, with David's yes on its instructions (asked by David, 2026-11-12)
 - [ ] The family mystery: letters, recordings and Hob's returning memories
 - [ ] The humans, about four to six, each found as a story moment
 - [ ] The parents' sealed message, delivered when the farm is whole again
@@ -511,15 +514,18 @@ Roughly in the order from [GameDesign.md section 13](GameDesign.md#13-scope-and-
 - [ ] Scale the sun's step with the shadow quality: a console variable for the step, set per `ShadowQuality` level in `Config/DefaultScalability.ini` (0.05 at High and Epic, larger at Low and Medium, where small jumps are the price of cheaper shadows), with `SunStepDegrees` on the day cycle as the level's default. Part of the graphics settings, not an option of its own (David's idea, 2026-11-05)
 - [ ] Main menu, settings and save slots. Its New game asks for confirmation before it replaces a save ([CodeReview.md, H5](CodeReview.md#h5--f9-deletes-both-saves-with-one-key-in-a-shipped-build))
    - Key rebinding in the settings, with Enhanced Input's user settings ([Systems.md, section 17](Systems.md#17-settings)): `bEnableUserSettings` on, the screen calls `SaveSettings()` after each remap, and the key hints ask Enhanced Input for the player's current key instead of the assets' default mappings and are rebuilt on a remap event ([Systems.md, section 5](Systems.md#5-input); found with H6, 2026-11-07)
+- [ ] Add a UI designer agent (`vestige-ui-designer`) with the first menu: it designs screens and the HUD for the player (layout, readability at a distance, gamepad navigation, accessibility, the pre-war interface style in [GameDesign.md, section 12](GameDesign.md#12-presentation)) before the architect designs them in UMG and Common UI. Made like the other agents, with David's yes on its instructions (asked by David, 2026-11-12)
 - Moving the test keys F9 and N into a cheat manager: moved to [4.0](#40-structure-from-the-code-review), because F9 deletes the saves (code review, 2026-11-04)
 - [ ] Turn save compatibility on at the first public build: a version per saved owner, with upgrades from then on ([CodeReview.md, H4](CodeReview.md#h4--save-upgrade-code-for-a-game-nobody-else-has-played))
 - [ ] Music and sound effects
+- [ ] Add an audio designer agent (`vestige-audio`) with the first sounds: it plans the sound and music for each system (feedback responses, gameplay cues, ambience), the mixing and the audio budget, from [Systems/14-Audio.md](Systems/14-Audio.md), and checks licenses for every sound. Made like the other agents, with David's yes on its instructions (asked by David, 2026-11-12)
 - [ ] Settle how many feedback messages the HUD shows at once (Project Settings > Game > Vestige HUD; five while the game is being built, 2026-10-30)
 - [ ] Final names for the game, the world, the town, the coin, the caretaker and the robot makers
 - [x] License headers (an SPDX line) in our own source files
 - [ ] A lawyer's check of the licensing setup
 - [ ] Make the GitHub repository public, so contributors can work on it as the licensing intends
 - [ ] Packaged builds and store pages
+- [ ] Add a release engineer agent (`vestige-release`) before the first public build: it packages and checks builds (cook warnings, Shipping-only problems, save compatibility, the licensing files that must ship with the build) and keeps the release checklist. Made like the other agents, with David's yes on its instructions (asked by David, 2026-11-12)
 
 ## 7. Open decisions
 
