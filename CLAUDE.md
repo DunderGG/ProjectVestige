@@ -14,7 +14,8 @@ The roles in "How work is done" in `AGENTS.md` are subagents in `.claude/agents/
 | Role | Subagent |
 |---|---|
 | Architect | `vestige-architect` |
-| Reviewer | `vestige-reviewer` (designs, code and art; review, then re-review) |
+| Reviewer | `vestige-reviewer` (designs and code; review, then re-review) |
+| Art reviewer | `vestige-art-reviewer` (art from the artist; review, then re-review) |
 | Implementer | `vestige-implementer` |
 | Test author | `vestige-test-author` |
 | Artist | `vestige-artist` |

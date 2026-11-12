@@ -53,7 +53,7 @@ Every change to code or content goes through specialist roles, in this order. "T
 
 **The main session owns the loose ends:** it passes each step what it needs (including the planned commit subject, for `Docs/PlayTest.md`), updates `Docs/Architecture.md` when the implementer had to deviate from the design, turns review findings left for later into `Docs/Roadmap.md` items, and records the maintainer's design answers in `Docs/GameDesign.md` (an unanswered question goes into its section 15, and the code built on the recommended option is kept cheap to change). Steps that run the Unreal editor or the build (`Build.bat`, `UnrealEditor-Cmd`) run one at a time, never in parallel: they lock the module and the packages they load.
 
-**Art** is made by the artist (Blender models, export, import, licensing records) and reviewed by the reviewer in step 5. A change that needs both art and code runs the artist alongside step 3, except for its editor steps.
+**Art** is made by the artist (Blender models, export, import, licensing records, preview renders) and reviewed by the art reviewer, a technical artist, who looks at the renders, measures the mesh and reads the scripts, and reviews again after every fix until it approves. Materials and textures are art too. Any change to code, a data asset, a Blueprint, a map or config that uses the art goes through the reviewer as usual, even when the artist's script made it. A change that needs both art and code runs the artist and the art review alongside steps 3 to 5, except for their editor steps.
 
 **A bug fix** starts with the test author writing a test that fails because of the bug, then the implementer fixes it, then the code review.
 

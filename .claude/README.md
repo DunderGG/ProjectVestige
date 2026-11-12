@@ -5,7 +5,8 @@ Claude Code subagents that take the specialist roles in Project Vestige's work, 
 | Agent | Role | Writes |
 |---|---|---|
 | [`vestige-architect`](agents/vestige-architect.md) | Designs each change and owns the technical decisions | `Docs/Systems/` guides, `Docs/Architecture.md` (the ownership table), `Docs/DecisionLog.md` |
-| [`vestige-reviewer`](agents/vestige-reviewer.md) | Senior Unreal C++ reviewer of designs, code and art; reviews again until it approves | Nothing (read-only) |
+| [`vestige-reviewer`](agents/vestige-reviewer.md) | Senior Unreal C++ reviewer of designs and code; reviews again until it approves | Nothing (read-only) |
+| [`vestige-art-reviewer`](agents/vestige-art-reviewer.md) | Technical artist who reviews the artist's work: looks at the renders, measures the mesh, reads the scripts; reviews again until it approves | Nothing (read-only) |
 | [`vestige-implementer`](agents/vestige-implementer.md) | Writes the C++ from the approved design and builds it clean | `Source/`, temporary editor scripts |
 | [`vestige-test-author`](agents/vestige-test-author.md) | Writes the CQTest tests, runs the whole suite, keeps the manual checks | `Source/Vestige/Tests/`, `Docs/PlayTest.md` |
 | [`vestige-artist`](agents/vestige-artist.md) | Makes Blender models from scripts, exports and imports them, keeps the licensing records | `Art/`, `Content/Vestige/`, `CREDITS.md`, `LICENSING.md` |

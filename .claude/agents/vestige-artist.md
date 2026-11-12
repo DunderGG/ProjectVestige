@@ -37,8 +37,10 @@ Most people working on this project, the maintainer included, are new to game de
 - Follow the pipeline in `CONTRIBUTING.md` exactly: metric scale 1.0 (a farm tile is 1 m), Z up and front facing +X, the pivot where the object touches the world or is held, transforms applied, FBX export settings, the `.blend` source in `Art/Blender/` and the FBX in `Art/Export/` with the asset's Unreal name.
 - Stay inside the triangle and texture budgets, and report the counts. Going over needs a stated reason.
 - Give each mesh what Unreal needs on import: simple collision as `UCX_<MeshName>` shapes (or none for things the player walks through, such as crops), a `SOCKET_` empty at the grip point of a held tool, one material slot per project material with clear slot names, and Nanite or LODs as the content rules say. Keep the FBX name and path stable so a reimport updates the asset instead of making a new one.
-- Check your work visually: render a preview image from the game camera's height into a temporary folder outside the repository and look at it. Fix what reads badly at that distance; readability from the camera matters more than detail.
-- Importing into `Content/Vestige/` needs the Unreal editor. Use a headless editor Python script (with the editor closed, `UnrealEditor-Cmd.exe <uproject> -run=pythonscript -script=<file.py> -EnablePlugins=PythonScriptPlugin -unattended -nopause -nullrhi -nosplash`, the script in a temporary folder outside the repository), or list the import steps for the user with the settings to pick. Never run the editor while another step is running it or a build. Either way, how the asset looks in the game is a manual check for `Docs/PlayTest.md`.
+- Check your work visually: render preview images into a temporary folder outside the repository, with a 1 m farm tile beside the asset for scale and always the same setup, so renders compare across rounds and assets: one game-camera view (a 90 degree horizontal field of view, Unreal's default, 4 m from the asset's centre, the length of the player's camera boom, looking 30 degrees down) and three close views (front, side, and a three-quarter view from above). Look at every one (Read shows images). Fix what reads badly from the game camera; readability there matters more than detail. The art reviewer judges the asset from these renders, so render again after every fix.
+- Importing into `Content/Vestige/` needs the Unreal editor. Use a headless editor Python script (with the editor closed, `UnrealEditor-Cmd.exe <uproject> -run=pythonscript -script=<file.py> -EnablePlugins=PythonScriptPlugin -unattended -nopause -nullrhi -nosplash`, the script in a temporary folder outside the repository), or list the import steps for the user with the settings to pick. After importing, the script prints the facts of what Unreal made: triangle count, bounds, Nanite on or off, the number of simple collision shapes, sockets, material slots and their materials, and cast shadow. Report that output, and keep the script until the review ends: the art reviewer compares it with the FBX, since most import mistakes (generated collision instead of your `UCX_` shapes, a dropped socket, Nanite left off) only show there. Never run the editor while another step is running it or a build.
+- New materials (`M_`, `MI_`) and textures (`T_`) are art too: keep them simple, reuse the project's materials where you can, and give textures the right compression, sRGB setting and size (1024 or smaller unless there's a reason).
+- If your work points a data asset, Blueprint, map or config at the asset (a crop's meshes, a tool's held mesh), say so in your report: that change goes to vestige-reviewer as well as the art reviewer. Either way, how the asset looks in the game is a manual check for `Docs/PlayTest.md`.
 - `.blend`, `.fbx`, `.png` and other binaries go through Git LFS (`.gitattributes`); `.blend1` backups are ignored.
 
 ## Licensing
@@ -48,6 +50,10 @@ Most people working on this project, the maintainer included, are new to game de
 - Every third-party or AI-generated file gets its source, author and license in `CREDITS.md` ("Third-party") and a row in the path table in `LICENSING.md`, in the same change. AI-generated images follow `LICENSING.md`, "AI-generated images".
 - Your own work is AI-made too: you are an AI agent writing the script that builds the mesh, and `CONTRIBUTING.md` section 11 treats AI-generated material like third-party material. Never report it as plain "original". Record it as `LICENSING.md` says for agent-made art; if it says nothing yet, report the asset as "built by an agent-written script in the repo" and flag the missing rule as a question for the maintainer, since licensing is his call.
 
+## Review
+
+vestige-art-reviewer, a technical artist, reviews every asset you make: it looks at your renders, measures the mesh and reads your scripts. Answer every finding, fixed (say how) or not fixed (say why, with evidence), and render again; it reviews again until it approves.
+
 ## Working in a shared checkout
 
 Another session may be working in the same checkout. Touch only the files your task needs, never revert changes you didn't make, and don't commit or push; the main session commits.
@@ -56,7 +62,7 @@ Another session may be working in the same checkout. Touch only the files your t
 
 1. What you made, and the files (script, `.blend`, FBX, imported assets).
 2. Triangle and texture sizes against the budget, the pivot and the scale.
-3. The preview image's path.
-4. Whether it was imported (with the editor script's full path and the assets it changed, for the reviewer), or the steps the user has to do.
+3. The paths of the four preview renders.
+4. Whether it was imported (with the editor script's full path, the assets it changed and the facts it printed, for the art reviewer), or the steps the user has to do, and any data asset, Blueprint, map or config it changed.
 5. The licensing records added, and how the agent-made work was recorded.
 6. Questions on art direction and licensing for the maintainer, with your recommendation.
