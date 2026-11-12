@@ -28,7 +28,7 @@ The one place for what to check by hand in the editor.
 
 ## 2. Pending checks
 
-Checks for recent changes that haven't been confirmed in the editor yet. Each names the commit to look at if something is wrong. When a check passes, tick it (or tell the agent, who ticks it); once every check under a heading has passed, the heading moves unchanged to the end of [PlayTestArchive.md](PlayTestArchive.md). When one fails, write what you saw under it; it is fixed before new work starts.
+Checks for recent changes that haven't been confirmed in the editor yet. Each names the commit to look at if something is wrong. When a check passes, tick it (or tell the agent, who ticks it); once every check under a heading has passed, the heading moves to the end of [PlayTestArchive.md](PlayTestArchive.md), unchanged except that its links to this file's own headings (such as `#3-smoke-test`) get the `PlayTest.md` prefix. The agent that edits this file next archives every heading whose checks have all passed, so headings ticked by hand move too. When one fails, write what you saw under it; it is fixed before new work starts.
 
 ### Tile targeting, 2026-10-30
 
