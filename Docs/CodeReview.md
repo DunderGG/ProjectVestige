@@ -188,6 +188,8 @@ The farming component posts "Tilled the soil." and "Watered." on every successfu
 
 `Docs/` is about 508 KB against about 273 KB of source (7,800 lines). [Architecture.md](Architecture.md) alone is 119 KB; its ownership table restates the class comments, and its decision log records tweaks such as Details panel category names and a Visual Studio plugin flag. From 24 October to this review, 41 commits touched `Docs/` and 15 touched `Source/`. Every change can update five documents, which slows work and invites drift. See rule 5 below.
 
+**Status: Resolved (2026-11-12).** David chose one ownership list, section 13 of [Architecture.md](Architecture.md) as a one-page system map with the detail in the class comments and the guides, and decision log entries of about 100 words with the same scope, so he can still overrule any agent's choice. The documents the agents read were restructured at the same time: one file per system guide, passed play-test checks archived, replaced decisions marked where they stand ([Roadmap.md, section 3](Roadmap.md#3-housekeeping)).
+
 ## Low
 
 - **L1 — Two class prefixes.** `Vestige` and `Farm` in one module make every new class a judgement call, and have already cost two renames. Use `Vestige` for everything new, and stop renaming existing `Farm` classes.
