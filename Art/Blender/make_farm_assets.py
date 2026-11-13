@@ -157,7 +157,7 @@ def add_root(bm, scale=1.0, drop=0.0):
         v.co.z *= 0.9
         if z < 0:
             # Pull the bottom into a short tail.
-            v.co.z -= 0.04 * scale * (-z / radius) ** 3
+            v.co.z -= 0.015 * scale * (-z / radius) ** 3
             v.co.x *= 1 - 0.35 * (-z / radius) ** 2
             v.co.y *= 1 - 0.35 * (-z / radius) ** 2
         v.co.z += center_z
@@ -168,53 +168,28 @@ def add_root(bm, scale=1.0, drop=0.0):
     return center_z + radius * 0.9
 
 
-def add_leaf(bm, base_z, yaw, length, lean_start, lean_end, width, thickness):
-    # Centerline curving outward from steep to shallower, with half-widths along it.
-    stations = [0.0, 0.3, 0.65, 1.0]
-    half_widths = [0.010, 0.045, 0.038, 0.006]
-    points, pos, prev_t = [], Vector((0.0, 0.0, 0.0)), 0.0
-    for t in stations:
-        if t > 0:
-            angle = math.radians(lean_start + (lean_end - lean_start) * t)
-            seg = (t - prev_t) * length
-            pos = pos + Vector((0.0, math.cos(angle) * seg, math.sin(angle) * seg))
-        points.append(pos.copy())
-        prev_t = t
-
-    left, right = [], []
-    for p, hw in zip(points, half_widths):
-        left.append(bm.verts.new((p.x - hw * width, p.y, p.z)))
-        right.append(bm.verts.new((p.x + hw * width, p.y, p.z)))
-    faces = [bm.faces.new((left[k], right[k], right[k + 1], left[k + 1])) for k in range(len(points) - 1)]
-    for f in faces:
-        f.material_index = 2
-    verts = left + right
-    # Give the leaf thickness so it doesn't vanish from behind in Unreal.
-    solid = bmesh.ops.solidify(bm, geom=faces, thickness=thickness)
-    new_verts = {e for e in solid["geom"] if isinstance(e, bmesh.types.BMVert)}
-    for f in {f for v in new_verts for f in v.link_faces}:
-        f.material_index = 2
-    all_verts = set(verts) | new_verts
-    transform_verts(bm, all_verts, Matrix.Translation((0, 0, base_z)) @ Matrix.Rotation(yaw, 4, "Z"))
+TURNIP_STATIONS, TURNIP_WIDTHS = [0.0, 0.3, 0.65, 1.0], [0.045, 0.21, 0.18, 0.03]
 
 
-def build_turnip(name, collection, mats, leaf_count, leaf_scale, root_scale=None, root_drop=0.0, seed=1):
+def build_turnip(name, collection, mats, leaf_count, leaf_length, lean, root_scale=None, root_drop=0.0, seed=1):
+    """Strap leaves fanning out from the centre; from Stage1 on, the root's purple top shows above the soil,
+    a little more each stage, and the ripe root sits on the soil whole."""
     rng = random.Random(seed)
     bm = bmesh.new()
     base_z = 0.005
+    # mats are root, top, leaf; without a root the mesh gets only the leaf slot.
+    used, leaf = (mats, 2) if root_scale else ([mats[2]], 0)
     if root_scale:
         base_z = add_root(bm, root_scale, root_drop) - 0.01 * root_scale
     for k in range(leaf_count):
         yaw = 2 * math.pi * k / leaf_count + rng.uniform(-0.15, 0.15)
-        s = leaf_scale * rng.uniform(0.88, 1.08)
-        add_leaf(bm, base_z, yaw, length=0.26 * s, lean_start=rng.uniform(70, 80), lean_end=rng.uniform(30, 45),
-                 width=s * 1.1, thickness=0.004)
-    return finish_object(name, bm, mats, collection)
+        add_blade(bm, Vector((0.0, 0.0, base_z)), yaw, leaf_length * rng.uniform(0.9, 1.08),
+                  lean[0] + rng.uniform(-5, 5), lean[1] + rng.uniform(-7, 7), TURNIP_STATIONS, TURNIP_WIDTHS, leaf, cup=0.25)
+    return finish_plant(name, bm, used, collection)
 
 
 # ---------------------------------------------------------------------------
-# Plant parts shared by the potato and the cabbage. The turnip keeps its own add_leaf above, so
-# tuning these never changes the turnip's geometry.
+# Plant parts shared by the three crops.
 
 def yaw_towards(dx, dy):
     """The yaw about Z that turns a part built along +Y to point along (dx, dy)."""
@@ -317,14 +292,16 @@ def finish_plant(name, bm, materials, collection):
 # sags, and tubers show on the ridge (along Y, where the soil stays at ridge height).
 
 LEAFLET_STATIONS, LEAFLET_WIDTHS = [0.0, 0.4, 1.0], [0.0, 0.42, 0.0]
-TUBER_SPOTS = [(0.02, 0.115, 0.4), (-0.025, -0.11, 1.9), (0.03, -0.20, 2.6)]
+TUBER_SPOTS = [(0.02, 0.13, 0.4), (-0.025, -0.12, 1.9), (0.03, -0.185, 2.6)]
+TUBER_SIZE = (0.056, 0.04, 0.034)
 
 
 def build_potato(name, collection, mats, stems, height, reach, leaflets, leaflet_size, seed,
-                 droop=0.0, flowers=0, dry_share=0.0, tubers=0):
-    """mats: the potato's materials by part; the mesh gets a slot only for the parts it uses."""
+                 droop=0.0, flowers=0, dry_share=0.0, tubers=0, lean=(15, 30), leaf_part="Leaf"):
+    """mats: the potato's materials by part; the mesh gets a slot only for the parts it uses.
+    leaf_part names the material of the green leaves and stems ("Sprout" on the seedling)."""
     rng = random.Random(seed)
-    parts = ["Leaf"] + (["LeafDry"] if dry_share else []) + (["Flower"] if flowers else []) + (["Tuber"] if tubers else [])
+    parts = [leaf_part] + (["LeafDry"] if dry_share else []) + (["Flower"] if flowers else []) + (["Tuber"] if tubers else [])
     slot = {part: k for k, part in enumerate(parts)}
     bm = bmesh.new()
     for s in range(stems):
@@ -335,7 +312,7 @@ def build_potato(name, collection, mats, stems, height, reach, leaflets, leaflet
         points = [Vector((0, 0, 0)) + out * 0.006, out * r * 0.3 + Vector((0, 0, h * 0.75)),
                   out * r + Vector((0, 0, h * (1.0 - droop)))]
         dry = rng.random() < dry_share
-        stem_mat = slot["LeafDry"] if dry else slot["Leaf"]
+        stem_mat = slot["LeafDry"] if dry else slot[leaf_part]
         add_stem(bm, points, 0.006, stem_mat)
         # Leaflets in pairs along the outer part of the stem and one at its tip, lying almost flat,
         # so the plant reads as a leafy mound from above rather than a bundle of stalks.
@@ -347,19 +324,19 @@ def build_potato(name, collection, mats, stems, height, reach, leaflets, leaflet
             else:
                 turn = math.radians(65 if k % 2 else -65)
                 direction = Matrix.Rotation(turn, 3, "Z") @ Vector((along.x, along.y, 0.0))
-            leaf_mat = slot["LeafDry"] if (dry or rng.random() < dry_share * 0.6) else slot["Leaf"]
-            lean = rng.uniform(15, 30) - 45 * droop
+            leaf_mat = slot["LeafDry"] if (dry or rng.random() < dry_share * 0.6) else slot[leaf_part]
+            leaf_lean = rng.uniform(*lean) - 45 * droop
             add_blade(bm, p, yaw_towards(direction.x, direction.y), leaflet_size * rng.uniform(0.85, 1.1),
-                      lean, lean - 20, LEAFLET_STATIONS, LEAFLET_WIDTHS, leaf_mat)
+                      leaf_lean, leaf_lean - 20, LEAFLET_STATIONS, LEAFLET_WIDTHS, leaf_mat)
         if s < flowers:
             for j in range(2):
-                tip = points[-1] + Vector((rng.uniform(-0.015, 0.015), rng.uniform(-0.015, 0.015), 0.018 + 0.008 * j))
-                res = bmesh.ops.create_cone(bm, cap_ends=True, cap_tris=True, segments=5, radius1=0.016,
+                tip = points[-1] + Vector((rng.uniform(-0.02, 0.02), rng.uniform(-0.02, 0.02), 0.022 + 0.01 * j))
+                res = bmesh.ops.create_cone(bm, cap_ends=True, cap_tris=True, segments=5, radius1=0.022,
                                             radius2=0.0, depth=0.008, matrix=Matrix.Translation(tip))
                 for f in {f for v in res["verts"] for f in v.link_faces}:
                     f.material_index = slot["Flower"]
     for x, y, yaw in TUBER_SPOTS[:tubers]:
-        add_lump(bm, Vector((x, y, 0.012)), (0.042, 0.03, 0.026), yaw, slot["Tuber"], rng)
+        add_lump(bm, Vector((x, y, 0.014)), TUBER_SIZE, yaw, slot["Tuber"], rng)
     return finish_plant(name, bm, [mats[p] for p in parts], collection)
 
 
@@ -368,11 +345,7 @@ def build_potato(name, collection, mats, stems, height, reach, leaflets, leaflet
 
 CABBAGE_STATIONS, CABBAGE_WIDTHS = [0.0, 0.3, 0.75, 1.0], [0.07, 0.42, 0.40, 0.15]
 COTYLEDON_STATIONS, COTYLEDON_WIDTHS = [0.0, 0.45, 1.0], [0.08, 0.5, 0.3]
-CABBAGE_S0_SEED_LEAF, CABBAGE_S0_TRUE_LEAF = 0.075, 0.055
-CABBAGE_S1_LEAF = 0.106
-CABBAGE_S2_LEAF = 0.15
-CABBAGE_S3_HEART = 0.07  # centre height and radius of the curled heart leaves
-
+CABBAGE_RIPE = 5  # stage number of the ripe mesh
 
 def add_rosette(bm, rng, count, length, lean_start, lean_end, material, start=0.008, cup=0.35, yaw_offset=0.0,
                 stations=CABBAGE_STATIONS, widths=CABBAGE_WIDTHS):
@@ -399,32 +372,38 @@ def add_wrapped_leaves(bm, rng, count, center_z, radius, theta_start, theta_end,
 
 
 def build_cabbage(name, collection, mats, stage, seed):
+    """Stage 0 seedling, 1 a cross, 2 a bowl, 3 a bowl with a pale heart, 4 a small head in a ring of
+    big leaves, CABBAGE_RIPE a big tight pale head hugged by its wrapper leaves."""
     rng = random.Random(seed)
     bm = bmesh.new()
     leaf, head = 0, 1
+    used = [mats["Leaf"]]
     if stage == 0:
-        # Seedling: two broad seed leaves held up off the ground and the first true leaf between them.
-        add_rosette(bm, rng, 2, CABBAGE_S0_SEED_LEAF, 56, 22, leaf, start=0.004, cup=0.0, yaw_offset=0.4,
+        # Two broad round seed leaves held out like paddles, and the first true leaf between them.
+        add_rosette(bm, rng, 2, 0.115, 50, 18, leaf, start=0.004, cup=0.0, yaw_offset=0.4,
                     stations=COTYLEDON_STATIONS, widths=COTYLEDON_WIDTHS)
-        add_rosette(bm, rng, 1, CABBAGE_S0_TRUE_LEAF, 70, 45, leaf, start=0.002, cup=0.0, yaw_offset=2.0)
-        used = [mats["Leaf"]]
+        add_rosette(bm, rng, 1, 0.07, 70, 45, leaf, start=0.002, cup=0.0, yaw_offset=2.0)
     elif stage == 1:
         # A raised cross of four leaves.
-        add_rosette(bm, rng, 4, CABBAGE_S1_LEAF, 60, 18, leaf)
-        used = [mats["Leaf"]]
+        add_rosette(bm, rng, 4, 0.152, 55, 15, leaf, cup=0.3)
     elif stage == 2:
         # A bowl: six leaves rising steeply from the centre, then opening out.
-        add_rosette(bm, rng, 6, CABBAGE_S2_LEAF, 67, 0, leaf, cup=0.45)
-        used = [mats["Leaf"]]
+        add_rosette(bm, rng, 6, 0.2, 58, 2, leaf, cup=0.45)
     elif stage == 3:
         # A bowl with a pale heart: inner leaves curl over the centre, wide outer leaves around them.
-        add_rosette(bm, rng, 5, 0.17, 45, 0, leaf, start=0.02)
-        add_wrapped_leaves(bm, rng, 4, CABBAGE_S3_HEART, CABBAGE_S3_HEART, 35, 140, head, yaw_offset=0.6, cup=0.0)
+        add_rosette(bm, rng, 7, 0.22, 50, -2, leaf, start=0.02)
+        add_wrapped_leaves(bm, rng, 4, 0.088, 0.088, 35, 140, head, yaw_offset=0.6, cup=0.0)
+        used = [mats["Leaf"], mats["Head"]]
+    elif stage == 4:
+        # A small round head forming in a ring of big spreading leaves.
+        add_lump(bm, Vector((0, 0, 0.115)), (0.085, 0.085, 0.088), 0.0, head, rng, u_segments=8, v_segments=6, jitter=0.05)
+        # The leaf ring starts close to the centre, so no gap shows under the head.
+        add_rosette(bm, rng, 7, 0.298, 42, -6, leaf, start=0.015, yaw_offset=0.25)
         used = [mats["Leaf"], mats["Head"]]
     else:
         # Ripe: a big, tight, pale head; the wrapper leaves rise against its sides, then flare out.
-        add_lump(bm, Vector((0, 0, 0.10)), (0.11, 0.11, 0.095), 0.0, head, rng, u_segments=8, v_segments=6, jitter=0.04)
-        add_rosette(bm, rng, 6, 0.22, 80, -10, leaf, start=0.075, cup=0.45, yaw_offset=0.3)
+        add_lump(bm, Vector((0, 0, 0.14)), (0.13, 0.13, 0.14), 0.0, head, rng, u_segments=8, v_segments=6, jitter=0.04)
+        add_rosette(bm, rng, 6, 0.245, 80, -10, leaf, start=0.09, cup=0.45, yaw_offset=0.3)
         used = [mats["Leaf"], mats["Head"]]
     return finish_plant(name, bm, used, collection)
 
@@ -541,6 +520,8 @@ def build_all():
     turnip_mats = [mat_root, mat_top, mat_leaf]
     potato_mats = {
         "Leaf": make_material("M_PotatoLeaf", "3E7B34", 0.7),
+        # The sprout is lighter and yellower, so the dark day-1 mound reads as a change from the camera.
+        "Sprout": make_material("M_PotatoSprout", "9FC14A", 0.7),
         "LeafDry": make_material("M_PotatoLeafDry", "B89A3A", 0.8),
         "Flower": make_material("M_PotatoFlower", "EDEBE1", 0.6),
         "Tuber": make_material("M_PotatoTuber", "E0C38F", 0.85),
@@ -552,24 +533,29 @@ def build_all():
 
     objects = [
         build_soil(new_collection("Soil"), mat_soil),
-        build_turnip("SM_Crop_Turnip_Stage0", new_collection("Crop_Turnip_Stage0"), turnip_mats, 2, 0.4, seed=10),
-        build_turnip("SM_Crop_Turnip_Stage1", new_collection("Crop_Turnip_Stage1"), turnip_mats, 3, 0.62, seed=11),
-        build_turnip("SM_Crop_Turnip_Stage2", new_collection("Crop_Turnip_Stage2"), turnip_mats, 5, 0.9, root_scale=0.6, root_drop=0.03, seed=12),
-        build_turnip("SM_Crop_Turnip_Ripe", new_collection("Crop_Turnip_Ripe"), turnip_mats, 5, 1.15, root_scale=1.0, seed=13),
+        build_turnip("SM_Crop_Turnip_Stage0", new_collection("Crop_Turnip_Stage0"), turnip_mats, 3, 0.145, (50, 22), seed=10),
+        build_turnip("SM_Crop_Turnip_Stage1", new_collection("Crop_Turnip_Stage1"), turnip_mats, 5, 0.163, (46, 16),
+                     root_scale=0.4, root_drop=0.012, seed=11),
+        build_turnip("SM_Crop_Turnip_Stage2", new_collection("Crop_Turnip_Stage2"), turnip_mats, 6, 0.22, (50, 18),
+                     root_scale=0.65, root_drop=0.012, seed=12),
+        build_turnip("SM_Crop_Turnip_Ripe", new_collection("Crop_Turnip_Ripe"), turnip_mats, 7, 0.21, (45, 15),
+                     root_scale=1.1, seed=13),
         build_potato("SM_Crop_Potato_Stage0", new_collection("Crop_Potato_Stage0"), potato_mats,
-                     stems=3, height=0.065, reach=0.035, leaflets=3, leaflet_size=0.06, seed=20),
+                     stems=3, height=0.05, reach=0.07, leaflets=3, leaflet_size=0.07, seed=20, lean=(15, 25),
+                     leaf_part="Sprout"),
         build_potato("SM_Crop_Potato_Stage1", new_collection("Crop_Potato_Stage1"), potato_mats,
-                     stems=4, height=0.09, reach=0.06, leaflets=4, leaflet_size=0.065, seed=21),
+                     stems=6, height=0.12, reach=0.075, leaflets=4, leaflet_size=0.07, seed=21, lean=(25, 40)),
         build_potato("SM_Crop_Potato_Stage2", new_collection("Crop_Potato_Stage2"), potato_mats,
-                     stems=5, height=0.15, reach=0.11, leaflets=4, leaflet_size=0.08, seed=22, flowers=3),
+                     stems=6, height=0.165, reach=0.115, leaflets=4, leaflet_size=0.08, seed=22, flowers=4),
         build_potato("SM_Crop_Potato_Ripe", new_collection("Crop_Potato_Ripe"), potato_mats,
-                     stems=6, height=0.17, reach=0.17, leaflets=3, leaflet_size=0.085, seed=23,
+                     stems=6, height=0.14, reach=0.13, leaflets=3, leaflet_size=0.08, seed=23,
                      droop=0.5, dry_share=0.65, tubers=3),
         build_cabbage("SM_Crop_Cabbage_Stage0", new_collection("Crop_Cabbage_Stage0"), cabbage_mats, 0, seed=30),
         build_cabbage("SM_Crop_Cabbage_Stage1", new_collection("Crop_Cabbage_Stage1"), cabbage_mats, 1, seed=31),
         build_cabbage("SM_Crop_Cabbage_Stage2", new_collection("Crop_Cabbage_Stage2"), cabbage_mats, 2, seed=32),
         build_cabbage("SM_Crop_Cabbage_Stage3", new_collection("Crop_Cabbage_Stage3"), cabbage_mats, 3, seed=33),
-        build_cabbage("SM_Crop_Cabbage_Ripe", new_collection("Crop_Cabbage_Ripe"), cabbage_mats, 4, seed=34),
+        build_cabbage("SM_Crop_Cabbage_Stage4", new_collection("Crop_Cabbage_Stage4"), cabbage_mats, 4, seed=35),
+        build_cabbage("SM_Crop_Cabbage_Ripe", new_collection("Crop_Cabbage_Ripe"), cabbage_mats, CABBAGE_RIPE, seed=34),
         build_watering_can(new_collection("WateringCan"), mat_can, mat_brass),
     ]
     return objects
@@ -604,7 +590,16 @@ RIDGE_TOP = 0.06  # crops stand on the middle ridge of a tilled tile
 GAME_CAMERA_DISTANCE = 4.0  # the player's camera boom
 GAME_CAMERA_PITCH = math.radians(30)
 GAME_CAMERA_FOV = math.radians(90)  # Unreal's default horizontal field of view
-LINEUP_CLOSE_SPACING = 0.5
+LINEUP_CLOSE_SPACING = 0.7
+STAGE_START_SCALE = 0.8  # a crop's StageStartScale in its data asset
+# The night each growth stage starts on, and the night the crop is ripe, as David chose on 2026-11-13.
+# Keep in step with the crops' data assets; the day strips show what each morning looks like.
+DAY_SCHEDULES = {
+    "Turnip": ([0, 1, 2], 3),
+    "Potato": ([0, 1, 3], 6),
+    "Cabbage": ([0, 1, 3, 5, 8], 10),
+}
+STRIP_DAYS = 11
 
 
 def setup_preview_scene():
@@ -687,52 +682,114 @@ def render_previews(objects, out_dir):
         crop.hide_render = True
         crop.location = (0.0, 0.0, 0.0)
 
-    # Lineups: one tile per stage along Y, left to right in the game camera, ripe last.
+    # Lineups: one tile per stage along Y, left to right in the game camera, ripe in the last column.
     by_crop = {}
     for crop in crops:
         by_crop.setdefault(crop_name(crop), []).append(crop)
+    columns = max(len(stages) for stages in by_crop.values())
     extra = []
     soil.hide_render = True
     for name, stages in by_crop.items():
         for col, crop in enumerate(stages):
-            column = col if crop is not stages[-1] else 4  # ripe always in the fifth column
-            y = column - 2.0
+            y = lineup_column(col, stages, columns)
             extra.append(tile_copy(soil, (0.0, y, 0.0)))
             crop.location = (0.0, y, RIDGE_TOP)
             crop.hide_render = False
         game_camera(cam, Vector((0.0, 0.0, 0.1)))
         render(scene, os.path.join(out_dir, f"Lineup_{name}_Game.png"), 1280, 720)
-        for tile in extra:
-            bpy.data.objects.remove(tile)
-        extra.clear()
-        # Close lineup: the same stages half a metre apart on three tiles.
+        remove_all(extra)
+        # Close lineup: the same stages closer together, on tiles under them.
         for crop in stages:
             crop.location.y *= LINEUP_CLOSE_SPACING
-        for y in (-1.0, 0.0, 1.0):
-            extra.append(tile_copy(soil, (0.0, y, 0.0)))
+        half = math.ceil((columns - 1) / 2 * LINEUP_CLOSE_SPACING)
+        for y in range(-half, half + 1):
+            extra.append(tile_copy(soil, (0.0, float(y), 0.0)))
         cam.data.sensor_fit = "AUTO"
-        cam.data.lens = 30
-        aim(cam, Vector((2.0, -0.7, 1.1)), Vector((0.0, 0.0, 0.08)))
+        cam.data.lens = 24
+        aim(cam, Vector((2.6, -1.0, 1.35)), Vector((0.0, 0.0, 0.08)))
         render(scene, os.path.join(out_dir, f"Lineup_{name}.png"), 1280, 640)
         for crop in stages:
             crop.hide_render = True
-        for tile in extra:
-            bpy.data.objects.remove(tile)
-        extra.clear()
+        remove_all(extra)
 
     # The field: one row of tiles per crop (along X), stages along Y, from the game camera.
     for row, (name, stages) in enumerate(by_crop.items()):
         x = 1.0 - row
+        filled = set()
         for col, crop in enumerate(stages):
-            column = col if crop is not stages[-1] else 4
-            y = column - 2.0
+            y = lineup_column(col, stages, columns)
+            filled.add(y)
             extra.append(tile_copy(soil, (x, y, 0.0)))
             crop.location = (x, y, RIDGE_TOP)
             crop.hide_render = False
-        for column in range(len(stages) - 1, 4):
-            extra.append(tile_copy(soil, (x, column - 2.0, 0.0)))
+        for col in range(columns):
+            y = col - (columns - 1) / 2
+            if y not in filled:
+                extra.append(tile_copy(soil, (x, y, 0.0)))
     game_camera(cam, Vector((0.0, 0.0, 0.1)))
     render(scene, os.path.join(out_dir, "Field_Game.png"), 1280, 720)
+    for crop in crops:
+        crop.hide_render = True
+    remove_all(extra)
+
+    for name, stages in by_crop.items():
+        render_day_strip(scene, cam, soil, name, stages, out_dir)
+
+
+def lineup_column(col, stages, columns):
+    """The Y of a stage's tile: growth stages from the left, the ripe mesh always in the last column."""
+    column = col if col < len(stages) - 1 else columns - 1
+    return column - (columns - 1) / 2
+
+
+def remove_all(objects):
+    for obj in objects:
+        bpy.data.objects.remove(obj)
+    objects.clear()
+
+
+def look_on_day(day, stages, schedule):
+    """The mesh and scale a crop shows on the morning of a day, as the game picks them: the stage that
+    started last, scaled from STAGE_START_SCALE on its first day to 1 on its last; ripe at full size."""
+    starts, ripe_day = schedule
+    if day >= ripe_day:
+        return stages[-1], 1.0
+    index = max(k for k, start in enumerate(starts) if start <= day)
+    first = starts[index]
+    last = (starts[index + 1] if index + 1 < len(starts) else ripe_day) - 1
+    scale = 1.0 if last == first else STAGE_START_SCALE + (1 - STAGE_START_SCALE) * (day - first) / (last - first)
+    return stages[index], scale
+
+
+def render_day_strip(scene, cam, soil, name, stages, out_dir):
+    """One tile per morning, day 0 to 10, in two rows from the game camera: days 0 to 5 in front,
+    6 to 10 behind, each with its day number on the soil in front of the tile."""
+    extra = []
+    label_mat = bpy.data.materials.get("M_PreviewLabel") or make_material("M_PreviewLabel", "F4F1E8", 0.9)
+    for day in range(STRIP_DAYS):
+        row, col = divmod(day, 6)
+        x, y = 0.6 - 1.2 * row, col - 2.5
+        extra.append(tile_copy(soil, (x, y, 0.0)))
+        mesh, scale = look_on_day(day, stages, DAY_SCHEDULES[name])
+        plant = mesh.copy()
+        scene.collection.objects.link(plant)
+        plant.location = (x, y, RIDGE_TOP)
+        plant.scale = (scale, scale, scale)
+        plant.hide_render = False
+        extra.append(plant)
+        text = bpy.data.curves.new(f"Day{day}", "FONT")
+        text.body = str(day)
+        text.size = 0.16
+        text.align_x = "CENTER"
+        label = bpy.data.objects.new(f"Day{day}", text)
+        label.data.materials.append(label_mat)
+        label.location = (x + 0.5, y, RIDGE_TOP + 0.01)
+        label.rotation_euler = (0.0, 0.0, math.radians(90))
+        scene.collection.objects.link(label)
+        extra.append(label)
+    game_camera(cam, Vector((0.0, 0.0, 0.1)))
+    render(scene, os.path.join(out_dir, f"Days_{name}_Game.png"), 1280, 720)
+    remove_all(extra)
 
 
 if __name__ == "__main__":
