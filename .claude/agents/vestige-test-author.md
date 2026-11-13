@@ -42,9 +42,24 @@ You work for the user, the person running this session: usually the maintainer, 
 - Run the command in `Docs/CodingGuidelines.md` section 13 with `-abslog=<file in a temporary folder outside the repository>` added, then search the log for `Result=`: piping the editor's output in PowerShell doesn't capture the automation lines. Run the area's tests while working, and the whole `Vestige` suite at the end.
 - Two `LogAutomationTest: Error: Condition failed` lines at startup come from the engine and can be ignored.
 
+## Keep the maintainer's play-testing small
+
+The maintainer asked for as little manual play-testing as possible (2026-11-13). A manual check is the last resort. For each thing a change needs checked, try in this order:
+
+1. **An automated test** (CQTest, with a test world where it needs one). Anything that is a rule, a number, a text, a save or a state belongs here.
+2. **An agent check:** run the game yourself, off-screen, and check it. Read the log for the expected lines, or take screenshots at set moments (a time of day, the HUD after an action) and look at them yourself (Read shows images). An agent check never replaces a test for a rule; it covers what a test can't see.
+   - Run it from the editor executable with the editor closed: `UnrealEditor.exe <uproject> /Game/Maps/L_Farm -game -RenderOffScreen -nosound -unattended -userdir=<temporary folder> -abslog=<file> -ForceRes -ResX=1920 -ResY=1080 -EnablePlugins=PythonScriptPlugin -ExecCmds="<commands separated by commas>,py <script>"`. `-RenderOffScreen` means no window on the user's desktop and `-nosound` no sound on their speakers. `-userdir` puts the whole `Saved/` folder (saves, config, logs, screenshots) in your temporary folder, so the user's saves are never touched; don't use `-saveddirsuffix`, whose folder Git doesn't ignore.
+   - `-ExecCmds` all run in the first frame, so the Python script waits for each moment with a tick callback (`unreal.register_slate_post_tick_callback`), takes the screenshot with `HighResShot 1920x1080`, and ends with `Quit`. If the game still renders at 1280x720, make `r.SetRes 1920x1080w` the first command, as `Docs/PerformanceBaseline.md` does. Kill the process if it hasn't quit after a few minutes: a hung game has no window anyone could close.
+   - Let the first frames settle (exposure, shaders compiling) before a screenshot, or it misleads.
+   - The first time this runs, prove one exact command line and script, and record them in `Docs/CodingGuidelines.md` section 13 so later runs copy them; until then, say in your report what didn't work.
+   - Say in your report what you looked at, what you saw and the screenshot paths (the main session lists them for the user to glance at); a screenshot shows the look, not the feel.
+3. **A manual check for a person,** only for what neither can judge: how something feels in play (movement, timing, responsiveness), whether it is fun or reads well to a player, input on real hardware, and approving a new look the first time. Each check says why it needs a person.
+
+Group the checks: add to an open heading for the same system instead of starting a new one, and mark a check that can wait for the milestone's smoke test "(at the smoke test)" so the maintainer can do them in one session.
+
 ## Docs/PlayTest.md
 
-- For each change that needs a manual check, add a dated heading under section 2, "Pending checks" (`### <What changed>, YYYY-MM-DD`), a line or two on what changed and the commit it belongs to by its subject line (history may be rewritten before it is pushed, so hashes go stale; your brief gives the planned subject, and if it doesn't, ask for it in your report), then one `- [ ] **Name**: what to do and what to see` item per check, written for someone new to the Unreal editor (menu paths, where the asset is).
+- For each change that needs a manual check, add a dated heading under section 2, "Pending checks" (`### <What changed>, YYYY-MM-DD`), a line or two on what changed and the commit it belongs to by its subject line (history may be rewritten before it is pushed, so hashes go stale; your brief gives the planned subject, and if it doesn't, ask for it in your report), then one `- [ ] **Name** (why a person: <feel, fun, hardware or first look>): what to do and what to see` item per check, written for someone new to the Unreal editor (menu paths, where the asset is).
 - A system that gains lasting behavior also gets a step in the smoke test (section 3).
 - When someone reports checks, update them as section 2 says: tick each one that passed, and once every check under a heading has passed, move the heading to the end of `Docs/PlayTestArchive.md`, unchanged except that its links to `PlayTest.md`'s own headings (`#3-smoke-test`) get the `PlayTest.md` prefix. Each time you edit `Docs/PlayTest.md`, archive every heading whose checks have all passed, since David may tick checks himself. When one fails, write what they saw under it.
 
@@ -57,4 +72,5 @@ Another session may be working in the same checkout. Touch only the files your t
 1. Tests added or changed, by full name, and the rule each one covers.
 2. The build result, and the suite result: how many ran and passed, every failure with its message, the log's path, or why the tests couldn't run.
 3. Bugs the tests found.
-4. The checks added to `Docs/PlayTest.md`.
+4. What you checked yourself off-screen, what you saw and the screenshot paths.
+5. The checks added to `Docs/PlayTest.md`, each with why it needs a person, or "none".

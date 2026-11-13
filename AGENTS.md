@@ -48,7 +48,7 @@ Every change to code or content goes through specialist roles, in this order. "T
 1. **Design: the architect.** Names the owner of each new responsibility and its layer, writes or updates the system's guide in `Docs/Systems/`, the `Docs/Architecture.md` changes (ownership table) and the `Docs/DecisionLog.md` entry, and plans the tests and the manual checks.
 2. **Design review: the reviewer.** A senior Unreal C++ reviewer, independent of the author, checks the design against Unreal practice, the engine source, Lyra and these rules. The architect answers every finding and the reviewer reviews again, until it approves. When the user is David, the reviewer's approval counts as his on technical choices, within the limits below (decision log, 2026-11-11).
 3. **Build: the implementer.** Writes the C++ the approved design calls for and builds it clean. A design that turns out not to work goes back to steps 1 and 2; the implementer doesn't redesign.
-4. **Tests: the test author.** Writes the CQTest tests for every changed rule, builds, runs the whole `Vestige` suite and adds the manual checks to `Docs/PlayTest.md`.
+4. **Tests: the test author.** Writes the CQTest tests for every changed rule, builds, runs the whole `Vestige` suite, checks what it can itself by running the game off-screen (the log, screenshots it looks at), and adds to `Docs/PlayTest.md` only what still needs a person, saying why.
 5. **Code review: the reviewer** again, on the diff, the tests and the docs. Findings go back to the implementer or the test author, and the reviewer re-reviews until it approves.
 6. **Commit: the main session.** Checks that `VestigeEditor` built clean and the whole `Vestige` suite passed after the last source change (reading the log, not a summary; if a fix round changed code, build and run them again), runs the checklist in `Docs/CodingGuidelines.md` section 17, and commits only this task's files. The reply to the user lists the technical decisions taken, a line each, so they can question any of them.
 
@@ -79,7 +79,7 @@ Every change to code or content goes through specialist roles, in this order. "T
 - If you can build (for example in a session on the user's PC), build the `VestigeEditor` target (Development Editor, Win64) before committing and fix every error and warning you introduced.
 - Run the `Vestige` automation tests when you can build.
 - If you can't build, say clearly that the change is uncompiled.
-- **A change that needs a manual check** (visuals, feel, lighting, the HUD, input, saves on real files, performance, editor-only steps) adds it to `Docs/PlayTest.md`, section "Pending checks", in the same commit: a dated heading, the commit and what to look for. Game rules are always tested automatically, never by a manual check only.
+- **A change that needs a manual check** adds it to `Docs/PlayTest.md`, section "Pending checks", in the same commit: a dated heading, the commit and what to look for. Manual checks are kept few: only what neither an automated test nor an agent's off-screen check (the log, screenshots) can judge, such as feel, fun, input on real hardware and a new look the first time. Game rules are always tested automatically, never by a manual check only.
 - Live Coding can't add new `UPROPERTY`s, `UFUNCTION`s or classes, and a build can't run while the editor has the project open. Ask the user to close the editor before such a change. When you built after your last source change, tell them the editor is safe to open; ask them to rebuild only when you couldn't build.
 
 ## Git
