@@ -544,6 +544,32 @@ In [Phase-02-Early.md](Dialogue/Phase-02-Early.md), scene `E-07`, Cleo says the 
 
 **Correction made:** Cleo now treats the pod's potential logs as a possible lead, not direct proof of a municipal pressure drop. The scene leaves whether the pod retained logs unresolved and does not invent an external pressure sensor or guarantee that records survived for seventy years.
 
+### L-30 — The human-romance promise has no possible human love interest
+
+**Severity: Medium**
+
+**Status: Open (2026-11-13).** The character sheets establish Gage and Cleo as robot love interests, but no human character is designed as a possible romance option.
+
+[GameDesign.md](../GameDesign.md) promises romance with robots and humans and sets a first-release target of three full romance arcs, about ten robots and two humans. [Lore.md](Lore.md) instead describes a possible cast of four to six human survivors, including the sleeper and sibling, while leaving most survivor roles as story hooks. The [nomad](Characters/Nomad.md) is explicitly not a romance option and chooses to keep travelling. The sibling is part of the player's family story, not an appropriate candidate to presume. Other possible human roles—including the shelter survivor, second sleeper, disguised survivor and living exhibit—do not yet have romance arcs or settled identities and wishes.
+
+**Why it matters:** The game promises a human romance option without identifying who could fulfill that promise. Treating every rare human as a potential partner would undermine the characters' individual boundaries; treating a survivor's vulnerability, concealment or abuse as a route to romance could turn their agency into a reward for the player.
+
+**Recommended change:** Explore one possible, optional human love interest for the first-release cast, without making that person canon or making other human encounters romanceable by default. Give the candidate an independent want, relationships and reasons to choose—or decline—a relationship with the sleeper. Do not use the sibling or presume the nomad should abandon their chosen life; handle any survivor of coercive research around their own wishes, not as a romance or rescue reward. Clarify whether the first-release target of two humans includes the sleeper.
+
+### L-31 — Romance, commitment and intimacy are not defined beyond the relationship outline
+
+**Severity: Medium**
+
+**Status: Open (2026-11-13).** The design says romance leads to dating and marriage, and a partner moves to the farm, but does not define the experiences or boundaries between those milestones.
+
+[GameDesign.md](../GameDesign.md) establishes explicit romantic opt-in, a possible character decline, and a partner moving to the farm. Gage's and Cleo's sheets add proposals, permanent partnership and domestic routines, but neither establishes what “marriage” means in human or robot society, how dating differs from friendship or commitment, or whether the scenes include physical affection or sexual intimacy. The documents also do not set expectations for exclusivity, ending a relationship, or whether relocation is a separate choice.
+
+The farm-work question has a clearer existing boundary: relationships do not grant farm or player performance upgrades. Gage's and Cleo's partner routines are character presentation, not automatic maintenance or production. This leaves an open question about what makes shared farm life emotionally rewarding, not a basis for turning marriage into a farm-labour reward.
+
+**Why it matters:** Writers could interpret “adult romance” as anything from domestic companionship to explicit sexual content, producing inconsistent tone and expectations. A romance that only moves a character to the farm risks feeling thin; one that makes a partner work for the player risks making intimacy an efficiency purchase and contradicting the progression rules.
+
+**Recommended change:** Before expanding the romance cast, define the intended content boundaries: the kinds of affection shown, whether intimacy is omitted, implied or depicted, what dating and permanent commitment add, and whether moving in is separately chosen. Distinguish emotionally mature themes—such as vulnerability, prejudice, grief and boundaries—from sexual explicitness. A restrained, affectionate romance with intimacy left off-screen is a possible fit for the current tone and scope, but remains a design question for the maintainer.
+
 ## Follow-up correction order
 
 1. [x] **L-25 — Farm stop:** Separated the proposal from each party's decision and made activation contingent on every party's agreement (resolved 2026-11-10).
