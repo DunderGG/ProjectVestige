@@ -344,6 +344,32 @@ namespace FarmingTests
 			ASSERT_THAT(IsTrue(TargetTile()->GetCrop()->GetContentId() == TEXT("Base.Turnip")));
 		}
 
+		TEST_METHOD(PlantingPotatoSeedsGrowsAPotato)
+		{
+			Grid->GetField()->Till(TargetCoordinates);
+			SetBag({{0, TEXT("Base.PotatoSeeds"), 1}});
+			UseToolAndFinish();
+			const UFarmCropData* Crop = TargetTile()->GetCrop();
+			ASSERT_THAT(IsNotNull(Crop));
+			ASSERT_THAT(IsTrue(Crop->GetContentId() == TEXT("Base.Potato")));
+			ASSERT_THAT(IsTrue(Inventory->GetItemCount(FPrimaryAssetId(UVestigeItemData::AssetType, TEXT("Base.PotatoSeeds"))) == 0));
+
+			for (int32 Day = 0; Day < Crop->GetDaysToMature(); ++Day)
+			{
+				ASSERT_THAT(IsFalse(TargetTile()->IsRipe()));
+				Grid->GetField()->Water(TargetCoordinates);
+				Grid->GetField()->AdvanceDay();
+			}
+			ASSERT_THAT(IsTrue(TargetTile()->IsRipe()));
+			Hold(TEXT("Base.Hand"), 0);
+			HarvestAndFinish();
+
+			const FPrimaryAssetId PotatoId(UVestigeItemData::AssetType, TEXT("Base.Potato"));
+			ASSERT_THAT(IsTrue(Crop->GetHarvestItemId() == PotatoId));
+			ASSERT_THAT(IsTrue(Inventory->GetItemCount(PotatoId) == Crop->GetYield()));
+			ASSERT_THAT(IsTrue(Crop->GetYield() > 0));
+		}
+
 		TEST_METHOD(WithoutSeedsNothingIsPlanted)
 		{
 			Grid->GetField()->Till(TargetCoordinates);

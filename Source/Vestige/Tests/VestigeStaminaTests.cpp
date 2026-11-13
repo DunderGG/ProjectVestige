@@ -11,6 +11,11 @@
 #include "Content/VestigeGameData.h"
 #include "Core/VestigeFeedbackSubsystem.h"
 #include "CQTest.h"
+#include "Content/FarmSeedFragment.h"
+#include "Content/VestigeItemData.h"
+#include "Content/VestigeToolData.h"
+#include "Engine/AssetManager.h"
+#include "Inventory/VestigeInventoryComponent.h"
 #include "Player/VestigePlayerState.h"
 
 // A namespace keeps the fixture's short name from hiding other declarations in unity builds.
@@ -24,6 +29,8 @@ namespace VestigeStaminaTests
 		/** The player state Blueprint the game uses, whose ability set grants the stamina set. */
 		BEFORE_EACH()
 		{
+			// The starting items are found through the content catalogue of the game instance.
+			Spawner.InitializeGameSubsystems();
 			// The stamina effects are GE_ assets named by the game data, which the asset manager loaded at startup.
 			const UVestigeGameData& GameData = UVestigeGameData::Get();
 			ASSERT_THAT(IsNotNull(GameData.GetStaminaCostEffect().Get()));
@@ -65,6 +72,36 @@ namespace VestigeStaminaTests
 			ASSERT_THAT(IsTrue(GetMaxStamina() > 0.f));
 			ASSERT_THAT(IsTrue(GetStamina() == GetMaxStamina()));
 			ASSERT_THAT(IsFalse(IsOutOfStamina()));
+		}
+
+		static const UVestigeToolData* LoadTool(const TCHAR* ContentId)
+		{
+			return Cast<UVestigeToolData>(
+				UAssetManager::Get().GetPrimaryAssetPath(FPrimaryAssetId(UVestigeToolData::AssetType, ContentId)).TryLoad());
+		}
+
+		/** The first-season guarantee: till, plant and water every starting seed in the first day's stamina. */
+		TEST_METHOD(TheFirstPlantingFitsInADaysStamina)
+		{
+			const UVestigeInventoryComponent* Inventory = AbilitySystem->GetOwner()->FindComponentByClass<UVestigeInventoryComponent>();
+			ASSERT_THAT(IsNotNull(Inventory));
+			const UVestigeToolData* Hoe = LoadTool(TEXT("Base.Hoe"));
+			const UVestigeToolData* Seeds = LoadTool(TEXT("Base.Seeds"));
+			const UVestigeToolData* WateringCan = LoadTool(TEXT("Base.WateringCan"));
+			ASSERT_THAT(IsTrue(Hoe && Seeds && WateringCan));
+			const float CostPerSeed = Hoe->GetStaminaCost() + Seeds->GetStaminaCost() + WateringCan->GetStaminaCost();
+
+			int32 SeedCount = 0;
+			for (const FVestigeInventorySlot& Slot : Inventory->GetSlots())
+			{
+				if (Slot.Item && Slot.Item->FindFragment<UFarmSeedFragment>())
+				{
+					SeedCount += Slot.Count;
+				}
+			}
+
+			ASSERT_THAT(IsTrue(SeedCount > 0));
+			ASSERT_THAT(IsTrue(SeedCount * CostPerSeed <= GetMaxStamina()));
 		}
 
 		TEST_METHOD(RunningOutReportsOnce)

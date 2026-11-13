@@ -445,7 +445,7 @@ namespace VestigeInventoryTests
 		}
 
 		/** Catches a missing editor step: the game mode must name a player state whose inventory starts with the tools and seeds. */
-		TEST_METHOD(ThePlayerStartsWithAHoeSeedsAndAWateringCan)
+		TEST_METHOD(ThePlayerStartsWithToolsAndSeedsOfEachSpringCrop)
 		{
 			UClass* GameModeClass = LoadClass<AGameModeBase>(nullptr, TEXT("/Game/Vestige/Blueprints/BP_GameMode.BP_GameMode_C"));
 			ASSERT_THAT(IsNotNull(GameModeClass));
@@ -458,10 +458,15 @@ namespace VestigeInventoryTests
 
 			ASSERT_THAT(IsNotNull(Component));
 			const TArray<FVestigeInventorySlot>& Slots = Component->GetSlots();
-			ASSERT_THAT(IsTrue(Slots.Num() >= 3));
-			ASSERT_THAT(IsTrue(Slots[0].Item && Slots[0].Item->GetContentId() == TEXT("Base.Hoe")));
-			ASSERT_THAT(IsTrue(Slots[1].Item && Slots[1].Item->GetContentId() == TEXT("Base.TurnipSeeds") && Slots[1].Count > 0));
-			ASSERT_THAT(IsTrue(Slots[2].Item && Slots[2].Item->GetContentId() == TEXT("Base.WateringCan")));
+			// The counts are tuning in the data and may change without a build, so only the items, their order and a count above 0 are checked.
+			const TCHAR* const Expected[] = {TEXT("Base.Hoe"), TEXT("Base.TurnipSeeds"), TEXT("Base.WateringCan"), TEXT("Base.PotatoSeeds"),
+				TEXT("Base.CabbageSeeds")};
+			ASSERT_THAT(IsTrue(Slots.Num() >= static_cast<int32>(UE_ARRAY_COUNT(Expected))));
+			for (int32 Slot = 0; Slot < static_cast<int32>(UE_ARRAY_COUNT(Expected)); ++Slot)
+			{
+				ASSERT_THAT(IsTrue(Slots[Slot].Item && Slots[Slot].Item->GetContentId() == Expected[Slot], *FString::FromInt(Slot)));
+				ASSERT_THAT(IsTrue(Slots[Slot].Count > 0, *FString::FromInt(Slot)));
+			}
 			ASSERT_THAT(IsTrue(Component->GetSelectedHotbarSlot() == 0));
 		}
 	};

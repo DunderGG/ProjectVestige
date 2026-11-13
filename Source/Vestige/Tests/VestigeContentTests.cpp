@@ -15,6 +15,10 @@
 #include "Engine/AssetManager.h"
 #include "Farming/VestigeGameplayAbility_UseTool.h"
 
+#if WITH_EDITOR
+#include "Misc/DataValidation.h"
+#endif
+
 // A namespace keeps the fixture's short name from hiding other declarations in unity builds.
 namespace VestigeContentTests
 {
@@ -114,6 +118,56 @@ namespace VestigeContentTests
 				}
 			}
 		}
+
+		/**
+		 * Every crop can be planted: some seed item names it. A crop without one is unreachable. A later roadmap item (mutated
+		 * crops, found rather than bought) may add a named exception here.
+		 */
+		TEST_METHOD(EveryCropHasASeedItem)
+		{
+			TArray<FPrimaryAssetId> CropIds;
+			UAssetManager::Get().GetPrimaryAssetIdList(UFarmCropData::AssetType, CropIds);
+			ASSERT_THAT(IsFalse(CropIds.IsEmpty()));
+			TArray<FPrimaryAssetId> ItemIds;
+			UAssetManager::Get().GetPrimaryAssetIdList(UVestigeItemData::AssetType, ItemIds);
+
+			TSet<FPrimaryAssetId> PlantedCrops;
+			for (const FPrimaryAssetId& ItemId : ItemIds)
+			{
+				const UVestigeItemData* Item = Cast<UVestigeItemData>(UAssetManager::Get().GetPrimaryAssetPath(ItemId).TryLoad());
+				ASSERT_THAT(IsNotNull(Item, *ItemId.ToString()));
+				if (const UFarmSeedFragment* Seed = Item->FindFragment<UFarmSeedFragment>())
+				{
+					PlantedCrops.Add(Seed->GetCropId());
+				}
+			}
+
+			for (const FPrimaryAssetId& CropId : CropIds)
+			{
+				ASSERT_THAT(IsTrue(PlantedCrops.Contains(CropId), *CropId.ToString()));
+			}
+		}
+
+#if WITH_EDITOR
+		/** What the editor's validation reports when content is saved: no crop or item may fail it. */
+		TEST_METHOD(EveryCropAndItemPassesValidation)
+		{
+			for (const FPrimaryAssetType& Type : {UFarmCropData::AssetType, UVestigeItemData::AssetType})
+			{
+				TArray<FPrimaryAssetId> Ids;
+				UAssetManager::Get().GetPrimaryAssetIdList(Type, Ids);
+				ASSERT_THAT(IsFalse(Ids.IsEmpty(), *Type.ToString()));
+				for (const FPrimaryAssetId& Id : Ids)
+				{
+					const UObject* Content = UAssetManager::Get().GetPrimaryAssetPath(Id).TryLoad();
+					ASSERT_THAT(IsNotNull(Content, *Id.ToString()));
+					FDataValidationContext Context;
+					const EDataValidationResult Result = Content->IsDataValid(Context);
+					ASSERT_THAT(IsTrue(Result != EDataValidationResult::Invalid && Context.GetNumErrors() == 0, *Id.ToString()));
+				}
+			}
+		}
+#endif
 	};
 }
 

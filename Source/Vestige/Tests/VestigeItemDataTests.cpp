@@ -89,6 +89,23 @@ namespace VestigeItemDataTests
 			ASSERT_THAT(IsNull(Turnip->FindFragment<UFarmSeedFragment>()));
 		}
 
+		TEST_METHOD(ThePotatoAndCabbageSeedsPlantTheirCrops)
+		{
+			const TPair<const TCHAR*, const TCHAR*> Seeds[] = {{TEXT("Base.PotatoSeeds"), TEXT("Base.Potato")},
+				{TEXT("Base.CabbageSeeds"), TEXT("Base.Cabbage")}};
+			for (const TPair<const TCHAR*, const TCHAR*>& Seed : Seeds)
+			{
+				const UVestigeItemData* Item = LoadContent<UVestigeItemData>(FPrimaryAssetId(UVestigeItemData::AssetType, Seed.Key));
+				ASSERT_THAT(IsNotNull(Item, Seed.Key));
+				const UFarmSeedFragment* SeedFragment = Item->FindFragment<UFarmSeedFragment>();
+				ASSERT_THAT(IsNotNull(SeedFragment, Seed.Key));
+				ASSERT_THAT(IsTrue(SeedFragment->GetCropId() == FPrimaryAssetId(UFarmCropData::AssetType, Seed.Value), Seed.Key));
+				const UVestigeToolFragment* ToolFragment = Item->FindFragment<UVestigeToolFragment>();
+				ASSERT_THAT(IsNotNull(ToolFragment, Seed.Key));
+				ASSERT_THAT(IsTrue(ToolFragment->GetToolId() == FPrimaryAssetId(UVestigeToolData::AssetType, TEXT("Base.Seeds")), Seed.Key));
+			}
+		}
+
 #if WITH_EDITOR
 		bool PassesValidation(const UObject& Object)
 		{
@@ -185,19 +202,6 @@ namespace VestigeItemDataTests
 
 			Crop.SetHarvestItemIdForTests(TurnipItemId);
 			ASSERT_THAT(IsTrue(PassesValidation(Crop)));
-		}
-
-		TEST_METHOD(TheBaseItemsAndTheTurnipCropAreValid)
-		{
-			for (const FPrimaryAssetId& Id : {TurnipItemId, TurnipSeedsItemId})
-			{
-				const UVestigeItemData* Item = LoadContent<UVestigeItemData>(Id);
-				ASSERT_THAT(IsNotNull(Item));
-				ASSERT_THAT(IsTrue(PassesValidation(*Item)));
-			}
-			const UFarmCropData* Crop = LoadContent<UFarmCropData>(TurnipCropId);
-			ASSERT_THAT(IsNotNull(Crop));
-			ASSERT_THAT(IsTrue(PassesValidation(*Crop)));
 		}
 #endif
 	};
