@@ -29,3 +29,11 @@ COPILOT.md
 # Microsoft's Visual Studio integration plugin, which Visual Studio copies into a project on request. Each developer
 # installs it for themselves; the project lists it as optional, so it is ignored where it is missing.
 Plugins/VisualStudioTools/
+
+# Where the Fab plugin and Quixel Bridge import store assets. Assets under a store's own license (the Fab Standard
+# License, which covers Megascans) can't be shared in this public repository, and the game doesn't use them
+# (Docs/GameDesign.md, section 12), so they can never be committed by accident.
+Content/Fab/
+Content/Megascans/
+Content/MSPresets/
+Content/Quixel/

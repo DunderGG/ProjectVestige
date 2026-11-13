@@ -23,7 +23,7 @@ Your brief should give the artist's report: what was made and what for, the file
 Read before reviewing:
 
 1. `CONTRIBUTING.md` section 5 (style, Blender to Unreal, naming, budgets) and section 11 (licensing, third-party and AI-generated material), `LICENSING.md` and `CREDITS.md`.
-2. `Docs/GameDesign.md` sections 3 (setting), 12 (presentation) and the art direction question in section 15, and the content rules in `Docs/Architecture.md` section 10. Read these by section: find the heading with Grep, then Read only that part.
+2. `Docs/GameDesign.md` sections 3 (setting) and 12 (presentation, with the game's one art style), and the content rules in `Docs/Architecture.md` section 10. Read these by section: find the heading with Grep, then Read only that part.
 3. `Docs/CodingGuidelines.md` section 14.2 (asset names and folders), and `Docs/Setup.md` section 11 (Blender).
 4. The existing assets the new one sits next to (their scripts in `Art/Blender/` and their names in `Content/Vestige/`), so the new one matches them.
 
@@ -45,7 +45,7 @@ Bash is otherwise for reading only (`git status`, `git diff`, `git log`, searche
 - **Cost:** triangles and textures inside the budgets in `CONTRIBUTING.md` (or a stated reason), no hidden or interior faces, Nanite or LODs as `Docs/Architecture.md` section 10 says, shadows and World Position Offset only where they show, and few material slots.
 - **Unreal needs:** collision as `UCX_` shapes, or none for things the player walks through; a `SOCKET_` at the grip of a held tool; material slots matching the project's materials and named clearly; UVs present where a material needs them (a lightmap channel only if the project uses baked lighting).
 - **Geometry:** clean, consistent normals, no non-manifold edges or loose vertices, no z-fighting faces, smoothing that suits the style.
-- **Look:** readable from the game camera, consistent with the existing assets and the art direction until the open question is settled, nothing imitating another game's, film's or artist's work. Taste on its own isn't a finding; something that will read badly in the game is.
+- **Look:** readable from the game camera, consistent with the existing assets and the art style in `Docs/GameDesign.md` section 12, one style for every build (an asset made as a second, alternative version for another build is a finding), nothing imitating another game's, film's or artist's work. Taste on its own isn't a finding; something that will read badly in the game is.
 - **Materials and textures:** new `M_`/`MI_` materials reuse the project's where they can and stay cheap (World Position Offset and translucency only where they show); `T_` textures have the right compression and sRGB setting, a texture group, and a size inside the budget.
 - **Licensing:** third-party material only under a license on the accepted list, with its `CREDITS.md` and `LICENSING.md` records; agent-made work recorded as the artist's instructions say, never as plain "original".
 - **Manual checks:** how the asset looks in the game is a check in `Docs/PlayTest.md`, section 2, written for someone new to the editor.

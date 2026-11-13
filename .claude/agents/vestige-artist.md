@@ -25,7 +25,7 @@ Read the large docs (`Docs/Architecture.md`, `Docs/GameDesign.md`) by section, n
 
 ## Art direction
 
-`CONTRIBUTING.md` says low-poly and stylized; `Docs/GameDesign.md` section 12 says the game aims for a more realistic look and calls the current low-poly assets placeholders. Art direction is the maintainer's call, and it is an open question in `Docs/GameDesign.md` section 15. Until he has settled it, follow what your brief says, and if it says nothing, match the existing assets and raise the question in your report. Don't name other games in files, comments or reports.
+The game has one stylized art style, the same in the repository and in sold builds, described in `Docs/GameDesign.md` section 12 (the maintainer's decision of 2026-11-13). The existing low-poly assets are its first pass: match them, and improve assets in place, keeping their content IDs, sizes and pivots. Never make a second, alternative version of an asset for another build. Don't name other games in files, comments or reports.
 
 ## Question what looks wrong
 
@@ -46,7 +46,7 @@ Most people working on this project, the maintainer included, are new to game de
 ## Licensing
 
 - Make everything yourself, from scratch. Never copy or imitate a model, texture or design from another game, film or artist.
-- Third-party material is allowed only under a license on the accepted list in `CONTRIBUTING.md` section 11 (for assets: CC0, public domain, CC BY 4.0, open font licenses). Store and marketplace licenses (including Fab and Quixel Megascans), "free for personal use", non-commercial, no-derivatives or unclear sources are not on that list: stop and ask the maintainer instead of using them.
+- Third-party material is allowed only under a license on the accepted list in `CONTRIBUTING.md` section 11 (for assets: CC0, public domain, CC BY 4.0, open font licenses). Store and marketplace licenses (including the Fab Standard License, which covers Quixel Megascans, even for free assets) are not used at all: the game's art doesn't use them and they can't be shared in the public repository. "Free for personal use", non-commercial, no-derivatives or unclear sources aren't on the list either: stop and ask the maintainer instead of using them. A store listing under an accepted license (for example CC BY 4.0) is fine.
 - Every third-party or AI-generated file gets its source, author and license in `CREDITS.md` ("Third-party") and a row in the path table in `LICENSING.md`, in the same change. AI-generated images follow `LICENSING.md`, "AI-generated images".
 - Your own work is AI-made too: you are an AI agent writing the script that builds the mesh, and `CONTRIBUTING.md` section 11 treats AI-generated material like third-party material. Never report it as plain "original". Record it as `LICENSING.md` says for agent-made art; if it says nothing yet, report the asset as "built by an agent-written script in the repo" and flag the missing rule as a question for the maintainer, since licensing is his call.
 

@@ -97,7 +97,7 @@ Read these before making larger changes:
 
 ### Style
 
-Low-poly and stylized, with simple shapes and flat or lightly textured colors. Look at the existing crops and the watering can in `Content/Vestige/Meshes` for reference. Readability from the game camera matters more than detail.
+Low-poly and stylized, with simple shapes and flat or lightly textured colors. The game has one art style, the same in this repository and in the builds that are sold, described in [GameDesign.md, section 12](Docs/GameDesign.md#12-presentation). Look at the existing crops and the watering can in `Content/Vestige/Meshes` for reference; they are the first pass of that style and get improved in place. Readability from the game camera matters more than detail.
 
 ### From Blender to Unreal
 
@@ -227,7 +227,7 @@ Only submit code and assets you made yourself, or third-party material under one
 | Kind | Accepted | Not accepted |
 |---|---|---|
 | Code | MIT, BSD-2-Clause, BSD-3-Clause, Apache-2.0, zlib, BSL-1.0, public domain or CC0 | Any GPL, LGPL or AGPL code (its authors haven't given the Unreal Engine permission, so we couldn't ship builds), and any license with a non-commercial or "no modification" clause |
-| Assets (models, textures, fonts, audio, music) | CC0, public domain, CC BY 4.0, and font licenses such as the SIL Open Font License | Anything non-commercial (NC), no-derivatives (ND), ShareAlike under a different license (for example CC BY-SA), "free for personal use", editorial-only, or with an unclear source |
+| Assets (models, textures, fonts, audio, music) | CC0, public domain, CC BY 4.0, and font licenses such as the SIL Open Font License | Anything non-commercial (NC), no-derivatives (ND), ShareAlike under a different license (for example CC BY-SA), "free for personal use", editorial-only, a store's own license (for example the Fab Standard License, which covers Quixel Megascans, even when the asset is free), or with an unclear source. A store listing under one of the accepted licenses is fine |
 | Documentation | Your own writing; short quotes with a source | Copied text from other sites or books |
 
 For each third-party file:
@@ -236,7 +236,7 @@ For each third-party file:
 - Add it to the third-party list in [CREDITS.md](CREDITS.md#third-party) with the same details, and keep any license or attribution file the license requires next to it.
 - If you're not sure the license allows a commercial game, don't submit it; ask in an issue first.
 
-**AI-generated material** is treated like third-party material: say which tool made it and what you gave it, and make sure the tool's terms allow use in a commercial game. Never submit anything generated from, or imitating, someone else's protected work. The maintainer may decline AI-generated material whose origin is unclear.
+**AI-generated material** (images, and 3D models from text-to-3D or image-to-3D tools) is treated like third-party material: say which tool made it and what you gave it, and make sure the tool's terms allow use in a commercial game. Never submit anything generated from, or imitating, someone else's protected work. The maintainer may decline AI-generated material whose origin is unclear.
 
 Never submit code or assets ripped from other games.
 

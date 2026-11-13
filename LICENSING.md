@@ -122,7 +122,8 @@ This setup has not yet been reviewed by a lawyer. Before Project Vestige is sold
 - the wording and scope of the additional permission, and how it works with later GPL versions;
 - whether it fits the Unreal Engine EULA and each target store and console's SDK terms;
 - the contributor terms and the way agreement is recorded;
-- the AI-generated images: who owns them, whether they are protected by copyright, and what each store requires to be disclosed about AI-generated content;
+- the AI-generated images and any AI-generated 3D models: who owns them, whether they are protected by copyright, and what each store requires to be disclosed about AI-generated content;
+- whether CC BY 4.0's ban on adding technical restrictions (DRM) affects third-party CC BY assets in store and console builds;
 - the maintainer's commercial use of contributed assets under CC BY-NC-SA.
 
 ## Questions
