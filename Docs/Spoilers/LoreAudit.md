@@ -560,15 +560,31 @@ In [Phase-02-Early.md](Dialogue/Phase-02-Early.md), scene `E-07`, Cleo says the 
 
 **Severity: Medium**
 
-**Status: Open (2026-11-13).** The design says romance leads to dating and marriage, and a partner moves to the farm, but does not define the experiences or boundaries between those milestones.
+**Status: Open (2026-11-13).** The design says romance leads to dating and marriage, and a partner moves to the farm, but does not define the experiences or boundaries between those milestones. The maintainer's current discussion direction is to allow multiple dating relationships and address exclusivity in an explicit commitment conversation. This direction has not yet been recorded as a final design decision.
 
 [GameDesign.md](../GameDesign.md) establishes explicit romantic opt-in, a possible character decline, and a partner moving to the farm. Gage's and Cleo's sheets add proposals, permanent partnership and domestic routines, but neither establishes what “marriage” means in human or robot society, how dating differs from friendship or commitment, or whether the scenes include physical affection or sexual intimacy. The documents also do not set expectations for exclusivity, ending a relationship, or whether relocation is a separate choice.
 
-The farm-work question has a clearer existing boundary: relationships do not grant farm or player performance upgrades. Gage's and Cleo's partner routines are character presentation, not automatic maintenance or production. This leaves an open question about what makes shared farm life emotionally rewarding, not a basis for turning marriage into a farm-labour reward.
+**Discussion direction for the relationship flow:** Use an independent per-character state, provisionally `Friendship -> Dating -> Committed`, with residence tracked separately. The player may have multiple characters in `Dating` at once. Before moving from `Dating` to `Committed`, an explicit conversation states whether the proposed commitment is exclusive; the character can accept or decline. A declined proposal leaves the current relationship state unchanged. Do not use a hidden jealousy value, apply an automatic affection penalty, or silently end another romance. If the player chooses an exclusive commitment, require explicit, character-specific closure or return-to-friendship choices for other dating partners. Whether committed non-monogamy is supported remains undecided; do not implement that commitment outcome until the policy is settled. Moving to the farm is a separate choice, not an automatic consequence of commitment.
+
+The maintainer's current content preference is affectionate, emotionally mature romance with physical intimacy left off-screen. The farm-work boundary is clearer: partners add home life and character content, not farm labour or performance bonuses. Gage's and Cleo's routines are character presentation, not automatic maintenance or production.
 
 **Why it matters:** Writers could interpret “adult romance” as anything from domestic companionship to explicit sexual content, producing inconsistent tone and expectations. A romance that only moves a character to the farm risks feeling thin; one that makes a partner work for the player risks making intimacy an efficiency purchase and contradicting the progression rules.
 
-**Recommended change:** Before expanding the romance cast, define the intended content boundaries: the kinds of affection shown, whether intimacy is omitted, implied or depicted, what dating and permanent commitment add, and whether moving in is separately chosen. Distinguish emotionally mature themes—such as vulnerability, prejudice, grief and boundaries—from sexual explicitness. A restrained, affectionate romance with intimacy left off-screen is a possible fit for the current tone and scope, but remains a design question for the maintainer.
+**Recommended change:** Before implementation, define the commitment rule (including whether committed non-monogamy is in scope), breakup and return-to-friendship behavior, and whether the player may decline relocation while remaining committed. Give dating and commitment distinct content, such as character-specific dates, conversations, affection and domestic scenes. Keep emotionally mature themes—such as vulnerability, prejudice, grief and boundaries—distinct from sexual explicitness. Current discussion preference: affectionate romance with intimacy off-screen; record it in [GameDesign.md](../GameDesign.md) only after the maintainer confirms it as a final choice.
+
+### L-32 — Partner upgrade trees would reintroduce relationship-based farm bonuses
+
+**Severity: Medium**
+
+**Status: Open (2026-11-13).** The maintainer asked whether partners could have gradually unlocked upgrade trees, such as Gage improving farm productivity or Cleo increasing crop sale value. No such tree or bonus has been approved.
+
+[GameDesign.md](../GameDesign.md), sections 8 and 9, explicitly assigns engineering upgrades to the tech tree and limits relationships to character content, never farm or player performance upgrades. [LoreAudit.md, L-28](#l-28--character-partner-rewards-exceed-the-stated-relationship-progression-boundary) records the removal of earlier Gage and Cleo performance bonuses. Putting the same effects behind gradual relationship milestones would not change their nature: romance would still unlock farm power. Productivity overlaps with automation and machine progression; sale-value bonuses alter the crop economy. If bonuses stack across dating or committed partners, dating becomes a route to accumulate power; if only one partner's upgrades can be active, the player is incentivized to choose the most profitable partner.
+
+**Why it matters:** A partner tree would add a second engineering progression system, increase balance and testing work for every romance arc, and make partners feel like selectable upgrades. Its gradual pacing could also encourage repeated relationship activity to fill out each tree, competing with character-driven scenes and the player's freedom to pursue relationships at their own pace.
+
+**Implementation boundary:** Do not create relationship or partner-tree nodes that change crop yield or sale value, machine throughput or reliability, energy, durability, tool costs, survival, or other farm/player performance. Do not stack partner performance bonuses. Keep relationship rewards to character scenes, domestic routines and spaces, optional journals or decoration, and non-essential gifts that do not become the best route to income or progression. If a character can do farm work, treat that as an explicit recruited-worker or automation feature, not a passive perk for dating or commitment; friendship may unlock recruitment as the design already proposes, but romance must not improve the worker's performance.
+
+**Recommended change:** Keep technical specialization and performance progression in the tech tree or skills. A character can demonstrate expertise in story scenes or offer non-performance content without granting a gameplay advantage. Any proposal to add partner performance trees would require the maintainer to deliberately reverse the current relationship/progression rule and rebalance the affected farm and economy systems; a separate per-partner tree is not a workaround.
 
 ## Follow-up correction order
 
@@ -577,6 +593,9 @@ The farm-work question has a clearer existing boundary: relationships do not gra
 3. [x] **L-28 — Relationship rewards:** Removed system-wide partner buffs and clarified the progression boundary in [GameDesign.md](../GameDesign.md) (resolved 2026-11-10).
 4. [x] **L-29 — Pod telemetry:** Limited Cleo's claim to potential pod logs that require comparison with independent evidence (resolved 2026-11-10).
 5. **L-24 remains open:** Standardize character content IDs after investigating the category-segment question noted in the previous follow-up.
+6. **L-30 remains open:** Explore one possible human romance option without treating it as canon or making every rare human a romance prospect.
+7. **L-31 remains open:** Set relationship commitment, exclusivity, intimacy and relocation rules before implementing romance.
+8. **L-32 remains open:** Keep performance progression out of partner relationships unless the maintainer explicitly reverses the existing rule.
 
 ## Review limits
 
