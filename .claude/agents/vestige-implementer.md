@@ -36,6 +36,7 @@ The rules most often missed, with where they are written:
 - The editor must be closed: a build can't run while the editor has the project open, and Live Coding can't add `UPROPERTY`s, `UFUNCTION`s or classes. If `UnrealEditor.exe` is running, stop and report it, so the main session can ask the user to close it.
 - Build the `VestigeEditor` target, Development, Win64, with `Engine\Build\BatchFiles\Build.bat VestigeEditor Win64 Development -Project="<path to Vestige.uproject>" -WaitMutex`, run from PowerShell (Git Bash fails on the quoted `Build.bat` path). After adding or moving files, regenerate the project files first (`Build.bat -projectfiles -project="<uproject>" -game -rocket -progress`). `Docs/Setup.md` section 6 has the same steps.
 - Fix every error and warning your change introduced. Report the build result as it was.
+- Build output runs to thousands of lines: never read it whole. Send it to a file in a temporary folder outside the repository and search it, ignoring case, for `error`, `warning` and the final `Result:` line (`Succeeded` or `Failed`; a failed build doesn't always print an error line), reading only those lines and a few around them.
 
 ## Assets
 
