@@ -17,11 +17,18 @@ const FPrimaryAssetType UFarmCropData::AssetType(TEXT("FarmCrop"));
 int32 UFarmCropData::GetGrowthStageIndex(int32 GrowthDays) const
 {
 	const int32 Days = FMath::Max(GrowthDays, 0);
-	if (IsRipeAt(Days) || GrowthStageMeshes.IsEmpty())
+	if (IsRipeAt(Days) || GrowthStages.IsEmpty())
 	{
 		return INDEX_NONE;
 	}
-	return Days * GrowthStageMeshes.Num() / DaysToMature;
+
+	// The first stage also covers days before its StartDay, which only invalid data has.
+	int32 StageIndex = 0;
+	for (int32 Index = 1; Index < GrowthStages.Num() && GrowthStages[Index].StartDay <= Days; ++Index)
+	{
+		StageIndex = Index;
+	}
+	return StageIndex;
 }
 
 FFarmCropGrowthLook UFarmCropData::GetGrowthLook(int32 GrowthDays) const
@@ -38,14 +45,15 @@ FFarmCropGrowthLook UFarmCropData::GetGrowthLook(int32 GrowthDays) const
 		return {};
 	}
 
-	// Stage k shows on the days d with d * N / D == k, which run from ceil(k * D / N) to ceil((k + 1) * D / N) - 1.
-	const int32 NumStages = GrowthStageMeshes.Num();
-	const int32 FirstDay = FMath::DivideAndRoundUp(StageIndex * DaysToMature, NumStages);
-	const int32 LastDay = FMath::DivideAndRoundUp((StageIndex + 1) * DaysToMature, NumStages) - 1;
+	// The stage runs from its StartDay to the day before the next stage starts, the last one to the day before the crop
+	// ripens. The clamps keep invalid start days from putting Days outside the span.
+	const int32 NextStartDay = StageIndex + 1 < GrowthStages.Num() ? GrowthStages[StageIndex + 1].StartDay : DaysToMature;
+	const int32 FirstDay = FMath::Min(GrowthStages[StageIndex].StartDay, Days);
+	const int32 LastDay = FMath::Max(FMath::Min(NextStartDay - 1, DaysToMature - 1), Days);
 	const float Scale = LastDay == FirstDay
 		? 1.f
 		: FMath::Lerp(StageStartScale, 1.f, static_cast<float>(Days - FirstDay) / static_cast<float>(LastDay - FirstDay));
-	return {GrowthStageMeshes[StageIndex].Get(), Scale};
+	return {GrowthStages[StageIndex].Mesh.Get(), Scale};
 }
 
 #if WITH_EDITOR
@@ -75,30 +83,42 @@ EDataValidationResult UFarmCropData::IsDataValid(FDataValidationContext& Context
 	{
 		ReportError(LOCTEXT("NoRipeMesh", "Ripe Mesh is empty, so the ripe crop draws the placeholder. Pick the crop's ripe mesh."));
 	}
-	if (GrowthStageMeshes.IsEmpty())
+	if (GrowthStages.IsEmpty())
 	{
-		ReportError(LOCTEXT("NoGrowthStageMeshes",
-			"Growth Stage Meshes is empty, so the growing crop draws the placeholder. Add the crop's stage meshes, seedling first."));
+		ReportError(LOCTEXT(
+			"NoGrowthStages", "Growth Stages is empty, so the growing crop draws the placeholder. Add the crop's stages, seedling first."));
 	}
-	for (int32 Index = 0; Index < GrowthStageMeshes.Num(); ++Index)
+	for (int32 Index = 0; Index < GrowthStages.Num(); ++Index)
 	{
-		if (GrowthStageMeshes[Index].IsNull())
+		const FFarmCropGrowthStage& Stage = GrowthStages[Index];
+		if (Stage.Mesh.IsNull())
+		{
+			ReportError(
+				FText::Format(LOCTEXT("NoGrowthStageMesh", "Growth stage {0} has no mesh. Pick its mesh or remove the stage."), Index));
+		}
+		else if (Stage.Mesh == RipeMesh)
 		{
 			ReportError(FText::Format(
-				LOCTEXT("EmptyGrowthStageMesh", "Growth Stage Meshes has an empty entry at index {0}. Pick its mesh or remove it."),
-				Index));
+				LOCTEXT("RipeMeshAmongStages", "Growth stage {0} uses the Ripe Mesh, so it shows before the crop is ripe."), Index));
 		}
-	}
-	if (!RipeMesh.IsNull() && GrowthStageMeshes.Contains(RipeMesh))
-	{
-		ReportError(LOCTEXT("RipeMeshAmongStages",
-			"Growth Stage Meshes has the Ripe Mesh in it, so it shows before the crop is ripe. Remove it from the stages."));
-	}
-	if (GrowthStageMeshes.Num() > DaysToMature)
-	{
-		Context.AddWarning(FText::Format(
-			LOCTEXT("MoreStagesThanDays", "Growth Stage Meshes has {0} meshes for {1} Days To Mature, so some stages then never show."),
-			GrowthStageMeshes.Num(), DaysToMature));
+		if (Index == 0 && Stage.StartDay != 0)
+		{
+			ReportError(
+				FText::Format(LOCTEXT("FirstStageNotPlanted", "Growth stage 0 starts on day {0}. It must start on day 0, the day planted."),
+					Stage.StartDay));
+		}
+		if (Index > 0 && Stage.StartDay <= GrowthStages[Index - 1].StartDay)
+		{
+			ReportError(FText::Format(
+				LOCTEXT("StagesNotIncreasing", "Growth stage {0} starts on day {1}. It must start later than the stage before it."), Index,
+				Stage.StartDay));
+		}
+		if (Stage.StartDay >= DaysToMature)
+		{
+			ReportError(FText::Format(
+				LOCTEXT("StageAfterRipe", "Growth stage {0} starts on day {1}, but the crop is ripe from day {2}, so it never shows."),
+				Index, Stage.StartDay, DaysToMature));
+		}
 	}
 	return Result;
 }

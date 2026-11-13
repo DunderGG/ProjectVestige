@@ -112,8 +112,12 @@ namespace FarmTileLooksTests
 			UStaticMesh& Stage1 = Spawner.SpawnObject<UStaticMesh>();
 			OutRipe = &Spawner.SpawnObject<UStaticMesh>();
 			Crop.SetDaysToMatureForTests(Days);
-			Crop.SetMeshesForTests({TSoftObjectPtr<UStaticMesh>(&Stage0), TSoftObjectPtr<UStaticMesh>(&Stage1)},
-				TSoftObjectPtr<UStaticMesh>(OutRipe));
+			TArray<FFarmCropGrowthStage> GrowthStages;
+			GrowthStages.AddDefaulted(2);
+			GrowthStages[0].Mesh = &Stage0;
+			GrowthStages[1].StartDay = 1;
+			GrowthStages[1].Mesh = &Stage1;
+			Crop.SetGrowthStagesForTests(GrowthStages, TSoftObjectPtr<UStaticMesh>(OutRipe));
 			return Crop;
 		}
 

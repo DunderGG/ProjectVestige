@@ -91,8 +91,8 @@ namespace VestigeItemDataTests
 
 		TEST_METHOD(ThePotatoAndCabbageSeedsPlantTheirCrops)
 		{
-			const TPair<const TCHAR*, const TCHAR*> Seeds[] = {{TEXT("Base.PotatoSeeds"), TEXT("Base.Potato")},
-				{TEXT("Base.CabbageSeeds"), TEXT("Base.Cabbage")}};
+			const TPair<const TCHAR*, const TCHAR*> Seeds[] = {
+				{TEXT("Base.PotatoSeeds"), TEXT("Base.Potato")}, {TEXT("Base.CabbageSeeds"), TEXT("Base.Cabbage")}};
 			for (const TPair<const TCHAR*, const TCHAR*>& Seed : Seeds)
 			{
 				const UVestigeItemData* Item = LoadContent<UVestigeItemData>(FPrimaryAssetId(UVestigeItemData::AssetType, Seed.Key));
@@ -102,7 +102,8 @@ namespace VestigeItemDataTests
 				ASSERT_THAT(IsTrue(SeedFragment->GetCropId() == FPrimaryAssetId(UFarmCropData::AssetType, Seed.Value), Seed.Key));
 				const UVestigeToolFragment* ToolFragment = Item->FindFragment<UVestigeToolFragment>();
 				ASSERT_THAT(IsNotNull(ToolFragment, Seed.Key));
-				ASSERT_THAT(IsTrue(ToolFragment->GetToolId() == FPrimaryAssetId(UVestigeToolData::AssetType, TEXT("Base.Seeds")), Seed.Key));
+				ASSERT_THAT(
+					IsTrue(ToolFragment->GetToolId() == FPrimaryAssetId(UVestigeToolData::AssetType, TEXT("Base.Seeds")), Seed.Key));
 			}
 		}
 
@@ -197,7 +198,9 @@ namespace VestigeItemDataTests
 			Crop.SetContentIdForTests(TEXT("Test.Crop"));
 			UStaticMesh& Stage = Spawner.SpawnObject<UStaticMesh>();
 			UStaticMesh& Ripe = Spawner.SpawnObject<UStaticMesh>();
-			Crop.SetMeshesForTests({TSoftObjectPtr<UStaticMesh>(&Stage)}, TSoftObjectPtr<UStaticMesh>(&Ripe));
+			FFarmCropGrowthStage GrowthStage;
+			GrowthStage.Mesh = &Stage;
+			Crop.SetGrowthStagesForTests({GrowthStage}, TSoftObjectPtr<UStaticMesh>(&Ripe));
 			ASSERT_THAT(IsFalse(PassesValidation(Crop)));
 
 			Crop.SetHarvestItemIdForTests(TurnipItemId);

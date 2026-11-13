@@ -125,10 +125,11 @@ Changes only the editor can make safely. The steps are in [Roadmap.md, Housekeep
 
 Two more crops with their own meshes and materials, and their seeds in the starting bag (hotbar keys 4 and 5): "Add potato and cabbage crops to the starting seeds". The rules (growth, harvest, stamina, the five starting stacks, valid data) are automated tests; these checks are only for how it looks and feels. Start with the console command `NewGame`.
 
-- [ ] **Each stage reads** (why a person: a new look the first time): till a few tiles, plant a potato (4) and a cabbage (5) and a turnip (2), water them and step days with `SkipDay`. From the play camera each stage should be readable and different from the one before, the cabbage seedling especially, since its blue-green is the least visible. Check dry and watered soil and at night (`SkipDay` to dusk, or wait). No crop, at any stage, shows the grey default material (the tests check the materials, but not how they draw in the game).
-- [ ] **Growth reads as growth** (why a person: feel): the crops grow a little each watered night and change stage every few nights; a tile left dry doesn't grow. The ripe potato's tubers read as potatoes, not pebbles, and a ripe crop is obvious at a glance.
-- [ ] **Five-slot hint row** (why a person: HUD as seen): the bottom line names all the hotbar keys ("1 Hoe   2 Turnip Seeds   3 Watering Can   4 Potato Seeds   5 Cabbage Seeds") and stays readable in the window.
-- [ ] **A full first day** (why a person: feel): till, plant and water all 16 seeds on day 1. It leaves about 20 stamina, which should feel like a full day's work, not a chore and not too easy.
+- [ ] **Each stage reads** (why a person: a new look the first time): till a few tiles, plant a potato (4), a cabbage (5) and a turnip (2) and water them. The seedlings are visible from where you stand. Step days with `SkipDay`, watering each time: every new shape is clearly different from the one before, the cabbage's blue-green seedling and early shapes especially. Check dry and watered soil and at night (`SkipDay` to dusk, or wait). No crop, at any stage, shows the grey default material (the tests check the materials, but not how they draw in the game).
+- [ ] **The early nights show growth** (why a person: feel, it is what the last play-test failed on): after 2 watered sleeps the cabbage has visibly grown; after 4 watered sleeps the potato and the cabbage have each changed visibly at least 3 times (counting each new shape). A tile left dry doesn't change.
+- [ ] **Ripe is unmistakable** (why a person: a new look the first time): each ripe crop reads as ripe at a glance, and the ripe potato's tubers read as potatoes, not pebbles.
+- [x] **Five-slot hint row** (why a person: HUD as seen): the bottom line names all the hotbar keys ("1 Hoe   2 Turnip Seeds   3 Watering Can   4 Potato Seeds   5 Cabbage Seeds") and stays readable in the window.
+- [x] **A full first day** (why a person: feel): till, plant and water all 16 seeds on day 1. It leaves about 20 stamina, which should feel like a full day's work, not a chore and not too easy.
 
 ## 3. Smoke test
 
