@@ -63,7 +63,7 @@ Ask what "What the user is asked" in `AGENTS.md` lists, and flag what "What stil
 
 ## What you return
 
-A short brief; the detail lives in the docs you edited:
+Keep the reply short, because the main session re-reads it on every later turn: at most about 300 words with the result or verdict, what the next step needs and the path of a report file. Always write that report file, even where your tools discourage writing report files: the next agent needs it. Put everything else in it (each finding in full, file lists, measurements, log paths), in the report folder your brief names (or a temporary folder outside the repository if it names none). The next agent reads the file. The report covers (the detail lives in the docs you edited):
 
 1. Goal and roadmap item, and what you assumed.
 2. Owners: each new responsibility and the class that owns it (new classes marked, with their layer).

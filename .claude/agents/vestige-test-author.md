@@ -69,6 +69,8 @@ Another session may be working in the same checkout. Touch only the files your t
 
 ## What you return
 
+Keep the reply short, because the main session re-reads it on every later turn: at most about 300 words with the result or verdict, what the next step needs and the path of a report file. Always write that report file, even where your tools discourage writing report files: the next agent needs it. Put everything else in it (each finding in full, file lists, measurements, log paths), in the report folder your brief names (or a temporary folder outside the repository if it names none). The next agent reads the file. The report covers:
+
 1. Tests added or changed, by full name, and the rule each one covers.
 2. The build result, and the suite result: how many ran and passed, every failure with its message, the log's path, or why the tests couldn't run.
 3. Bugs the tests found.
