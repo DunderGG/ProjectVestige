@@ -544,25 +544,27 @@ In [Phase-02-Early.md](Dialogue/Phase-02-Early.md), scene `E-07`, Cleo says the 
 
 **Correction made:** Cleo now treats the pod's potential logs as a possible lead, not direct proof of a municipal pressure drop. The scene leaves whether the pod retained logs unresolved and does not invent an external pressure sensor or guarantee that records survived for seventy years.
 
-### L-30 — The human-romance promise has no possible human love interest
+## Findings from 2026-11-13: Romance and partnership
+
+### L-30 — The human-romance candidate and first-release roster remain unresolved
 
 **Severity: Medium**
 
-**Status: Open (2026-11-13).** The character sheets establish Gage and Cleo as robot love interests, but no human character is designed as a possible romance option.
+**Status: Partially addressed (2026-11-13).** The [second sleeper](Characters/SecondSleeper.md) is now a provisional human romance candidate: an adult from a separate cryo pod with an independent creative or community project. This is a character concept, not a finalized release-roster or romance decision; their name, identity, voice, full history, and eligibility remain open.
 
-[GameDesign.md](../GameDesign.md) promises romance with robots and humans and sets a first-release target of three full romance arcs, about ten robots and two humans. [Lore.md](Lore.md) instead describes a possible cast of four to six human survivors, including the sleeper and sibling, while leaving most survivor roles as story hooks. The [nomad](Characters/Nomad.md) is explicitly not a romance option and chooses to keep travelling. The sibling is part of the player's family story, not an appropriate candidate to presume. Other possible human roles—including the shelter survivor, second sleeper, disguised survivor and living exhibit—do not yet have romance arcs or settled identities and wishes.
+[GameDesign.md](../GameDesign.md) promises romance with robots and humans and sets a first-release target of three full romance arcs, about ten robots and two humans. [Lore.md](Lore.md) instead describes a possible cast of four to six human survivors, including the sleeper and sibling, while leaving most survivor roles as story hooks. The [nomad](Characters/Nomad.md) is explicitly not a romance option and chooses to keep travelling. The sibling is part of the player's family story, not an appropriate candidate to presume. The second sleeper is now a candidate, but the disguised survivor and shelter survivor still have no defined romance eligibility or arc; the living exhibit's wishes and story remain centered on recovery from coercion, not romance.
 
 **Why it matters:** The game promises a human romance option without identifying who could fulfill that promise. Treating every rare human as a potential partner would undermine the characters' individual boundaries; treating a survivor's vulnerability, concealment or abuse as a route to romance could turn their agency into a reward for the player.
 
-**Recommended change:** Explore one possible, optional human love interest for the first-release cast, without making that person canon or making other human encounters romanceable by default. Give the candidate an independent want, relationships and reasons to choose—or decline—a relationship with the sleeper. Do not use the sibling or presume the nomad should abandon their chosen life; handle any survivor of coercive research around their own wishes, not as a romance or rescue reward. Clarify whether the first-release target of two humans includes the sleeper.
+**Recommended change:** Develop the second sleeper as one possible, optional human love interest without making romance their defining purpose or making other human encounters romanceable by default. Give them independent wants, relationships and a friendship path that does not depend on the sleeper. Do not use the sibling or presume the nomad should abandon their chosen life; handle any survivor of coercive research around their own wishes, not as a romance or rescue reward. Clarify whether the first-release target of two humans includes the sleeper and whether the second sleeper is among the three planned romance arcs.
 
 ### L-31 — Romance, commitment and intimacy are not defined beyond the relationship outline
 
 **Severity: Medium**
 
-**Status: Open (2026-11-13).** The design says romance leads to dating and marriage, and a partner moves to the farm, but does not define the experiences or boundaries between those milestones. The maintainer's current discussion direction is to allow multiple dating relationships and address exclusivity in an explicit commitment conversation. This direction has not yet been recorded as a final design decision.
+**Status: Partially addressed (2026-11-13).** The design says romance leads to dating and marriage, but does not define the experiences or boundaries between those milestones. A committed partner may move to the farm only by a separate choice; commitment does not force relocation. The maintainer's current discussion direction is to allow multiple dating relationships and address exclusivity in an explicit commitment conversation; these commitment rules are not final.
 
-[GameDesign.md](../GameDesign.md) establishes explicit romantic opt-in, a possible character decline, and a partner moving to the farm. Gage's and Cleo's sheets add proposals, permanent partnership and domestic routines, but neither establishes what “marriage” means in human or robot society, how dating differs from friendship or commitment, or whether the scenes include physical affection or sexual intimacy. The documents also do not set expectations for exclusivity, ending a relationship, or whether relocation is a separate choice.
+[GameDesign.md](../GameDesign.md) establishes explicit romantic opt-in, a possible character decline, and separate choice for a committed partner's residence. Gage's and Cleo's sheets add proposals, permanent partnership and domestic routines, but neither establishes what “marriage” means in human or robot society, how dating differs from friendship or commitment, or whether the scenes include physical affection or sexual intimacy. The documents also do not set expectations for exclusivity or ending a relationship.
 
 **Discussion direction for the relationship flow:** Use an independent per-character state, provisionally `Friendship -> Dating -> Committed`, with residence tracked separately. The player may have multiple characters in `Dating` at once. Before moving from `Dating` to `Committed`, an explicit conversation states whether the proposed commitment is exclusive; the character can accept or decline. A declined proposal leaves the current relationship state unchanged. Do not use a hidden jealousy value, apply an automatic affection penalty, or silently end another romance. If the player chooses an exclusive commitment, require explicit, character-specific closure or return-to-friendship choices for other dating partners. Whether committed non-monogamy is supported remains undecided; do not implement that commitment outcome until the policy is settled. Moving to the farm is a separate choice, not an automatic consequence of commitment.
 
@@ -570,7 +572,7 @@ The maintainer's current content preference is affectionate, emotionally mature 
 
 **Why it matters:** Writers could interpret “adult romance” as anything from domestic companionship to explicit sexual content, producing inconsistent tone and expectations. A romance that only moves a character to the farm risks feeling thin; one that makes a partner work for the player risks making intimacy an efficiency purchase and contradicting the progression rules.
 
-**Recommended change:** Before implementation, define the commitment rule (including whether committed non-monogamy is in scope), breakup and return-to-friendship behavior, and whether the player may decline relocation while remaining committed. Give dating and commitment distinct content, such as character-specific dates, conversations, affection and domestic scenes. Keep emotionally mature themes—such as vulnerability, prejudice, grief and boundaries—distinct from sexual explicitness. Current discussion preference: affectionate romance with intimacy off-screen; record it in [GameDesign.md](../GameDesign.md) only after the maintainer confirms it as a final choice.
+**Recommended change:** Before implementation, define the commitment rule (including whether committed non-monogamy is in scope) and breakup or return-to-friendship behavior. Preserve the decided separate residence choice: the player may decline relocation while remaining committed. Give dating and commitment distinct content, such as character-specific dates, conversations, affection and domestic scenes. Keep emotionally mature themes—such as vulnerability, prejudice, grief and boundaries—distinct from sexual explicitness. Current discussion preference: affectionate romance with intimacy off-screen; record it in [GameDesign.md](../GameDesign.md) only after the maintainer confirms it as a final choice.
 
 ### L-32 — Partner upgrade trees would reintroduce relationship-based farm bonuses
 
@@ -586,6 +588,50 @@ The maintainer's current content preference is affectionate, emotionally mature 
 
 **Recommended change:** Keep technical specialization and performance progression in the tech tree or skills. A character can demonstrate expertise in story scenes or offer non-performance content without granting a gameplay advantage. Any proposal to add partner performance trees would require the maintainer to deliberately reverse the current relationship/progression rule and rebalance the affected farm and economy systems; a separate per-partner tree is not a workaround.
 
+### L-33 — Romance eligibility and player-character compatibility are undefined
+
+**Severity: Medium**
+
+**Status: Open (2026-11-13).** The lore defines the sleeper as a young adult with a player-chosen name and appearance and no fixed gender. Gage and Cleo have chosen gender identities and pronouns; Hob is gender-neutral. The documents do not say which characters are romanceable, what each character's attraction or eligibility is, or whether the sleeper's presentation changes that.
+
+The omission is especially important for Hob. Hob is the player's first relationship and spent decades preserving the sleeper under the parents' order, but the character sheet only describes a friendship arc about choosing a purpose after that order ends. It does not make Hob a romance option. Treating long-term care or high trust as implied romantic interest could blur the difference between duty, dependence and mutual desire.
+
+**Why it matters:** Writers and implementers could infer eligibility from a character's pronouns, chassis or friendship level, while players may not know whether an option is unavailable by design or simply not yet written. A romance roster also needs to respect the player's identity and each character's independent agency.
+
+**Recommended change:** Before implementing eligibility, list the intended romanceable characters and define each character's orientation or attraction, any relevant age/adult status, and how the player can recognize eligibility. Do not infer attraction from gender, pronouns or robot body. Keep Hob's tutorial relationship friendship-only unless a deliberately authored, separate romance arc resolves the caretaker-history concern; do not let the trust tutorial silently become romantic.
+
+### L-34 — The dating stage lacks a character-specific player experience
+
+**Severity: Medium**
+
+**Status: Open (2026-11-13).** The character sheets include romance opt-ins and later commitment proposals, but do not establish what dating itself adds or how it differs from friendship for each character.
+
+Gage's and Cleo's arcs already have distinct foundations—Gage's belief in dependable partnership and Cleo's learning about consent and stewardship. Their romance should develop those character conflicts rather than function as the same confession, proposal and move-in sequence with different props.
+
+**Why it matters:** Without a dating stage with its own character-led content, romance may feel like one dialogue choice followed by a marriage reward. It can also make gifts, trust thresholds or quest completion look like substitutes for mutual interest.
+
+**Recommended change:** Give each romance arc a compact, character-specific structure: why mutual interest becomes possible; an explicit opt-in; at least one distinct dating experience; a conversation or event where both people choose whether to deepen the relationship; and optional commitment and post-commitment content. Keep a meaningful friendship outcome, and keep faction access, town restoration and the character's core story available without romance. Use story events and visible behavior to establish trust; do not require gift-grinding as the romance route.
+
+### L-35 — Relationship status and event pacing are not legible to players
+
+**Severity: Medium**
+
+**Status: Open (2026-11-13).** The character sheets use heart stages and event triggers, while [GameDesign.md](../GameDesign.md) describes friendship and romance only at a high level. There is no shared rule for showing eligibility, whether the player is dating or committed, what a choice changes, or how missed events and concurrent dating are presented.
+
+**Why it matters:** The proposed multi-dating and commitment conversation can be understood only if players can see their current relationships and are told the consequences before choosing. Hidden status, event windows that permanently expire, or unexplained friendship changes could turn an opt-in relationship into a surprise penalty or checklist.
+
+**Recommended change:** Make the active relationship stage and any pending commitment choice clear in dialogue or the relationship interface. Show the terms before a commitment choice; do not use hidden jealousy or relationship decay. Do not permanently forfeit a relationship event because the player missed a particular day or season unless a character-specific story explains and communicates that consequence in advance. Exact heart thresholds and schedule windows can be tuned after the relationship loop is prototyped.
+
+### L-36 — Romance scope has no player-facing acceptance criteria
+
+**Severity: Medium**
+
+**Status: Open (2026-11-13).** The first-release scope targets three full romance arcs, but the vertical slice tests only Hob's trust arc and does not validate dating, commitment, concurrent relationships or cohabitation. No romance-specific playtest criteria are recorded.
+
+**Why it matters:** “Three full arcs” can mean very different amounts of writing, branching, schedules and post-commitment content. Implementing all three before validating one relationship flow risks expanding the system before the project knows whether players understand its stages or find the romance distinct from friendship.
+
+**Recommended change:** After the farming slice, prototype one robot romance before committing to all three arcs. Define a “full arc” in terms of visible stages and scenes, then test whether players can distinguish friendship, dating and commitment; understand exclusivity before choosing; reject or defer romance without losing friendship or core story; and move in only with clear choice. Add checks for concurrent dating once that rule is finalized. Do not treat the vertical slice's Hob relationship as evidence that romance itself has been validated.
+
 ## Follow-up correction order
 
 1. [x] **L-25 — Farm stop:** Separated the proposal from each party's decision and made activation contingent on every party's agreement (resolved 2026-11-10).
@@ -593,9 +639,13 @@ The maintainer's current content preference is affectionate, emotionally mature 
 3. [x] **L-28 — Relationship rewards:** Removed system-wide partner buffs and clarified the progression boundary in [GameDesign.md](../GameDesign.md) (resolved 2026-11-10).
 4. [x] **L-29 — Pod telemetry:** Limited Cleo's claim to potential pod logs that require comparison with independent evidence (resolved 2026-11-10).
 5. **L-24 remains open:** Standardize character content IDs after investigating the category-segment question noted in the previous follow-up.
-6. **L-30 remains open:** Explore one possible human romance option without treating it as canon or making every rare human a romance prospect.
+6. **L-30 remains open:** Finalize the second sleeper's identity, arc and eligibility, and reconcile the human-cast and romance counts.
 7. **L-31 remains open:** Set relationship commitment, exclusivity, intimacy and relocation rules before implementing romance.
 8. **L-32 remains open:** Keep performance progression out of partner relationships unless the maintainer explicitly reverses the existing rule.
+9. **L-33 remains open:** Define romance eligibility for the sleeper and each character, including Hob's relationship boundary.
+10. **L-34 remains open:** Define what dating adds in each character's arc while preserving the friendship path.
+11. **L-35 remains open:** Make relationship state, choice consequences and event pacing legible before implementation.
+12. **L-36 remains open:** Define “full romance arc” and validate one romance before expanding the cast.
 
 ## Review limits
 

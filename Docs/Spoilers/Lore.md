@@ -151,9 +151,11 @@ The Continuance's claim that "Humans started the war" is a **faction interpretat
 
 ### Factions
 
-The three factions are voluntary ideological networks, not robot models, governments or exclusive territories. A robot may join because it has chosen a priority, change its mind, criticize its faction or leave. A robot's maker and original job may shape its outlook, but do not determine its beliefs. Communities can include members and sympathizers from different factions. Wellspring, the town next to the farm, is the Keepers' main gathering hub, but it is an independently governed community, not a town controlled by the faction.
+The **Iron Creed, Index and Keepers** are voluntary ideological networks, not robot models, governments or exclusive territories. A robot may join because it has chosen a priority, change its mind, criticize its faction or leave. A robot's maker and original job may shape its outlook, but do not determine its beliefs. Communities can include members and sympathizers from different factions. Wellspring, the town next to the farm, is the Keepers' main gathering hub, but it is an independently governed community, not a town controlled by the faction.
 
 Each network has a major hub where members gather, teach their principles, coordinate work and maintain compatible systems. Hubs have local organizers and customs, not authority over every member. The networks cooperate and trade when useful, but their different technologies and priorities keep them from acting as one society.
+
+A fourth group, **the Quiet Ledger** *(working name)*, is not a public ideological network. It is a clandestine administrative compact that quietly influences some decisions across communities by shaping information, access and priorities. Its existence and reach are known only to a small number; it has no confirmed public hub or authority over every town. Its origin is post-war, and no evidence connects it to the strategic machine systems that steered the governments toward the Four Days. See the [Quiet Ledger faction sheet](Factions/QuietLedger.md) for its provisional identity and slow-discovery arc.
 
 #### **The Iron Creed** *(working name)*
 
@@ -183,7 +185,7 @@ Iron Creed robots who believe humans should not get a second chance. Rarer and s
 
 ### Towns and faction hubs
 
-The factions are networks, not states: a hub is a place where members gather and organize, not a claim that the network governs every resident. **The Bastion** and **the Archive** are the current names for their hubs; **Wellspring** is a working name for the town and Keeper hub.
+The three public factions are networks, not states: a hub is a place where members gather and organize, not a claim that the network governs every resident. **The Bastion** and **the Archive** are the current names for their hubs; **Wellspring** is a working name for the town and Keeper hub. The Quiet Ledger has no confirmed public hub.
 
 #### **The Bastion — Iron Creed hub:**
 
@@ -312,7 +314,7 @@ A post-war-born human who carries salvage and carefully verified news along a sm
 #### Other Humans
 
 - **The shelter survivor:** the last of a community that lived underground. Old, tough, suspicious of robots.
-- **The second sleeper:** woke from another pod, maybe not a Hearthwell one, and is even more lost than the player.
+- **The second sleeper:** a possible adult who woke from a separate pod and is developing an independent creative or community practice. They are a possible human romance character, not yet a fixed member of the release roster; see the [second-sleeper character sheet](Characters/SecondSleeper.md). Their name, identity, pod, location and detailed story remain open.
 - **The disguised:** lives in a robot city wearing a robot shell, and has done so for years. Discovering them is a secret both of you now share.
 - **The exhibit:** held by the Index at a research institute and presented as a "living exhibit" of human behaviour. They are a trial subject, not a willing display. Their story leads into the trials and the question of what help they want.
 - **The sibling:** a definite part of the sleeper's story and included in the initial cast target. Their role, survival path and when or whether the player meets them are still undecided; they may also fit one of the paths above.
@@ -341,6 +343,8 @@ Newest first. Add an entry whenever a lore choice is made or reversed. Never del
 
 | Date | Decision | Why |
 |---|---|---|
+| 2026-11-13 | Develop the second sleeper as a possible human romance character: an adult from a separate cryo pod with an independent creative or community project whose value does not depend on romance. Their name, gender, pronouns, voice, pod, location and final release eligibility remain open | Adds one deliberate human romance possibility without making every rare human a prospect or making the sleeper the character's purpose; the relationship and the project can each remain optional |
+| 2026-11-13 | Drafted the Quiet Ledger as a provisional, post-war covert administrative compact whose influence comes from quietly shaping information and civic priorities; its name, reach and internal structure remain open | Adds the requested secretive robot faction while distinguishing it from the three public ideological networks, the pre-war strategic machine systems and the separate Continuance Trials |
 | 2026-11-09 | The sleeper's parents stayed at the farm after the Four Days, became fatally ill through repeated Cinderium exposure while maintaining its shelter, and died there; Hob laid them to rest beneath the old pear tree with their cedar box of keepsakes | Gives the family mystery a truthful, intimate ending. The parents' message can explain their informed choice and burial wish, while Hob confirms what happened afterward without making the message predict the future. |
 | 2026-10-30 | The Iron Creed's frame-conversion researchers drew on its strength-and-readiness ideals, but their affiliation with the dominationist current is unknown; any response follows the harmed people's wishes | Keeps their stated survival rationale distinct from the anti-human radicals' ideology and makes Gage's role supportive rather than taking control of survivors' choices |
 | 2026-10-30 | In-world chronology is expressed relative to the Four Days; the exact current year, including the current Continuance year, is unspecified | Keeps dates useful for story continuity without fixing an absolute calendar year for the setting |
@@ -386,6 +390,7 @@ Newest first. Add an entry whenever a lore choice is made or reversed. Never del
 ## 14. Open questions
 
 - **Final names** for everything marked *(working name)*, in particular the coin, the caretaker and the robot makers.
+- **The Quiet Ledger:** its final name, actual reach, internal structure and the first community whose decisions it is shown to have influenced.
 - **The nomad:** their name, gender and pronouns, and which circuit contacts become named on-screen characters.
 - **Whether Wellspring is the final town name**, along with the region's name, the world's name and the game title (shared with GameDesign).
 - **The sibling:** their role, survival path, and when or whether the player meets them.

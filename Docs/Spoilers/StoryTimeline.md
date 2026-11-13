@@ -297,6 +297,18 @@ If the sibling is encountered, they are a person with their own history, boundar
 
 The family-message payoff gives the sleeper closure: the parents chose to stay, the reason they died, where Hob laid them to rest, and the freedom to make a future without turning the farm into a shrine. It leaves room for the sibling's future to remain open and does not answer unrelated regional mysteries.
 
+## Parallel thread — The Quiet Ledger
+
+The [Quiet Ledger faction sheet](Factions/QuietLedger.md) outlines a separate, optional mystery about a covert administrative network. This thread can unfold alongside the character arcs and the Continuance Trials, but it does not explain or cause them. It must not be required to understand the trials or the family story.
+
+- **Opening:** Keep attention on waking, farm routines and Wellspring. Do not present an overt conspiracy clue.
+- **Early:** If the player notices anything, it is one mundane discrepancy in a delivery, record or notice, with a plausible local explanation.
+- **Transition:** Similar administrative methods appear in independent places. Comparison raises a question about coordination but does not yet identify a group.
+- **Middle:** Corroborated evidence can establish that a small covert network steered some civic decisions without authorization. It does not establish the full membership, reach or leadership.
+- **Late:** The affected communities decide what to disclose and whether to accept, limit or reject future coordination. Exposure is not a required outcome and should not endanger uninvolved people by default.
+
+Keep the clues optional and spaced apart. No single stamp, missing document or character's accusation proves the network exists. The Ledger is not a hidden explanation for every unexplained event, and its resemblance to pre-war information control does not establish a connection to the strategic machine systems.
+
 ## Reveal and knowledge guardrails
 
 - **Hint before proof.** Early clues should support more than one interpretation. Save corroborating evidence and direct testimony for later phases.
