@@ -287,10 +287,10 @@ def build_all():
 
     objects = [
         build_soil(new_collection("Soil"), mat_soil),
-        build_turnip("SM_Crop_Stage0", new_collection("Crop_Stage0"), turnip_mats, 2, 0.4, seed=10),
-        build_turnip("SM_Crop_Stage1", new_collection("Crop_Stage1"), turnip_mats, 3, 0.62, seed=11),
-        build_turnip("SM_Crop_Stage2", new_collection("Crop_Stage2"), turnip_mats, 5, 0.9, root_scale=0.6, root_drop=0.03, seed=12),
-        build_turnip("SM_Crop_Ripe", new_collection("Crop_Ripe"), turnip_mats, 5, 1.15, root_scale=1.0, seed=13),
+        build_turnip("SM_Crop_Turnip_Stage0", new_collection("Crop_Turnip_Stage0"), turnip_mats, 2, 0.4, seed=10),
+        build_turnip("SM_Crop_Turnip_Stage1", new_collection("Crop_Turnip_Stage1"), turnip_mats, 3, 0.62, seed=11),
+        build_turnip("SM_Crop_Turnip_Stage2", new_collection("Crop_Turnip_Stage2"), turnip_mats, 5, 0.9, root_scale=0.6, root_drop=0.03, seed=12),
+        build_turnip("SM_Crop_Turnip_Ripe", new_collection("Crop_Turnip_Ripe"), turnip_mats, 5, 1.15, root_scale=1.0, seed=13),
         build_watering_can(new_collection("WateringCan"), mat_can, mat_brass),
     ]
     return objects

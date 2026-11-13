@@ -116,7 +116,7 @@ Low-poly and stylized, with simple shapes and flat or lightly textured colors. T
 
 ### Naming
 
-Follow Epic's [recommended asset naming](https://dev.epicgames.com/documentation/en-us/unreal-engine/recommended-asset-naming-conventions-in-unreal-engine-projects): `SM_` static mesh, `SK_` skeletal mesh, `M_` material, `MI_` material instance, `T_` texture, `BP_` Blueprint and so on. Variants go at the end: `SM_Crop_Stage0`, `SM_Crop_Ripe`. The full table is in [CodingGuidelines.md](Docs/CodingGuidelines.md#142-content-and-asset-naming).
+Follow Epic's [recommended asset naming](https://dev.epicgames.com/documentation/en-us/unreal-engine/recommended-asset-naming-conventions-in-unreal-engine-projects): `SM_` static mesh, `SK_` skeletal mesh, `M_` material, `MI_` material instance, `T_` texture, `BP_` Blueprint and so on. Variants go at the end: `SM_Crop_Turnip_Stage0`, `SM_Crop_Turnip_Ripe`. The full table is in [CodingGuidelines.md](Docs/CodingGuidelines.md#142-content-and-asset-naming).
 
 ### Budgets
 

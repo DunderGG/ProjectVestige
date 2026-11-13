@@ -488,7 +488,7 @@ Our assets live under `Content/Vestige/`, split by type. Leave the template's fo
 | `WBP_` | Widget Blueprint | `WBP_Inventory` |
 | `ABP_` | Animation Blueprint | `ABP_Farmer` |
 | `DA_` | Data asset | `DA_Crop_Parsnip` |
-| `SM_` | Static mesh | `SM_Crop_Ripe` |
+| `SM_` | Static mesh | `SM_Crop_Turnip_Ripe` |
 | `SK_` | Skeletal mesh | `SK_Farmer` |
 | `M_` / `MI_` | Material / material instance | `MI_Soil_Watered` |
 | `T_` | Texture (with suffix `_D`, `_N`, `_ORM`) | `T_Soil_D` |
@@ -496,7 +496,7 @@ Our assets live under `Content/Vestige/`, split by type. Leave the template's fo
 | `S_` / `SC_` | Sound wave / sound cue | `S_Hoe` |
 | `NS_` | Niagara system | `NS_WaterSplash` |
 
-Variants go after the base name with underscores: `SM_Crop_Stage0`, `SM_Crop_Stage1`.
+Variants go after the base name with underscores: `SM_Crop_Turnip_Stage0`, `SM_Crop_Turnip_Stage1`.
 
 Blender sources go in `Art/Blender/`, exported FBX files in `Art/Export/`, with the same names as the imported assets.
 
