@@ -36,7 +36,7 @@ struct FFarmTileLookSettings
 	UPROPERTY(EditAnywhere, Category = "Farming|Placeholders")
 	TObjectPtr<UStaticMesh> PlaceholderSoilMesh;
 
-	/** Placeholder for a crop without a mesh for its growth stage: the engine cylinder, taller each day. */
+	/** Placeholder for a crop without a mesh for its growth stage: the engine cylinder, taller as it grows. */
 	UPROPERTY(EditAnywhere, Category = "Farming|Placeholders")
 	TObjectPtr<UStaticMesh> PlaceholderCropMesh;
 
@@ -86,6 +86,9 @@ namespace FarmTileLooks
 	inline const FLinearColor GrowingColor(0.20f, 0.70f, 0.15f);
 	inline const FLinearColor RipeColor(1.00f, 0.60f, 0.05f);
 
-	/** How Tile is drawn with Settings: the tilled soil mesh once the tile isn't grass, the crop's mesh for its growth stage. */
+	/**
+	 * How Tile is drawn with Settings: the tilled soil mesh once the tile isn't grass, and the mesh and scale its crop's data gives
+	 * for its growth days (UFarmCropData::GetGrowthLook), standing on the soil surface.
+	 */
 	FFarmTileLook GetLook(const FFarmTileState& Tile, const FFarmTileLookSettings& Settings);
 }

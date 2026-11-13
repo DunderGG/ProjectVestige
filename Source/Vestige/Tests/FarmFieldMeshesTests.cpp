@@ -125,8 +125,8 @@ namespace FarmFieldMeshesTests
 			const FPrimaryAssetId TurnipId(UFarmCropData::AssetType, TEXT("Base.Turnip"));
 			const UFarmCropData* Turnip = UVestigeContentCatalog::Get(&Spawner.GetWorld())->Find<UFarmCropData>(TurnipId);
 			ASSERT_THAT(IsNotNull(Turnip));
-			const UStaticMesh* Seedling = Turnip->GetGrowthStageMesh(0);
-			const UStaticMesh* NextStage = Turnip->GetGrowthStageMesh(1);
+			const UStaticMesh* Seedling = Turnip->GetGrowthLook(0).Mesh;
+			const UStaticMesh* NextStage = Turnip->GetGrowthLook(1).Mesh;
 			ASSERT_THAT(IsTrue(Seedling && NextStage && Seedling != NextStage));
 			PlantAndWater(FIntPoint(2, 3), *Turnip);
 			ASSERT_THAT(IsTrue(Meshes->GetInstanceCount(Seedling) == 1));

@@ -136,7 +136,7 @@ Each crop, tool and item is a **data asset**: an asset in the Content Browser wh
 
 ### Adding a crop
 
-1. **Make the meshes**, one per growth stage, from the day it's planted to ripe: a crop that takes 3 days has 4 meshes. Follow [Contributing art](#5-contributing-art), with the origin at the center of the base on the soil surface, and name them after the crop: `SM_Crop_Carrot_Stage0` ... `SM_Crop_Carrot_Ripe`. Import them into `Content/Vestige/Meshes`.
+1. **Make the meshes:** a few growth stages, seedling first, plus a separate ripe mesh. Four or five looks in all are plenty, whatever the crop's days: the game spreads the stages evenly over *Days To Mature*, so a crop has at most as many stages as days, and shows the ripe mesh only once the crop can be harvested, so make it look clearly ready. Within a stage the game scales the crop from 80% to full size, a little more each night it grew, so make each stage at least 1.25 times the one before, in height and in spread, or a new stage looks smaller than the end of the last; the ripe mesh has no size rule. Follow [Contributing art](#5-contributing-art), with the origin at the center of the base on the soil surface (the crop grows from it), and name them after the crop: `SM_Crop_Carrot_Stage0`, `SM_Crop_Carrot_Stage1` ... and `SM_Crop_Carrot_Ripe`. Import them into `Content/Vestige/Meshes`. The rules are in [Systems.md, section 22](Docs/Systems.md#22-farm-fields-and-tiles).
 2. **Create the data asset.** In the Content Browser, open `Content/Vestige/Crops`, right-click and choose *Miscellaneous > Data Asset*, pick **Farm Crop Data**, and name it `DA_Crop_Carrot`. It has to be in `Content/Vestige/Crops` (or a folder inside it): that is the folder the Asset Manager scans for crops (`Config/DefaultGame.ini`).
 3. **Fill in its fields** (double-click the asset):
 
@@ -144,13 +144,15 @@ Each crop, tool and item is a **data asset**: an asset in the Content Browser wh
    |---|---|
    | Content Id | `Base.Carrot`: the namespace `Base` for the game's own content, a dot, and the crop's name, each starting with a capital letter, letters and digits only. Saves store this ID, so it **never changes** once the crop is in a release. It doesn't follow the asset's name, so renaming or moving the asset later is safe |
    | Display Name | The name the player sees, such as *Carrot* |
-   | Days To Mature | Watered days until it can be harvested. It grows one stage per watered day |
-   | Growth Stage Meshes | The meshes from step 1, in order, one more than *Days To Mature* |
+   | Days To Mature | Watered days until it can be harvested. The growth stage meshes are spread over these days, so changing it needs no new meshes |
+   | Growth Stage Meshes | The stage meshes from step 1, seedling first, without the ripe one. No more than *Days To Mature* of them, or some never show |
+   | Ripe Mesh | The ripe mesh from step 1, shown only when the crop can be harvested |
+   | Stage Start Scale | How big the crop is on the first day of each stage, before it reaches full size on the stage's last day. Leave it at 0.8 unless your stages grow by less than 1.25 times |
    | Harvest Item Id | The item a harvest gives, such as `VestigeItem:Base.Carrot`. Make that item first, as in [Adding an item](#adding-an-item); prices belong to it |
    | Yield | How many of that item one harvest gives |
    | Seasons, Water Need, Contamination Tolerance | Fill in what you intend. The game doesn't use them yet; they are there so crops don't need changing when seasons and contamination arrive |
 
-4. **Save it and check it.** Right-click the `Content/Vestige/Crops` folder and choose *Validate Assets*: a missing or badly formed Content Id, or a Harvest Item Id that names no item, shows as an error. Restart the editor and check the Output Log for an "is used by more than one asset" error, which means another asset already has your ID.
+4. **Save it and check it.** Right-click the `Content/Vestige/Crops` folder and choose *Validate Assets*: a missing or badly formed Content Id, a Harvest Item Id that names no item, a missing ripe mesh, no growth stage meshes or an empty one, or the ripe mesh among the growth stages, shows as an error, and more stages than days as a warning. Restart the editor and check the Output Log for an "is used by more than one asset" error, which means another asset already has your ID.
 5. **Try it in the game.** Seeds are planted from the item in hand, so make a seed item for your crop first ([Adding an item](#adding-an-item)): besides its **Farm Seed Fragment** naming your crop, it needs a **Vestige Tool Fragment** whose *Tool Id* is `VestigeTool:Base.Seeds`, the Seeds tool every seed item uses. Then open `Content/Vestige/Blueprints/BP_PlayerState`, select its **Inventory** component and add your seeds under **Starting Items**; the first nine slots are the hotbar. Start a new game with them: while playing, open the console and type `NewGame` ([PlayTest.md](Docs/PlayTest.md#1-before-you-test) says how to open it). Till a tile with the hoe, press the number key of your seeds' slot (or scroll to it) and press E on the tilled tile. Change the starting items back before you commit, unless your pull request is meant to change them.
 6. **Open a pull request** with the data asset, the meshes, their `.blend` source and a screenshot of each growth stage in the game.
 

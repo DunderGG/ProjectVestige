@@ -11,6 +11,7 @@
 #include "Content/VestigeToolFragment.h"
 #include "CQTest.h"
 #include "Engine/AssetManager.h"
+#include "Engine/StaticMesh.h"
 
 #if WITH_EDITOR
 #include "Misc/DataValidation.h"
@@ -177,6 +178,9 @@ namespace VestigeItemDataTests
 		{
 			UFarmCropData& Crop = Spawner.SpawnObject<UFarmCropData>();
 			Crop.SetContentIdForTests(TEXT("Test.Crop"));
+			UStaticMesh& Stage = Spawner.SpawnObject<UStaticMesh>();
+			UStaticMesh& Ripe = Spawner.SpawnObject<UStaticMesh>();
+			Crop.SetMeshesForTests({TSoftObjectPtr<UStaticMesh>(&Stage)}, TSoftObjectPtr<UStaticMesh>(&Ripe));
 			ASSERT_THAT(IsFalse(PassesValidation(Crop)));
 
 			Crop.SetHarvestItemIdForTests(TurnipItemId);

@@ -104,6 +104,19 @@ namespace FarmTileLooksTests
 			ASSERT_THAT(IsTrue(Ripe.Crop->Transform.GetScale3D().Z > Seedling.Crop->Transform.GetScale3D().Z));
 		}
 
+		/** A crop that takes Days to mature, with two stage meshes and a ripe mesh. */
+		UFarmCropData& MeshedCrop(int32 Days, UStaticMesh*& OutRipe)
+		{
+			UFarmCropData& Crop = Spawner.SpawnObject<UFarmCropData>();
+			UStaticMesh& Stage0 = Spawner.SpawnObject<UStaticMesh>();
+			UStaticMesh& Stage1 = Spawner.SpawnObject<UStaticMesh>();
+			OutRipe = &Spawner.SpawnObject<UStaticMesh>();
+			Crop.SetDaysToMatureForTests(Days);
+			Crop.SetMeshesForTests({TSoftObjectPtr<UStaticMesh>(&Stage0), TSoftObjectPtr<UStaticMesh>(&Stage1)},
+				TSoftObjectPtr<UStaticMesh>(OutRipe));
+			return Crop;
+		}
+
 		TEST_METHOD(ACropWithStageMeshesShowsItsStageOnTheSoilSurface)
 		{
 			AddSoilArt();
@@ -111,13 +124,61 @@ namespace FarmTileLooksTests
 			Spawner.InitializeGameSubsystems();
 			const UFarmCropData* Crop = UVestigeContentCatalog::Get(&Spawner.GetWorld())->Find<UFarmCropData>(TurnipId);
 			ASSERT_THAT(IsNotNull(Crop));
-			ASSERT_THAT(IsNotNull(Crop->GetGrowthStageMesh(0)));
+			ASSERT_THAT(IsNotNull(Crop->GetGrowthLook(0).Mesh));
 
 			const FFarmTileLook Look = ::FarmTileLooks::GetLook(PlantedTile(*Crop, 0), Settings);
 
 			ASSERT_THAT(IsTrue(Look.Crop.IsSet()));
-			ASSERT_THAT(IsTrue(Look.Crop->Mesh == Crop->GetGrowthStageMesh(0)));
+			ASSERT_THAT(IsTrue(Look.Crop->Mesh == Crop->GetGrowthLook(0).Mesh));
 			ASSERT_THAT(IsNull(Look.Crop->Material));
+			ASSERT_THAT(IsTrue(FMath::IsNearlyEqual(Look.Crop->Transform.GetLocation().Z, Settings.SoilSurfaceHeight)));
+		}
+
+		TEST_METHOD(AnUnripeCropNeverShowsItsRipeMesh)
+		{
+			UStaticMesh* RipeMesh = nullptr;
+			const UFarmCropData& Crop = MeshedCrop(4, RipeMesh);
+
+			for (int32 Days = 0; Days < 4; ++Days)
+			{
+				const FFarmTileLook Growing = ::FarmTileLooks::GetLook(PlantedTile(Crop, Days), Settings);
+				ASSERT_THAT(IsTrue(Growing.Crop.IsSet() && Growing.Crop->Mesh != RipeMesh));
+			}
+			const FFarmTileLook Ripe = ::FarmTileLooks::GetLook(PlantedTile(Crop, 4), Settings);
+			ASSERT_THAT(IsTrue(Ripe.Crop.IsSet() && Ripe.Crop->Mesh == RipeMesh));
+		}
+
+		TEST_METHOD(APlaceholderCropIsAsTallWhenRipeWhateverItsLength)
+		{
+			float RipeHeight = -1.f;
+			for (const int32 Days : {1, 3, 10})
+			{
+				UFarmCropData& Crop = Spawner.SpawnObject<UFarmCropData>();
+				Crop.SetDaysToMatureForTests(Days);
+
+				const FFarmTileLook Ripe = ::FarmTileLooks::GetLook(PlantedTile(Crop, Days), Settings);
+
+				ASSERT_THAT(IsTrue(Ripe.Crop.IsSet()));
+				if (RipeHeight < 0.f)
+				{
+					RipeHeight = Ripe.Crop->Transform.GetScale3D().Z;
+				}
+				ASSERT_THAT(IsTrue(FMath::IsNearlyEqual(Ripe.Crop->Transform.GetScale3D().Z, RipeHeight)));
+			}
+		}
+
+		TEST_METHOD(AGrowingCropIsScaledFromItsBase)
+		{
+			AddSoilArt();
+			UStaticMesh* RipeMesh = nullptr;
+			const UFarmCropData& Crop = MeshedCrop(10, RipeMesh);
+			const FFarmCropGrowthLook GrowthLook = Crop.GetGrowthLook(1);
+			ASSERT_THAT(IsTrue(GrowthLook.Scale < 1.f));
+
+			const FFarmTileLook Look = ::FarmTileLooks::GetLook(PlantedTile(Crop, 1), Settings);
+
+			ASSERT_THAT(IsTrue(Look.Crop.IsSet()));
+			ASSERT_THAT(IsTrue(Look.Crop->Transform.GetScale3D().Equals(FVector(GrowthLook.Scale))));
 			ASSERT_THAT(IsTrue(FMath::IsNearlyEqual(Look.Crop->Transform.GetLocation().Z, Settings.SoilSurfaceHeight)));
 		}
 	};

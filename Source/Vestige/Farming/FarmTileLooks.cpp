@@ -13,10 +13,10 @@ namespace FarmTilePlaceholder
 	const FVector SoilLocation(0.f, 0.f, 2.f);
 	constexpr float SoilTop = 4.f;
 
-	// The engine cylinder is 100 units tall and centered on its origin. It grows taller each stage.
+	// The engine cylinder is 100 units tall and centered on its origin. It grows taller as the crop grows, from seedling to ripe.
 	constexpr float CropWidthScale = 0.3f;
 	constexpr float CropSeedlingHeightScale = 0.15f;
-	constexpr float CropHeightScalePerDay = 0.25f;
+	constexpr float CropRipeHeightScale = 0.9f;
 	constexpr float CylinderHalfHeight = 50.f;
 }
 
@@ -48,6 +48,22 @@ namespace FarmTileLooks
 			return Soil;
 		}
 
+		/** How far a planted tile's crop has grown, from 0 on the day planted to 1 when ripe. */
+		float GetGrowthFraction(const FFarmTileState& Tile)
+		{
+			if (Tile.IsRipe())
+			{
+				return 1.f;
+			}
+			const UFarmCropData* CropData = Tile.GetCrop();
+			if (!CropData)
+			{
+				return 0.f;
+			}
+			const float DaysToMature = static_cast<float>(FMath::Max(CropData->GetDaysToMature(), 1));
+			return FMath::Clamp(static_cast<float>(Tile.GetGrowthDays()) / DaysToMature, 0.f, 1.f);
+		}
+
 		FFarmTilePartLook GetCropLook(const FFarmTileState& Tile, const FFarmTileLookSettings& Settings)
 		{
 			using namespace FarmTilePlaceholder;
@@ -55,14 +71,16 @@ namespace FarmTileLooks
 			FFarmTilePartLook Crop;
 			const float SurfaceZ = Settings.TilledSoilMesh ? Settings.SoilSurfaceHeight : SoilTop;
 			const UFarmCropData* CropData = Tile.GetCrop();
-			if (UStaticMesh* StageMesh = CropData ? CropData->GetGrowthStageMesh(Tile.GetGrowthDays()) : nullptr)
+			const FFarmCropGrowthLook GrowthLook = CropData ? CropData->GetGrowthLook(Tile.GetGrowthDays()) : FFarmCropGrowthLook();
+			if (GrowthLook.Mesh)
 			{
-				Crop.Mesh = StageMesh;
-				Crop.Transform = FTransform(FVector(0.f, 0.f, SurfaceZ));
+				Crop.Mesh = GrowthLook.Mesh;
+				Crop.Transform = FTransform(FQuat::Identity, FVector(0.f, 0.f, SurfaceZ), FVector(GrowthLook.Scale));
 				return Crop;
 			}
 
-			const float HeightScale = CropSeedlingHeightScale + CropHeightScalePerDay * Tile.GetGrowthDays();
+			// The placeholder ignores the stage scale: its height already follows the whole growth.
+			const float HeightScale = FMath::Lerp(CropSeedlingHeightScale, CropRipeHeightScale, GetGrowthFraction(Tile));
 			Crop.Mesh = Settings.PlaceholderCropMesh;
 			Crop.Material = Settings.PlaceholderMaterial;
 			Crop.Transform = FTransform(FQuat::Identity, FVector(0.f, 0.f, SurfaceZ + HeightScale * CylinderHalfHeight),

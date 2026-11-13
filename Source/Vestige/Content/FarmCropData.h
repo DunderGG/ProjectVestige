@@ -10,6 +10,16 @@
 
 class UStaticMesh;
 
+/** How a crop looks on one growth day: one mesh at a uniform scale, standing on its origin at the base. */
+struct FFarmCropGrowthLook
+{
+	/** The mesh, or nullptr when the crop has none for that day or it isn't loaded; the tile then draws its placeholder. */
+	UStaticMesh* Mesh = nullptr;
+
+	/** Uniform scale of Mesh, from the crop's StageStartScale on a stage's first day to 1 on its last. */
+	float Scale = 1.f;
+};
+
 /**
  * The definition of one crop: how it grows, how it looks and what its harvest gives, plus the ID and name every content asset has.
  * One asset per crop, found through the Asset Manager by its ContentId. Holds no runtime state; tiles do.
@@ -26,20 +36,52 @@ public:
 	int32 GetDaysToMature() const { return DaysToMature; }
 	int32 GetYield() const { return Yield; }
 
+	/** Scale of a growth stage mesh on its stage's first day, from above 0 to 1. */
+	float GetStageStartScale() const { return StageStartScale; }
+
 	/** The item a harvest gives (VestigeItem:Base.Turnip). */
 	const FPrimaryAssetId& GetHarvestItemId() const { return HarvestItemId; }
 
-	/** The mesh for a crop that has grown for GrowthDays days, or nullptr if that stage has no mesh or it isn't loaded. */
-	UStaticMesh* GetGrowthStageMesh(int32 GrowthDays) const;
+	/** Whether a crop that has grown for GrowthDays watered days can be harvested. A DaysToMature below 1 is always ripe. */
+	bool IsRipeAt(int32 GrowthDays) const { return GrowthDays >= DaysToMature; }
+
+	/**
+	 * Which of GrowthStageMeshes a crop that has grown for GrowthDays days shows: the stages spread evenly over DaysToMature,
+	 * seedling on the day planted. INDEX_NONE once it is ripe, or when the crop has no growth stage meshes.
+	 */
+	int32 GetGrowthStageIndex(int32 GrowthDays) const;
+
+	/**
+	 * How a crop that has grown for GrowthDays days looks: its ripe mesh at full size once ripe, before that its growth stage
+	 * mesh, scaled up evenly within the stage. The mesh is nullptr when it is missing or not loaded. Never loads an asset.
+	 */
+	FFarmCropGrowthLook GetGrowthLook(int32 GrowthDays) const;
 
 #if WITH_EDITOR
-	/** Reports a HarvestItemId that is empty, of another content type, or names no item. */
+	/**
+	 * Reports a HarvestItemId that is empty, of another content type, or names no item; a DaysToMature below 1, a StageStartScale
+	 * outside (0, 1], a missing ripe mesh, no growth stage meshes, an empty stage entry, or the ripe mesh among the stages.
+	 * Warns, without failing, about more growth stage meshes than DaysToMature.
+	 */
 	virtual EDataValidationResult IsDataValid(FDataValidationContext& Context) const override;
 #endif
 
 #if WITH_DEV_AUTOMATION_TESTS
 	/** For tests only. Crops get their harvest item in the editor. */
 	void SetHarvestItemIdForTests(const FPrimaryAssetId& InHarvestItemId) { HarvestItemId = InHarvestItemId; }
+
+	/** For tests only. Crops get their growth time in the editor. */
+	void SetDaysToMatureForTests(int32 InDaysToMature) { DaysToMature = InDaysToMature; }
+
+	/** For tests only. Crops get their meshes in the editor. */
+	void SetMeshesForTests(const TArray<TSoftObjectPtr<UStaticMesh>>& InGrowthStageMeshes, const TSoftObjectPtr<UStaticMesh>& InRipeMesh)
+	{
+		GrowthStageMeshes = InGrowthStageMeshes;
+		RipeMesh = InRipeMesh;
+	}
+
+	/** For tests only. Crops get their stage start scale in the editor. */
+	void SetStageStartScaleForTests(float InStageStartScale) { StageStartScale = InStageStartScale; }
 #endif
 
 protected:
@@ -50,7 +92,7 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Farming", meta = (AllowPrivateAccess = "true", Categories = "Vestige.Season"))
 	FGameplayTagContainer Seasons;
 
-	/** Watered days the crop needs before it can be harvested. It grows one stage per watered day. */
+	/** Watered days the crop needs before it can be harvested. Its growth stage meshes are spread over these days. */
 	UPROPERTY(EditDefaultsOnly, Category = "Farming|Growth", meta = (AllowPrivateAccess = "true", ClampMin = 1))
 	int32 DaysToMature = 3;
 
@@ -63,11 +105,23 @@ private:
 	float ContaminationTolerance = 1.f;
 
 	/**
-	 * One mesh per growth stage, from the day planted to ripe (DaysToMature + 1 entries). Origin on the soil surface.
-	 * Empty slots fall back to the tile's placeholder shape; with too few entries, the last one is used for later stages.
+	 * The meshes the crop shows while it grows, seedling first, without the ripe mesh. They are spread evenly over DaysToMature,
+	 * so there are at most DaysToMature of them, and each is at least 1 / StageStartScale times the one before in height and
+	 * spread. Origin at the center of the base on the soil surface. An empty entry draws the tile's placeholder shape.
 	 */
 	UPROPERTY(EditDefaultsOnly, Category = "Farming|Visuals", meta = (AllowPrivateAccess = "true", AssetBundles = "Visuals"))
 	TArray<TSoftObjectPtr<UStaticMesh>> GrowthStageMeshes;
+
+	/** The mesh the crop shows once it can be harvested, at full size, and never before. Origin as for the growth stage meshes. */
+	UPROPERTY(EditDefaultsOnly, Category = "Farming|Visuals", meta = (AllowPrivateAccess = "true", AssetBundles = "Visuals"))
+	TSoftObjectPtr<UStaticMesh> RipeMesh;
+
+	/**
+	 * Scale of a growth stage mesh on the stage's first day. The crop grows evenly to full size on the stage's last day, so it
+	 * changes every night it grew; a one-day stage shows at full size.
+	 */
+	UPROPERTY(EditDefaultsOnly, Category = "Farming|Visuals", meta = (AllowPrivateAccess = "true", ClampMin = 0.1, ClampMax = 1))
+	float StageStartScale = 0.8f;
 
 	/** The item one harvest gives, Yield times. Prices belong to that item. */
 	UPROPERTY(EditDefaultsOnly, Category = "Farming|Harvest", meta = (AllowPrivateAccess = "true", AllowedTypes = "VestigeItem"))

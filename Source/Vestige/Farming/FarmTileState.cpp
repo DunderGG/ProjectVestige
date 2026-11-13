@@ -51,7 +51,7 @@ bool FFarmTileState::Harvest()
 
 bool FFarmTileState::IsRipe() const
 {
-	return State == EFarmTileState::Planted && Crop && GrowthDays >= Crop->GetDaysToMature();
+	return State == EFarmTileState::Planted && Crop && Crop->IsRipeAt(GrowthDays);
 }
 
 void FFarmTileState::AdvanceDay()
