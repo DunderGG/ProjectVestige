@@ -126,6 +126,7 @@ This setup has not yet been reviewed by a lawyer. Before Project Vestige is sold
 - whether it fits the Unreal Engine EULA and each target store and console's SDK terms;
 - the contributor terms and the way agreement is recorded;
 - the AI-generated images and any AI-generated 3D models; and the meshes `make_farm_assets.py` generates (`Art/Blender/*.blend`, `Art/Export/*.fbx` and the meshes imported from them), which no generative model made but a script written by an AI agent did: who owns them, whether they are protected by copyright, and what each store requires to be disclosed about AI-generated content;
+- code, scripts and docs written by AI agents for the maintainer (most of `Source/`, the scripts in `Art/Blender/`, much of `Docs/`, and content assets that agents' editor scripts outside the repository made or changed, for example `M_Crop` with its `MI_Crop_*` instances and the crop and item data assets): ownership, copyright, and what stores require to be disclosed;
 - whether CC BY 4.0's ban on adding technical restrictions (DRM) affects third-party CC BY assets in store and console builds;
 - the maintainer's commercial use of contributed assets under CC BY-NC-SA.
 
