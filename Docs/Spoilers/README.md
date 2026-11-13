@@ -10,11 +10,13 @@ The documents in this folder reveal the story, its secrets and the characters' b
 - [Characters/Hob.md](Characters/Hob.md): Hob's character sheet.
 - [Characters/Archivist.md](Characters/Archivist.md): the Index archivist's character sheet.
 - [Characters/Nomad.md](Characters/Nomad.md): the nomad's character sheet.
-- [Characters/SecondSleeper.md](Characters/SecondSleeper.md): a provisional second-sleeper character and possible human romance arc.
+- [Characters/Alice.md](Characters/Alice.md): Alice's pre-war character concept and potential human romance arc in the planned release roster.
+- [Characters/Reed.md](Characters/Reed.md): a provisional human romance character who blends into robot society through social presentation.
+- [Characters/AuthorityIntermediary.md](Characters/AuthorityIntermediary.md): Morrow, a human-origin covert recruiter with a fully mechanical interior and a convincing human exterior.
 - [Dialogue/README.md](Dialogue/README.md): voice-ready draft scenes organized by story phase.
 - [Factions/IronCreed.md](Factions/IronCreed.md): the Iron Creed's beliefs, symbol and story direction.
 - [Factions/Index.md](Factions/Index.md): the Index's beliefs, symbol and story direction.
 - [Factions/Keepers.md](Factions/Keepers.md): the Keepers' beliefs, symbol and story direction.
-- [Factions/QuietLedger.md](Factions/QuietLedger.md): the Quiet Ledger's covert organization, internal conflict and slow-discovery story direction.
+- [Factions/ContinuanceAuthority.md](Factions/ContinuanceAuthority.md): the Continuance Authority's concealed rule, claim to power and slow-discovery story direction.
 
 Contributors writing dialogue, item descriptions, quests or other story content need these documents. Everything else (how the game plays, the code, the roadmap) is in the parent [Docs](..) folder and is spoiler-free.

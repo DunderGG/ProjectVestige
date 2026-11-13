@@ -19,3 +19,4 @@ Every piece of third-party material in the repository is listed here with its so
 - Built with [Unreal Engine](https://www.unrealengine.com/) by Epic Games. Template code and content used under the Unreal Engine EULA (see [LICENSING.md](LICENSING.md)).
 - 3D assets made with [Blender](https://www.blender.org/). Blender is a tool, so its GPL license doesn't apply to what we make with it.
 - `Images/*-CGPT.png` (and other `-CGPT` files): AI-generated with ChatGPT by OpenAI, from David Bennehag's prompts. See [LICENSING.md](LICENSING.md#ai-generated-images).
+- `Images/*-GMN.jpg` (and other `-GMN` files): AI-generated with Google Gemini by David Bennehag, from his prompts. See [LICENSING.md](LICENSING.md#ai-generated-images).

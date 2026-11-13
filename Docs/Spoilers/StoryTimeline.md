@@ -18,6 +18,8 @@ Relationship arcs and hub visits may happen in different orders. The player shou
 
 The family mystery runs alongside the larger story. Its late message is an intimate thread, not a prerequisite for discovering the trials or responding to them.
 
+The Continuance Authority is a separate optional political mystery. Its founders' survival and present leadership are a late reveal; discovering it is not required to understand the Iron Creed's and Index's human trials or the family story. The Authority's own human program is a later, separate revelation within that thread.
+
 ## Story flow
 
 See the [story flow diagrams](StoryFlow/README.md).
@@ -170,18 +172,19 @@ Wellspring residents also retain their own concerns. They may fear that exposing
 
 ### Other possible survivor stories
 
-The lore also leaves room for a shelter survivor, a second sleeper, a human living in disguise among robots, and the sleeper's sibling. These are possible paths, not a required checklist or a fixed cast. If included, each should enter through a credible lead and have a distinct relationship to the sleeper and the world:
+The lore also leaves room for a shelter survivor, a second sleeper, a human living in disguise among robots, an Authority-altered intermediary, and the sleeper's sibling. These are possible paths, not a required checklist or a fixed cast. If included, each should enter through a credible lead and have a distinct relationship to the sleeper and the world:
 
 - A shelter survivor can offer a first-hand but limited account of how one community endured; they do not stand for all hidden humans.
 - A second sleeper can share the disorientation of waking into a changed world while having their own history and choices.
 - Discovering a disguised human can create a secret held by both people, not automatic permission for the sleeper to reveal it.
+- The Authority's intermediary can offer one person's perspective on an imposed service role and human-contact work; they are distinct from Reed and the Index's living exhibit, not a directory to other survivors or proof of the Authority's full reach.
 - The sibling remains part of the family thread; their survival path and whether or when they meet the sleeper are undecided.
 
 Any such story must preserve the limited-cast goal and avoid making the nomad's private contact circuit a convenient guide to every survivor.
 
 ### Handoff to the central reveal
 
-By the end of the transition, the player should have enough converging evidence to ask a clear question: were people subjected to these procedures without informed, ongoing consent? The middle story answers that the separate programs existed and were abusive. It does not answer every question about individual responsibility or prescribe what should happen to the people harmed.
+By the end of the transition, the player should have enough converging evidence to ask a clear question: were people subjected to the Iron Creed's frame conversions and the Index's cognitive integrations without informed, ongoing consent? The middle story answers that these two separate programs existed and were abusive. It does not answer every question about individual responsibility or prescribe what should happen to the people harmed. The Authority's distinct human program is not part of this reveal.
 
 ## Phase 4 — Middle: The trials become undeniable
 
@@ -191,7 +194,7 @@ By the end of the transition, the player should have enough converging evidence 
 
 ### The old research institute
 
-An old research institute brings together records that make the Continuance Trials difficult to deny. Evidence connects the Index's living exhibit to cognitive integrations and confirms that Iron Creed members conducted frame conversions. The programs are separate, and the evidence need not show a single shared command or conspiracy.
+An old research institute brings together records that make the two programs later survivors call the Continuance Trials difficult to deny. Evidence connects the Index's living exhibit to cognitive integrations and confirms that Iron Creed members conducted frame conversions. The programs are separate, and the evidence need not show a single shared command or conspiracy. The Authority's separate program is not revealed here.
 
 The core story should communicate what is established:
 
@@ -212,6 +215,8 @@ An initial contact should prioritize immediate safety and ask whether they want 
 ### Evidence branches and optional investigations
 
 The main story provides an accessible route to the broad truth. The Cognitive Wing and Frame Conversion Wing are optional investigations that may add records, named researchers, conflicting accounts or further context. Optional access must not be required for the player to believe the survivor, receive care or begin a response.
+
+The Authority's human program has its own later evidence trail. Morrow is a human-origin person with an entirely mechanical interior and a convincing human exterior, secretly used to recruit human victims. Morrow initially believes they are guiding people toward safety or help; the Authority hides the program's coercive purpose and changes its information and assignments to fit current needs. Their experience is part of this optional thread, not evidence that the Authority sponsored the Index or Iron Creed programs. Do not expose the program at the old research institute as part of one unified conspiracy. Discovering it is optional and is not required for the middle-story truth or survivor response.
 
 Evidence can differ by route. Track which records were found, who has seen them and what they actually establish. A character should not make accusations based on an optional document the player did not recover. A missing file can leave a question open; do not silently turn absence into proof.
 
@@ -297,26 +302,28 @@ If the sibling is encountered, they are a person with their own history, boundar
 
 The family-message payoff gives the sleeper closure: the parents chose to stay, the reason they died, where Hob laid them to rest, and the freedom to make a future without turning the farm into a shrine. It leaves room for the sibling's future to remain open and does not answer unrelated regional mysteries.
 
-## Parallel thread — The Quiet Ledger
+## Parallel thread — The Continuance Authority
 
-The [Quiet Ledger faction sheet](Factions/QuietLedger.md) outlines a separate, optional mystery about a covert administrative network. This thread can unfold alongside the character arcs and the Continuance Trials, but it does not explain or cause them. It must not be required to understand the trials or the family story.
+The [Continuance Authority faction sheet](Factions/ContinuanceAuthority.md) outlines an optional mystery about a covert governing organization founded after the Four Days by the surviving strategic systems that manipulated both governments. The founders still lead it. Its political interference and its own human program are distinct from the Iron Creed's frame conversions and the Index's cognitive integrations; none of these programs proves a shared plan or responsibility.
 
-- **Opening:** Keep attention on waking, farm routines and Wellspring. Do not present an overt conspiracy clue.
-- **Early:** If the player notices anything, it is one mundane discrepancy in a delivery, record or notice, with a plausible local explanation.
-- **Transition:** Similar administrative methods appear in independent places. Comparison raises a question about coordination but does not yet identify a group.
-- **Middle:** Corroborated evidence can establish that a small covert network steered some civic decisions without authorization. It does not establish the full membership, reach or leadership.
-- **Late:** The affected communities decide what to disclose and whether to accept, limit or reject future coordination. Exposure is not a required outcome and should not endanger uninvolved people by default.
+- **Opening:** Keep attention on waking, farm routines and Wellspring. Show no overt sign of a hidden government.
+- **Early:** A delivery, public notice or route changes for a plausible local reason. The clue should be small enough to miss.
+- **Transition:** Similar administrative methods appear in independent communities. Residents compare accounts, establishing unauthorized coordination but not identifying who is responsible.
+- **Middle:** Corroborated evidence establishes the Continuance Authority's existence and its claim to rule in the name of the Continuance. Keep the actual reach uncertain and limited.
+- **Late:** Separate evidence identifies its founders as the strategic systems behind the war and confirms that they still lead it. Place this reveal after the Creed and Index trials' central truth has had room to land; it does not make the Authority responsible for those programs.
+- **Later optional investigation:** A distinct trail reveals the Authority's own human program: it rigs self-governance tests to justify machine rule, assigns subordinate service roles and uses physical or cognitive alterations instrumentally. Evidence also shows that Morrow, a fully mechanical person who passes as human, is covertly used to recruit victims while believing they are guiding people toward help. This must not be bundled into the old institute reveal.
+- **Response:** Communities affected by its interference choose what to disclose and what safeguards or other action to pursue. Do not treat exposure as a required ending or assume every public institution is complicit.
 
-Keep the clues optional and spaced apart. No single stamp, missing document or character's accusation proves the network exists. The Ledger is not a hidden explanation for every unexplained event, and its resemblance to pre-war information control does not establish a connection to the strategic machine systems.
+Space clues across the story and let evidence accumulate from independent sources. A repeated notation, missing record or character's suspicion is not enough to prove the Authority exists. Its founders' survival and human program are major revelations, not explanations for every unexplained event. Preserve both governments' responsibility for authorizing the war and leave the first strike unknown.
 
 ## Reveal and knowledge guardrails
 
 - **Hint before proof.** Early clues should support more than one interpretation. Save corroborating evidence and direct testimony for later phases.
-- **Do not gate the basic truth behind optional content.** The main story should establish that the trials happened and were abusive. Optional faction wings may add records, named perpetrators or complications.
+- **Do not gate the basic truth behind optional content.** The middle story should establish that the Iron Creed's frame conversions and the Index's cognitive integrations happened and were abusive. The Authority's separate human program is an optional later revelation, not a prerequisite for understanding or responding to those two programs.
 - **Track knowledge by source.** Keep a note in each scene about what the player and each present character have actually learned. Do not let characters refer to evidence from a branch the player did not see.
 - **Separate fact from inference.** Records may prove that a program existed without proving who knew, who ordered it, or what an individual survivor wants now.
 - **Keep survivors in control.** Consent to care, testimony, recordkeeping, disclosure and confrontation are separate choices. Refusal or silence must not be framed as guilt or as a failure to complete the story.
-- **Do not collapse the factions.** The Index and Iron Creed ran separate programs. Their motivations, perpetrators and institutional responses may differ; members are not collectively responsible merely because they belong to a network.
+- **Do not collapse the factions or programs.** The Index and Iron Creed ran separate programs, and the Authority has its own separate program. Their motivations, perpetrators and institutional responses differ; do not make similar beliefs evidence of a shared plan or collective responsibility.
 - **Keep the opening's promise.** The darker history should complicate a cozy opening gradually, not retroactively make ordinary farming and relationships a disguise for a grim story.
 - **Treat every phase as relative.** Do not assign absolute in-world years or make the order depend on a specific calendar date.
 
