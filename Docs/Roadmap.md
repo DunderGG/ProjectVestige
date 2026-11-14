@@ -216,7 +216,7 @@ Before more tools and [4.6](#46-interface-and-input):
 
 When working nearby:
 
-- [ ] Remove the data fields nothing reads (`Seasons`, `WaterNeed`, `ContaminationTolerance` on crops, `SellPrice` on items) until their feature is designed ([L2](CodeReview.md#low))
+- [ ] Remove the data fields nothing reads (`WaterNeed`, `ContaminationTolerance` on crops, `SellPrice` on items) until their feature is designed ([L2](CodeReview.md#low)). The crops' `Seasons` stays: its tags are the calendar's seasons (2026-11-14), and the seeds' warning and withering items in 4.2 read it next
 - [x] Standard ability tasks (wait delay, montages) instead of timers in abilities ([L3](CodeReview.md#low))
    - Done 2026-11-07 with H1: the tool abilities wait with `WaitDelay` and `WaitMovementModeChange`; no other ability used a timer. Montages come with tool animations
 - [ ] Blueprint tool abilities, H1's modding half: make `CanUseOn` and `UseOn` Blueprint-implementable, make the field's rules callable from Blueprints, and turn the tool's `Ability` into a soft class reference in its bundle, when mod support is designed ([Systems.md, section 9](Systems.md#9-abilities-attributes-and-effects-gameplay-ability-system), tools as abilities)
@@ -354,9 +354,11 @@ The code changes that the slice's content depends on. Doing them first means add
 - [ ] Water level on each tile, so watering is a state the tile tracks
 - [ ] Clean water as a resource: a water source on the farm that the watering can fills from
 - [ ] Dirty water: easy to get, but raises tile radiation
-- [ ] A 28-day season with the date and the days left shown on the HUD
+- [x] A 28-day season with the date and the days left shown on the HUD
 - [ ] Seeds show their days to harvest, and planting a crop that can't ripen before the season ends gives a warning
 - [ ] Out-of-season crops wither at 06:00 on the first day of the next season
+   - `OnSeasonStarted`'s listeners run in no set order, so this item decides the order of its messages after the season message ([Systems/04-Time.md](Systems/04-Time.md), pitfalls)
+- [ ] A test for the "Welcome back" message's values (`Vestige.Feedback.Save.Loaded`, season and day of the season); the save subsystem builds that report privately, so the test needs a hook (code review, 2026-11-14)
 
 ### 4.3 Stamina and late nights
 

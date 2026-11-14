@@ -109,7 +109,7 @@ protected:
 	virtual FPrimaryAssetType GetContentType() const override { return AssetType; }
 
 private:
-	/** Seasons the crop grows in. Not used yet: crops grow in any season until seasons exist. */
+	/** Seasons the crop grows in, tags of the calendar's seasons (DA_GameData). Nothing reads it yet: crops grow in any season. */
 	UPROPERTY(EditDefaultsOnly, Category = "Farming", meta = (AllowPrivateAccess = "true", Categories = "Vestige.Season"))
 	FGameplayTagContainer Seasons;
 

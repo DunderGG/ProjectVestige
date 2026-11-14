@@ -4,6 +4,7 @@
 #include "Save/VestigeSaveSubsystem.h"
 
 #include "AbilitySystem/VestigeGameplayTags.h"
+#include "Content/VestigeCalendar.h"
 #include "Core/VestigeFeedbackSubsystem.h"
 #include "Core/VestigeSaveLog.h"
 #include "Core/VestigeSaveRegistry.h"
@@ -207,7 +208,7 @@ void UVestigeSaveSubsystem::LoadGame()
 	Registry->Load(Save.Records);
 	VESTIGE_LOG(this, LogVestigeSave, Log, "Loaded day {Day} from save slot {Slot} (version {Version}, save {Sequence}, {Count} parts).",
 		Clock->GetCurrentDay(), UVestigeSaveGame::SlotNames[Decision.Slot], Save.SaveVersion, Save.SaveSequence, Save.Records.Num());
-	PendingReports.Add({VestigeGameplayTags::Feedback_Save_Loaded, FFormatNamedArguments{{TEXT("Day"), Clock->GetCurrentDay()}}});
+	PendingReports.Add({VestigeGameplayTags::Feedback_Save_Loaded, Clock->GetCalendar().GetReportValues(Clock->GetCurrentDay())});
 }
 
 void UVestigeSaveSubsystem::TellPlayerAboutLoad()

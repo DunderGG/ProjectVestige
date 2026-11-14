@@ -362,13 +362,14 @@ One row per class, lowest layer first: its job in a sentence and what it doesn't
 | `UVestigeContentData` | Abstract data asset base, `Content/` | What all content shares: the `ContentId` and the primary asset ID built from it, the display name, the `Visuals` bundle, and checking the ID in data validation ([Systems.md, section 2](Systems/02-Content.md)) | Anything specific to one kind of content |
 | `UVestigeAssetManager` | The project's Asset Manager, `Content/` | Startup checks of all content (content IDs used twice) and loading the global game data once | Loading content for gameplay systems |
 | `UVestigeContentCatalog` | Game-instance subsystem, `Content/` | Every content definition with its visuals, loaded once per game before any world plays; finding one by ID, never loading | Loading icons or other bundles for a UI, content added while a game runs, the global game data |
-| `UVestigeGameData` | Primary data asset, `Content/` (`DA_GameData`) | Global data code needs that isn't one piece of content: today the gameplay effects code applies | Who applies the effects, the amounts, runtime state |
+| `UVestigeGameData` | Primary data asset, `Content/` (`DA_GameData`) | Global data code needs that isn't one piece of content: today the gameplay effects code applies and the calendar | Who applies the effects, the amounts, runtime state |
+| `FVestigeCalendar`, `FVestigeSeason` and `FVestigeDate` | Structs, `Content/` (the calendar is `UVestigeGameData`'s) | The calendar's definition (the seasons in order with their tags and names, the days in a season), the pure rule that turns a day count into a date (year, season, day of the season, days left), the values a report about a date gives, and checking the definition ([Systems.md, section 4](Systems/04-Time.md)) | The day count, when a season starts, showing the date |
 | `GE_StaminaCost`, `GE_StaminaRefill`, `GE_LateNightDrain`, `GE_Exhausted` | Gameplay effect Blueprints (`Content/Vestige/Abilities/`) | What each effect does to stamina or the exhausted state, changed in the editor by designers and mods | Who applies them, the amounts |
 | `UVestigeToolData` | Primary data asset `VestigeTool`, `Content/` | One tool's definition: the ability that is its behaviour, its held mesh, stamina cost and use time | Which tools the player has, the grip offset in the hand |
 | `UFarmCropData` | Primary data asset `FarmCrop`, `Content/` | One crop's definition: seasons, growth and when it is ripe, its meshes and its look (mesh and scale) on each growth day, and the item a harvest gives and how many | Runtime state such as growth or which tiles grow it; prices, which belong to items |
 | `UVestigeItemData` | Primary data asset `VestigeItem`, `Content/` | One item's definition: stack size, sell price and its fragments ([Systems.md, section 8](Systems/08-Inventory.md)) | Runtime state such as how many the player has; what only some items have, which is a fragment |
 | `UVestigeItemFragment` and subclasses | Instanced objects inside an item asset, `Content/` | One aspect only some items have: `UFarmSeedFragment` the crop a seed plants, `UVestigeToolFragment` the tool an item is | Runtime state, the item's other aspects |
-| `UVestigeClockSubsystem` | Game-instance subsystem, `Time/` | Game time across maps: the day and the clock, their events (the new day, each minute and hour, the day's end), how the day ended, running forward for developer commands, and its save part ([Systems.md, section 4](Systems/04-Time.md)) | Lighting, tiles, saving, HUD, what any hour means, starting the next day |
+| `UVestigeClockSubsystem` | Game-instance subsystem, `Time/` | Game time across maps: the day and the clock, today's date from its copy of the calendar, their events (the new day, the start of a season, each minute and hour, the day's end), how the day ended, running forward and jumping to a day for developer commands, and its save part ([Systems.md, section 4](Systems/04-Time.md)) | Lighting, tiles, saving, HUD, what any hour or season means, telling the player, starting the next day |
 | `UVestigeClockSettings` | Developer settings, `Time/` | How the clock runs: its speed and its hours (the day's start and end, sunrise and sunset) | The clock's state |
 | `AVestigeSkyLighting` | Placed actor, `Time/` | The lighting, read from the clock: the sun (turned in steps) and the moon, the sky light and the night exposure | The clock, days, events, the sky atmosphere and clouds |
 | `UVestigeInventoryComponent` | Component on the player state, `Inventory/` | The items the player carries: the slots and the starting items, adding and removing by item ID, the hotbar and the item in hand, their events, and its save part ([Systems.md, section 8](Systems/08-Inventory.md)) | What items do (planting, eating, which tool an item is); money; showing the bag |
@@ -396,7 +397,7 @@ One row per class, lowest layer first: its job in a sentence and what it doesn't
 | `AVestigeHUD` + `UVestigeHudWidget` | HUD (`BP_HUD`) and UMG widget bases, `UI/` | Display only: the HUD builds each text when an event says it changed and pushes it to `WBP_Hud`, which never reads the game; each feedback message in a box that fades ([Systems.md, section 6](Systems/06-UserInterface.md)) | Any game state |
 | `UVestigeHudSettings` | Developer settings, `UI/` | How many feedback messages show at once and for how long | Game state, the messages themselves |
 | `UVestigeFeedbackResponses` | Data asset (`DA_FeedbackResponses`), `UI/` | The text (later the sound) presentation gives each feedback tag | Deciding when anything is reported |
-| `AVestigeGameMode` | Game mode (`BP_GameMode`), `Game/` | The classes a player is made of (`BP_GameMode` names the player's character, state and controller Blueprints and `BP_HUD`), and the end of the day: on the clock's `OnDayEnded` it tells the player and starts the next day, with or without a pawn | The clock, what the night does to the player, saving |
+| `AVestigeGameMode` | Game mode (`BP_GameMode`), `Game/` | The classes a player is made of (`BP_GameMode` names the player's character, state and controller Blueprints and `BP_HUD`), and the end of the day: on the clock's `OnDayEnded` it tells the player and starts the next day, with or without a pawn, and on its `OnSeasonStarted` it tells the player a season has begun | The clock, the calendar, what the night or a season does to the farm or the player, saving |
 | `AVestigePlayerController` | Player controller (`BP_PlayerController`), `Game/` | The player's will: the cheat class outside Shipping, and later the menus' mapping contexts | The body's mapping contexts and keys (the character's since H6, 2026-11-07), the camera, game rules |
 
 When a new responsibility appears, decide its owner using [section 2](#2-unreals-gameplay-framework-where-things-go), add a row here, and say so in the commit message.
@@ -440,7 +441,7 @@ flowchart TD
     UseTool --> Inventory
     UseTool --> Stamina[UVestigeStaminaSet<br/>stamina]
     Rest --> Stamina
-    UseTool --> GameData[UVestigeGameData<br/>the GE_ effects]
+    UseTool --> GameData[UVestigeGameData<br/>the GE_ effects, the calendar]
     Inventory --> Catalog[UVestigeContentCatalog<br/>every content definition]
     Farming --> Catalog
     UseTool --> Catalog
@@ -461,7 +462,9 @@ flowchart TD
     Farming --> Feedback[UVestigeFeedbackSubsystem<br/>feedback reports]
     Rest --> Feedback
     Save --> Feedback
-    Clock -. OnDayEnded .-> GameMode[AVestigeGameMode<br/>end of the day]
+    Clock -. OnDayEnded, OnSeasonStarted .-> GameMode[AVestigeGameMode<br/>end of the day]
+    Clock -.reads.-> GameData
+    Cheats --> Clock
     GameMode --> Clock
     GameMode --> Feedback
     Clock -. OnNewDay .-> Rest
@@ -486,7 +489,7 @@ The layers are the source folders ([CodingGuidelines.md, section 14.1](CodingGui
 | `Core/` | Shared services that know no game rules: `UVestigeFeedbackSubsystem` (player messages), the save registry (`UVestigeSaveRegistry`, `IVestigeSaveable`, `FVestigeSaveRecord` and `LogVestigeSave`), `VestigeActorLookup`, the module, `VESTIGE_LOG` and the shared log categories (`VestigeLog.h`). Each layer declares its own system's category in its own log header ([Systems.md, section 21](Systems.md#21-logging)) | Engine only |
 | `AbilitySystem/` | Our Gameplay Ability System parts that know no farm: `UVestigeStaminaSet` and `FVestigeStaminaSaveData`, `UVestigeAbilitySet` and the native tags (`VestigeGameplayTags`). Below `Content/`, so content such as an item can grant abilities later | `Core/` |
 | `Interaction/` | `IVestigeInteractable` and `FVestigeInteractionOption`, `UVestigeInteractionComponent` and `UVestigeGameplayAbility_Interact`: finding and using interactables, knowing none of them. Below everything that can be used | `Core/`, `AbilitySystem/` |
-| `Content/` | Content definitions: `UVestigeContentData`, `UFarmCropData`, `UVestigeToolData`, `UVestigeItemData` and its fragments, `UVestigeGameData` (global data such as the gameplay effects), and `UVestigeAssetManager` (content checks and loading the game data at startup), and `UVestigeContentCatalog` (every content definition, loaded once per game) | `Core/` to `Interaction/` |
+| `Content/` | Content definitions: `UVestigeContentData`, `UFarmCropData`, `UVestigeToolData`, `UVestigeItemData` and its fragments, `UVestigeGameData` (global data such as the gameplay effects and the calendar, `FVestigeCalendar`), and `UVestigeAssetManager` (content checks and loading the game data at startup), and `UVestigeContentCatalog` (every content definition, loaded once per game) | `Core/` to `Interaction/` |
 | `Time/` | `UVestigeClockSubsystem`, `UVestigeClockSettings` and `FVestigeClockSaveData`, and `AVestigeSkyLighting` (the lighting that follows the clock) | `Core/` to `Content/` |
 | `Inventory/` | `UVestigeInventoryComponent`, `FVestigeInventory` and `FVestigeInventorySaveData` | `Core/` to `Time/` |
 | `Farming/` | `UFarmFieldSubsystem` and `UFarmField`, `FFarmTileState`, `AFarmGrid`, `UFarmFieldMeshesComponent` and `FarmTileLooks`, `UFarmingComponent`, `UFarmTargetingComponent`, `UVestigeGameplayAbility_UseTool` and the tool abilities (`UFarmGameplayAbility_*`), `UVestigeRestComponent` and `AVestigeBed`, `UFarmTargetHighlightComponent`, and their save structs | `Core/` to `Inventory/` |
@@ -520,9 +523,11 @@ sequenceDiagram
     Rest->>Clock: EndDay() (or the clock reaches 06:00)
     Clock->>Clock: stop, keep how the day ended
     Clock-->>GameMode: OnDayEnded
-    GameMode->>Feedback: Report(Vestige.Feedback.Day.Slept, Day=2)
+    GameMode->>Feedback: Report(Vestige.Feedback.Day.Slept, Day=2, Season=Spring, DayOfSeason=2)
     GameMode->>Clock: StartNextDay()
     Clock->>Clock: day + 1, clock to 06:00
+    Clock-->>GameMode: OnSeasonStarted(Date), on a season's first day only
+    GameMode->>Feedback: Report(Vestige.Feedback.Season.Started, Season=Summer, PreviousSeason=Spring)
     Clock-->>Rest: OnNewDay(Day)
     Rest->>Stamina: exhausted effect added (late night) or removed (early night)
     Rest->>Stamina: refill effect, Stamina to 75% or 100% of MaxStamina
@@ -567,5 +572,5 @@ Likely next steps as the game grows, with the design we intend. These aren't com
 - **The clock runs only where the game mode lets it.** Today the clock ticks in any game world, so a main menu map would run the day. When the menu arrives, the game mode starts and stops the clock (and a world without our game mode never runs it), which also shows a missing game mode at once instead of at 06:00.
 - **Save slots and a main menu** add a choice of slot to `UVestigeSaveSubsystem`, which already lives in the game instance, and move loading from the first map's initialisation to an explicit Continue (and New game) in the menu, plus the gameplay game mode for Play in Editor started on a farm map ([Systems.md, section 1](Systems.md#1-saving-and-loading)).
 - **More interactables** (the shipping bin, the water source, chests, robots) implement `IVestigeInteractable`, built 2026-11-01 with the bed. A way to choose between several options (a menu or a key per option) comes with the first object that offers two at once ([Systems.md, section 7](Systems.md#7-interaction)).
-- **Seasons and weather** belong to the game state, or to the day cycle if they stay small. They broadcast changes like `OnNewDay`.
+- **Weather** belongs with the clock's day in the game instance, as the seasons do (a game state dies with each map): chosen once a day on the new day from per-season data, saved as a value, and broadcast like `OnSeasonStarted` ([Systems.md, section 4](Systems/04-Time.md)).
 - **Menus and inventory UI** move to UMG Widget Blueprints with C++ base classes.

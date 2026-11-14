@@ -52,7 +52,7 @@ EDataValidationResult UVestigeGameData::IsDataValid(FDataValidationContext& Cont
 			Result = EDataValidationResult::Invalid;
 		}
 	}
-	return Result;
+	return CombineDataValidationResults(Result, Calendar.Validate(Context));
 }
 #endif
 
@@ -64,6 +64,11 @@ void UVestigeGameData::SetEffectsForTests(TSubclassOf<UGameplayEffect> InStamina
 	StaminaRefillEffect = InStaminaRefill;
 	LateNightDrainEffect = InLateNightDrain;
 	ExhaustedEffect = InExhausted;
+}
+
+void UVestigeGameData::SetCalendarForTests(const FVestigeCalendar& InCalendar)
+{
+	Calendar = InCalendar;
 }
 #endif
 

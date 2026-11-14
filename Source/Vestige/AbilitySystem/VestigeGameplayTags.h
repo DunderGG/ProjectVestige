@@ -78,13 +78,22 @@ namespace VestigeGameplayTags
 	/** The rest component: a night that ended before midnight cleared the exhaustion. */
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Feedback_Rest_WokeRested);
 
-	/** The game mode: the player slept and a new day begins. Value Day: the day that begins. */
+	/** The game mode: the player slept and a new day begins. Values Day, Season and DayOfSeason: the day that begins. */
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Feedback_Day_Slept);
 
-	/** The game mode: the player stayed up until the day ended and a new day begins. Value Day: the day that begins. */
+	/**
+	 * The game mode: the player stayed up until the day ended and a new day begins. Values Day, Season and DayOfSeason: the day
+	 * that begins.
+	 */
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Feedback_Day_StayedUp);
 
-	/** The save subsystem: a save was loaded. Value Day: the loaded day. */
+	/**
+	 * The game mode, on the first morning of a season: the season has begun. Values Day, Season and DayOfSeason of that day, and
+	 * PreviousSeason, the season that ended.
+	 */
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Feedback_Season_Started);
+
+	/** The save subsystem: a save was loaded. Values Day, Season and DayOfSeason: the loaded day. */
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Feedback_Save_Loaded);
 
 	/** The save subsystem: the game was saved. */
@@ -104,6 +113,9 @@ namespace VestigeGameplayTags
 
 	/** The save subsystem: part of the save is from a newer version of the game, so saving is off until a new game. */
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Feedback_Save_PartTooNew);
+
+	/** The parent of every season tag. The seasons themselves are data: the calendar in DA_GameData names them (Systems.md, section 4). */
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Season);
 
 	// Input tags: an input config (UVestigeInputConfig) names the input action for each, and the player character binds by
 	// them, so code never names an input asset (Systems.md, section 5).

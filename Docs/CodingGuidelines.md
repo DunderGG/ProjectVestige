@@ -442,6 +442,27 @@ Game rules get automated tests. They run in seconds without playing the game, an
   - A multicast delegate calls its listeners in reverse order of binding, and removing one reorders them, so a test never asserts the order between listeners of one delegate.
   - A `TEST_CLASS` fixture named like a namespace hides the namespace inside the test; qualify it with `::` (`::FarmTileLooks::GetLook`).
   - From the command line, add `-abslog=<file>` and search that file for `Result=`: piping the editor's output in PowerShell doesn't capture the automation lines.
+- **Checking the game off-screen** (an agent, for what a test can't see, such as the HUD as drawn): run the game with the editor closed, in a temporary `-userdir` so the user's `Saved/` is never touched, and take screenshots from a Python tick callback. Proven 2026-11-14 (the season date line):
+
+  ```
+  "C:\Program Files\Epic Games\UE_5.8\Engine\Binaries\Win64\UnrealEditor.exe" "C:\Unreal Projects\Vestige\Vestige.uproject" /Game/Maps/L_Farm -game -RenderOffScreen -nosound -unattended -nopause -nosplash -userdir=<temp>\user -abslog=<temp>\game.log -ForceRes -ResX=1920 -ResY=1080 -EnablePlugins=PythonScriptPlugin -ExecCmds="r.SetRes 1920x1080w,py <temp>\shots.py"
+  ```
+
+  ```python
+  import time, unreal
+  STEPS = [(12.0, "Shot ShowUI"), (14.0, "SetDay 27"), (15.5, "Shot ShowUI"), (18.0, "Quit")]  # seconds after the script loads
+  state = {"start": time.time(), "next": 0}
+  def tick(delta):
+      if state["next"] >= len(STEPS):
+          return
+      when, cmd = STEPS[state["next"]]
+      if time.time() - state["start"] >= when:
+          unreal.SystemLibrary.execute_console_command(unreal.find_object(None, "/Game/Maps/L_Farm.L_Farm"), cmd)
+          state["next"] += 1
+  unreal.register_slate_post_tick_callback(tick)
+  ```
+
+  The screenshots land in `<temp>\user\Saved\Screenshots\WindowsEditor\ScreenShot0000N.png`; crop a corner before reading one to keep the image small. The map is up about 15 seconds into the first run in a new `-userdir`, which is why the first step waits 12 seconds after the script loads. Traps: `HighResShot` leaves the HUD out (use `Shot ShowUI`); a console command with no world object (`None`) reaches `Quit` but not the cheat manager or the viewport, so pass the map's world object as above; `unreal.EditorLevelLibrary.get_game_world()` crashes the game in `-game`; and kill the process if it hasn't quit after a few minutes.
 
 ## 14. Project layout and assets
 

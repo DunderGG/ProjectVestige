@@ -20,10 +20,11 @@ class UVestigeHudWidget;
 class UVestigeInteractionComponent;
 class UVestigeInventoryComponent;
 struct FGameplayTag;
+struct FVestigeDate;
 struct FVestigeFeedbackReport;
 
 /**
- * The farming HUD's data side for its player: the day and time from the game's UVestigeClockSubsystem, the item in hand
+ * The farming HUD's data side for its player: the date and time from the game's UVestigeClockSubsystem, the item in hand
  * and the items from the inventory and the stamina from the ability system on the player state, the farmer's key hints,
  * the prompt for the interactable the pawn's UVestigeInteractionComponent focuses, and the message FeedbackResponses gives
  * each report UVestigeFeedbackSubsystem carries. It only displays.
@@ -56,6 +57,12 @@ public:
 	 */
 	static EVestigeHintDevice GetHintDevice(ECommonInputType InputType);
 
+	/**
+	 * The status line's date: "Spring 3, 25 days left", "Spring 27, 1 day left", "Spring 28, last day", or "Day 31" (the day
+	 * count) when SeasonName is empty because the calendar has no seasons.
+	 */
+	static FText FormatDate(const FVestigeDate& Date, const FText& SeasonName);
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
@@ -78,7 +85,7 @@ private:
 
 	void StopFollowingPawn();
 
-	/** Rebuilds the day, clock and item in hand line and remembers the day and minute it shows. */
+	/** Rebuilds the date, clock and item in hand line and remembers the day and minute it shows; the date only on a new day. */
 	void RefreshStatusText();
 
 	/** Rebuilds the item in hand's name and the status line. Bound to the inventory's OnItemInHandChanged. */
@@ -148,6 +155,9 @@ private:
 	EVestigeHintDevice HintDevice = EVestigeHintDevice::KeyboardAndMouse;
 
 	FText ItemInHandText;
+
+	/** The date part of the status line, for StatusDay, so the clock's steps don't format it again. */
+	FText DateText;
 
 	// The day and minute the status line shows, so Tick rebuilds it only when one changes.
 	int32 StatusDay = INDEX_NONE;

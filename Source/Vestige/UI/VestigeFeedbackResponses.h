@@ -10,8 +10,11 @@
 
 struct FVestigeFeedbackReport;
 
-/** How the game responds to one feedback report. A struct, so the report's sound joins the same row when audio arrives. */
-USTRUCT()
+/**
+ * How the game responds to one feedback report. A struct, so the report's sound joins the same row when audio arrives.
+ * BlueprintType only so editor scripts can make and set rows; Blueprints don't read it.
+ */
+USTRUCT(BlueprintType)
 struct FVestigeFeedbackResponse
 {
 	GENERATED_BODY()
@@ -56,6 +59,7 @@ public:
 
 private:
 	/** One row per feedback tag. A report without a row shows nothing and logs a warning. */
-	UPROPERTY(EditDefaultsOnly, Category = "Feedback", meta = (Categories = "Vestige.Feedback", ForceInlineRow))
+	UPROPERTY(
+		EditDefaultsOnly, Category = "Feedback", meta = (AllowPrivateAccess = "true", Categories = "Vestige.Feedback", ForceInlineRow))
 	TMap<FGameplayTag, FVestigeFeedbackResponse> Responses;
 };

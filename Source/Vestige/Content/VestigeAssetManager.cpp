@@ -50,7 +50,8 @@ void UVestigeAssetManager::LoadGameData()
 	if (!GameData)
 	{
 		VESTIGE_LOG(this, LogVestigeContent, Error,
-			"The game data {Path} didn't load, so nothing applies the stamina effects. Set GameDataPath in Config/DefaultGame.ini.",
+			"The game data {Path} didn't load, so nothing applies the stamina effects and the calendar has no seasons. Set GameDataPath "
+			"in Config/DefaultGame.ini.",
 			GameDataPath.ToString());
 	}
 }

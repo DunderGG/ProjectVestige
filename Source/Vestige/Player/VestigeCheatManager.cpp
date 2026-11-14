@@ -156,3 +156,17 @@ void UVestigeCheatManager::BenchmarkField(int32 FieldSize, FName CropId)
 	Crops.Add(CropId, Crop);
 	Grid->GetField()->RestoreTilesFromSaveData(RipeTiles, Crops);
 }
+
+void UVestigeCheatManager::SetDay(int32 Day)
+{
+	UVestigeClockSubsystem* Clock = UVestigeClockSubsystem::Get(GetWorld());
+	if (!Clock)
+	{
+		VESTIGE_LOG(this, LogVestige, Warning, "There is no clock to set the day of.");
+		return;
+	}
+	if (!Clock->JumpToDay(Day))
+	{
+		VESTIGE_LOG(this, LogVestige, Warning, "Give the day count from 1, for example SetDay 25, not {Day}.", Day);
+	}
+}

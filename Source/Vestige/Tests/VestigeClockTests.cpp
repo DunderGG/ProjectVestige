@@ -4,6 +4,8 @@
 #if WITH_DEV_AUTOMATION_TESTS
 
 #include "Components/ActorTestSpawner.h"
+#include "Content/VestigeCalendar.h"
+#include "Content/VestigeGameData.h"
 #include "CQTest.h"
 #include "Tests/VestigeTestEventRecorder.h"
 #include "Time/VestigeClockSaveData.h"
@@ -524,6 +526,178 @@ namespace VestigeClockTests
 			ASSERT_THAT(IsTrue(Hours == 0));
 			ASSERT_THAT(IsTrue(GameClock->GetCurrentDay() == 2));
 			ASSERT_THAT(IsTrue(GameClock->GetTimeOfDay() == GameClock->GetDayStartHour()));
+		}
+
+		/** The last day of the game's first season, from the clock's calendar (the data may tune it). */
+		int32 GetLastDayOfFirstSeason() const { return GameClock->GetCalendar().GetDaysPerSeason(); }
+
+		/** Counts every season the clock starts into Count, and remembers the last one in LastDate. */
+		void CountSeasonStarts(int32& Count, FVestigeDate* LastDate = nullptr)
+		{
+			GameClock->OnSeasonStarted.AddLambda(
+				[&Count, LastDate](const FVestigeDate& Date)
+				{
+					++Count;
+					if (LastDate)
+					{
+						*LastDate = Date;
+					}
+				});
+		}
+
+		TEST_METHOD(TheClocksCalendarIsTheGameDatas)
+		{
+			const FVestigeCalendar& Calendar = GameClock->GetCalendar();
+			const FVestigeCalendar& Data = UVestigeGameData::Get().GetCalendar();
+
+			ASSERT_THAT(IsTrue(Calendar.GetSeasons().Num() > 1));
+			ASSERT_THAT(IsTrue(Calendar.GetSeasons().Num() == Data.GetSeasons().Num()));
+			ASSERT_THAT(IsTrue(Calendar.GetDaysPerSeason() == Data.GetDaysPerSeason()));
+			ASSERT_THAT(IsTrue(Calendar.GetSeasons()[0].Tag == Data.GetSeasons()[0].Tag));
+		}
+
+		TEST_METHOD(TheDateFollowsTheDayCount)
+		{
+			const FVestigeCalendar& Calendar = GameClock->GetCalendar();
+			const int32 Days = Calendar.GetDaysPerSeason();
+
+			const FVestigeDate First = GameClock->GetDate();
+			ASSERT_THAT(IsTrue(First.Day == 1));
+			ASSERT_THAT(IsTrue(First.SeasonIndex == 0));
+			ASSERT_THAT(IsTrue(First.Season == Calendar.GetSeasons()[0].Tag));
+			ASSERT_THAT(IsTrue(First.DayOfSeason == 1));
+			ASSERT_THAT(IsTrue(First.DaysLeft == Days - 1));
+
+			GameClock->StartNextDay();
+			ASSERT_THAT(IsTrue(GameClock->GetDate().DayOfSeason == 2));
+			ASSERT_THAT(IsTrue(GameClock->GetDate().Day == 2));
+		}
+
+		TEST_METHOD(TheDateComesBackWithTheSavedDay)
+		{
+			const FVestigeCalendar& Calendar = GameClock->GetCalendar();
+			const int32 Days = Calendar.GetDaysPerSeason();
+			GameClock->RestoreFromSaveData(MakeClock(Days + 2, 13.5f));
+			const FVestigeClockSaveData Saved = GameClock->GetSaveData();
+			GameClock->StartNewGame();
+
+			GameClock->RestoreFromSaveData(Saved);
+
+			const FVestigeDate Date = GameClock->GetDate();
+			ASSERT_THAT(IsTrue(Date.Day == Days + 2));
+			ASSERT_THAT(IsTrue(Date.SeasonIndex == 1));
+			ASSERT_THAT(IsTrue(Date.Season == Calendar.GetSeasons()[1].Tag));
+			ASSERT_THAT(IsTrue(Date.DayOfSeason == 2));
+			ASSERT_THAT(IsTrue(Date.DaysLeft == Days - 2));
+		}
+
+		TEST_METHOD(ASeasonStartsOnItsFirstMorningBeforeTheNewDay)
+		{
+			const FVestigeCalendar& Calendar = GameClock->GetCalendar();
+			const int32 Last = GetLastDayOfFirstSeason();
+			const TStrongObjectPtr<UVestigeTestEventRecorder> Recorder(NewObject<UVestigeTestEventRecorder>());
+			UVestigeTestEventRecorder* Listener = Recorder.Get();
+			FVestigeDate Started;
+			GameClock->OnSeasonStarted.AddLambda(
+				[Listener, &Started](const FVestigeDate& Date)
+				{
+					Listener->Record(TEXT("Season"));
+					Started = Date;
+				});
+			GameClock->OnNewDay.AddLambda(
+				[Listener](int32 Day)
+				{
+					Listener->Record(TEXT("NewDay"));
+				});
+			GameClock->RestoreFromSaveData(MakeClock(Last, 20.f));
+
+			GameClock->StartNextDay();
+
+			const TArray<FString> Expected = {TEXT("Season"), TEXT("NewDay")};
+			ASSERT_THAT(IsTrue(Recorder->GetEvents() == Expected));
+			ASSERT_THAT(IsTrue(Started.Day == Last + 1));
+			ASSERT_THAT(IsTrue(Started.Season == Calendar.GetSeasons()[1].Tag));
+			ASSERT_THAT(IsTrue(Started.DayOfSeason == 1));
+		}
+
+		TEST_METHOD(ANewYearStartsTheFirstSeasonAgain)
+		{
+			const FVestigeCalendar& Calendar = GameClock->GetCalendar();
+			const int32 YearLength = Calendar.GetDaysPerSeason() * Calendar.GetSeasons().Num();
+			int32 Starts = 0;
+			FVestigeDate Started;
+			CountSeasonStarts(Starts, &Started);
+			GameClock->RestoreFromSaveData(MakeClock(YearLength, 20.f));
+
+			GameClock->StartNextDay();
+
+			ASSERT_THAT(IsTrue(Starts == 1));
+			ASSERT_THAT(IsTrue(Started.Year == 2));
+			ASSERT_THAT(IsTrue(Started.Season == Calendar.GetSeasons()[0].Tag));
+		}
+
+		TEST_METHOD(NoSeasonStartsOnOtherDays)
+		{
+			const int32 Last = GetLastDayOfFirstSeason();
+			int32 Starts = 0;
+			CountSeasonStarts(Starts);
+
+			// The first new day, the day before the last day, the last day and the second day of the next season.
+			GameClock->StartNextDay();
+			GameClock->RestoreFromSaveData(MakeClock(Last - 2, 20.f));
+			GameClock->StartNextDay();
+			GameClock->StartNextDay();
+			GameClock->RestoreFromSaveData(MakeClock(Last + 1, 20.f));
+			GameClock->StartNextDay();
+
+			ASSERT_THAT(IsTrue(Starts == 0));
+		}
+
+		TEST_METHOD(ANewGameARestoreOrAJumpStartsNoSeason)
+		{
+			const int32 Last = GetLastDayOfFirstSeason();
+			int32 Starts = 0;
+			CountSeasonStarts(Starts);
+
+			GameClock->RestoreFromSaveData(MakeClock(Last + 1, 20.f));
+			ASSERT_THAT(IsTrue(GameClock->GetDate().IsFirstDayOfSeason()));
+			GameClock->JumpToDay(Last + 1);
+			GameClock->StartNewGame();
+
+			ASSERT_THAT(IsTrue(Starts == 0));
+		}
+
+		TEST_METHOD(JumpingToADayKeepsTheTimeAndBroadcastsNothing)
+		{
+			PassHours(2.5f);
+			const float Time = GameClock->GetTimeOfDay();
+			int32 Broadcasts = 0;
+			CountBroadcasts(GameClock->OnNewDay, Broadcasts);
+			CountBroadcasts(GameClock->OnNewDayFinished, Broadcasts);
+			CountBroadcasts(GameClock->OnMinuteStarted, Broadcasts);
+			CountBroadcasts(GameClock->OnHourStarted, Broadcasts);
+			CountDayEnds(Broadcasts);
+			CountSeasonStarts(Broadcasts);
+			const int32 Day = GetLastDayOfFirstSeason() + 4;
+
+			ASSERT_THAT(IsTrue(GameClock->JumpToDay(Day)));
+
+			ASSERT_THAT(IsTrue(GameClock->GetCurrentDay() == Day));
+			ASSERT_THAT(IsTrue(GameClock->GetTimeOfDay() == Time));
+			ASSERT_THAT(IsTrue(GameClock->IsRunning()));
+			ASSERT_THAT(IsTrue(Broadcasts == 0));
+			ASSERT_THAT(IsTrue(GameClock->GetDate().SeasonIndex == 1));
+		}
+
+		TEST_METHOD(JumpingToADayBeforeOneChangesNothing)
+		{
+			GameClock->RestoreFromSaveData(MakeClock(5, 12.f));
+
+			ASSERT_THAT(IsFalse(GameClock->JumpToDay(0)));
+			ASSERT_THAT(IsFalse(GameClock->JumpToDay(-3)));
+
+			ASSERT_THAT(IsTrue(GameClock->GetCurrentDay() == 5));
+			ASSERT_THAT(IsTrue(GameClock->GetTimeOfDay() == 12.f));
 		}
 	};
 }

@@ -42,4 +42,12 @@ public:
 	 */
 	UFUNCTION(Exec)
 	void BenchmarkField(int32 FieldSize, FName CropId);
+
+	/**
+	 * Console: SetDay <Day>, the day count from 1, for example SetDay 25. The clock jumps to that day and keeps the time, as
+	 * the clock's JumpToDay does: the days between don't happen, so no crop grows and no season starts, and nothing is saved
+	 * until the next new day. To see a season begin, set its last day and sleep.
+	 */
+	UFUNCTION(Exec)
+	void SetDay(int32 Day);
 };

@@ -3,6 +3,7 @@
 
 #include "Time/VestigeClockSubsystem.h"
 
+#include "Content/VestigeGameData.h"
 #include "Core/VestigeLog.h"
 #include "Core/VestigeSaveRegistry.h"
 #include "Engine/GameInstance.h"
@@ -33,6 +34,14 @@ void UVestigeClockSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 	DayEndHour = Settings.GetDayEndHour();
 	SunriseHour = Settings.GetSunriseHour();
 	SunsetHour = Settings.GetSunsetHour();
+
+	// The asset manager loads the game data in UEngine::Init, before any game instance exists.
+	Calendar = UVestigeGameData::Get().GetCalendar();
+	if (Calendar.GetSeasons().IsEmpty())
+	{
+		VESTIGE_LOG(this, LogVestigeTime, Error,
+			"The game data's calendar has no seasons, so the date shows only the day count. Set its Calendar in DA_GameData.");
+	}
 
 	// Registering restores the saved day and clock, or starts day 1.
 	SaveRegistry = Collection.InitializeDependency<UVestigeSaveRegistry>();
@@ -80,6 +89,7 @@ void UVestigeClockSubsystem::StartNextDay()
 	++CurrentDay;
 	TimeOfDay = DayStartHour;
 	bDayEndReached = false;
+	StartSeasonIfFirstDay();
 	OnNewDay.Broadcast(CurrentDay);
 	OnNewDayBlueprint.Broadcast(CurrentDay);
 	OnNewDayFinished.Broadcast(CurrentDay);
@@ -137,6 +147,16 @@ void UVestigeClockSubsystem::RestoreFromSaveData(const FVestigeClockSaveData& Da
 	bDayEndReached = false;
 }
 
+bool UVestigeClockSubsystem::JumpToDay(int32 Day)
+{
+	if (Day < 1)
+	{
+		return false;
+	}
+	CurrentDay = Day;
+	return true;
+}
+
 bool UVestigeClockSubsystem::AdvanceTo(float NewTimeOfDay)
 {
 	// A long jump broadcasts every minute it passes.
@@ -192,6 +212,17 @@ void UVestigeClockSubsystem::RecordDayEnd()
 	LastDayEnd.Day = CurrentDay;
 	LastDayEnd.TimeOfDay = TimeOfDay;
 	LastDayEnd.bEndedEarly = TimeOfDay < DayEndHour;
+}
+
+void UVestigeClockSubsystem::StartSeasonIfFirstDay()
+{
+	const FVestigeDate Today = GetDate();
+	if (!Today.HasSeason() || !Today.IsFirstDayOfSeason())
+	{
+		return;
+	}
+	VESTIGE_LOG(this, LogVestigeTime, Log, "{Season} began on day {Day}.", Today.Season.ToString(), Today.Day);
+	OnSeasonStarted.Broadcast(Today);
 }
 
 bool UVestigeClockSubsystem::IsTickable() const

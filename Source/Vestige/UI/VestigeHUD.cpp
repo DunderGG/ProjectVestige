@@ -9,6 +9,7 @@
 #include "AbilitySystemGlobals.h"
 #include "CommonInputSubsystem.h"
 #include "CommonInputTypeEnum.h"
+#include "Content/VestigeCalendar.h"
 #include "Content/VestigeItemData.h"
 #include "Core/VestigeFeedbackSubsystem.h"
 #include "Core/VestigeLog.h"
@@ -182,10 +183,32 @@ void AVestigeHUD::RefreshStatusText()
 		return;
 	}
 
-	StatusDay = CurrentClock->GetCurrentDay();
+	if (CurrentClock->GetCurrentDay() != StatusDay)
+	{
+		const FVestigeDate Today = CurrentClock->GetDate();
+		DateText = FormatDate(Today, CurrentClock->GetCalendar().GetSeasonName(Today));
+		StatusDay = Today.Day;
+	}
 	StatusClockMinutes = VestigeHudClock::ToShownMinutes(CurrentClock->GetTimeOfDay());
-	HudWidget->SetStatusText(FText::FormatNamed(LOCTEXT("Status", "Day {Day}   {Clock}   |   {Item}"), TEXT("Day"), StatusDay,
-		TEXT("Clock"), VestigeHudClock::Format(StatusClockMinutes), TEXT("Item"), ItemInHandText));
+	HudWidget->SetStatusText(FText::FormatNamed(LOCTEXT("Status", "{Date}   {Clock}   |   {Item}"), TEXT("Date"), DateText, TEXT("Clock"),
+		VestigeHudClock::Format(StatusClockMinutes), TEXT("Item"), ItemInHandText));
+}
+
+FText AVestigeHUD::FormatDate(const FVestigeDate& Date, const FText& SeasonName)
+{
+	if (SeasonName.IsEmpty())
+	{
+		return FText::FormatNamed(LOCTEXT("DateWithoutSeason", "Day {Day}"), TEXT("Day"), Date.Day);
+	}
+
+	// Plural forms are CLDR's, and English puts 0 in "other", so the last day has a text of its own.
+	if (Date.DaysLeft <= 0)
+	{
+		return FText::FormatNamed(
+			LOCTEXT("DateLastDay", "{Season} {DayOfSeason}, last day"), TEXT("Season"), SeasonName, TEXT("DayOfSeason"), Date.DayOfSeason);
+	}
+	return FText::FormatNamed(LOCTEXT("Date", "{Season} {DayOfSeason}, {DaysLeft} {DaysLeft}|plural(one=day,other=days) left"),
+		TEXT("Season"), SeasonName, TEXT("DayOfSeason"), Date.DayOfSeason, TEXT("DaysLeft"), Date.DaysLeft);
 }
 
 EVestigeHintDevice AVestigeHUD::GetHintDevice(ECommonInputType InputType)

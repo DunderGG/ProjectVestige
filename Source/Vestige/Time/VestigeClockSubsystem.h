@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Content/VestigeCalendar.h"
 #include "Core/VestigeSaveable.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "Tickable.h"
@@ -46,12 +47,14 @@ struct FVestigeDayEnd
 };
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnVestigeDayEnded, const FVestigeDayEnd& /* DayEnd */);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnVestigeSeasonStarted, const FVestigeDate& /* Date */);
 
 /**
  * The game's time: the day counter and the clock, the one owner of game time (Systems.md, section 4). A game-instance
  * subsystem, so the clock keeps its time across map changes and runs in whichever game map is open. It advances with that
  * world's time, so pausing stops it and time dilation (slomo) speeds it up, and it stands still while a map loads. Its
  * speed and hours, and the hours of sunrise and sunset, come from UVestigeClockSettings. Presentation (the sun, the HUD) reads it; nothing else keeps a clock.
+ * The day count is also the calendar: the date is worked out from it with the game data's calendar, copied at Initialize.
  * Saves the day and the clock under Base.Clock through UVestigeSaveRegistry, for the whole game.
  */
 UCLASS(BlueprintType, meta = (DisplayName = "Vestige Clock"))
@@ -106,7 +109,21 @@ public:
 	 */
 	bool AdvanceTo(float NewTimeOfDay);
 
+	/**
+	 * Sets the day count to Day and keeps the time, broadcasting nothing, as a restore does: the days between don't happen (no
+	 * crop grows), and the next new day saves the new count. For developer commands. Returns false, and changes nothing, for a
+	 * day before 1.
+	 */
+	bool JumpToDay(int32 Day);
+
+	/** The day count, from 1: the only calendar state. GetDate works out the date from it. */
 	int32 GetCurrentDay() const { return CurrentDay; }
+
+	/** Today's date: the year, the season, the day of the season and the days left. */
+	FVestigeDate GetDate() const { return Calendar.GetDate(CurrentDay); }
+
+	/** The game's calendar, copied from the game data at Initialize: the seasons, their names and the days in each. */
+	const FVestigeCalendar& GetCalendar() const { return Calendar; }
 
 	/** Hours since midnight at the start of the current day. Goes past 24 after midnight, up to GetDayEndHour. */
 	float GetTimeOfDay() const { return TimeOfDay; }
@@ -169,6 +186,14 @@ public:
 	FOnVestigeDayEnded OnDayEnded;
 
 	/**
+	 * Broadcast with the new day's date when StartNextDay starts the first day of a season: after the day count moves and
+	 * before OnNewDay, so the season's rules (crops that wither) apply before the day's. The same contract as OnNewDay: finish
+	 * every change to saved state in the handler. Not broadcast for a new game, a restore or JumpToDay, nor by a calendar with
+	 * no seasons. Telling the player is the game mode's job.
+	 */
+	FOnVestigeSeasonStarted OnSeasonStarted;
+
+	/**
 	 * Broadcast each time the running clock reaches a whole hour, with the hour since midnight at the start of the day: 22
 	 * is 22:00, 24 is the next midnight. Once per hour even when a long frame passes several, after that hour's
 	 * OnMinuteStarted. Not broadcast for the hour a new day starts at, nor when the clock is restored from a save. When a
@@ -204,6 +229,9 @@ private:
 	/** Keeps the current day and time in LastDayEnd, as the day that ended. */
 	void RecordDayEnd();
 
+	/** Logs and broadcasts OnSeasonStarted when today is the first day of a season. */
+	void StartSeasonIfFirstDay();
+
 	UPROPERTY()
 	TObjectPtr<UVestigeSaveRegistry> SaveRegistry;
 
@@ -213,6 +241,9 @@ private:
 	float DayEndHour = 30.f;
 	float SunriseHour = 6.f;
 	float SunsetHour = 20.f;
+
+	/** Copied from UVestigeGameData at Initialize and kept for the game instance's lifetime. */
+	FVestigeCalendar Calendar;
 
 	int32 CurrentDay = 1;
 	float TimeOfDay = 6.f;

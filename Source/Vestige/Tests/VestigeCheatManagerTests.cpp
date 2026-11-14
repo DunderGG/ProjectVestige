@@ -105,6 +105,39 @@ namespace VestigeCheatManagerTests
 		/** The clock's whole minutes since midnight at the start of the day. */
 		int32 GetMinute() { return VestigeClock::ToWholeMinutes(GetClock().GetTimeOfDay()); }
 
+		TEST_METHOD(SetDayMovesTheCalendarToTheDayAndKeepsTheTime)
+		{
+			GetClock().AdvanceTo(12.f);
+			const int32 Day = GetClock().GetCalendar().GetDaysPerSeason() + 2;
+			int32 Broadcasts = 0;
+			GetClock().OnNewDay.AddLambda(
+				[&Broadcasts](int32 NewDay)
+				{
+					++Broadcasts;
+				});
+
+			SpawnCheats()->SetDay(Day);
+
+			ASSERT_THAT(IsTrue(GetClock().GetCurrentDay() == Day));
+			ASSERT_THAT(IsTrue(GetClock().GetDate().SeasonIndex == 1));
+			ASSERT_THAT(IsTrue(GetClock().GetDate().DayOfSeason == 2));
+			ASSERT_THAT(IsTrue(GetClock().GetTimeOfDay() == 12.f));
+			ASSERT_THAT(IsTrue(Broadcasts == 0));
+		}
+
+		TEST_METHOD(SetDayIgnoresADayBeforeOne)
+		{
+			ASSERT_THAT(IsTrue(GetClock().JumpToDay(4)));
+			TestRunner->AddExpectedMessagePlain(
+				TEXT("Give the day count from 1"), ELogVerbosity::Warning, EAutomationExpectedMessageFlags::Contains, 2);
+			UVestigeCheatManager* Cheats = SpawnCheats();
+
+			Cheats->SetDay(0);
+			Cheats->SetDay(-6);
+
+			ASSERT_THAT(IsTrue(GetClock().GetCurrentDay() == 4));
+		}
+
 		TEST_METHOD(SkipToTimeTakesTheTimeAsDigits)
 		{
 			UVestigeCheatManager* Cheats = SpawnCheats();

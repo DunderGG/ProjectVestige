@@ -2,7 +2,7 @@
 
 One of the [system guides](../Systems.md); read [How to use this document](../Systems.md#how-to-use-this-document) first.
 
-**Status:** in use for seasons (`Vestige.Season.*` in `Config/DefaultGameplayTags.ini`) and, as native tags in `AbilitySystem/VestigeGameplayTags.h`, for the stamina system ([section 9](09-AbilitySystem.md)) and input (`Vestige.Input.*`, [section 5](05-Input.md)).
+**Status:** in use for seasons (`Vestige.Season.*` in `Config/DefaultGameplayTags.ini`, named by the calendar in `DA_GameData` and the crops' `Seasons`; their parent `Vestige.Season` is native, for the calendar's data validation, [section 4](04-Time.md)) and, as native tags in `AbilitySystem/VestigeGameplayTags.h`, for the stamina system ([section 9](09-AbilitySystem.md)) and input (`Vestige.Input.*`, [section 5](05-Input.md)).
 
 **References:** Epic's "Gameplay Tags" page; Lyra's native tags (`LyraGameplayTags.h/.cpp`, declared with `UE_DECLARE_GAMEPLAY_TAG_EXTERN` and defined with `UE_DEFINE_GAMEPLAY_TAG_COMMENT`).
 

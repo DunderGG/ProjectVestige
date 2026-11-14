@@ -38,12 +38,14 @@ namespace VestigeGameplayTags
 		Feedback_Rest_WokeExhausted, "Vestige.Feedback.Rest.WokeExhausted", "Feedback: the player wakes exhausted.");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(
 		Feedback_Rest_WokeRested, "Vestige.Feedback.Rest.WokeRested", "Feedback: an early night cleared the exhaustion.");
-	UE_DEFINE_GAMEPLAY_TAG_COMMENT(
-		Feedback_Day_Slept, "Vestige.Feedback.Day.Slept", "Feedback: the player slept; value Day, the day that begins.");
-	UE_DEFINE_GAMEPLAY_TAG_COMMENT(
-		Feedback_Day_StayedUp, "Vestige.Feedback.Day.StayedUp", "Feedback: the player stayed up; value Day, the day that begins.");
-	UE_DEFINE_GAMEPLAY_TAG_COMMENT(
-		Feedback_Save_Loaded, "Vestige.Feedback.Save.Loaded", "Feedback: a save was loaded; value Day, the loaded day.");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Feedback_Day_Slept, "Vestige.Feedback.Day.Slept",
+		"Feedback: the player slept; values Day, Season, DayOfSeason: the day that begins.");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Feedback_Day_StayedUp, "Vestige.Feedback.Day.StayedUp",
+		"Feedback: the player stayed up; values Day, Season, DayOfSeason: the day that begins.");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Feedback_Season_Started, "Vestige.Feedback.Season.Started",
+		"Feedback: a season has begun; values Day, Season, DayOfSeason and PreviousSeason.");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Feedback_Save_Loaded, "Vestige.Feedback.Save.Loaded",
+		"Feedback: a save was loaded; values Day, Season, DayOfSeason: the loaded day.");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Feedback_Save_Saved, "Vestige.Feedback.Save.Saved", "Feedback: the game was saved.");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(
 		Feedback_Save_Failed, "Vestige.Feedback.Save.Failed", "Feedback: the save couldn't be written; the previous one is kept.");
@@ -55,6 +57,9 @@ namespace VestigeGameplayTags
 		Feedback_Save_TooNew, "Vestige.Feedback.Save.TooNew", "Feedback: the save is from a newer version; saving is off.");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(
 		Feedback_Save_PartTooNew, "Vestige.Feedback.Save.PartTooNew", "Feedback: part of the save is newer; saving is off.");
+
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(
+		Season, "Vestige.Season", "The parent of every season tag; the calendar in DA_GameData lists the seasons.");
 
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Input, "Vestige.Input", "The parent of every input tag, which an input config binds actions to.");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Input_UseTool, "Vestige.Input.UseTool", "Input: use the item in hand while held.");

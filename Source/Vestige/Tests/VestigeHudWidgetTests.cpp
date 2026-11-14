@@ -11,6 +11,7 @@
 #include "CommonInputTypeEnum.h"
 #include "Components/TextBlock.h"
 #include "Core/VestigeFeedbackSubsystem.h"
+#include "Content/VestigeCalendar.h"
 #include "CQTest.h"
 #include "GameFramework/GameModeBase.h"
 #include "UI/VestigeHUD.h"
@@ -180,6 +181,36 @@ namespace VestigeHudWidgetTests
 			ASSERT_THAT(IsNull(Responses->FindResponse(VestigeGameplayTags::Feedback_Day_StayedUp)));
 		}
 
+		/** A made-up calendar of 28-day seasons, so the date texts don't depend on the game's names. */
+		static FVestigeCalendar MakeCalendar(const TArray<FVestigeSeason>& Seasons) { return FVestigeCalendar::MakeForTests(28, Seasons); }
+
+		TEST_METHOD(TheDateShowsTheSeasonAndTheDaysLeft)
+		{
+			FVestigeSeason Spring;
+			Spring.Tag = FGameplayTag::RequestGameplayTag(FName(TEXT("Vestige.Season.Spring")));
+			Spring.DisplayName = LOCTEXT("TestSpring", "Spring");
+			const FVestigeCalendar Calendar = MakeCalendar({Spring});
+
+			const auto Format = [&Calendar](int32 Day)
+			{
+				const FVestigeDate Date = Calendar.GetDate(Day);
+				return AVestigeHUD::FormatDate(Date, Calendar.GetSeasonName(Date)).ToString();
+			};
+
+			ASSERT_THAT(AreEqual(Format(3), FString(TEXT("Spring 3, 25 days left"))));
+			ASSERT_THAT(AreEqual(Format(1), FString(TEXT("Spring 1, 27 days left"))));
+			ASSERT_THAT(AreEqual(Format(27), FString(TEXT("Spring 27, 1 day left"))));
+			ASSERT_THAT(AreEqual(Format(28), FString(TEXT("Spring 28, last day"))));
+		}
+
+		TEST_METHOD(TheDateWithoutASeasonShowsTheDayCount)
+		{
+			const FVestigeCalendar Calendar = MakeCalendar({});
+			const FVestigeDate Date = Calendar.GetDate(30);
+
+			ASSERT_THAT(AreEqual(AVestigeHUD::FormatDate(Date, Calendar.GetSeasonName(Date)).ToString(), FString(TEXT("Day 30"))));
+		}
+
 		TEST_METHOD(EveryFeedbackTagHasAResponse)
 		{
 			const UClass* GameModeClass = LoadClass<AGameModeBase>(nullptr, GameModePath);
@@ -192,7 +223,8 @@ namespace VestigeHudWidgetTests
 			// Each native feedback tag with the values its reporter gives. Listed here rather than asked of the tag manager,
 			// whose children of Vestige.Feedback include the in-between tags (Vestige.Feedback.Farm).
 			const TArray<FString> NoValues;
-			const TArray<FString> DayValue = {TEXT("Day")};
+			const TArray<FString> DateValues = {TEXT("Day"), TEXT("Season"), TEXT("DayOfSeason")};
+			const TArray<FString> SeasonStartValues = {TEXT("Day"), TEXT("Season"), TEXT("DayOfSeason"), TEXT("PreviousSeason")};
 			const TMap<FGameplayTag, TArray<FString>> Expected = {
 				{VestigeGameplayTags::Feedback_Tool_NoTarget, NoValues},
 				{VestigeGameplayTags::Feedback_Tool_NothingInHand, NoValues},
@@ -207,9 +239,10 @@ namespace VestigeHudWidgetTests
 				{VestigeGameplayTags::Feedback_Rest_PastMidnight, NoValues},
 				{VestigeGameplayTags::Feedback_Rest_WokeExhausted, NoValues},
 				{VestigeGameplayTags::Feedback_Rest_WokeRested, NoValues},
-				{VestigeGameplayTags::Feedback_Day_Slept, DayValue},
-				{VestigeGameplayTags::Feedback_Day_StayedUp, DayValue},
-				{VestigeGameplayTags::Feedback_Save_Loaded, DayValue},
+				{VestigeGameplayTags::Feedback_Day_Slept, DateValues},
+				{VestigeGameplayTags::Feedback_Day_StayedUp, DateValues},
+				{VestigeGameplayTags::Feedback_Season_Started, SeasonStartValues},
+				{VestigeGameplayTags::Feedback_Save_Loaded, DateValues},
 				{VestigeGameplayTags::Feedback_Save_Saved, NoValues},
 				{VestigeGameplayTags::Feedback_Save_Failed, NoValues},
 				{VestigeGameplayTags::Feedback_Save_ContentMissing, NoValues},
