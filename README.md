@@ -11,32 +11,36 @@ You bring the farm back to life, help the town next door, and slowly push out in
 
 ## 📥 Download
 
-Release builds and playable demosare coming for Windows.
+Project Vestige is in early-development. Release builds and playable demos are coming for Windows.
 
 ## 🚀 Getting started
 
 You need Windows 10 or 11, Unreal Engine 5.8, Git with **Git LFS**, and Visual Studio 2026 with the components in `.vsconfig` (the editor compiles the project's C++ the first time, even if you won't write code).
 
-```
+```powershell
 git lfs install
 git clone https://github.com/DunderGG/ProjectVestige.git
 ```
 
-Then double-click `Vestige.uproject`, let Unreal build the C++ modules, open `Content/Maps/L_Farm` in the editor and press **Play**. **[Docs/Setup.md](Docs/Setup.md)** walks through every step on a fresh PC, with troubleshooting; the controls are in [CONTRIBUTING.md](CONTRIBUTING.md#controls).
+Then double-click `Vestige.uproject`, let Unreal build the C++ modules, open `Content/Maps/L_Farm` in the editor and press **Play**. The **[the setup guide](Docs/Setup.md)** walks through every step on a fresh PC, with troubleshooting; the controls are in [CONTRIBUTING.md](CONTRIBUTING.md#controls).
 
 ## 📚 Documentation
 
 | Document | What's in it |
 |---|---|
-| [Docs/Setup.md](Docs/Setup.md) | Setting up a new Windows PC to build and run the project, step by step |
-| [Docs/Architecture.md](Docs/Architecture.md) | How the code fits together and who owns what |
-| [Docs/DecisionLog.md](Docs/DecisionLog.md) | Every design decision, with its reasons |
-| [Docs/GameDesign.md](Docs/GameDesign.md) | What the game is, how it plays and why |
-| [Docs/Systems.md](Docs/Systems.md) | How the game systems work, and how to add new ones |
-| [Docs/CodingGuidelines.md](Docs/CodingGuidelines.md) | How the code looks |
-| [CONTRIBUTING.md](CONTRIBUTING.md) | Project layout, and how to contribute code, art, audio and ideas |
-| [Docs/Spoilers/Lore.md](Docs/Spoilers/Lore.md) | The story, the world and its characters (spoilers) |
-| [Docs/Roadmap.md](Docs/Roadmap.md) | What's done and what comes next |
+| [Documentation index](Docs/README.md) | Index of the project's guides, plans, reviews, and tests |
+| [Game design](Docs/GameDesign.md) | The premise, intended experience, and planned gameplay |
+| [Roadmap](Docs/Roadmap.md) | What is implemented and what development plans next |
+| [Setup guide](Docs/Setup.md) | Complete Windows setup, build, test, and troubleshooting instructions |
+| [Contributing guide](CONTRIBUTING.md) | Ways to help, repository workflow, and requirements for contributions |
+| [Architecture](Docs/Architecture.md) | How the code is organized and which classes own each responsibility |
+| [Decision log](Docs/DecisionLog.md) | Why important technical and design decisions were made |
+| [Systems guide](Docs/Systems.md) | Technical guidance for the game's systems |
+| [Coding guidelines](Docs/CodingGuidelines.md) | C++ conventions, asset naming, testing, and review checklist |
+| [Play-test guide](Docs/PlayTest.md) | Manual checks and the project's in-editor smoke test |
+| [Licensing](LICENSING.md) | Which licenses apply to code, assets, and other project material |
+| [Security policy](SECURITY.md) | How to report security problems privately |
+| [Lore](Docs/Spoilers/Lore.md) | Story and world details; **contains spoilers** |
 
 ## 🧱 Built With
 
@@ -54,8 +58,6 @@ Contributions are welcome: gameplay code, 3D art, audio, testing, documentation 
 ## 📄 License
 > Still under investigation. Any lawyers in chat? Hit me up!
 
-- **Code** (`Source/`, `Config/`, scripts): [GPL-3.0-or-later](LICENSE), with an [additional permission](LICENSE-EXCEPTION.txt) to link with Unreal Engine and platform SDKs. Anyone may share and sell it, as long as they pass on the source under the same license.
-- **Assets and documentation**: [CC BY-NC-SA 4.0](LICENSE-ASSETS.txt). Free for non-commercial use; commercial use is reserved to the maintainer, who sells official builds.
-- **Epic Games template material** stays under the [Unreal Engine EULA](https://www.unrealengine.com/eula).
+The repository does not use a single license for everything: project code is licensed under **GPL-3.0-or-later** with an additional permission for Unreal Engine and platform SDKs; most project assets and documentation use **CC BY-NC-SA 4.0**; Epic Games template material remains under the Unreal Engine EULA. See [LICENSING.md](LICENSING.md) for the full details and the files that each license covers.
 
 [LICENSING.md](LICENSING.md) explains what this means in practice. Contributors are listed in [CREDITS.md](CREDITS.md).
