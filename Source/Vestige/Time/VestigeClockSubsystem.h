@@ -186,10 +186,11 @@ public:
 	FOnVestigeDayEnded OnDayEnded;
 
 	/**
-	 * Broadcast with the new day's date when StartNextDay starts the first day of a season: after the day count moves and
-	 * before OnNewDay, so the season's rules (crops that wither) apply before the day's. The same contract as OnNewDay: finish
-	 * every change to saved state in the handler. Not broadcast for a new game, a restore or JumpToDay, nor by a calendar with
-	 * no seasons. Telling the player is the game mode's job.
+	 * Broadcast with the new day's date when StartNextDay starts a new season (the calendar's GetDayKind is NewSeason: a
+	 * season's first day after a day of another season): after the day count moves and before OnNewDay, so the season's rules
+	 * (crops that wither) apply before the day's. The same contract as OnNewDay: finish every change to saved state in the
+	 * handler. Not broadcast for a new game, a restore or JumpToDay, nor by a calendar of one season or none. Telling the
+	 * player is the game mode's job, in its day report.
 	 */
 	FOnVestigeSeasonStarted OnSeasonStarted;
 
@@ -229,8 +230,8 @@ private:
 	/** Keeps the current day and time in LastDayEnd, as the day that ended. */
 	void RecordDayEnd();
 
-	/** Logs and broadcasts OnSeasonStarted when today is the first day of a season. */
-	void StartSeasonIfFirstDay();
+	/** Logs and broadcasts OnSeasonStarted when today starts a new season. */
+	void StartSeasonIfNew();
 
 	UPROPERTY()
 	TObjectPtr<UVestigeSaveRegistry> SaveRegistry;

@@ -397,7 +397,7 @@ One row per class, lowest layer first: its job in a sentence and what it doesn't
 | `AVestigeHUD` + `UVestigeHudWidget` | HUD (`BP_HUD`) and UMG widget bases, `UI/` | Display only: the HUD builds each text when an event says it changed and pushes it to `WBP_Hud`, which never reads the game; each feedback message in a box that fades ([Systems.md, section 6](Systems/06-UserInterface.md)) | Any game state |
 | `UVestigeHudSettings` | Developer settings, `UI/` | How many feedback messages show at once and for how long | Game state, the messages themselves |
 | `UVestigeFeedbackResponses` | Data asset (`DA_FeedbackResponses`), `UI/` | The text (later the sound) presentation gives each feedback tag | Deciding when anything is reported |
-| `AVestigeGameMode` | Game mode (`BP_GameMode`), `Game/` | The classes a player is made of (`BP_GameMode` names the player's character, state and controller Blueprints and `BP_HUD`), and the end of the day: on the clock's `OnDayEnded` it tells the player and starts the next day, with or without a pawn, and on its `OnSeasonStarted` it tells the player a season has begun | The clock, the calendar, what the night or a season does to the farm or the player, saving |
+| `AVestigeGameMode` | Game mode (`BP_GameMode`), `Game/` | The classes a player is made of (`BP_GameMode` names the player's character, state and controller Blueprints and `BP_HUD`), and the end of the day: on the clock's `OnDayEnded` it tells the player and starts the next day, with or without a pawn, saying so in the season form of the day's message when the new day starts another season | The clock, the calendar, what the night or a season does to the farm or the player, saving |
 | `AVestigePlayerController` | Player controller (`BP_PlayerController`), `Game/` | The player's will: the cheat class outside Shipping, and later the menus' mapping contexts | The body's mapping contexts and keys (the character's since H6, 2026-11-07), the camera, game rules |
 
 When a new responsibility appears, decide its owner using [section 2](#2-unreals-gameplay-framework-where-things-go), add a row here, and say so in the commit message.
@@ -462,7 +462,7 @@ flowchart TD
     Farming --> Feedback[UVestigeFeedbackSubsystem<br/>feedback reports]
     Rest --> Feedback
     Save --> Feedback
-    Clock -. OnDayEnded, OnSeasonStarted .-> GameMode[AVestigeGameMode<br/>end of the day]
+    Clock -. OnDayEnded .-> GameMode[AVestigeGameMode<br/>end of the day]
     Clock -.reads.-> GameData
     Cheats --> Clock
     GameMode --> Clock
@@ -523,11 +523,9 @@ sequenceDiagram
     Rest->>Clock: EndDay() (or the clock reaches 06:00)
     Clock->>Clock: stop, keep how the day ended
     Clock-->>GameMode: OnDayEnded
-    GameMode->>Feedback: Report(Vestige.Feedback.Day.Slept, Day=2, Season=Spring, DayOfSeason=2)
+    GameMode->>Feedback: Report(Vestige.Feedback.Day.Slept, Day=2, Season=Spring, DayOfSeason=2), or Day.Slept.NewSeason when the day starts another season
     GameMode->>Clock: StartNextDay()
     Clock->>Clock: day + 1, clock to 06:00
-    Clock-->>GameMode: OnSeasonStarted(Date), on a season's first day only
-    GameMode->>Feedback: Report(Vestige.Feedback.Season.Started, Season=Summer, PreviousSeason=Spring)
     Clock-->>Rest: OnNewDay(Day)
     Rest->>Stamina: exhausted effect added (late night) or removed (early night)
     Rest->>Stamina: refill effect, Stamina to 75% or 100% of MaxStamina

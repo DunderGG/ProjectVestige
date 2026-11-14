@@ -46,13 +46,32 @@ FText FVestigeCalendar::GetSeasonName(const FVestigeDate& Date) const
 	return Seasons.IsValidIndex(Date.SeasonIndex) ? Seasons[Date.SeasonIndex].DisplayName : FText::GetEmpty();
 }
 
+FText FVestigeCalendar::GetSeasonNameInSentence(const FVestigeDate& Date) const
+{
+	return Seasons.IsValidIndex(Date.SeasonIndex) ? Seasons[Date.SeasonIndex].NameInSentence : FText::GetEmpty();
+}
+
+EVestigeDayKind FVestigeCalendar::GetDayKind(int32 Day) const
+{
+	const FVestigeDate Date = GetDate(Day);
+
+	// GetDate counts a day before 1 as day 1, so day 1's day before is in its own season.
+	if (Date.HasSeason() && Date.IsFirstDayOfSeason() && GetDate(Date.Day - 1).SeasonIndex != Date.SeasonIndex)
+	{
+		return EVestigeDayKind::NewSeason;
+	}
+	return Date.IsLastDayOfSeason() ? EVestigeDayKind::LastDay : EVestigeDayKind::Usual;
+}
+
 FFormatNamedArguments FVestigeCalendar::GetReportValues(int32 Day) const
 {
 	const FVestigeDate Date = GetDate(Day);
 	FFormatNamedArguments Values;
 	Values.Add(TEXT("Day"), Date.Day);
 	Values.Add(TEXT("Season"), GetSeasonName(Date));
+	Values.Add(TEXT("SeasonInSentence"), GetSeasonNameInSentence(Date));
 	Values.Add(TEXT("DayOfSeason"), Date.DayOfSeason);
+	Values.Add(TEXT("DaysLeft"), Date.DaysLeft);
 	return Values;
 }
 
@@ -109,6 +128,10 @@ EDataValidationResult FVestigeCalendar::Validate(FDataValidationContext& Context
 		if (Season.DisplayName.IsEmpty())
 		{
 			AddError(FText::Format(LOCTEXT("NoName", "Season {0} of the calendar has no Display Name."), IndexText));
+		}
+		if (Season.NameInSentence.IsEmpty())
+		{
+			AddError(FText::Format(LOCTEXT("NoNameInSentence", "Season {0} of the calendar has no Name In Sentence."), IndexText));
 		}
 	}
 	return Result;

@@ -58,8 +58,8 @@ public:
 	static EVestigeHintDevice GetHintDevice(ECommonInputType InputType);
 
 	/**
-	 * The status line's date: "Spring 3, 25 days left", "Spring 27, 1 day left", "Spring 28, last day", or "Day 31" (the day
-	 * count) when SeasonName is empty because the calendar has no seasons.
+	 * The status line's date, counting up through the season: "Spring, Day 3", or "Day 31" (the day count) when SeasonName is
+	 * empty because the calendar has no seasons. The days left are the morning message's.
 	 */
 	static FText FormatDate(const FVestigeDate& Date, const FText& SeasonName);
 

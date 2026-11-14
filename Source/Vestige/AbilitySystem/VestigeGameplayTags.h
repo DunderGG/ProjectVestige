@@ -78,23 +78,33 @@ namespace VestigeGameplayTags
 	/** The rest component: a night that ended before midnight cleared the exhaustion. */
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Feedback_Rest_WokeRested);
 
-	/** The game mode: the player slept and a new day begins. Values Day, Season and DayOfSeason: the day that begins. */
+	// The day reports: one per morning, its child tag saying which kind of day begins (FVestigeCalendar::GetDayKind). Values
+	// Day, Season, SeasonInSentence, DayOfSeason and DaysLeft (FVestigeCalendar::GetReportValues) of the day that begins, and
+	// PreviousSeason on a new season's morning.
+
+	/** The game mode: the player slept and a usual day begins. */
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Feedback_Day_Slept);
 
-	/**
-	 * The game mode: the player stayed up until the day ended and a new day begins. Values Day, Season and DayOfSeason: the day
-	 * that begins.
-	 */
+	/** The game mode: the player slept and a new season begins, instead of Day.Slept. Also gives PreviousSeason. */
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Feedback_Day_Slept_NewSeason);
+
+	/** The game mode: the player slept and the season's last day begins, instead of Day.Slept. */
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Feedback_Day_Slept_LastDay);
+
+	/** The game mode: the player stayed up until the day ended and a usual day begins. */
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Feedback_Day_StayedUp);
 
-	/**
-	 * The game mode, on the first morning of a season: the season has begun. Values Day, Season and DayOfSeason of that day, and
-	 * PreviousSeason, the season that ended.
-	 */
-	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Feedback_Season_Started);
+	/** The game mode: the player stayed up and a new season begins, instead of Day.StayedUp. Also gives PreviousSeason. */
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Feedback_Day_StayedUp_NewSeason);
 
-	/** The save subsystem: a save was loaded. Values Day, Season and DayOfSeason: the loaded day. */
+	/** The game mode: the player stayed up and the season's last day begins, instead of Day.StayedUp. */
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Feedback_Day_StayedUp_LastDay);
+
+	/** The save subsystem: a save was loaded. The day report's values of the loaded day. */
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Feedback_Save_Loaded);
+
+	/** The save subsystem: a save was loaded on its season's last day, instead of Save.Loaded. */
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Feedback_Save_Loaded_LastDay);
 
 	/** The save subsystem: the game was saved. */
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Feedback_Save_Saved);

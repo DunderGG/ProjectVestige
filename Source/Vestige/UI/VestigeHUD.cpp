@@ -200,15 +200,8 @@ FText AVestigeHUD::FormatDate(const FVestigeDate& Date, const FText& SeasonName)
 	{
 		return FText::FormatNamed(LOCTEXT("DateWithoutSeason", "Day {Day}"), TEXT("Day"), Date.Day);
 	}
-
-	// Plural forms are CLDR's, and English puts 0 in "other", so the last day has a text of its own.
-	if (Date.DaysLeft <= 0)
-	{
-		return FText::FormatNamed(
-			LOCTEXT("DateLastDay", "{Season} {DayOfSeason}, last day"), TEXT("Season"), SeasonName, TEXT("DayOfSeason"), Date.DayOfSeason);
-	}
-	return FText::FormatNamed(LOCTEXT("Date", "{Season} {DayOfSeason}, {DaysLeft} {DaysLeft}|plural(one=day,other=days) left"),
-		TEXT("Season"), SeasonName, TEXT("DayOfSeason"), Date.DayOfSeason, TEXT("DaysLeft"), Date.DaysLeft);
+	return FText::FormatNamed(
+		LOCTEXT("Date", "{Season}, Day {DayOfSeason}"), TEXT("Season"), SeasonName, TEXT("DayOfSeason"), Date.DayOfSeason);
 }
 
 EVestigeHintDevice AVestigeHUD::GetHintDevice(ECommonInputType InputType)

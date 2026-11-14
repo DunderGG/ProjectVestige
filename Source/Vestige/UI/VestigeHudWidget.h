@@ -28,7 +28,7 @@ class UVestigeHudWidget : public UUserWidget
 public:
 	UVestigeHudWidget(const FObjectInitializer& ObjectInitializer);
 
-	/** "Spring 3, 25 days left   18:40   |   Hoe". */
+	/** "Spring, Day 3   18:40   |   Hoe". */
 	void SetStatusText(const FText& Text);
 
 	/**

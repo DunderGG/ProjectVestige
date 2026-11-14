@@ -208,7 +208,12 @@ void UVestigeSaveSubsystem::LoadGame()
 	Registry->Load(Save.Records);
 	VESTIGE_LOG(this, LogVestigeSave, Log, "Loaded day {Day} from save slot {Slot} (version {Version}, save {Sequence}, {Count} parts).",
 		Clock->GetCurrentDay(), UVestigeSaveGame::SlotNames[Decision.Slot], Save.SaveVersion, Save.SaveSequence, Save.Records.Num());
-	PendingReports.Add({VestigeGameplayTags::Feedback_Save_Loaded, Clock->GetCalendar().GetReportValues(Clock->GetCurrentDay())});
+	const FVestigeCalendar& Calendar = Clock->GetCalendar();
+	const int32 LoadedDay = Clock->GetCurrentDay();
+	const FGameplayTag LoadedTag = Calendar.GetDayKind(LoadedDay) == EVestigeDayKind::LastDay
+		? VestigeGameplayTags::Feedback_Save_Loaded_LastDay
+		: VestigeGameplayTags::Feedback_Save_Loaded;
+	PendingReports.Add({LoadedTag, Calendar.GetReportValues(LoadedDay)});
 }
 
 void UVestigeSaveSubsystem::TellPlayerAboutLoad()

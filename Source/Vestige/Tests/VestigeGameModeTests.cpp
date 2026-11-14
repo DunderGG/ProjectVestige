@@ -143,8 +143,9 @@ namespace VestigeGameModeTests
 		TEST_METHOD(TheDayReportsNameTheDate)
 		{
 			const FVestigeCalendar& Calendar = Clock->GetCalendar();
-			ASSERT_THAT(IsTrue(Calendar.GetDaysPerSeason() > 5));
-			const FString FirstSeason = Calendar.GetSeasons()[0].DisplayName.ToString();
+			const int32 Days = Calendar.GetDaysPerSeason();
+			ASSERT_THAT(IsTrue(Days > 5));
+			const FVestigeSeason& First = Calendar.GetSeasons()[0];
 			TArray<FVestigeFeedbackReport> Reports;
 			RecordReports(Reports);
 
@@ -155,64 +156,93 @@ namespace VestigeGameModeTests
 			ASSERT_THAT(IsTrue(Reports.Num() == 2));
 			ASSERT_THAT(IsTrue(Reports[0].Tag == VestigeGameplayTags::Feedback_Day_Slept));
 			ASSERT_THAT(IsTrue(GetNumber(Reports[0], TEXT("Day")) == 4));
-			ASSERT_THAT(AreEqual(GetText(Reports[0], TEXT("Season")), FirstSeason));
+			ASSERT_THAT(AreEqual(GetText(Reports[0], TEXT("Season")), First.DisplayName.ToString()));
+			ASSERT_THAT(AreEqual(GetText(Reports[0], TEXT("SeasonInSentence")), First.NameInSentence.ToString()));
 			ASSERT_THAT(IsTrue(GetNumber(Reports[0], TEXT("DayOfSeason")) == 4));
+			ASSERT_THAT(IsTrue(GetNumber(Reports[0], TEXT("DaysLeft")) == Days - 4));
 			ASSERT_THAT(IsTrue(Reports[1].Tag == VestigeGameplayTags::Feedback_Day_StayedUp));
 			ASSERT_THAT(IsTrue(GetNumber(Reports[1], TEXT("Day")) == 5));
-			ASSERT_THAT(AreEqual(GetText(Reports[1], TEXT("Season")), FirstSeason));
+			ASSERT_THAT(AreEqual(GetText(Reports[1], TEXT("Season")), First.DisplayName.ToString()));
 			ASSERT_THAT(IsTrue(GetNumber(Reports[1], TEXT("DayOfSeason")) == 5));
+			ASSERT_THAT(IsTrue(GetNumber(Reports[1], TEXT("DaysLeft")) == Days - 5));
 		}
 
-		TEST_METHOD(ANewSeasonIsReportedOnItsFirstMorning)
+		/** Checks that Reports holds one report: Tag, on the first day of the second season, with the values naming both seasons. */
+		void CheckNewSeasonReport(const TArray<FVestigeFeedbackReport>& Reports, const FGameplayTag& Tag)
 		{
 			const FVestigeCalendar& Calendar = Clock->GetCalendar();
-			ASSERT_THAT(IsTrue(Calendar.GetSeasons().Num() > 1));
-			const int32 Last = Calendar.GetDaysPerSeason();
-			const FString FirstSeason = Calendar.GetSeasons()[0].DisplayName.ToString();
-			const FString NextSeason = Calendar.GetSeasons()[1].DisplayName.ToString();
-			TArray<FVestigeFeedbackReport> Reports;
-			RecordReports(Reports);
-
-			SetClockDay(Last, 22.f);
-			Clock->EndDay();
-
-			// The day's own report comes first, then the season's, whatever order the clock's listeners run in.
-			ASSERT_THAT(IsTrue(Reports.Num() == 2));
-			ASSERT_THAT(IsTrue(Reports[0].Tag == VestigeGameplayTags::Feedback_Day_Slept));
-			ASSERT_THAT(IsTrue(GetNumber(Reports[0], TEXT("Day")) == Last + 1));
-			ASSERT_THAT(AreEqual(GetText(Reports[0], TEXT("Season")), NextSeason));
+			const int32 Days = Calendar.GetDaysPerSeason();
+			const FVestigeSeason& First = Calendar.GetSeasons()[0];
+			const FVestigeSeason& Second = Calendar.GetSeasons()[1];
+			ASSERT_THAT(AreEqual(Reports.Num(), 1));
+			ASSERT_THAT(AreEqual(Reports[0].Tag.ToString(), Tag.ToString()));
+			ASSERT_THAT(IsTrue(GetNumber(Reports[0], TEXT("Day")) == Days + 1));
+			ASSERT_THAT(AreEqual(GetText(Reports[0], TEXT("Season")), Second.DisplayName.ToString()));
+			ASSERT_THAT(AreEqual(GetText(Reports[0], TEXT("SeasonInSentence")), Second.NameInSentence.ToString()));
+			ASSERT_THAT(AreEqual(GetText(Reports[0], TEXT("PreviousSeason")), First.DisplayName.ToString()));
 			ASSERT_THAT(IsTrue(GetNumber(Reports[0], TEXT("DayOfSeason")) == 1));
-			ASSERT_THAT(IsTrue(Reports[1].Tag == VestigeGameplayTags::Feedback_Season_Started));
-			ASSERT_THAT(IsTrue(GetNumber(Reports[1], TEXT("Day")) == Last + 1));
-			ASSERT_THAT(AreEqual(GetText(Reports[1], TEXT("Season")), NextSeason));
-			ASSERT_THAT(AreEqual(GetText(Reports[1], TEXT("PreviousSeason")), FirstSeason));
-			ASSERT_THAT(IsTrue(GetNumber(Reports[1], TEXT("DayOfSeason")) == 1));
+			ASSERT_THAT(IsTrue(GetNumber(Reports[0], TEXT("DaysLeft")) == Days - 1));
 		}
 
-		TEST_METHOD(NoSeasonIsReportedOnOtherMornings)
+		TEST_METHOD(ASeasonsFirstMorningHasOneDayMessage)
 		{
+			ASSERT_THAT(IsTrue(Clock->GetCalendar().GetSeasons().Num() > 1));
 			TArray<FVestigeFeedbackReport> Reports;
 			RecordReports(Reports);
 
-			SetClockDay(Clock->GetCalendar().GetDaysPerSeason() - 1, 22.f);
-			Clock->EndDay();
-
-			ASSERT_THAT(IsTrue(Reports.Num() == 1));
-			ASSERT_THAT(IsTrue(Reports[0].Tag == VestigeGameplayTags::Feedback_Day_Slept));
-		}
-
-		TEST_METHOD(AGameModeThatHasStoppedPlayingReportsNoSeason)
-		{
-			TArray<FVestigeFeedbackReport> Reports;
-			RecordReports(Reports);
-			PlayingGameMode->Destroy();
 			SetClockDay(Clock->GetCalendar().GetDaysPerSeason(), 22.f);
-			TestRunner->AddExpectedMessagePlain(TEXT("nothing starts the next one"), ELogVerbosity::Warning);
-
 			Clock->EndDay();
-			Clock->StartNextDay();
 
-			ASSERT_THAT(IsTrue(Reports.IsEmpty()));
+			// The player is told once that the season began, not by two messages saying the same.
+			CheckNewSeasonReport(Reports, VestigeGameplayTags::Feedback_Day_Slept_NewSeason);
+		}
+
+		TEST_METHOD(StayingUpIntoASeasonHasOneDayMessage)
+		{
+			ASSERT_THAT(IsTrue(Clock->GetCalendar().GetSeasons().Num() > 1));
+			TArray<FVestigeFeedbackReport> Reports;
+			RecordReports(Reports);
+
+			SetClockDay(Clock->GetCalendar().GetDaysPerSeason(), 22.f);
+			PassHours(Clock->GetDayEndHour());
+
+			CheckNewSeasonReport(Reports, VestigeGameplayTags::Feedback_Day_StayedUp_NewSeason);
+		}
+
+		TEST_METHOD(TheLastDaysMorningHasItsOwnMessage)
+		{
+			const FVestigeCalendar& Calendar = Clock->GetCalendar();
+			const int32 Days = Calendar.GetDaysPerSeason();
+			const FVestigeSeason& First = Calendar.GetSeasons()[0];
+			TArray<FVestigeFeedbackReport> Reports;
+			RecordReports(Reports);
+
+			SetClockDay(Days - 1, 22.f);
+			Clock->EndDay();
+			SetClockDay(Days - 1, 22.f);
+			PassHours(Clock->GetDayEndHour());
+
+			ASSERT_THAT(AreEqual(Reports.Num(), 2));
+			ASSERT_THAT(AreEqual(Reports[0].Tag.ToString(), VestigeGameplayTags::Feedback_Day_Slept_LastDay.GetTag().ToString()));
+			ASSERT_THAT(AreEqual(Reports[1].Tag.ToString(), VestigeGameplayTags::Feedback_Day_StayedUp_LastDay.GetTag().ToString()));
+			for (const FVestigeFeedbackReport& Report : Reports)
+			{
+				ASSERT_THAT(IsTrue(GetNumber(Report, TEXT("Day")) == Days));
+				ASSERT_THAT(IsTrue(GetNumber(Report, TEXT("DaysLeft")) == 0));
+				ASSERT_THAT(AreEqual(GetText(Report, TEXT("SeasonInSentence")), First.NameInSentence.ToString()));
+			}
+		}
+
+		TEST_METHOD(AMidSeasonMorningHasTheUsualMessage)
+		{
+			TArray<FVestigeFeedbackReport> Reports;
+			RecordReports(Reports);
+
+			SetClockDay(3, 22.f);
+			Clock->EndDay();
+
+			ASSERT_THAT(AreEqual(Reports.Num(), 1));
+			ASSERT_THAT(AreEqual(Reports[0].Tag.ToString(), VestigeGameplayTags::Feedback_Day_Slept.GetTag().ToString()));
 		}
 
 		TEST_METHOD(AGameModeThatHasStoppedPlayingNoLongerStartsDays)

@@ -89,7 +89,7 @@ void UVestigeClockSubsystem::StartNextDay()
 	++CurrentDay;
 	TimeOfDay = DayStartHour;
 	bDayEndReached = false;
-	StartSeasonIfFirstDay();
+	StartSeasonIfNew();
 	OnNewDay.Broadcast(CurrentDay);
 	OnNewDayBlueprint.Broadcast(CurrentDay);
 	OnNewDayFinished.Broadcast(CurrentDay);
@@ -214,13 +214,13 @@ void UVestigeClockSubsystem::RecordDayEnd()
 	LastDayEnd.bEndedEarly = TimeOfDay < DayEndHour;
 }
 
-void UVestigeClockSubsystem::StartSeasonIfFirstDay()
+void UVestigeClockSubsystem::StartSeasonIfNew()
 {
-	const FVestigeDate Today = GetDate();
-	if (!Today.HasSeason() || !Today.IsFirstDayOfSeason())
+	if (Calendar.GetDayKind(CurrentDay) != EVestigeDayKind::NewSeason)
 	{
 		return;
 	}
+	const FVestigeDate Today = GetDate();
 	VESTIGE_LOG(this, LogVestigeTime, Log, "{Season} began on day {Day}.", Today.Season.ToString(), Today.Day);
 	OnSeasonStarted.Broadcast(Today);
 }

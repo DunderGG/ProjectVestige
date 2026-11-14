@@ -60,6 +60,7 @@ namespace VestigeGameDataTests
 				const FVestigeSeason& Season = Calendar.GetSeasons()[Index];
 				ASSERT_THAT(AreEqual(Season.Tag.ToString(), ExpectedTags[Index]));
 				ASSERT_THAT(IsFalse(Season.DisplayName.IsEmpty(), ExpectedTags[Index]));
+				ASSERT_THAT(IsFalse(Season.NameInSentence.IsEmpty(), ExpectedTags[Index]));
 			}
 		}
 
@@ -70,6 +71,7 @@ namespace VestigeGameDataTests
 			FVestigeSeason Season;
 			Season.Tag = FGameplayTag::RequestGameplayTag(FName(TagName), false);
 			Season.DisplayName = FText::FromString(DisplayName);
+			Season.NameInSentence = FText::FromString(FString(DisplayName).ToLower());
 			return Season;
 		}
 
@@ -108,6 +110,11 @@ namespace VestigeGameDataTests
 			FVestigeSeason NoName = Summer;
 			NoName.DisplayName = FText::GetEmpty();
 			ASSERT_THAT(AreEqual(CountCalendarErrors(FVestigeCalendar::MakeForTests(28, {Spring, NoName})), 1u, TEXT("empty name")));
+
+			FVestigeSeason NoSentenceName = Summer;
+			NoSentenceName.NameInSentence = FText::GetEmpty();
+			ASSERT_THAT(AreEqual(
+				CountCalendarErrors(FVestigeCalendar::MakeForTests(28, {Spring, NoSentenceName})), 1u, TEXT("empty name in sentence")));
 		}
 
 		TEST_METHOD(TheGameDataReportsItsInvalidCalendar)

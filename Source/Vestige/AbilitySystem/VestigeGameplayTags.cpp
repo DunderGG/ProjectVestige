@@ -39,13 +39,21 @@ namespace VestigeGameplayTags
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(
 		Feedback_Rest_WokeRested, "Vestige.Feedback.Rest.WokeRested", "Feedback: an early night cleared the exhaustion.");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Feedback_Day_Slept, "Vestige.Feedback.Day.Slept",
-		"Feedback: the player slept; values Day, Season, DayOfSeason: the day that begins.");
+		"Feedback: the player slept; values Day, Season, SeasonInSentence, DayOfSeason, DaysLeft of the day that begins.");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Feedback_Day_Slept_NewSeason, "Vestige.Feedback.Day.Slept.NewSeason",
+		"Feedback: the player slept into a new season; the day values and PreviousSeason.");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Feedback_Day_Slept_LastDay, "Vestige.Feedback.Day.Slept.LastDay",
+		"Feedback: the player slept into the season's last day; the day values.");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Feedback_Day_StayedUp, "Vestige.Feedback.Day.StayedUp",
-		"Feedback: the player stayed up; values Day, Season, DayOfSeason: the day that begins.");
-	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Feedback_Season_Started, "Vestige.Feedback.Season.Started",
-		"Feedback: a season has begun; values Day, Season, DayOfSeason and PreviousSeason.");
+		"Feedback: the player stayed up; values Day, Season, SeasonInSentence, DayOfSeason, DaysLeft of the day that begins.");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Feedback_Day_StayedUp_NewSeason, "Vestige.Feedback.Day.StayedUp.NewSeason",
+		"Feedback: the player stayed up into a new season; the day values and PreviousSeason.");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Feedback_Day_StayedUp_LastDay, "Vestige.Feedback.Day.StayedUp.LastDay",
+		"Feedback: the player stayed up into the season's last day; the day values.");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Feedback_Save_Loaded, "Vestige.Feedback.Save.Loaded",
-		"Feedback: a save was loaded; values Day, Season, DayOfSeason: the loaded day.");
+		"Feedback: a save was loaded; values Day, Season, SeasonInSentence, DayOfSeason, DaysLeft of the loaded day.");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Feedback_Save_Loaded_LastDay, "Vestige.Feedback.Save.Loaded.LastDay",
+		"Feedback: a save was loaded on its season's last day; the day values.");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Feedback_Save_Saved, "Vestige.Feedback.Save.Saved", "Feedback: the game was saved.");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(
 		Feedback_Save_Failed, "Vestige.Feedback.Save.Failed", "Feedback: the save couldn't be written; the previous one is kept.");

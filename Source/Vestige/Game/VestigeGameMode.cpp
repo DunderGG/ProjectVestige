@@ -12,6 +12,25 @@
 #include "Time/VestigeClockSubsystem.h"
 #include "UI/VestigeHUD.h"
 
+namespace VestigeGameModeReports
+{
+	/** The day report's tag for a night that ended as DayEnd did, before a day of Kind. */
+	FGameplayTag GetDayTag(const FVestigeDayEnd& DayEnd, EVestigeDayKind Kind)
+	{
+		const bool bSlept = DayEnd.bEndedEarly;
+		switch (Kind)
+		{
+		case EVestigeDayKind::NewSeason:
+			return bSlept ? VestigeGameplayTags::Feedback_Day_Slept_NewSeason : VestigeGameplayTags::Feedback_Day_StayedUp_NewSeason;
+		case EVestigeDayKind::LastDay:
+			return bSlept ? VestigeGameplayTags::Feedback_Day_Slept_LastDay : VestigeGameplayTags::Feedback_Day_StayedUp_LastDay;
+		case EVestigeDayKind::Usual:
+			break;
+		}
+		return bSlept ? VestigeGameplayTags::Feedback_Day_Slept : VestigeGameplayTags::Feedback_Day_StayedUp;
+	}
+}
+
 AVestigeGameMode::AVestigeGameMode()
 {
 	HUDClass = AVestigeHUD::StaticClass();
@@ -27,7 +46,6 @@ void AVestigeGameMode::BeginPlay()
 	if (UVestigeClockSubsystem* GameClock = Clock.Get())
 	{
 		GameClock->OnDayEnded.AddUObject(this, &AVestigeGameMode::StartNextDay);
-		GameClock->OnSeasonStarted.AddUObject(this, &AVestigeGameMode::ReportSeasonStarted);
 	}
 }
 
@@ -36,7 +54,6 @@ void AVestigeGameMode::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	if (UVestigeClockSubsystem* GameClock = Clock.Get())
 	{
 		GameClock->OnDayEnded.RemoveAll(this);
-		GameClock->OnSeasonStarted.RemoveAll(this);
 	}
 	Clock.Reset();
 	Super::EndPlay(EndPlayReason);
@@ -50,17 +67,13 @@ void AVestigeGameMode::StartNextDay(const FVestigeDayEnd& DayEnd)
 		return;
 	}
 
-	// Reported first, so the reports of everything reacting to the new day, like waking exhausted and saving, follow it.
-	const FGameplayTag DayTag = DayEnd.bEndedEarly ? VestigeGameplayTags::Feedback_Day_Slept : VestigeGameplayTags::Feedback_Day_StayedUp;
-	UVestigeFeedbackSubsystem::Report(GetWorld(), DayTag, GameClock->GetCalendar().GetReportValues(DayEnd.Day + 1));
+	// One report per morning: a new season is told inside it, not in a second message. Reported first, so the reports of
+	// everything reacting to the new day, like waking exhausted and saving, follow it.
+	const FVestigeCalendar& Calendar = GameClock->GetCalendar();
+	const int32 NextDay = DayEnd.Day + 1;
+	const EVestigeDayKind Kind = Calendar.GetDayKind(NextDay);
+	FFormatNamedArguments Values =
+		Kind == EVestigeDayKind::NewSeason ? Calendar.GetSeasonStartValues(NextDay) : Calendar.GetReportValues(NextDay);
+	UVestigeFeedbackSubsystem::Report(GetWorld(), VestigeGameModeReports::GetDayTag(DayEnd, Kind), MoveTemp(Values));
 	GameClock->StartNextDay();
-}
-
-void AVestigeGameMode::ReportSeasonStarted(const FVestigeDate& Date)
-{
-	if (const UVestigeClockSubsystem* GameClock = Clock.Get())
-	{
-		UVestigeFeedbackSubsystem::Report(
-			GetWorld(), VestigeGameplayTags::Feedback_Season_Started, GameClock->GetCalendar().GetSeasonStartValues(Date.Day));
-	}
 }

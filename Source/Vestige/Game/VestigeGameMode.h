@@ -8,7 +8,6 @@
 #include "VestigeGameMode.generated.h"
 
 class UVestigeClockSubsystem;
-struct FVestigeDate;
 struct FVestigeDayEnd;
 
 /**
@@ -28,7 +27,7 @@ public:
 	AVestigeGameMode();
 
 protected:
-	/** Follows the clock's OnDayEnded and OnSeasonStarted. */
+	/** Follows the clock's OnDayEnded. */
 	virtual void BeginPlay() override;
 
 	/** Stops following the clock, which outlives this world. */
@@ -36,16 +35,11 @@ protected:
 
 private:
 	/**
-	 * Tells the player how the day ended and starts the next one. Bound to UVestigeClockSubsystem::OnDayEnded; does
-	 * nothing when DayEnd is no longer the clock's current, stopped day.
+	 * Tells the player how the day ended and which day begins, in one day report whose tag says whether the new day starts a
+	 * season or is a season's last (FVestigeCalendar::GetDayKind), and starts the next one. Bound to
+	 * UVestigeClockSubsystem::OnDayEnded; does nothing when DayEnd is no longer the clock's current, stopped day.
 	 */
 	void StartNextDay(const FVestigeDayEnd& DayEnd);
-
-	/**
-	 * Tells the player that the season of Date has begun and which one ended (Vestige.Feedback.Season.Started). Bound to
-	 * UVestigeClockSubsystem::OnSeasonStarted, which StartNextDay's new day broadcasts after the day's own report.
-	 */
-	void ReportSeasonStarted(const FVestigeDate& Date);
 
 	/** The game's clock, found at BeginPlay. It lives in the game instance, so this world doesn't own it. */
 	TWeakObjectPtr<UVestigeClockSubsystem> Clock;

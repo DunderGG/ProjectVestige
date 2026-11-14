@@ -18,6 +18,7 @@ namespace VestigeCalendarTests
 		FVestigeSeason Season;
 		Season.Tag = FGameplayTag::RequestGameplayTag(FName(TagName));
 		Season.DisplayName = FText::FromString(DisplayName);
+		Season.NameInSentence = FText::FromString(FString(DisplayName).ToLower());
 		return Season;
 	}
 
@@ -161,18 +162,6 @@ namespace VestigeCalendarTests
 			ASSERT_THAT(IsNull(Calendar.FindSeason(FGameplayTag())));
 		}
 
-		TEST_METHOD(TheReportValuesNameTheSeason)
-		{
-			const FVestigeCalendar Calendar = MakeCalendar();
-
-			const FFormatNamedArguments Values = Calendar.GetReportValues(DaysPerSeason + 1);
-
-			ASSERT_THAT(IsTrue(GetNumber(Values, TEXT("Day")) == DaysPerSeason + 1));
-			ASSERT_THAT(AreEqual(GetText(Values, TEXT("Season")), FString(TEXT("Beta"))));
-			ASSERT_THAT(IsTrue(GetNumber(Values, TEXT("DayOfSeason")) == 1));
-			ASSERT_THAT(IsTrue(Values.Find(TEXT("PreviousSeason")) == nullptr));
-		}
-
 		TEST_METHOD(TheSeasonStartValuesNameThePreviousSeason)
 		{
 			const FVestigeCalendar Calendar = MakeCalendar();
@@ -181,6 +170,8 @@ namespace VestigeCalendarTests
 			ASSERT_THAT(IsTrue(GetNumber(Summer, TEXT("Day")) == DaysPerSeason + 1));
 			ASSERT_THAT(AreEqual(GetText(Summer, TEXT("Season")), FString(TEXT("Beta"))));
 			ASSERT_THAT(AreEqual(GetText(Summer, TEXT("PreviousSeason")), FString(TEXT("Alpha"))));
+			ASSERT_THAT(AreEqual(GetText(Summer, TEXT("SeasonInSentence")), FString(TEXT("beta"))));
+			ASSERT_THAT(IsTrue(GetNumber(Summer, TEXT("DaysLeft")) == DaysPerSeason - 1));
 			ASSERT_THAT(IsTrue(GetNumber(Summer, TEXT("DayOfSeason")) == 1));
 
 			// The first season of a new year follows the last one.
@@ -190,6 +181,66 @@ namespace VestigeCalendarTests
 
 			// Day 1 has no season before it, so its own season is named.
 			ASSERT_THAT(AreEqual(GetText(Calendar.GetSeasonStartValues(1), TEXT("PreviousSeason")), FString(TEXT("Alpha"))));
+		}
+
+		TEST_METHOD(TheReportValuesNameTheSeasonAndTheDaysLeft)
+		{
+			const FVestigeCalendar Calendar = MakeCalendar();
+
+			const FFormatNamedArguments Values = Calendar.GetReportValues(DaysPerSeason + 3);
+
+			ASSERT_THAT(IsTrue(GetNumber(Values, TEXT("Day")) == DaysPerSeason + 3));
+			ASSERT_THAT(AreEqual(GetText(Values, TEXT("Season")), FString(TEXT("Beta"))));
+			ASSERT_THAT(AreEqual(GetText(Values, TEXT("SeasonInSentence")), FString(TEXT("beta"))));
+			ASSERT_THAT(IsTrue(GetNumber(Values, TEXT("DayOfSeason")) == 3));
+			ASSERT_THAT(IsTrue(GetNumber(Values, TEXT("DaysLeft")) == DaysPerSeason - 3));
+			ASSERT_THAT(IsTrue(Values.Find(TEXT("PreviousSeason")) == nullptr));
+		}
+
+		TEST_METHOD(TheLastDayHasNoDaysLeft)
+		{
+			const FVestigeCalendar Calendar = MakeCalendar();
+
+			ASSERT_THAT(IsTrue(Calendar.GetDate(DaysPerSeason).IsLastDayOfSeason()));
+			ASSERT_THAT(IsFalse(Calendar.GetDate(DaysPerSeason - 1).IsLastDayOfSeason()));
+			ASSERT_THAT(IsFalse(Calendar.GetDate(DaysPerSeason + 1).IsLastDayOfSeason()));
+			ASSERT_THAT(IsTrue(GetNumber(Calendar.GetReportValues(DaysPerSeason), TEXT("DaysLeft")) == 0));
+		}
+
+		TEST_METHOD(TheDayKindFollowsTheCalendar)
+		{
+			const FVestigeCalendar Calendar = MakeCalendar();
+			ASSERT_THAT(IsTrue(Calendar.GetDayKind(1) == EVestigeDayKind::Usual));
+			ASSERT_THAT(IsTrue(Calendar.GetDayKind(2) == EVestigeDayKind::Usual));
+			ASSERT_THAT(IsTrue(Calendar.GetDayKind(DaysPerSeason - 1) == EVestigeDayKind::Usual));
+			ASSERT_THAT(IsTrue(Calendar.GetDayKind(DaysPerSeason) == EVestigeDayKind::LastDay));
+			ASSERT_THAT(IsTrue(Calendar.GetDayKind(DaysPerSeason + 1) == EVestigeDayKind::NewSeason));
+			ASSERT_THAT(IsTrue(Calendar.GetDayKind(DaysPerSeason + 2) == EVestigeDayKind::Usual));
+			ASSERT_THAT(IsTrue(Calendar.GetDayKind(DaysPerSeason * 2) == EVestigeDayKind::LastDay));
+
+			// A new year starts a season too, and day 0 is day 1.
+			ASSERT_THAT(IsTrue(Calendar.GetDayKind(DaysPerSeason * Calendar.GetSeasons().Num() + 1) == EVestigeDayKind::NewSeason));
+			ASSERT_THAT(IsTrue(Calendar.GetDayKind(0) == EVestigeDayKind::Usual));
+		}
+
+		TEST_METHOD(TheDayKindOfUnusualCalendars)
+		{
+			// One season: its first day after the last is not a new season, as no other season came before.
+			const FVestigeCalendar OneSeason =
+				FVestigeCalendar::MakeForTests(DaysPerSeason, {MakeSeason(TEXT("Vestige.Season.Spring"), TEXT("Alpha"))});
+			ASSERT_THAT(IsTrue(OneSeason.GetDayKind(DaysPerSeason + 1) == EVestigeDayKind::Usual));
+			ASSERT_THAT(IsTrue(OneSeason.GetDayKind(DaysPerSeason) == EVestigeDayKind::LastDay));
+
+			// One-day seasons: day 2 starts the second season, and day 1 is its own last day.
+			const FVestigeCalendar OneDay = FVestigeCalendar::MakeForTests(
+				1, {MakeSeason(TEXT("Vestige.Season.Spring"), TEXT("Alpha")), MakeSeason(TEXT("Vestige.Season.Summer"), TEXT("Beta"))});
+			ASSERT_THAT(IsTrue(OneDay.GetDayKind(1) == EVestigeDayKind::LastDay));
+			ASSERT_THAT(IsTrue(OneDay.GetDayKind(2) == EVestigeDayKind::NewSeason));
+
+			// No seasons: never a new season, but the last day of the count is still the last day.
+			const FVestigeCalendar None = FVestigeCalendar::MakeForTests(DaysPerSeason, {});
+			ASSERT_THAT(IsTrue(None.GetDayKind(DaysPerSeason + 1) == EVestigeDayKind::Usual));
+			ASSERT_THAT(IsTrue(None.GetDayKind(DaysPerSeason) == EVestigeDayKind::LastDay));
 		}
 	};
 }

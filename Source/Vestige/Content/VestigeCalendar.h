@@ -24,9 +24,29 @@ struct FVestigeSeason
 	UPROPERTY(EditDefaultsOnly, Category = "Calendar", meta = (Categories = "Vestige.Season"))
 	FGameplayTag Tag;
 
-	/** The name the HUD and the messages show ("Spring"). */
+	/** The name the HUD shows and messages use at the start of a sentence ("Spring"). */
 	UPROPERTY(EditDefaultsOnly, Category = "Calendar")
 	FText DisplayName;
+
+	/**
+	 * The name messages use in the middle of a sentence ("spring"). Its own text rather than DisplayName in lower case, since
+	 * languages differ in which names they capitalise.
+	 */
+	UPROPERTY(EditDefaultsOnly, Category = "Calendar")
+	FText NameInSentence;
+};
+
+/** Which kind of day a day is in its season, for the reports that tell the player about it. A fixed set of calendar states. */
+enum class EVestigeDayKind : uint8
+{
+	/** A day that is neither of the others. */
+	Usual,
+
+	/** The first day of a season, after a day of another season. Never day 1, nor in a calendar of one season or none. */
+	NewSeason,
+
+	/** A season's last day, with no days left, unless it is also a new season (a season of one day). */
+	LastDay
 };
 
 /**
@@ -54,6 +74,9 @@ struct FVestigeDate
 	int32 DaysLeft = 0;
 
 	bool IsFirstDayOfSeason() const { return DayOfSeason == 1; }
+
+	/** True on the season's last day, when no days are left. */
+	bool IsLastDayOfSeason() const { return DaysLeft == 0; }
 
 	/** False when the calendar has no seasons. */
 	bool HasSeason() const { return SeasonIndex != INDEX_NONE; }
@@ -88,9 +111,20 @@ public:
 	/** The display name of Date's season, empty when it has none. */
 	FText GetSeasonName(const FVestigeDate& Date) const;
 
+	/** The name of Date's season in the middle of a sentence, empty when it has none. */
+	FText GetSeasonNameInSentence(const FVestigeDate& Date) const;
+
+	/**
+	 * Which kind of day count Day is: NewSeason when it is a season's first day and the day before was another season, else
+	 * LastDay when it has no days left, else Usual. The one rule for a season starting: the clock's OnSeasonStarted and the
+	 * reports' tags follow it.
+	 */
+	EVestigeDayKind GetDayKind(int32 Day) const;
+
 	/**
 	 * The values a feedback report about day count Day gives its text: Day (the day count), Season (its season's name, empty
-	 * without one) and DayOfSeason. Every report that names a date uses these, so they all name it the same way.
+	 * without one), SeasonInSentence (that name in a sentence), DayOfSeason and DaysLeft (a number). Every report that names a
+	 * date uses these, so they all name it the same way. None is a finished phrase: the texts are the responses'.
 	 */
 	FFormatNamedArguments GetReportValues(int32 Day) const;
 
@@ -103,7 +137,7 @@ public:
 #if WITH_EDITOR
 	/**
 	 * Adds one error to Context for each problem: no seasons, fewer than 1 day per season, a season tag that is empty, is
-	 * Vestige.Season itself or isn't under it, a tag used twice, and an empty name.
+	 * Vestige.Season itself or isn't under it, a tag used twice, an empty DisplayName and an empty NameInSentence.
 	 */
 	EDataValidationResult Validate(FDataValidationContext& Context) const;
 #endif

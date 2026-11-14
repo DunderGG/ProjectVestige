@@ -449,6 +449,8 @@ Roughly in the order from [GameDesign.md section 13](GameDesign.md#13-scope-and-
 - [ ] A forecast for the next day, read by the robot weather broadcaster
 - [ ] One festival per season in town
 - [ ] Crops that regrow, or span several seasons
+- [ ] An end-of-season recap screen when a season ends (David, 2026-11-14)
+- [ ] A title card that shows the new season on its first morning, taking over from the morning message as the season's announcement (David, 2026-11-14)
 
 ### Energy and the land
 
