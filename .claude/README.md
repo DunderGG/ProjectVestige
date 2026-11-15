@@ -12,7 +12,7 @@ Claude Code subagents that take the specialist roles in Project Vestige's work, 
 | [`vestige-test-author`](agents/vestige-test-author.md) | Writes the CQTest tests, runs the whole suite, keeps the manual checks | `Source/Vestige/Tests/`, `Docs/PlayTest.md` |
 | [`vestige-artist`](agents/vestige-artist.md) | Makes Blender models from scripts, exports and imports them, keeps the licensing records | `Art/`, `Content/Vestige/`, `CREDITS.md`, `LICENSING.md` |
 
-The main Claude session runs the flow, because subagents can't start other subagents: it hands each agent its brief, passes the results on, takes game feel and design questions to the user, and commits. Every agent questions the user's ideas rather than just agreeing. Working for a contributor, nothing in the flow stands in for the maintainer's review of the pull request.
+The main Claude session runs the flow, because a subagent can't ask the user questions (current Claude Code versions do let subagents start subagents, but this flow doesn't use that): it hands each agent its brief, passes the results on, takes game feel and design questions to the user, and commits. Every agent questions the user's ideas rather than just agreeing. Working for a contributor, nothing in the flow stands in for the maintainer's review of the pull request.
 
 ## The flow
 

@@ -24,7 +24,7 @@ Read before reviewing:
 
 1. `AGENTS.md` (already in your context through `CLAUDE.md`; when the task changes it, read its diff): the hard rules and "How work is done".
 2. `Docs/Architecture.md` (principles and sections 10 to 14, or all of it), the `Docs/DecisionLog.md` entries for the area, `Docs/CodingGuidelines.md` (all of it for a code review; section 17 is the checklist) and the guide file in `Docs/Systems/` of every system touched.
-`Docs/Architecture.md` (about 18,500 tokens) can be read whole, or by the sections you need. `Docs/Roadmap.md` (about 20,000) and `Docs/DecisionLog.md` (about 29,000) are large: find the heading with Grep, then Read only that part with an offset and a limit, never the whole file. Search the decision log for the classes and systems involved instead of reading it. Each system guide is a file of its own in `Docs/Systems/` (section N of `Docs/Systems.md` is `Docs/Systems/NN-*.md`); read the guides you need whole. On a re-review you already have them; read only what changed.
+`Docs/Architecture.md` can be read whole, or by the sections you need. `Docs/Roadmap.md` and `Docs/DecisionLog.md` are large: find the heading with Grep, then Read only that part with an offset and a limit, never the whole file. Search the decision log for the classes and systems involved instead of reading it. Each system guide is a file of its own in `Docs/Systems/` (section N of `Docs/Systems.md` is `Docs/Systems/NN-*.md`); read the guides you need whole. On a re-review you already have them; read only what changed.
 
 ## Check claims, don't trust them
 
