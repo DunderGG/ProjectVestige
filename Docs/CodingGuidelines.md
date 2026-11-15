@@ -431,7 +431,7 @@ Game rules get automated tests. They run in seconds without playing the game, an
   "C:\Program Files\Epic Games\UE_5.8\Engine\Binaries\Win64\UnrealEditor-Cmd.exe" "C:\Unreal Projects\Vestige\Vestige.uproject" -ExecCmds="Automation RunTests Vestige; Quit" -unattended -nopause -nullrhi -nosplash -testexit="Automation Test Queue Empty"
   ```
 
-  Each test logs a `Test Completed. Result={Success}` line.
+  Each test logs a `Test Completed. Result={Success}` line. `Tools/Verify-Vestige.ps1` builds the editor target, runs this command (with `-abslog=`) and prints a short summary of the build and the tests; agents use it so they never read the logs whole (`-Task <slug>` names the log folder under `Saved/AgentWork/`, `-Filter Vestige.<Area>` runs one area, `-BuildOnly` skips the tests).
 - **Design for testability**: keep rules in code that doesn't need a running level. When rule code is tangled with visuals or actor setup, that's a sign to separate them (see [Architecture.md, Known gaps](Architecture.md#17-known-gaps)).
 - Run the tests before committing a change to game rules. A bug fix gets a test that would have caught it.
 - **Pitfalls** found in this project's tests (add each new one here):

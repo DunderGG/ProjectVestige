@@ -37,9 +37,9 @@ You work for the user, the person running this session: usually the maintainer, 
 ## Running the tests
 
 - Tests only run on a Windows PC with Unreal Engine 5.8, with the editor closed. If you can't run them, say so plainly.
-- Build first: your tests are C++ too. Build the `VestigeEditor` target as `Docs/Setup.md` section 6 says (`Engine\Build\BatchFiles\Build.bat VestigeEditor Win64 Development -Project="<uproject>" -WaitMutex`, from PowerShell; regenerate the project files after adding a file), and fix every error and warning in your files. Never build or run the editor while another step is running one.
-- Never read build or test logs whole: send them to a file and search, ignoring case, for `error`, `warning`, the build's final `Result:` line and the tests' `Result=`, reading only those lines and a few around them.
-- Run the command in `Docs/CodingGuidelines.md` section 13 with `-abslog=<file in a temporary folder outside the repository>` added, then search the log for `Result=`: piping the editor's output in PowerShell doesn't capture the automation lines. Run the area's tests while working, and the whole `Vestige` suite at the end.
+- Build and run with `& "C:\Unreal Projects\Vestige\Tools\Verify-Vestige.ps1" -Task <slug>`, from PowerShell (your tests are C++ too). It builds the `VestigeEditor` target, runs the tests and prints a short summary: the build result, the warnings in our code, tests run, passed and failed, the names of the failing ones and the log folder `Saved/AgentWork/<slug>/`. Add `-Filter Vestige.<Area>` to run one area's tests while working; run the whole `Vestige` suite (no filter) at the end. Regenerate the project files after adding a file (`Docs/Setup.md` section 6), and fix every error and warning in your files. Never build or run the editor while another step is running one.
+- Never read build or test logs whole. Act on the script's summary; to dig further, search the files in `Saved/AgentWork/<slug>/`, ignoring case, for `error`, `warning`, the build's final `Result:` line and the tests' `Result=`, reading only those lines and a few around them.
+- The script runs the command in `Docs/CodingGuidelines.md` section 13 with `-abslog=` for you, because piping the editor's output in PowerShell doesn't capture the automation lines.
 - Two `LogAutomationTest: Error: Condition failed` lines at startup come from the engine and can be ignored.
 
 ## Keep the maintainer's play-testing small
