@@ -1,10 +1,28 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1120" viewBox="0 0 1600 1120" style="width: 100%; height: auto; max-width: 1600px;" role="img" aria-labelledby="title description">
   <title id="title">Home farm master blockout plan</title>
-  <desc id="description">A relative 2.5D plan for the walkable home farm, with arrival, farmhouse, an existing eight by eight field, a field apron sized by testing, service yard, open farmyard, and optional direct route connections. The Editor measurements are to be supplied later.</desc>
+  <desc id="description">A relative 2.5D plan for the walkable home farm, with textured terrain, defined optional routes, arrival, farmhouse, an existing eight by eight field, a field apron sized by testing, service yard, and open farmyard. The Editor measurements are to be supplied later.</desc>
   <defs>
     <pattern id="groundDots" width="22" height="22" patternUnits="userSpaceOnUse">
       <circle cx="3" cy="3" r="1.5" fill="#72826c" opacity=".22"/>
     </pattern>
+    <pattern id="grassTexture" width="58" height="44" patternUnits="userSpaceOnUse">
+      <path d="M9 29l3-6m0 7 4-5m18 13 3-6m0 7 4-5M43 12l3-6m0 7 4-5" fill="none" stroke="#52684f" stroke-width="1.5" stroke-linecap="round" opacity=".2"/>
+      <circle cx="28" cy="10" r="1.2" fill="#52684f" opacity=".18"/>
+      <circle cx="52" cy="34" r="1.1" fill="#52684f" opacity=".16"/>
+    </pattern>
+    <pattern id="soilTexture" width="28" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="6" cy="7" r="1.2" fill="#5c4935" opacity=".28"/>
+      <circle cx="20" cy="17" r="1.1" fill="#e1c79b" opacity=".5"/>
+      <path d="M13 3l2 2m-9 13 2 2" stroke="#5c4935" stroke-width="1" opacity=".2"/>
+    </pattern>
+    <pattern id="apronHatch" width="18" height="18" patternUnits="userSpaceOnUse" patternTransform="rotate(35)">
+      <path d="M0 0V18" stroke="#73856c" stroke-width="2" opacity=".16"/>
+    </pattern>
+    <linearGradient id="farmGround" x1="0" y1="0" x2=".85" y2="1">
+      <stop offset="0" stop-color="#b4c29b"/>
+      <stop offset=".52" stop-color="#9bad88"/>
+      <stop offset="1" stop-color="#899c79"/>
+    </linearGradient>
     <style>
       text { font-family: "Segoe UI", Arial, sans-serif; fill: #263638; }
       .title { font-size: 34px; font-weight: 700; }
@@ -15,6 +33,12 @@
       .tiny { font-size: 14px; }
       .callout { fill: #fffdf6; stroke: #536365; stroke-width: 2; }
       .blockout { fill: #d7d9d2; fill-opacity: .92; stroke: #515c59; stroke-width: 3; stroke-dasharray: 9 7; }
+      .routeEdge { fill: none; stroke: #755d43; stroke-width: 14; stroke-linecap: round; stroke-linejoin: round; opacity: .46; }
+      .routeBed { fill: none; stroke: #decda9; stroke-width: 9; stroke-linecap: round; stroke-linejoin: round; }
+      .routeCenterline { fill: none; stroke: #a35f38; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 8 7; }
+      .utilityEdge { fill: none; stroke: #315e67; stroke-width: 9; stroke-linecap: round; stroke-linejoin: round; opacity: .5; }
+      .utilityBed { fill: none; stroke: #a7c7c1; stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; }
+      .utilityCenterline { fill: none; stroke: #477f8a; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 3 6; }
     </style>
   </defs>
 
@@ -25,23 +49,40 @@
   <text x="68" y="112" class="subtitle">Whole planned footprint is walkable • optional direct routes, not a daily circuit • measure tile pitch P before setting dimensions</text>
 
   <!-- One connected, traversable farm footprint. The edge is not a map exit. -->
-  <polygon points="150,320 845,92 1450,356 758,760 150,424" fill="#9bad88" stroke="#52684f" stroke-width="4"/>
+  <polygon points="150,320 845,92 1450,356 758,760 150,424" fill="url(#farmGround)" stroke="#52684f" stroke-width="4"/>
   <polygon points="150,424 758,760 758,796 150,460" fill="#73866c" stroke="#52684f" stroke-width="3"/>
   <polygon points="758,760 1450,356 1450,392 758,796" fill="#667a64" stroke="#52684f" stroke-width="3"/>
   <polygon points="150,320 845,92 1450,356 758,760 150,424" fill="url(#groundDots)" opacity=".8"/>
+  <polygon points="150,320 845,92 1450,356 758,760 150,424" fill="url(#grassTexture)"/>
+  <path d="M161 323 845 99 1438 357 758 749 161 418Z" fill="none" stroke="#d8dfc0" stroke-width="2" opacity=".58"/>
+  <g fill="#d5ddbf" opacity=".22">
+    <path d="M220 345q35-25 76-13 22 8 34 25-42 17-83 8-20-4-27-20Z"/>
+    <path d="M627 172q43-24 88-8 22 8 34 24-37 18-82 10-28-5-40-26Z"/>
+    <path d="M1154 359q42-23 81-7 22 9 31 25-42 16-82 8-20-4-30-26Z"/>
+    <path d="M826 683q43-26 83-9 20 8 32 22-38 20-78 12-24-5-37-25Z"/>
+  </g>
+  <g fill="#647b59" opacity=".19">
+    <path d="M288 367q34-18 65-6 15 6 24 17-32 14-63 7-18-4-26-18Z"/>
+    <path d="M1014 241q34-19 65-6 16 6 24 17-32 14-63 7-18-4-26-18Z"/>
+    <path d="M1296 383q30-17 58-5 15 6 22 16-29 12-56 6-16-4-24-17Z"/>
+    <path d="M590 632q34-18 65-6 15 6 24 17-32 14-63 7-18-4-26-18Z"/>
+  </g>
 
   <!-- Farmhouse zone close to the route, deliberately outside the field apron. -->
   <polygon points="338,342 472,297 584,346 449,392" fill="#d8c8a9" fill-opacity=".72" stroke="#806d54" stroke-width="3" stroke-dasharray="10 7"/>
+  <path d="M348 343 472 302 573 347 449 384Z" fill="none" stroke="#f4e8cc" stroke-width="2" opacity=".75"/>
   <polygon points="374,325 450,301 520,331 444,357" fill="#a98968" stroke="#634e3d" stroke-width="2"/>
   <polygon points="374,325 444,357 444,409 374,377" fill="#b99470" stroke="#634e3d" stroke-width="2"/>
   <polygon points="444,357 520,331 520,382 444,409" fill="#98785e" stroke="#634e3d" stroke-width="2"/>
   <polygon points="374,325 425,290 520,315 470,341 444,357" fill="#73583f" stroke="#634e3d" stroke-width="2"/>
+  <path d="M385 324 426 296 508 317M382 330l55 24m-51-17 1 36m68-11 0 42" fill="none" stroke="#d8c09c" stroke-width="2" opacity=".62"/>
   <rect x="390" y="258" width="242" height="54" rx="9" class="callout"/>
   <text x="511" y="282" text-anchor="middle" class="zone">HOME ZONE</text>
   <text x="511" y="301" text-anchor="middle" class="tiny">farmhouse massing; bed moves here</text>
 
   <!-- Arrival court and start marker. -->
   <polygon points="192,420 302,382 388,421 278,461" fill="#d8c8a9" fill-opacity=".78" stroke="#806d54" stroke-width="2"/>
+  <path d="M220 410 306 449m-41-55 86 39m-145 1 87 39" fill="none" stroke="#a58d69" stroke-width="1.5" opacity=".48"/>
   <circle cx="250" cy="430" r="17" fill="#fffdf6" stroke="#354447" stroke-width="4"/>
   <path d="M240 430h20 M250 420v20" stroke="#354447" stroke-width="3"/>
   <rect x="63" y="474" width="285" height="67" rx="9" class="callout"/>
@@ -51,14 +92,19 @@
   <circle cx="552" cy="410" r="7" fill="#477f8a"/>
   <!-- Field apron width remains open until pawn, targeting, and camera clearance are tested. -->
   <polygon points="603,288 903,188 1071,308 771,408" fill="#e0e2d2" fill-opacity=".88" stroke="#62775e" stroke-width="3" stroke-dasharray="12 8"/>
+  <polygon points="603,288 903,188 1071,308 771,408" fill="url(#apronHatch)" opacity=".68"/>
 
   <!-- Existing field, shown as a raised 8 by 8 plane. -->
+  <polygon points="650,306 890,226 1040,306 784,414" fill="#594b39" opacity=".22"/>
+  <polygon points="650,290 784,386 784,402 650,306" fill="#806346"/>
   <polygon points="784,386 1024,306 1024,322 784,402" fill="#70573f"/>
   <g transform="matrix(.75,-.25,.42,.3,650,290)">
     <rect x="0" y="0" width="320" height="320" fill="#9a7652" stroke="#594a38" stroke-width="5"/>
+    <rect x="3" y="3" width="314" height="314" fill="url(#soilTexture)" opacity=".72"/>
     <path d="M40 0V320 M80 0V320 M120 0V320 M160 0V320 M200 0V320 M240 0V320 M280 0V320
              M0 40H320 M0 80H320 M0 120H320 M0 160H320 M0 200H320 M0 240H320 M0 280H320"
           fill="none" stroke="#d6c39b" stroke-width="2"/>
+    <path d="M2 3H318M2 317H318" fill="none" stroke="#ead7ad" stroke-width="2" opacity=".68"/>
   </g>
   <rect x="683" y="137" width="230" height="54" rx="8" fill="#fffdf6" fill-opacity=".96" stroke="#7b654b" stroke-width="2"/>
   <text x="798" y="160" text-anchor="middle" class="label">CROP FIELD</text>
@@ -66,15 +112,18 @@
 
   <!-- Planned service yard. These are footprint markers, not functioning features. -->
   <polygon points="1092,372 1214,330 1318,376 1196,419" fill="#ded4bd" fill-opacity=".92" stroke="#6b6656" stroke-width="3" stroke-dasharray="10 7"/>
+  <path d="M1103 372 1214 336 1305 376 1196 412Z" fill="none" stroke="#f5ebd6" stroke-width="2" opacity=".8"/>
   <g transform="translate(1127 352)">
     <ellipse cx="22" cy="10" rx="22" ry="9" fill="#8bb4b2" stroke="#466d70" stroke-width="2"/>
     <path d="M0 10v27c0 5 10 9 22 9s22-4 22-9V10" fill="#6f9c9b" stroke="#466d70" stroke-width="2"/>
     <ellipse cx="22" cy="37" rx="22" ry="9" fill="#6f9c9b" stroke="#466d70" stroke-width="2"/>
+    <path d="M6 17v18m32-18v18" stroke="#b8d5cf" stroke-width="2" opacity=".68"/>
   </g>
   <g transform="translate(1221 368)">
     <polygon points="0,10 38,0 66,13 28,24" fill="#8e6949" stroke="#594a38" stroke-width="2"/>
     <polygon points="28,24 66,13 66,45 28,56" fill="#6e523b" stroke="#594a38" stroke-width="2"/>
     <polygon points="0,10 28,24 28,56 0,42" fill="#a77c55" stroke="#594a38" stroke-width="2"/>
+    <path d="M8 13 35 27m-26 1 19 10m7-12v28m21-37v31" fill="none" stroke="#d0a676" stroke-width="2" opacity=".6"/>
   </g>
   <rect x="1088" y="265" width="292" height="72" rx="9" class="callout"/>
   <text x="1234" y="290" text-anchor="middle" class="zone">SERVICE YARD</text>
@@ -83,16 +132,25 @@
 
   <!-- Open farmyard: playable ground now, not a locked future reserve. -->
   <polygon points="836,506 1006,440 1144,500 973,571" fill="#c9d5b9" fill-opacity=".72" stroke="#64765f" stroke-width="3" stroke-dasharray="11 8"/>
+  <path d="M851 506 1006 448 1127 500 973 562Z" fill="none" stroke="#edf0dc" stroke-width="2" opacity=".72"/>
+  <g fill="none" stroke="#718767" stroke-width="2" stroke-linecap="round" opacity=".46">
+    <path d="m862 522 4-7m1 8 5-6m41 22 4-7m1 8 5-6m99-32 4-7m1 8 5-6m39 14 4-7m1 8 5-6"/>
+  </g>
   <!-- Direct connections and the optional yard circuit. The lines do not prescribe direction. -->
-  <path d="M270 448 C324 446 355 433 388 425 C430 414 462 417 490 425 C550 440 615 450 680 458 C715 461 740 461 763 458 C760 440 760 423 771 408"
-        fill="none" stroke="#c46f3e" stroke-width="10" stroke-linecap="round" stroke-dasharray="15 10"/>
-  <path d="M771 408 C782 425 790 440 780 458 C889 461 1000 466 1090 458"
-        fill="none" stroke="#c46f3e" stroke-width="10" stroke-linecap="round" stroke-dasharray="15 10"/>
-  <path d="M1090 470 C1135 490 1132 520 1070 538 C1006 557 930 565 840 566 C700 568 600 568 500 568 C420 568 350 560 320 535 C295 513 280 485 274 453"
-        fill="none" stroke="#c46f3e" stroke-width="10" stroke-linecap="round" stroke-dasharray="15 10"/>
+  <path class="routeEdge" d="M270 448 C324 446 355 433 388 425 C430 414 462 417 490 425 C550 440 615 450 680 458 C715 461 740 461 763 458 C760 440 760 423 771 408"/>
+  <path class="routeBed" d="M270 448 C324 446 355 433 388 425 C430 414 462 417 490 425 C550 440 615 450 680 458 C715 461 740 461 763 458 C760 440 760 423 771 408"/>
+  <path class="routeEdge" d="M771 408 C782 425 790 440 780 458 C889 461 1000 466 1090 458"/>
+  <path class="routeBed" d="M771 408 C782 425 790 440 780 458 C889 461 1000 466 1090 458"/>
+  <path class="routeEdge" d="M1090 458 C1135 490 1132 520 1070 538 C1006 557 930 565 840 566 C700 568 600 568 500 568 C420 568 350 560 320 535 C295 513 280 485 274 453"/>
+  <path class="routeBed" d="M1090 458 C1135 490 1132 520 1070 538 C1006 557 930 565 840 566 C700 568 600 568 500 568 C420 568 350 560 320 535 C295 513 280 485 274 453"/>
+  <path class="routeCenterline" d="M270 448 C324 446 355 433 388 425 C430 414 462 417 490 425 C550 440 615 450 680 458 C715 461 740 461 763 458 C760 440 760 423 771 408"/>
+  <path class="routeCenterline" d="M771 408 C782 425 790 440 780 458 C889 461 1000 466 1090 458"/>
+  <path class="routeCenterline" d="M1090 458 C1135 490 1132 520 1070 538 C1006 557 930 565 840 566 C700 568 600 568 500 568 C420 568 350 560 320 535 C295 513 280 485 274 453"/>
 
   <!-- Utility access spur from the loop into the service yard. -->
-  <path d="M1090 458 C1122 432 1154 411 1190 394" fill="none" stroke="#477f8a" stroke-width="7" stroke-linecap="round" stroke-dasharray="4 10"/>
+  <path class="utilityEdge" d="M1090 458 C1122 432 1154 411 1190 394"/>
+  <path class="utilityBed" d="M1090 458 C1122 432 1154 411 1190 394"/>
+  <path class="utilityCenterline" d="M1090 458 C1122 432 1154 411 1190 394"/>
 
   <rect x="365" y="475" width="250" height="56" rx="9" class="callout"/>
   <text x="490" y="498" text-anchor="middle" class="small" font-weight="700">Caretaker welcome spot</text>
@@ -123,10 +181,14 @@
 
   <rect x="66" y="810" width="548" height="196" rx="14" fill="#fffdf6" stroke="#b8b8a6" stroke-width="2"/>
   <text x="96" y="847" class="zone">How to read the plan</text>
-  <path d="M100 885 H185" stroke="#c46f3e" stroke-width="9" stroke-dasharray="15 10"/>
-  <text x="211" y="891" class="small">optional direct player route</text>
-  <path d="M100 923 H185" stroke="#477f8a" stroke-width="7" stroke-dasharray="4 10"/>
-  <text x="211" y="929" class="small">approach to service placeholders</text>
+  <path class="routeEdge" d="M100 885 H185"/>
+  <path class="routeBed" d="M100 885 H185"/>
+  <path class="routeCenterline" d="M100 885 H185"/>
+  <text x="211" y="891" class="small">optional player route (dashed centerline)</text>
+  <path class="utilityEdge" d="M100 923 H185"/>
+  <path class="utilityBed" d="M100 923 H185"/>
+  <path class="utilityCenterline" d="M100 923 H185"/>
+  <text x="211" y="929" class="small">service spur (dashed centerline)</text>
   <rect x="100" y="945" width="49" height="24" fill="#e0e2d2" stroke="#62775e" stroke-width="2" stroke-dasharray="7 5"/>
   <text x="211" y="964" class="small">clear field work apron</text>
   <rect x="100" y="978" width="49" height="20" fill="#d7d9d2" stroke="#515c59" stroke-width="2" stroke-dasharray="7 5"/>
