@@ -11,6 +11,7 @@ Claude Code subagents that take the specialist roles in Project Vestige's work, 
 | [`vestige-implementer`](agents/vestige-implementer.md) | Writes the C++ from the approved design and builds it clean | `Source/`, temporary editor scripts |
 | [`vestige-test-author`](agents/vestige-test-author.md) | Writes the CQTest tests, runs the whole suite, keeps the manual checks | `Source/Vestige/Tests/`, `Docs/PlayTest.md` |
 | [`vestige-artist`](agents/vestige-artist.md) | Makes Blender models from scripts, exports and imports them, keeps the licensing records | `Art/`, `Content/Vestige/`, `CREDITS.md`, `LICENSING.md` |
+| [`vestige-writer`](agents/vestige-writer.md) | Writes the lore, story, characters, dialogue, item texts, found texts and names; keeps the spoiler documents consistent and spoilers out of everything else; decides line-level writing and minor canon itself, and asks the user only about big canon | `Docs/Spoilers/` |
 
 The main Claude session runs the flow, because a subagent can't ask the user questions (current Claude Code versions do let subagents start subagents, but this flow doesn't use that): it hands each agent its brief, passes the results on, takes game feel and design questions to the user, and commits. Every agent questions the user's ideas rather than just agreeing. Working for a contributor, nothing in the flow stands in for the maintainer's review of the pull request.
 
@@ -21,5 +22,7 @@ The main Claude session runs the flow, because a subagent can't ask the user que
 The diagram's source is [`agent-flow.puml`](agent-flow.puml) (PlantUML). After changing it, render the image again: in VS Code, open the file and press Alt+D to preview it, or right-click > Export Current Diagram; from a terminal in `.claude/`, `java -jar <path to plantuml.jar> -tpng agent-flow.puml` (the VS Code PlantUML extension ships a `plantuml.jar`).
 
 **Lanes.** The main session picks a lane before starting any agent: A (trivial) is one agent and one code review; B (a change inside an established system) is the implementer, the test author when a rule changes and one code review, with no architect or design review; C (a new design, meaning a tripwire in `AGENTS.md`, "Lanes", applies) is the full flow. Unsure about a tripwire means C; unsure about anything else means B.
+
+**Writing.** Lore, story, dialogue and other text with a voice go to the writer and skip the flow. Text that goes into the game is marked Ready by the writer, then entered by the implementer as `FText` data and code-reviewed in its lane.
 
 The agents need Claude Code; they are picked up from `.claude/agents/` when Claude Code runs in this repository. With another AI tool, follow the same roles from "How work is done" in `AGENTS.md`. The reasons for the workflow are in the decision log entry of 2026-11-11 in `Docs/DecisionLog.md`. Personal Claude Code settings go in `.claude/settings.local.json`, which Git ignores.

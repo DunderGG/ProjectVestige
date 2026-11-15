@@ -19,4 +19,4 @@ The documents in this folder reveal the story, its secrets and the characters' b
 - [Factions/Keepers.md](Factions/Keepers.md): the Keepers' beliefs, symbol and story direction.
 - [Factions/ContinuanceAuthority.md](Factions/ContinuanceAuthority.md): the Continuance Authority's concealed rule, claim to power and slow-discovery story direction.
 
-Contributors writing dialogue, item descriptions, quests or other story content need these documents. Everything else (how the game plays, the code, the roadmap) is in the parent [Docs](..) folder and is spoiler-free.
+Contributors writing dialogue, item descriptions, quests or other story content need these documents. The `vestige-writer` agent (see [.claude/README.md](../../.claude/README.md)) writes and keeps them consistent for the maintainer, and keeps their secrets out of every other document. Everything else (how the game plays, the code, the roadmap) is in the parent [Docs](..) folder and is spoiler-free.
