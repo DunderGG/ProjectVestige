@@ -1,0 +1,143 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1120" viewBox="0 0 1600 1120" style="width: 100%; height: auto; max-width: 1600px;" role="img" aria-labelledby="title description">
+  <title id="title">Home farm master blockout plan</title>
+  <desc id="description">A broad 2.5D plan for the whole walkable home farm, with arrival, farmhouse, an existing eight by eight field, field apron, service yard, open farmyard, and connected player routes. The Editor measurements are to be supplied later.</desc>
+  <defs>
+    <pattern id="groundDots" width="22" height="22" patternUnits="userSpaceOnUse">
+      <circle cx="3" cy="3" r="1.5" fill="#72826c" opacity=".22"/>
+    </pattern>
+    <marker id="routeArrow" markerWidth="30" markerHeight="27" refX="25" refY="13.5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L30,13.5 L0,27 Z" fill="#c46f3e"/>
+    </marker>
+    <marker id="spurArrow" markerWidth="24" markerHeight="22" refX="20" refY="11" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L24,11 L0,22 Z" fill="#477f8a"/>
+    </marker>
+    <style>
+      text { font-family: "Segoe UI", Arial, sans-serif; fill: #263638; }
+      .title { font-size: 34px; font-weight: 700; }
+      .subtitle { font-size: 18px; fill: #536365; }
+      .zone { font-size: 22px; font-weight: 700; }
+      .label { font-size: 18px; font-weight: 700; }
+      .small { font-size: 16px; }
+      .tiny { font-size: 14px; }
+      .callout { fill: #fffdf6; stroke: #536365; stroke-width: 2; }
+      .blockout { fill: #d7d9d2; fill-opacity: .92; stroke: #515c59; stroke-width: 3; stroke-dasharray: 9 7; }
+    </style>
+  </defs>
+
+  <rect width="1600" height="1120" fill="#e9e6d9"/>
+  <rect x="28" y="28" width="1544" height="1064" rx="20" fill="#f5f2e7" stroke="#b8b8a6" stroke-width="2"/>
+
+  <text x="66" y="78" class="title">Home farm — master blockout plan</text>
+  <text x="68" y="112" class="subtitle">Whole planned footprint is walkable • relative layout • measure tile pitch P in L_Farm before setting world dimensions</text>
+
+  <!-- One connected, traversable farm footprint. The edge is not a map exit. -->
+  <polygon points="150,320 845,92 1450,356 758,760 150,424" fill="#9bad88" stroke="#52684f" stroke-width="4"/>
+  <polygon points="150,424 758,760 758,796 150,460" fill="#73866c" stroke="#52684f" stroke-width="3"/>
+  <polygon points="758,760 1450,356 1450,392 758,796" fill="#667a64" stroke="#52684f" stroke-width="3"/>
+  <polygon points="150,320 845,92 1450,356 758,760 150,424" fill="url(#groundDots)" opacity=".8"/>
+
+  <!-- Farmhouse zone close to the route, deliberately outside the field apron. -->
+  <polygon points="338,342 472,297 584,346 449,392" fill="#d8c8a9" fill-opacity=".72" stroke="#806d54" stroke-width="3" stroke-dasharray="10 7"/>
+  <polygon points="374,325 450,301 520,331 444,357" fill="#a98968" stroke="#634e3d" stroke-width="2"/>
+  <polygon points="374,325 444,357 444,409 374,377" fill="#b99470" stroke="#634e3d" stroke-width="2"/>
+  <polygon points="444,357 520,331 520,382 444,409" fill="#98785e" stroke="#634e3d" stroke-width="2"/>
+  <polygon points="374,325 425,290 520,315 470,341 444,357" fill="#73583f" stroke="#634e3d" stroke-width="2"/>
+  <rect x="390" y="258" width="242" height="54" rx="9" class="callout"/>
+  <text x="511" y="282" text-anchor="middle" class="zone">HOME ZONE</text>
+  <text x="511" y="301" text-anchor="middle" class="tiny">farmhouse massing; bed moves here</text>
+
+  <!-- Arrival court and start marker. -->
+  <polygon points="192,420 302,382 388,421 278,461" fill="#d8c8a9" fill-opacity=".78" stroke="#806d54" stroke-width="2"/>
+  <circle cx="250" cy="430" r="17" fill="#fffdf6" stroke="#354447" stroke-width="4"/>
+  <path d="M240 430h20 M250 420v20" stroke="#354447" stroke-width="3"/>
+  <rect x="63" y="474" width="285" height="67" rx="9" class="callout"/>
+  <text x="80" y="500" class="label">ARRIVAL / PLAYER START</text>
+  <text x="80" y="522" class="tiny">current anchor: locate and verify</text>
+  <circle cx="552" cy="410" r="20" fill="#f5f2e7" stroke="#477f8a" stroke-width="4"/>
+  <circle cx="552" cy="410" r="7" fill="#477f8a"/>
+  <!-- One tile-pitch work apron around the existing 8 by 8 field. -->
+  <polygon points="603,288 903,188 1071,308 771,408" fill="#e0e2d2" fill-opacity=".88" stroke="#62775e" stroke-width="3" stroke-dasharray="12 8"/>
+
+  <!-- Existing field, shown as a raised 8 by 8 plane. -->
+  <polygon points="784,386 1024,306 1024,322 784,402" fill="#70573f"/>
+  <g transform="matrix(.75,-.25,.42,.3,650,290)">
+    <rect x="0" y="0" width="320" height="320" fill="#9a7652" stroke="#594a38" stroke-width="5"/>
+    <path d="M40 0V320 M80 0V320 M120 0V320 M160 0V320 M200 0V320 M240 0V320 M280 0V320
+             M0 40H320 M0 80H320 M0 120H320 M0 160H320 M0 200H320 M0 240H320 M0 280H320"
+          fill="none" stroke="#d6c39b" stroke-width="2"/>
+  </g>
+  <rect x="683" y="137" width="230" height="54" rx="8" fill="#fffdf6" fill-opacity=".96" stroke="#7b654b" stroke-width="2"/>
+  <text x="798" y="160" text-anchor="middle" class="label">CROP FIELD</text>
+  <text x="798" y="180" text-anchor="middle" class="tiny">existing 8 × 8 grid</text>
+
+  <!-- Planned service yard. These are footprint markers, not functioning features. -->
+  <polygon points="1092,372 1214,330 1318,376 1196,419" fill="#ded4bd" fill-opacity=".92" stroke="#6b6656" stroke-width="3" stroke-dasharray="10 7"/>
+  <g transform="translate(1127 352)">
+    <ellipse cx="22" cy="10" rx="22" ry="9" fill="#8bb4b2" stroke="#466d70" stroke-width="2"/>
+    <path d="M0 10v27c0 5 10 9 22 9s22-4 22-9V10" fill="#6f9c9b" stroke="#466d70" stroke-width="2"/>
+    <ellipse cx="22" cy="37" rx="22" ry="9" fill="#6f9c9b" stroke="#466d70" stroke-width="2"/>
+  </g>
+  <g transform="translate(1221 368)">
+    <polygon points="0,10 38,0 66,13 28,24" fill="#8e6949" stroke="#594a38" stroke-width="2"/>
+    <polygon points="28,24 66,13 66,45 28,56" fill="#6e523b" stroke="#594a38" stroke-width="2"/>
+    <polygon points="0,10 28,24 28,56 0,42" fill="#a77c55" stroke="#594a38" stroke-width="2"/>
+  </g>
+  <rect x="1088" y="265" width="292" height="72" rx="9" class="callout"/>
+  <text x="1234" y="290" text-anchor="middle" class="zone">SERVICE YARD</text>
+  <text x="1234" y="311" text-anchor="middle" class="tiny">planned water source + shipping bin</text>
+  <text x="1234" y="329" text-anchor="middle" class="tiny">placeholder positions; keep off the apron</text>
+
+  <!-- Open farmyard: playable ground now, not a locked future reserve. -->
+  <polygon points="836,506 1006,440 1144,500 973,571" fill="#c9d5b9" fill-opacity=".72" stroke="#64765f" stroke-width="3" stroke-dasharray="11 8"/>
+  <!-- Main connected circulation loop. Arrows mark direction through the plan. -->
+  <path d="M270 448 C324 437 365 411 413 392 C490 364 548 393 610 427 C669 459 709 464 763 458"
+        fill="none" stroke="#c46f3e" stroke-width="10" stroke-linecap="round" stroke-dasharray="15 10" marker-end="url(#routeArrow)"/>
+  <path d="M780 458 C889 461 1000 466 1090 458"
+        fill="none" stroke="#c46f3e" stroke-width="10" stroke-linecap="round" stroke-dasharray="15 10" marker-end="url(#routeArrow)"/>
+  <path d="M1090 470 C1135 490 1132 520 1070 538 C1006 557 930 565 840 566 C700 568 600 550 500 520 C410 500 330 480 274 453"
+        fill="none" stroke="#c46f3e" stroke-width="10" stroke-linecap="round" stroke-dasharray="15 10" marker-end="url(#routeArrow)"/>
+
+  <!-- Utility access spur from the loop into the service yard. -->
+  <path d="M1090 458 C1122 432 1154 411 1190 394" fill="none" stroke="#477f8a" stroke-width="7" stroke-linecap="round" stroke-dasharray="4 10" marker-end="url(#spurArrow)"/>
+
+  <rect x="365" y="475" width="250" height="56" rx="9" class="callout"/>
+  <text x="490" y="498" text-anchor="middle" class="small" font-weight="700">Caretaker welcome spot</text>
+  <text x="490" y="518" text-anchor="middle" class="tiny">clear standing room for two</text>
+  <rect x="648" y="475" width="477" height="64" rx="9" class="callout"/>
+  <text x="886" y="500" text-anchor="middle" class="small" font-weight="700">FIELD APRON — keep standable around every edge</text>
+  <text x="886" y="522" text-anchor="middle" class="tiny">keep the route outside; leave tiles available for a later sprinkler test</text>
+  <rect x="852" y="578" width="301" height="62" rx="9" class="callout"/>
+  <text x="1002" y="603" text-anchor="middle" class="zone">OPEN FARMYARD</text>
+  <text x="1002" y="624" text-anchor="middle" class="tiny">walkable and connected from the first blockout</text>
+
+  <rect x="66" y="590" width="564" height="75" rx="10" fill="#fffdf6" stroke="#b8b8a6" stroke-width="2"/>
+  <text x="88" y="618" class="label">DAILY LOOP</text>
+  <text x="88" y="644" class="small">arrival → home → field → service yard → open farmyard → home</text>
+
+  <rect x="650" y="810" width="886" height="196" rx="14" fill="#fffdf6" stroke="#b8b8a6" stroke-width="2"/>
+  <text x="681" y="847" class="zone">Build the level in this order</text>
+  <g class="small">
+    <circle cx="692" cy="878" r="15" fill="#354447"/><text x="692" y="884" text-anchor="middle" fill="#fff" font-weight="700">1</text>
+    <text x="720" y="884">Survey current Player Start, 8 × 8 grid, bed, tile pitch P, pawn capsule, and camera view.</text>
+    <circle cx="692" cy="916" r="15" fill="#354447"/><text x="692" y="922" text-anchor="middle" fill="#fff" font-weight="700">2</text>
+    <text x="720" y="922">Duplicate L_Farm; block the full traversable boundary and lay the route loop.</text>
+    <circle cx="692" cy="954" r="15" fill="#354447"/><text x="692" y="960" text-anchor="middle" fill="#fff" font-weight="700">3</text>
+    <text x="720" y="960">Add home, service yard, arrival, and open-yard massing; leave field apron clear.</text>
+    <circle cx="692" cy="992" r="15" fill="#354447"/><text x="692" y="998" text-anchor="middle" fill="#fff" font-weight="700">4</text>
+    <text x="720" y="998">Play-test the whole loop and field-edge access before adding meshes or decoration.</text>
+  </g>
+
+  <rect x="66" y="810" width="548" height="196" rx="14" fill="#fffdf6" stroke="#b8b8a6" stroke-width="2"/>
+  <text x="96" y="847" class="zone">How to read the plan</text>
+  <path d="M100 885 H185" stroke="#c46f3e" stroke-width="9" stroke-dasharray="15 10" marker-end="url(#routeArrow)"/>
+  <text x="211" y="891" class="small">connected player route</text>
+  <path d="M100 923 H185" stroke="#477f8a" stroke-width="7" stroke-dasharray="4 10" marker-end="url(#spurArrow)"/>
+  <text x="211" y="929" class="small">service-yard access spur</text>
+  <rect x="100" y="945" width="49" height="24" fill="#e0e2d2" stroke="#62775e" stroke-width="2" stroke-dasharray="7 5"/>
+  <text x="211" y="964" class="small">clear field work apron</text>
+  <rect x="100" y="978" width="49" height="20" fill="#d7d9d2" stroke="#515c59" stroke-width="2" stroke-dasharray="7 5"/>
+  <text x="211" y="995" class="small">new blockout or planned-feature placeholder</text>
+
+  <text x="68" y="1040" class="small" font-weight="700">Scale key: P = measured center-to-center tile pitch. Convert P to centimeters in the Editor; the drawing is a spatial plan, not a measured survey.</text>
+  <text x="68" y="1070" class="tiny">The farmhouse, service equipment, caretaker, and final terrain/art are planned or placeholder content. The farm boundary remains walkable; it is not an exit to the town.</text>
+</svg>
