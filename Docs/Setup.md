@@ -240,15 +240,36 @@ The repository's `.editorconfig` also makes Visual Studio flag names that break 
 
 Only needed to make or change 3D models.
 
-1. Install the current release of **[Blender](https://www.blender.org/download/)**. Any 4.x or 5.x release works with the project's script; the maintainer uses 5.0.
-2. Open the sources in `Art/Blender/`. The export settings, scale, pivots and naming are in [CONTRIBUTING.md, Contributing art](../CONTRIBUTING.md#5-contributing-art).
-3. `Art/Blender/make_farm_assets.py` builds the current crop and tool meshes from a script and exports them to `Art/Export/`. From the project folder:
+1. Install the current release of **[Blender](https://www.blender.org/download/)**. The scripts are tested on Blender 5.0, which the maintainer uses; other 4.x and 5.x releases may work but haven't been tried.
+2. Open the sources in `Art/Blender/`. The export settings, scale, pivots and naming are in [CONTRIBUTING.md, Contributing art](../CONTRIBUTING.md#5-contributing-art), and `Art/README.md` shows how to add an asset.
+3. The models are built by scripts, so a change to a model is a change to its script. `Art/Blender/make_farm_assets.py` builds the current crop and tool meshes (the soil tile, every crop stage and the watering can); one run rewrites all of its 16 FBX files and `FarmAssets.blend`, so run it only when you changed one of those assets. Newer assets each have their own script, such as `Art/Blender/make_bed.py`, built on the shared helpers in `Art/Blender/vestige_art/`; a run writes only that asset's files. From the project folder:
 
    ```
-   blender --background --python Art/Blender/make_farm_assets.py
+   blender --background --python-exit-code 1 --python Art/Blender/make_bed.py
    ```
 
-   If `blender` isn't found, use its full path, for example `"C:\Program Files\Blender Foundation\Blender 5.0\blender.exe"`.
+   If `blender` isn't found, use its full path, for example `"C:\Program Files\Blender Foundation\Blender 5.0\blender.exe"` (in PowerShell, start it with `&`). `--python-exit-code 1` makes Blender finish with an error status when the script fails; without it a failed run looks like a success. The bed script writes only `Art/Export/SM_Bed.fbx`, and only after its checks pass (triangle budget, pivot, size, materials, collision).
+
+   Options for these scripts go after a `--` at the end of the command. A misspelt option stops the run, and nothing is written:
+
+   | Option | What it does |
+   |---|---|
+   | `--check-only` | Builds and checks the asset and writes nothing. Use it to try a change. |
+   | `--export-dir DIR` | Writes the FBX into `DIR` instead of `Art/Export`. |
+   | `--save-blend [FILE]` | Also saves the `.blend` source (by default `Art/Blender/<Asset>.blend`). Without it no `.blend` is written. |
+   | `--preview-dir DIR` | Renders preview images into `DIR`: the game camera view from the asset's front and from its side, and three close views, with a 1 m farm tile for scale. `DIR` must be outside the repository, or inside its `Saved` folder, which Git ignores (for example `Saved/AgentWork/bed`). |
+
+   For example, to try the bed without changing any file Git tracks, and look at it:
+
+   ```
+   blender --background --python-exit-code 1 --python Art/Blender/make_bed.py -- --export-dir "C:\Temp\bed" --preview-dir "Saved/AgentWork/bed"
+   ```
+
+   Blender prints a lot. Send its output to a file and search it for `PROBLEM`, `FAILED`, `Error` and `Traceback`.
+
+   After changing the shared helpers in `Art/Blender/vestige_art/`, run their self-test with plain Python (it starts Blender once per case and takes one to two minutes): `python Art/Blender/check_vestige_art.py`. It ends with `N of N passed`; see [Art/README.md](../Art/README.md#checking-the-shared-module).
+
+   The FBX holds the time it was made, so a run changes the file even when the mesh is the same. The script prints a geometry fingerprint; commit a new FBX only when the asset changed.
 
 `.blend1` backup files are ignored by Git, and `.blend` and `.fbx` files go through Git LFS automatically.
 
