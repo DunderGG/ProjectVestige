@@ -2,9 +2,30 @@
 
 **Date:** 2026-11-14  
 **Scope:** `AGENTS.md`, `CLAUDE.md`, `.claude/README.md`, `.claude/settings.json`, `.claude/agent-flow.puml`, the seven `.claude/agents/*.md` files, and the workflow entries in `Docs/DecisionLog.md`.  
-**Status:** recommendations only. Nothing here has been applied. Every change to the workflow rules needs David's yes (`AGENTS.md`, "What still needs the maintainer's yes") and a `Docs/DecisionLog.md` entry once applied.
+**Status:** Fixes 1 to 6 and 8 are applied (see "Implementation status"). Fixes 7 and 9 wait for usage data and David's go-ahead. Every applied change had David's yes (`AGENTS.md`, "What still needs the maintainer's yes") and has a `Docs/DecisionLog.md` entry dated 2026-11-14.
 
 This document replaces an earlier audit and a second review of it. The first pass over-read some documents and missed others, so every finding was re-checked against the repository files and Claude Code's published documentation ([permissions](https://code.claude.com/docs/en/permissions), [subagents](https://code.claude.com/docs/en/sub-agents)). Only the fixes that survived that check are below. Findings that did not survive are in the appendix, with the reason, so nobody re-raises them.
+
+## Implementation status
+
+| Fix | Status | Commit subject |
+|---|---|---|
+| 1. Fresh session per roadmap item | Applied | Work each roadmap item in a fresh session |
+| 2. Lanes and tripwires | Applied | Route changes by lane and tripwire |
+| 3. No avoidable permission prompts | Applied: scratch folder `Saved/AgentWork/`, one allow rule for the script, one `Edit(/Saved/AgentWork/**)` rule. Asset-changing commands stay gated | Keep agent scratch files and reports inside the repository |
+| 4. Verify script | Applied: `Tools/Verify-Vestige.ps1`. First run: 394 tests passed, 47 s; a second run took 24 s. An independent review found that a crashed test run could report success; fixed before the commit | Add a verify script that builds and runs the tests |
+| 5. Reports only when needed | Applied | Keep agent scratch files and reports inside the repository |
+| 6. Out-of-date statements | Applied: nested subagents, hard-coded sizes, the diagram's legend (re-rendered) | Correct outdated statements in the workflow files; Show lanes and the editor lock in the agent flow diagram |
+| 7. `effort`, `maxTurns`, Sonnet trial | Not started: needs usage data from a few tasks first | |
+| 8. Reversibility tag | Applied | Work each roadmap item in a fresh session |
+| 9. Usage log | Not started: needs David's go-ahead, because it reads personal transcript files | |
+
+**To confirm on first real use:**
+
+- The allow rule for the script (`PowerShell(& "…\Verify-Vestige.ps1" *)`) matches the way Claude Code is asked to call it. If it still prompts, approve it once and keep the form it offers.
+- Whether background subagents still prompt for anything the rules above should cover.
+- `claude --version`, to confirm the nested-subagent statement in `CLAUDE.md` for the installed version.
+- The script's "editor is running" stop and its crash path were reviewed but not run.
 
 ## Summary
 
