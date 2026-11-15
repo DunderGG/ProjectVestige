@@ -262,6 +262,10 @@ The code changes that the slice's content depends on. Doing them first means add
    - Decided 2026-11-10: no category segment. The primary asset type is the category (`VestigeCharacter:Base.Gage`); all existing and mod IDs stay valid, and validation, duplicate detection and saves don't change. The rules for type names, cross-type references and redirects are in [Architecture.md section 5](Architecture.md#5-data-and-content) (decision log, 2026-11-10)
 - [ ] An ID redirect list, once an ID first has to change (deferred, see the decision log)
 
+**Editor tooling**
+
+- [ ] Implement and validate the first generic, read-only level survey: inspect only the currently open Editor map and write a human-readable report plus versioned JSON under ignored `Saved/LevelReports/`; test it on `L_Farm` and a structurally different or empty map. The technical design is in [Systems.md, section 23](Systems.md#23-editor-scripting); the broader proposals and deferred tools are in [Docs/Levels/Scripts/README.md](Levels/Scripts/README.md).
+
 **Tiles and the farm grid**
 
 - [x] Tile rules in a plain state struct, separate from the tile actor that shows them

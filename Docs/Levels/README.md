@@ -11,4 +11,4 @@ The existing map is `/Game/Maps/L_Farm`. Verify actor locations and dimensions i
 
 ## Shared level-authoring tools
 
-- [Reusable level tools](./Scripts/README.md) describes map-independent Editor survey, blockout generation, optional adjustment widgets, and route validation. These are implementation plans; no scripts are implemented yet.
+- [Reusable level tools](./Scripts/README.md) describes the implemented read-only survey (in-Editor validation pending) and proposals for blockout generation, optional adjustment widgets, and route validation.

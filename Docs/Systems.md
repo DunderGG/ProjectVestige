@@ -104,3 +104,7 @@ The guides, one file each in [`Systems/`](Systems/). The numbered headings below
 ## 22. Farm fields and tiles
 
 [Systems/22-FarmFields.md](Systems/22-FarmFields.md)
+
+## 23. Editor scripting
+
+[Systems/23-EditorScripting.md](Systems/23-EditorScripting.md)
