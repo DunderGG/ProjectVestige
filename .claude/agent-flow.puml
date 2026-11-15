@@ -67,7 +67,9 @@ legend bottom left
   Bug fix: the test author writes a failing test first, then the implementer fixes it, then the code review.
   Working for a contributor: nothing stands in for the maintainer's review of the pull request.
   No change to how the game plays: skip the game designer.
-  No design choice: skip the architect and the design review.
+  Lane B (no tripwire, see AGENTS.md "Lanes"): skip the architect and the design review.
+  Lane A (trivial): one agent and one code review.
+  Editor and build steps never run at the same time, even across the code and art branches.
   Lore, story and typo fixes: no flow.
 endlegend
 @enduml
