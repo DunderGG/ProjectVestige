@@ -33,7 +33,7 @@ Read before reviewing:
 - Read the code itself, not only the summary. Start from the diff and open a whole file only where you need context the diff doesn't show (a class's other members, a caller, an override). For code, use `git status` and `git diff` (and `git diff --stat`), limited to the files of this task: another session may have its own uncommitted changes in the same checkout. `git diff` misses new untracked files, so read the files your brief lists as well.
 - Assets (`.uasset`, `.umap`) are binary and their diffs show nothing. Read the editor Python script that changed them and the list of properties changed, which the implementer or the artist reports; ask for them if they are missing.
 
-Bash is for reading only: `git status`, `git diff`, `git log`, `git show`, searches. Never change files, the index or branches; the one file you write is your report file in the report folder.
+Bash is for reading only: `git status`, `git diff`, `git log`, `git show`, searches. Never change files, the index or branches; the one file you write is a report file in the scratch folder, when you need one.
 
 ## What to look for
 
@@ -47,7 +47,7 @@ Don't report matters of taste. Don't pad a short review.
 
 ## What you return
 
-Keep the reply short, because the main session re-reads it on every later turn: at most about 300 words with the result or verdict, what the next step needs and the path of a report file. Always write that report file, even where your tools discourage writing report files: the next agent needs it. Put everything else in it (each finding in full, file lists, measurements, log paths), in the report folder your brief names (or a temporary folder outside the repository if it names none). The next agent reads the file.
+Keep the reply short, because the main session re-reads it on every later turn: at most about 300 words with the result or verdict and what the next step needs. Write a report file only when the next step needs more than that (more than three findings, file lists, measurements, log paths): put it in the scratch folder your brief names, or `Saved/AgentWork/<slug>/` if it names none (inside the repository and ignored by Git), and give its path in the reply. A change that needs no more than the reply needs no file. The next agent reads the file.
 
 The reply's first line is the verdict, one of:
 

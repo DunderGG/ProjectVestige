@@ -442,7 +442,7 @@ Game rules get automated tests. They run in seconds without playing the game, an
   - A multicast delegate calls its listeners in reverse order of binding, and removing one reorders them, so a test never asserts the order between listeners of one delegate.
   - A `TEST_CLASS` fixture named like a namespace hides the namespace inside the test; qualify it with `::` (`::FarmTileLooks::GetLook`).
   - From the command line, add `-abslog=<file>` and search that file for `Result=`: piping the editor's output in PowerShell doesn't capture the automation lines.
-- **Checking the game off-screen** (an agent, for what a test can't see, such as the HUD as drawn): run the game with the editor closed, in a temporary `-userdir` so the user's `Saved/` is never touched, and take screenshots from a Python tick callback. Proven 2026-11-14 (the season date line):
+- **Checking the game off-screen** (an agent, for what a test can't see, such as the HUD as drawn): run the game with the editor closed, in a temporary `-userdir` (below, `<temp>` is `Saved\AgentWork\<slug>`, which Git ignores) so the user's own `Saved/` is never touched, and take screenshots from a Python tick callback. Proven 2026-11-14 (the season date line):
 
   ```
   "C:\Program Files\Epic Games\UE_5.8\Engine\Binaries\Win64\UnrealEditor.exe" "C:\Unreal Projects\Vestige\Vestige.uproject" /Game/Maps/L_Farm -game -RenderOffScreen -nosound -unattended -nopause -nosplash -userdir=<temp>\user -abslog=<temp>\game.log -ForceRes -ResX=1920 -ResY=1080 -EnablePlugins=PythonScriptPlugin -ExecCmds="r.SetRes 1920x1080w,py <temp>\shots.py"

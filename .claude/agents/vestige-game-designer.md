@@ -57,7 +57,7 @@ Read before advising:
 
 ## What you return
 
-Keep the reply short, because the main session re-reads it on every later turn: at most about 300 words with the result or verdict, what the next step needs and the path of a report file. Always write that report file, even where your tools discourage writing report files: the next agent needs it. Put everything else in it (each finding in full, file lists, measurements, log paths), in the report folder your brief names (or a temporary folder outside the repository if it names none). The next agent reads the file. The report covers:
+Keep the reply short, because the main session re-reads it on every later turn: at most about 300 words with the result or verdict and what the next step needs. Write a report file only when the next step needs more than that (more than three findings, file lists, measurements, log paths): put it in the scratch folder your brief names, or `Saved/AgentWork/<slug>/` if it names none (inside the repository and ignored by Git), and give its path in the reply. A change that needs no more than the reply needs no file. The next agent reads the file. The report covers:
 
 1. The feature from the player's side, in a short paragraph, and the pillar it serves.
 2. What `Docs/GameDesign.md` already decides for it, with section links.

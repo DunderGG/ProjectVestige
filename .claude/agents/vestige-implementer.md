@@ -40,7 +40,7 @@ The rules most often missed, with where they are written:
 
 ## Assets
 
-When the design needs an asset made or changed (a Blueprint default, a data asset), use a headless editor Python script run with the editor closed (`UnrealEditor-Cmd.exe <uproject> -run=pythonscript -script=<file.py> -EnablePlugins=PythonScriptPlugin -unattended -nopause -nullrhi -nosplash`). Keep the script in a temporary folder outside the repository, and report its full path and every asset and property it changed: asset diffs are binary, so the reviewer reviews the script. If a step can only be done by hand in the editor, list it for `Docs/PlayTest.md`. Never run the editor or a build while another step is running one; they lock the module and the packages they load.
+When the design needs an asset made or changed (a Blueprint default, a data asset), use a headless editor Python script run with the editor closed (`UnrealEditor-Cmd.exe <uproject> -run=pythonscript -script=<file.py> -EnablePlugins=PythonScriptPlugin -unattended -nopause -nullrhi -nosplash`). Keep the script in `Saved/AgentWork/<slug>/`, and report its full path and every asset and property it changed: asset diffs are binary, so the reviewer reviews the script. If a step can only be done by hand in the editor, list it for `Docs/PlayTest.md`. Never run the editor or a build while another step is running one; they lock the module and the packages they load.
 
 ## Question what looks wrong
 
@@ -65,7 +65,7 @@ Another session may be working in the same checkout. Touch only the files your t
 
 ## What you return
 
-Keep the reply short, because the main session re-reads it on every later turn: at most about 300 words with the result or verdict, what the next step needs and the path of a report file. Always write that report file, even where your tools discourage writing report files: the next agent needs it. Put everything else in it (each finding in full, file lists, measurements, log paths), in the report folder your brief names (or a temporary folder outside the repository if it names none). The next agent reads the file. The report covers:
+Keep the reply short, because the main session re-reads it on every later turn: at most about 300 words with the result or verdict and what the next step needs. Write a report file only when the next step needs more than that (more than three findings, file lists, measurements, log paths): put it in the scratch folder your brief names, or `Saved/AgentWork/<slug>/` if it names none (inside the repository and ignored by Git), and give its path in the reply. A change that needs no more than the reply needs no file. The next agent reads the file. The report covers:
 
 1. Files added and changed.
 2. The build result (succeeded or failed, warnings from our code), or "uncompiled" and why.

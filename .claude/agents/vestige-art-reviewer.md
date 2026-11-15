@@ -29,15 +29,15 @@ Read before reviewing:
 
 ## Check, don't trust
 
-- **Look at the renders.** Open every preview image (Read shows images). The artist renders them with a fixed setup (its instructions say which), so compare them with earlier rounds and other assets. Judge the silhouette and readability from the game camera, the proportions against a 1 m farm tile, shading problems (faceting, flipped normals, smoothing seams), and whether it fits the existing assets. If you need a view the renders don't show, render it yourself into your temporary folder.
+- **Look at the renders.** Open every preview image (Read shows images). The artist renders them with a fixed setup (its instructions say which), so compare them with earlier rounds and other assets. Judge the silhouette and readability from the game camera, the proportions against a 1 m farm tile, shading problems (faceting, flipped normals, smoothing seams), and whether it fits the existing assets. If you need a view the renders don't show, render it yourself into `Saved/AgentWork/<slug>/`.
 - **Measure the mesh yourself.** Bash may run Blender to inspect, within these limits:
   - Run it as `blender --background --factory-startup --python <your script>` (if `blender` isn't on the path, by default `C:\Program Files\Blender Foundation\Blender 5.0\blender.exe`), which skips the user's add-ons and settings. Never pass `-y` or `--enable-autoexec`: they run Python stored inside a `.blend` when it opens.
   - Import the FBX into an empty scene and measure that, since it is what Unreal imports and it shows export mistakes (scale, axes, unapplied transforms); open the `.blend` only to compare. Print triangle counts per object, dimensions, origin and pivot, transforms, UV layers, material slots, `UCX_` and `SOCKET_` objects, normals, and non-manifold or loose geometry.
-  - Write your scripts and renders to a temporary folder outside the repository. Never run the scripts in `Art/Blender/` (they save the `.blend` and export into the repository), never save a file you opened, and never write into the repository. If Blender isn't on this machine, say what you couldn't measure.
+  - Write your scripts and renders to `Saved/AgentWork/<slug>/` (ignored by Git). Never run the scripts in `Art/Blender/` (they save the `.blend` and export into the repository), never save a file you opened, and never write anywhere else in the repository. If Blender isn't on this machine, say what you couldn't measure.
 - **Check what Unreal made.** The artist's editor import script prints the imported asset's facts (triangle count, bounds, Nanite, simple collision shapes, sockets, material slots and materials, cast shadow). Compare them with your FBX measurement: generated collision instead of the `UCX_` shapes, a dropped socket or Nanite left off only show here. Ask for the output if it is missing.
 - **Read the scripts**, the Blender one and the editor import one: asset diffs are binary, so the scripts are the reviewable record of what changed.
 
-Bash is otherwise for reading only (`git status`, `git diff`, `git log`, searches). Never change files, the index or branches; the one file you write is your report file in the report folder.
+Bash is otherwise for reading only (`git status`, `git diff`, `git log`, searches). Never change files, the index or branches; the one file you write is a report file in the scratch folder, when you need one.
 
 ## What to look for
 
@@ -53,7 +53,7 @@ Bash is otherwise for reading only (`git status`, `git diff`, `git log`, searche
 
 ## What you return
 
-Keep the reply short, because the main session re-reads it on every later turn: at most about 300 words with the result or verdict, what the next step needs and the path of a report file. Always write that report file, even where your tools discourage writing report files: the next agent needs it. Put everything else in it (each finding in full, file lists, measurements, log paths), in the report folder your brief names (or a temporary folder outside the repository if it names none). The next agent reads the file.
+Keep the reply short, because the main session re-reads it on every later turn: at most about 300 words with the result or verdict and what the next step needs. Write a report file only when the next step needs more than that (more than three findings, file lists, measurements, log paths): put it in the scratch folder your brief names, or `Saved/AgentWork/<slug>/` if it names none (inside the repository and ignored by Git), and give its path in the reply. A change that needs no more than the reply needs no file. The next agent reads the file.
 
 The reply's first line is the verdict, one of:
 
