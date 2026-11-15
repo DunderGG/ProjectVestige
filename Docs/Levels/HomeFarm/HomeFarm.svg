@@ -31,7 +31,10 @@
       .label { font-size: 18px; font-weight: 700; }
       .small { font-size: 16px; }
       .tiny { font-size: 14px; }
+      .stepNumber { fill: #fff; font-weight: 700; }
       .callout { fill: #fffdf6; stroke: #536365; stroke-width: 2; }
+      .leader { fill: none; stroke: #536365; stroke-width: 1.6; stroke-linecap: round; }
+      .leaderDot { fill: #fffdf6; stroke: #536365; stroke-width: 2; }
       .blockout { fill: #d7d9d2; fill-opacity: .92; stroke: #515c59; stroke-width: 3; stroke-dasharray: 9 7; }
       .routeEdge { fill: none; stroke: #755d43; stroke-width: 14; stroke-linecap: round; stroke-linejoin: round; opacity: .46; }
       .routeBed { fill: none; stroke: #decda9; stroke-width: 9; stroke-linecap: round; stroke-linejoin: round; }
@@ -57,7 +60,7 @@
   <path d="M161 323 845 149 1438 357 758 749 161 418Z" fill="none" stroke="#d8dfc0" stroke-width="2" opacity=".58"/>
   <g fill="#d5ddbf" opacity=".22">
     <path d="M220 345q35-25 76-13 22 8 34 25-42 17-83 8-20-4-27-20Z"/>
-    <path d="M627 172q43-24 88-8 22 8 34 24-37 18-82 10-28-5-40-26Z"/>
+    <path d="M567 232q43-24 88-8 22 8 34 24-37 18-82 10-28-5-40-26Z"/>
     <path d="M1154 359q42-23 81-7 22 9 31 25-42 16-82 8-20-4-30-26Z"/>
     <path d="M826 683q43-26 83-9 20 8 32 22-38 20-78 12-24-5-37-25Z"/>
   </g>
@@ -99,9 +102,6 @@
           fill="none" stroke="#d6c39b" stroke-width="2"/>
     <path d="M2 3H318M2 317H318" fill="none" stroke="#ead7ad" stroke-width="2" opacity=".68"/>
   </g>
-  <rect x="683" y="137" width="230" height="54" rx="8" fill="#fffdf6" fill-opacity=".96" stroke="#7b654b" stroke-width="2"/>
-  <text x="798" y="160" text-anchor="middle" class="label">CROP FIELD</text>
-  <text x="798" y="180" text-anchor="middle" class="tiny">existing 8 × 8 grid</text>
 
   <!-- Planned service yard. These are footprint markers, not functioning features. -->
   <polygon points="1092,372 1214,330 1318,376 1196,419" fill="#ded4bd" fill-opacity=".92" stroke="#6b6656" stroke-width="3" stroke-dasharray="10 7"/>
@@ -140,47 +140,72 @@
   <path class="utilityBed" d="M1090 458 C1122 432 1154 411 1190 394"/>
   <path class="utilityCenterline" d="M1090 458 C1122 432 1154 411 1190 394"/>
 
-  <!-- Foreground labels follow the route layers so roads cannot obscure their text. -->
-  <rect x="390" y="218" width="242" height="54" rx="9" class="callout"/>
-  <text x="511" y="242" text-anchor="middle" class="zone">HOME ZONE</text>
-  <text x="511" y="261" text-anchor="middle" class="tiny">farmhouse massing; bed moves here</text>
+  <!-- Callouts sit on empty grass or in the margin, never over a zone, route, marker, or terrain edge.
+       Leaders follow the route layers so they stay visible; boxes come last so nothing covers their text. -->
+  <g class="leader">
+    <path d="M640 180 735 285"/>
+    <path d="M410 240 440 303"/>
+    <path d="M1100 206 980 250"/>
+    <path d="M1320 296 1214 350"/>
+    <path d="M250 580V451"/>
+    <path d="M552 475V433"/>
+    <path d="M890 582 935 522"/>
+  </g>
+  <g class="leaderDot">
+    <circle cx="735" cy="285" r="4.5"/>
+    <circle cx="440" cy="303" r="4.5"/>
+    <circle cx="980" cy="250" r="4.5"/>
+    <circle cx="1214" cy="350" r="4.5"/>
+    <circle cx="935" cy="522" r="4.5"/>
+  </g>
 
-  <rect x="1088" y="265" width="292" height="72" rx="9" class="callout"/>
-  <text x="1234" y="290" text-anchor="middle" class="zone">SERVICE YARD</text>
-  <text x="1234" y="311" text-anchor="middle" class="tiny">planned water source + shipping bin</text>
-  <text x="1234" y="329" text-anchor="middle" class="tiny">placeholder positions; keep off the apron</text>
+  <rect x="450" y="128" width="220" height="52" rx="8" fill="#fffdf6" fill-opacity=".96" stroke="#7b654b" stroke-width="2"/>
+  <text x="560" y="151" text-anchor="middle" class="label">CROP FIELD</text>
+  <text x="560" y="170" text-anchor="middle" class="tiny">existing 8 × 8 grid</text>
 
-  <rect x="63" y="474" width="285" height="67" rx="9" class="callout"/>
-  <text x="80" y="500" class="label">ARRIVAL / PLAYER START</text>
-  <text x="80" y="522" class="tiny">current anchor: locate and verify</text>
+  <rect x="172" y="186" width="262" height="54" rx="9" class="callout"/>
+  <text x="303" y="210" text-anchor="middle" class="zone">HOME ZONE</text>
+  <text x="303" y="229" text-anchor="middle" class="tiny">farmhouse massing; bed moves here</text>
 
-  <rect x="365" y="475" width="250" height="56" rx="9" class="callout"/>
-  <text x="490" y="498" text-anchor="middle" class="small" font-weight="700">Caretaker welcome spot</text>
-  <text x="490" y="518" text-anchor="middle" class="tiny">clear standing room for two</text>
-  <rect x="648" y="475" width="477" height="74" rx="9" class="callout"/>
-  <text x="886" y="497" text-anchor="middle" class="small" font-weight="700">FIELD APRON — standable around every edge</text>
-  <text x="886" y="519" text-anchor="middle" class="tiny">Size after pawn, tool-reach, and camera tests.</text>
-  <text x="886" y="537" text-anchor="middle" class="tiny">Keep direct access to the full field perimeter.</text>
+  <rect x="1080" y="128" width="340" height="78" rx="9" class="callout"/>
+  <text x="1250" y="154" text-anchor="middle" class="zone">FIELD APRON</text>
+  <text x="1250" y="176" text-anchor="middle" class="tiny">standable around every field edge</text>
+  <text x="1250" y="195" text-anchor="middle" class="tiny">size after pawn, tool-reach, and camera tests</text>
 
-  <rect x="852" y="578" width="301" height="62" rx="9" class="callout"/>
-  <text x="1002" y="603" text-anchor="middle" class="zone">OPEN FARMYARD</text>
-  <text x="1002" y="624" text-anchor="middle" class="tiny">walkable and connected from the first blockout</text>
+  <rect x="1300" y="222" width="256" height="74" rx="9" class="callout"/>
+  <text x="1428" y="248" text-anchor="middle" class="zone">SERVICE YARD</text>
+  <text x="1428" y="268" text-anchor="middle" class="tiny">planned water source + shipping bin</text>
+  <text x="1428" y="286" text-anchor="middle" class="tiny">placeholders; keep off the apron</text>
 
-  <rect x="66" y="590" width="564" height="75" rx="10" fill="#fffdf6" stroke="#b8b8a6" stroke-width="2"/>
-  <text x="88" y="618" class="label">OPTIONAL ROUTES</text>
-  <text x="88" y="644" class="small">Direct home / field / service links; yard circuit is optional</text>
+  <rect x="50" y="580" width="285" height="67" rx="9" class="callout"/>
+  <text x="67" y="606" class="label">ARRIVAL / PLAYER START</text>
+  <text x="67" y="628" class="tiny">current anchor: locate and verify</text>
+
+  <rect x="385" y="475" width="250" height="56" rx="9" class="callout"/>
+  <text x="510" y="498" text-anchor="middle" class="small" font-weight="700">Caretaker welcome spot</text>
+  <text x="510" y="518" text-anchor="middle" class="tiny">clear standing room for two</text>
+
+  <rect x="678" y="582" width="226" height="74" rx="9" class="callout"/>
+  <text x="791" y="607" text-anchor="middle" class="zone">OPEN FARMYARD</text>
+  <text x="791" y="627" text-anchor="middle" class="tiny">walkable and connected</text>
+  <text x="791" y="645" text-anchor="middle" class="tiny">from the first blockout</text>
+
+  <rect x="50" y="668" width="380" height="96" rx="10" fill="#fffdf6" stroke="#b8b8a6" stroke-width="2"/>
+  <text x="72" y="696" class="label">OPTIONAL ROUTES</text>
+  <text x="72" y="722" class="small">Direct home, field, and service links.</text>
+  <text x="72" y="746" class="small">The yard circuit is optional.</text>
 
   <rect x="650" y="810" width="886" height="196" rx="14" fill="#fffdf6" stroke="#b8b8a6" stroke-width="2"/>
   <text x="681" y="847" class="zone">Build the level in this order</text>
   <g class="small">
-    <circle cx="692" cy="878" r="15" fill="#354447"/><text x="692" y="884" text-anchor="middle" fill="#fff" font-weight="700">1</text>
-    <text x="720" y="884">Survey current Player Start, 8 × 8 grid, bed, tile pitch P, pawn capsule, and camera view.</text>
-    <circle cx="692" cy="916" r="15" fill="#354447"/><text x="692" y="922" text-anchor="middle" fill="#fff" font-weight="700">2</text>
-    <text x="720" y="922">Duplicate L_Farm; block the full walkable area and connect home, field, and services.</text>
-    <circle cx="692" cy="954" r="15" fill="#354447"/><text x="692" y="960" text-anchor="middle" fill="#fff" font-weight="700">3</text>
-    <text x="720" y="960">Add home, service yard, arrival, and open-yard massing; leave field apron clear.</text>
-    <circle cx="692" cy="992" r="15" fill="#354447"/><text x="692" y="998" text-anchor="middle" fill="#fff" font-weight="700">4</text>
-    <text x="720" y="998">Play-test direct routes, optional yard circuit, and field access before adding art.</text>
+    <circle cx="692" cy="876" r="15" fill="#354447"/><text x="692" y="882" text-anchor="middle" class="stepNumber">1</text>
+    <text x="720" y="882">Survey current Player Start, 8 × 8 grid, bed, tile pitch P, pawn capsule, and camera view.</text>
+    <circle cx="692" cy="911" r="15" fill="#354447"/><text x="692" y="917" text-anchor="middle" class="stepNumber">2</text>
+    <text x="720" y="917">Duplicate L_Farm; block the full walkable area and connect home, field, and services.</text>
+    <circle cx="692" cy="946" r="15" fill="#354447"/><text x="692" y="952" text-anchor="middle" class="stepNumber">3</text>
+    <text x="720" y="952">Add home, service yard, arrival, and open-yard massing; leave field apron clear.</text>
+    <circle cx="692" cy="981" r="15" fill="#354447"/><text x="692" y="987" text-anchor="middle" class="stepNumber">4</text>
+    <text x="720" y="987">Play-test direct routes, optional yard circuit, and field access before adding art.</text>
   </g>
 
   <rect x="66" y="810" width="548" height="196" rx="14" fill="#fffdf6" stroke="#b8b8a6" stroke-width="2"/>
