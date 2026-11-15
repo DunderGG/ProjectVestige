@@ -70,3 +70,7 @@ Do not add tutorial scripting, custom landmarks, or decoration in the first bloc
 6. **Check the focal view.** Start Play and check the camera at the Player Start. Adjust the broad layout until the home and field are easy to orient toward without hiding the full walkable area.
 7. **Walk and interact.** Test the daily loop, field edges/corners, bed prompt, and collisions. Later, when features are implemented, verify reaching the water source, sprinkler, and shipping bin from their planned places.
 8. **Replace blockout only after the layout works.** Add meshes, materials, vegetation, and lighting as a separate pass; do not solve route or scale problems with decoration.
+
+## Reusable Editor tools
+
+The proposed map-independent survey and blockout tools are described in [Reusable Unreal Editor level tools](../Scripts/README.md). HomeFarm can be their first configured layout, but the shared tools should not assume any farm-specific actors or zones.

@@ -8,3 +8,7 @@ This folder holds level blockout plans and editor notes. These documents describ
 - [Home farm layout diagram](./HomeFarm/HomeFarm.svg) is an editable, relative-scale 2.5D master plan, not a survey of the current map.
 
 The existing map is `/Game/Maps/L_Farm`. Verify actor locations and dimensions in the Editor before treating the diagram as a measured plan. Keep experimental changes in a duplicate map until the layout is agreed.
+
+## Shared level-authoring tools
+
+- [Reusable level tools](./Scripts/README.md) describes map-independent Editor survey, blockout generation, optional adjustment widgets, and route validation. These are implementation plans; no scripts are implemented yet.
