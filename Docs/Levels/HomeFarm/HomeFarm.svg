@@ -49,12 +49,12 @@
   <text x="68" y="112" class="subtitle">Whole planned footprint is walkable • optional direct routes, not a daily circuit • measure tile pitch P before setting dimensions</text>
 
   <!-- One connected, traversable farm footprint. The edge is not a map exit. -->
-  <polygon points="150,320 845,92 1450,356 758,760 150,424" fill="url(#farmGround)" stroke="#52684f" stroke-width="4"/>
+  <polygon points="150,320 845,142 1450,356 758,760 150,424" fill="url(#farmGround)" stroke="#52684f" stroke-width="4"/>
   <polygon points="150,424 758,760 758,796 150,460" fill="#73866c" stroke="#52684f" stroke-width="3"/>
   <polygon points="758,760 1450,356 1450,392 758,796" fill="#667a64" stroke="#52684f" stroke-width="3"/>
-  <polygon points="150,320 845,92 1450,356 758,760 150,424" fill="url(#groundDots)" opacity=".8"/>
-  <polygon points="150,320 845,92 1450,356 758,760 150,424" fill="url(#grassTexture)"/>
-  <path d="M161 323 845 99 1438 357 758 749 161 418Z" fill="none" stroke="#d8dfc0" stroke-width="2" opacity=".58"/>
+  <polygon points="150,320 845,142 1450,356 758,760 150,424" fill="url(#groundDots)" opacity=".8"/>
+  <polygon points="150,320 845,142 1450,356 758,760 150,424" fill="url(#grassTexture)"/>
+  <path d="M161 323 845 149 1438 357 758 749 161 418Z" fill="none" stroke="#d8dfc0" stroke-width="2" opacity=".58"/>
   <g fill="#d5ddbf" opacity=".22">
     <path d="M220 345q35-25 76-13 22 8 34 25-42 17-83 8-20-4-27-20Z"/>
     <path d="M627 172q43-24 88-8 22 8 34 24-37 18-82 10-28-5-40-26Z"/>
@@ -76,18 +76,11 @@
   <polygon points="444,357 520,331 520,382 444,409" fill="#98785e" stroke="#634e3d" stroke-width="2"/>
   <polygon points="374,325 425,290 520,315 470,341 444,357" fill="#73583f" stroke="#634e3d" stroke-width="2"/>
   <path d="M385 324 426 296 508 317M382 330l55 24m-51-17 1 36m68-11 0 42" fill="none" stroke="#d8c09c" stroke-width="2" opacity=".62"/>
-  <rect x="390" y="258" width="242" height="54" rx="9" class="callout"/>
-  <text x="511" y="282" text-anchor="middle" class="zone">HOME ZONE</text>
-  <text x="511" y="301" text-anchor="middle" class="tiny">farmhouse massing; bed moves here</text>
-
   <!-- Arrival court and start marker. -->
   <polygon points="192,420 302,382 388,421 278,461" fill="#d8c8a9" fill-opacity=".78" stroke="#806d54" stroke-width="2"/>
   <path d="M220 410 306 449m-41-55 86 39m-145 1 87 39" fill="none" stroke="#a58d69" stroke-width="1.5" opacity=".48"/>
   <circle cx="250" cy="430" r="17" fill="#fffdf6" stroke="#354447" stroke-width="4"/>
   <path d="M240 430h20 M250 420v20" stroke="#354447" stroke-width="3"/>
-  <rect x="63" y="474" width="285" height="67" rx="9" class="callout"/>
-  <text x="80" y="500" class="label">ARRIVAL / PLAYER START</text>
-  <text x="80" y="522" class="tiny">current anchor: locate and verify</text>
   <circle cx="552" cy="410" r="20" fill="#f5f2e7" stroke="#477f8a" stroke-width="4"/>
   <circle cx="552" cy="410" r="7" fill="#477f8a"/>
   <!-- Field apron width remains open until pawn, targeting, and camera clearance are tested. -->
@@ -125,11 +118,6 @@
     <polygon points="0,10 28,24 28,56 0,42" fill="#a77c55" stroke="#594a38" stroke-width="2"/>
     <path d="M8 13 35 27m-26 1 19 10m7-12v28m21-37v31" fill="none" stroke="#d0a676" stroke-width="2" opacity=".6"/>
   </g>
-  <rect x="1088" y="265" width="292" height="72" rx="9" class="callout"/>
-  <text x="1234" y="290" text-anchor="middle" class="zone">SERVICE YARD</text>
-  <text x="1234" y="311" text-anchor="middle" class="tiny">planned water source + shipping bin</text>
-  <text x="1234" y="329" text-anchor="middle" class="tiny">placeholder positions; keep off the apron</text>
-
   <!-- Open farmyard: playable ground now, not a locked future reserve. -->
   <polygon points="836,506 1006,440 1144,500 973,571" fill="#c9d5b9" fill-opacity=".72" stroke="#64765f" stroke-width="3" stroke-dasharray="11 8"/>
   <path d="M851 506 1006 448 1127 500 973 562Z" fill="none" stroke="#edf0dc" stroke-width="2" opacity=".72"/>
@@ -152,12 +140,28 @@
   <path class="utilityBed" d="M1090 458 C1122 432 1154 411 1190 394"/>
   <path class="utilityCenterline" d="M1090 458 C1122 432 1154 411 1190 394"/>
 
+  <!-- Foreground labels follow the route layers so roads cannot obscure their text. -->
+  <rect x="390" y="218" width="242" height="54" rx="9" class="callout"/>
+  <text x="511" y="242" text-anchor="middle" class="zone">HOME ZONE</text>
+  <text x="511" y="261" text-anchor="middle" class="tiny">farmhouse massing; bed moves here</text>
+
+  <rect x="1088" y="265" width="292" height="72" rx="9" class="callout"/>
+  <text x="1234" y="290" text-anchor="middle" class="zone">SERVICE YARD</text>
+  <text x="1234" y="311" text-anchor="middle" class="tiny">planned water source + shipping bin</text>
+  <text x="1234" y="329" text-anchor="middle" class="tiny">placeholder positions; keep off the apron</text>
+
+  <rect x="63" y="474" width="285" height="67" rx="9" class="callout"/>
+  <text x="80" y="500" class="label">ARRIVAL / PLAYER START</text>
+  <text x="80" y="522" class="tiny">current anchor: locate and verify</text>
+
   <rect x="365" y="475" width="250" height="56" rx="9" class="callout"/>
   <text x="490" y="498" text-anchor="middle" class="small" font-weight="700">Caretaker welcome spot</text>
   <text x="490" y="518" text-anchor="middle" class="tiny">clear standing room for two</text>
-  <rect x="648" y="475" width="477" height="64" rx="9" class="callout"/>
-  <text x="886" y="500" text-anchor="middle" class="small" font-weight="700">FIELD APRON — keep standable around every edge</text>
-  <text x="886" y="522" text-anchor="middle" class="tiny">set width after pawn, targeting, and camera tests; keep direct access to every edge</text>
+  <rect x="648" y="475" width="477" height="74" rx="9" class="callout"/>
+  <text x="886" y="497" text-anchor="middle" class="small" font-weight="700">FIELD APRON — standable around every edge</text>
+  <text x="886" y="519" text-anchor="middle" class="tiny">Size after pawn, tool-reach, and camera tests.</text>
+  <text x="886" y="537" text-anchor="middle" class="tiny">Keep direct access to the full field perimeter.</text>
+
   <rect x="852" y="578" width="301" height="62" rx="9" class="callout"/>
   <text x="1002" y="603" text-anchor="middle" class="zone">OPEN FARMYARD</text>
   <text x="1002" y="624" text-anchor="middle" class="tiny">walkable and connected from the first blockout</text>
