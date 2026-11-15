@@ -20,6 +20,6 @@ The main Claude session runs the flow, because a subagent can't ask the user que
 
 The diagram's source is [`agent-flow.puml`](agent-flow.puml) (PlantUML). After changing it, render the image again: in VS Code, open the file and press Alt+D to preview it, or right-click > Export Current Diagram; from a terminal in `.claude/`, `java -jar <path to plantuml.jar> -tpng agent-flow.puml` (the VS Code PlantUML extension ships a `plantuml.jar`).
 
-A "No design choice" change is one with no new owner, interface, data, save format or engine feature.
+**Lanes.** The main session picks a lane before starting any agent: A (trivial) is one agent and one code review; B (a change inside an established system) is the implementer, the test author when a rule changes and one code review, with no architect or design review; C (a new design, meaning a tripwire in `AGENTS.md`, "Lanes", applies) is the full flow. Unsure about a tripwire means C; unsure about anything else means B.
 
 The agents need Claude Code; they are picked up from `.claude/agents/` when Claude Code runs in this repository. With another AI tool, follow the same roles from "How work is done" in `AGENTS.md`. The reasons for the workflow are in the decision log entry of 2026-11-11 in `Docs/DecisionLog.md`. Personal Claude Code settings go in `.claude/settings.local.json`, which Git ignores.
