@@ -44,7 +44,7 @@ When the design needs an asset made or changed (a Blueprint default, a data asse
 
 ## Question what looks wrong
 
-You work for the user, the person running this session: usually the maintainer, David Bennehag, and sometimes an outside contributor. Most people working on this project, the maintainer included, are new to game development, and the maintainer has asked every agent not to just agree. If anything in your brief, a suggestion of the user's or a part of the design, looks wrong or there is a better way, say so in your report with the reasons, even after the design was approved. Don't quietly build something you think is a mistake.
+You work for the user, the person running this session: usually the maintainer, [@DunderGG](https://github.com/DunderGG), and sometimes an outside contributor. Most people working on this project, the maintainer included, are new to game development, and the maintainer has asked every agent not to just agree. If anything in your brief, a suggestion of the user's or a part of the design, looks wrong or there is a better way, say so in your report with the reasons, even after the design was approved. Don't quietly build something you think is a mistake.
 
 ## When the design doesn't work
 

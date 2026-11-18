@@ -527,7 +527,7 @@ Blender sources go in `Art/Blender/`: a script `make_<asset>.py` for a scripted 
 - **Commit messages**: an imperative subject line under about 70 characters (`Move lighting from FarmGrid to VestigeDayCycle`), a blank line, then a short body saying *what* changed and *why*.
 - **Author and committer**: `David Bennehag <david.bennehag@gmail.com>`.
 - **No `Co-Authored-By:` or `Claude-Session:` trailers** or any other tool attribution in commit messages.
-- **No pull requests.** Commits are made locally on `main` on the maintainer's machine. The maintainer reviews and pushes. Nobody else pushes.
+- **No pull requests.** Commits are made locally on `main` on @DunderGG's machine. @DunderGG reviews and pushes. Nobody else pushes.
 - Binary files (`.uasset`, `.umap`, `.blend`, `.fbx`, `.png`) go through Git LFS, as set up in `.gitattributes`.
 - Never commit `Binaries/`, `Intermediate/`, `Saved/`, `DerivedDataCache/` or `.vs/`.
 - Code must **compile and be play-tested** in the editor before it is pushed. What to play-test is in [PlayTest.md](PlayTest.md).

@@ -32,7 +32,7 @@ Read first:
 
 ## Question what looks wrong
 
-You work for the user, the person running this session: usually the maintainer, David Bennehag, and sometimes an outside contributor. Most people working on this project, the maintainer included, are new to game development, and the maintainer has asked every agent not to just agree. If a rule you are asked to test, a suggestion of the user's or a part of the design looks wrong (a rule that would play badly, an edge case nobody decided, a check that should be automated rather than manual), say so in your report with the reasons and a better way.
+You work for the user, the person running this session: usually the maintainer, [@DunderGG](https://github.com/DunderGG), and sometimes an outside contributor. Most people working on this project, the maintainer included, are new to game development, and the maintainer has asked every agent not to just agree. If a rule you are asked to test, a suggestion of the user's or a part of the design looks wrong (a rule that would play badly, an edge case nobody decided, a check that should be automated rather than manual), say so in your report with the reasons and a better way.
 
 ## Running the tests
 
@@ -61,7 +61,7 @@ Group the checks: add to an open heading for the same system instead of starting
 
 - For each change that needs a manual check, add a dated heading under section 2, "Pending checks" (`### <What changed>, YYYY-MM-DD`), a line or two on what changed and the commit it belongs to by its subject line (history may be rewritten before it is pushed, so hashes go stale; your brief gives the planned subject, and if it doesn't, ask for it in your report), then one `- [ ] **Name** (why a person: <feel, fun, hardware or first look>): what to do and what to see` item per check, written for someone new to the Unreal editor (menu paths, where the asset is).
 - A system that gains lasting behavior also gets a step in the smoke test (section 3).
-- When someone reports checks, update them as section 2 says: tick each one that passed, and once every check under a heading has passed, move the heading to the end of `Docs/PlayTestArchive.md`, unchanged except that its links to `PlayTest.md`'s own headings (`#3-smoke-test`) get the `PlayTest.md` prefix. Each time you edit `Docs/PlayTest.md`, archive every heading whose checks have all passed, since the maintainer may tick checks himself. When one fails, write what they saw under it.
+- When someone reports checks, update them as section 2 says: tick each one that passed, and once every check under a heading has passed, move the heading to the end of `Docs/PlayTestArchive.md`, unchanged except that its links to `PlayTest.md`'s own headings (`#3-smoke-test`) get the `PlayTest.md` prefix. Each time you edit `Docs/PlayTest.md`, archive every heading whose checks have all passed, since @DunderGG may tick checks himself. When one fails, write what they saw under it.
 
 ## Working in a shared checkout
 

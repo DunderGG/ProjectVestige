@@ -15,18 +15,18 @@ Play-test headings whose checks have all passed, moved unchanged from [PlayTest.
 
 ### Smooth turning, 2026-10-30
 
-Replaces the tap to turn, walking and feel checks of the tile targeting change, after the maintainer's notes that turns snapped round and the farmer stood still before walking. Walking now eases in over 0.25 s from a press, and every turn goes through the movement component at 540 degrees per second (GameDesign.md, section 6). Both are the maintainer's tuning from play.
+Replaces the tap to turn, walking and feel checks of the tile targeting change, after @DunderGG's notes that turns snapped round and the farmer stood still before walking. Walking now eases in over 0.25 s from a press, and every turn goes through the movement component at 540 degrees per second (GameDesign.md, section 6). Both are @DunderGG's tuning from play.
 
 - [x] **Tap** (a3e118b): a quick tap of W, A, S or D turns the farmer smoothly toward that tile, with no pop, and he moves no more than a few centimetres. The frame moves to the neighbouring tile in that direction, and after a tap he is still on his own tile.
 - [x] **Walking** (a3e118b): holding a key walks at once, with no pause before he starts, and the frame stays one tile ahead in the direction of travel.
 - [x] **No double turn** (a3e118b): turn the camera to an angle to the field (about 30 degrees) and tap or walk. The farmer turns once, without snapping one way and sliding back.
 - [x] **Settling** (a3e118b): after walking at an angle and letting go, he finishes turning to face the framed tile.
 - [x] **Tuning** (a3e118b): if a tap moves too far or the walk feels slow to start, change Move Ramp Seconds on `BP_Farmer` in `Content/Farm/Blueprints` (Details panel, Farming > Input; lower walks sooner, higher keeps taps smaller). If turns feel slow or too snappy, change Rotation Rate Z on its Character Movement component (Details panel, select CharacterMovement, Character Movement (Rotation Settings)). Note the values that feel right.
-   - The maintainer tuned them in play on 2026-10-30 (300 degrees per second and 0.5 s felt heavy; 540 and 0.25 feel good), and they are now the C++ defaults. Still open for more tuning.
+   - @DunderGG tuned them in play on 2026-10-30 (300 degrees per second and 0.5 s felt heavy; 540 and 0.25 feel good), and they are now the C++ defaults. Still open for more tuning.
 
 ### Message boxes, 2026-10-30
 
-Replaces the earlier messages check (c87081e), after the maintainer's note that messages stacked in one box read like a log.
+Replaces the earlier messages check (c87081e), after @DunderGG's note that messages stacked in one box read like a log.
 
 - [x] **Separate boxes** (826f80b): every message shows in a small box of its own, stacked above the key hints with a gap between them. Sleeping shows "You slept. Day N begins." and "Game saved." as two boxes.
 - [x] **Own timers** (826f80b): each box fades in, stays about three seconds and fades out on its own. Use a tool, wait a second and use it again: the first box fades a second before the second.
@@ -158,7 +158,7 @@ Holding E keeps using the tool: the next use starts when the last one has finish
 
 ### Slower walk while holding E, 2026-11-03
 
-After the maintainer's play-test: the farmer walks at half speed while E is held, so a row is worked evenly. The tests check the speed; these checks are for the feel. The commit is the one titled "Walk at half speed while E is held".
+After @DunderGG's play-test: the farmer walks at half speed while E is held, so a row is worked evenly. The tests check the speed; these checks are for the feel. The commit is the one titled "Walk at half speed while E is held".
 
 - [x] **Slower**: holding E while walking along a row moves at about half speed, and every tile of the row is worked. Letting go brings back the normal walk at once.
 - [x] **No E, no change**: walking without E, and jumping or falling with E held, feel as before.
@@ -166,7 +166,7 @@ After the maintainer's play-test: the farmer walks at half speed while E is held
 
 ### No tools in the air, 2026-11-03
 
-After the maintainer found that jumping got round the slower walk: tools don't work while the farmer is in the air, a held E carries on when he lands, and a jump with E held is slowed like the walk. The tests cover the rules. The commit is the one titled "Keep tools on the ground".
+After @DunderGG found that jumping got round the slower walk: tools don't work while the farmer is in the air, a held E carries on when he lands, and a jump with E held is slowed like the walk. The tests cover the rules. The commit is the one titled "Keep tools on the ground".
 
 - [x] **Jumping**: hold E with the hoe and jump along a row of grass. No tile changes while he is in the air, and the tile he faces when he lands is tilled.
 - [x] **No speed-up**: with E held, jumping along the row is no faster than walking it.
@@ -219,7 +219,7 @@ The sun (and the moon at night) now turns in quarter-degree steps instead of eve
 `L_Farm`'s day cycle runs a game hour in about 1.5 seconds, which turns the sun every few frames anyway. To see the steps at the normal pace, select the `VestigeDayCycle` in `L_Farm` and set **Real Seconds Per Game Hour** (Details panel, **Time**) to 40 for these checks, then set it back without saving the level, or tell me if 40 should stay.
 
 - [x] **Midday shadows**: press Play and watch the farmer's and the crops' shadows for a game hour around midday. They creep along as before, with no visible jumps or flicker.
-- [x] **Sunrise, sunset and moonlight** (2026-11-05: the maintainer saw small jumps at 0.25 and 0.1 degrees with the clock at 40 seconds per game hour; 0.05 looks smooth and is now the default): watch the long shadows just after 06:00, before 20:00, and the moon's shadows after 20:00. They move in small hops about every half second. Say whether the hops are noticeable; if they are, lower **Sun Step Degrees** on the `VestigeDayCycle` (Details panel, **Lighting**) and tell me which value looks smooth.
+- [x] **Sunrise, sunset and moonlight** (2026-11-05: @DunderGG saw small jumps at 0.25 and 0.1 degrees with the clock at 40 seconds per game hour; 0.05 looks smooth and is now the default): watch the long shadows just after 06:00, before 20:00, and the moon's shadows after 20:00. They move in small hops about every half second. Say whether the hops are noticeable; if they are, lower **Sun Step Degrees** on the `VestigeDayCycle` (Details panel, **Lighting**) and tell me which value looks smooth.
 - [x] **Smooth fades**: the warm sunrise colour, the evening dimming and the darkening into night still fade without steps.
 - [x] **New day**: sleep in the bed. The morning starts with the sun at its sunrise position at once, not turning there over a few seconds.
 
@@ -243,7 +243,7 @@ The volumetric clouds take fewer samples at High, Medium and Low, set in `Config
 
 The clock and the farm moved out of the level into the game instance; the grid, its tiles and the day cycle's lighting now only show them. The rules are covered by tests; these checks are for the editor and play. The commit is the one titled "Move the clock and the farm data into the game instance".
 
-- [x] **Leftover nodes** (done by the maintainer, 2026-11-05): open `BP_PlayerCharacter`. It shows compile errors from the Print String nodes left from the extension point checks (Get Day Cycle, Bind Event to On New Day, Print String in the Event Graph). Delete those nodes, compile and save. This also finishes the housekeeping item in [Roadmap.md, section 3](Roadmap.md#3-housekeeping). Until then the test `Vestige.Farming.AFullBagLeavesTheCropInTheGround`, the first to load the Blueprint, fails on the compile errors.
+- [x] **Leftover nodes** (done by @DunderGG, 2026-11-05): open `BP_PlayerCharacter`. It shows compile errors from the Print String nodes left from the extension point checks (Get Day Cycle, Bind Event to On New Day, Print String in the Event Graph). Delete those nodes, compile and save. This also finishes the housekeeping item in [Roadmap.md, section 3](Roadmap.md#3-housekeeping). Until then the test `Vestige.Farming.AFullBagLeavesTheCropInTheGround`, the first to load the Blueprint, fails on the compile errors.
 - [x] **Old save refused**: press Play. The HUD says the save couldn't be read and saving is off (the save version is now 2). Type `NewGame` in the console; the map reopens on day 1.
 - [x] **Clock settings**: Project Settings > Game > **Vestige Clock** shows Real Seconds Per Game Hour (40), Day Start Hour (6) and Day End Hour (30). The sky lighting actor in `L_Farm` (`VestigeDayCycle` until 2026-11-05) shows only **Lighting**; since 2026-11-05 the sunrise and sunset hours are in the clock settings (see Sky lighting, 2026-11-05). The clock now runs at 40 seconds per game hour; `slomo 20` in the console speeds it up for testing. Tell me if L_Farm's old fast clock should come back as the project setting.
 - [x] **Grid**: the `FarmGrid` in `L_Farm` shows **Field Id** `Base.Farm` under **Farming**.
@@ -313,7 +313,7 @@ The toolbar is now the bag's first nine slots: keys 1 to 9 select a slot, and th
 - [x] **The last seed**: plant until the seeds run out. After the last one the status line shows "Empty hand", the 2 hint disappears and the farmer's hand empties; the next E with 2 does what the hand does.
 - [x] **Holding E with seeds**: with 2 seeds left, hold E with the seeds and walk along two tilled tiles: both are planted, then the repeat stops quietly.
 - [x] **Can you tell how to harvest?** Empty slots have no hint, and the 4 Hand hint is gone. Play a little as a new player would: is it clear that an empty slot (or holding a crop) harvests? Write what you think; a hint for the hand can come with the UMG hotbar.
-   - No, it wasn't clear (the maintainer, 2026-11-07). Harvesting moved to F, with a prompt on the ripe crop: [Harvesting with F](#harvesting-with-f-2026-11-07) below.
+   - No, it wasn't clear (@DunderGG, 2026-11-07). Harvesting moved to F, with a prompt on the ripe crop: [Harvesting with F](#harvesting-with-f-2026-11-07) below.
 - [x] **Saving**: select the watering can (3), sleep in the bed, stop and play again: the watering can is still in hand.
 
 ### Harvesting with F, 2026-11-07
@@ -334,8 +334,8 @@ Gameplay no longer writes the player's messages: it reports what happened as a t
 - [x] **Solution**: regenerate the project files (right-click `Vestige.uproject` > Generate Visual Studio project files): the solution lists `UI/VestigeFeedbackResponses.h` and `.cpp`.
 - [x] **Quiet work**: hold E with the hoe across a row of grass, then plant, water and harvest it. No message shows for any use that worked.
 - [x] **Reasons**: one press of E shows its reason once for each of these: the hoe on tilled soil ("Only grass can be tilled."), the watering can on grass ("Nothing to water here."), seeds on grass ("Seeds need empty tilled soil."), an empty hotbar slot ("Nothing in hand to use."), and any tool facing away from the field ("Stand facing a farm tile."). F on a ripe crop with a full bag shows "No room in your bag." and the crop stays. Holding E on such a tile shows the reason once, not again and again.
-- [x] **Day and stamina**: sleep: "You slept. Day N begins." shows, and "Game saved." no longer does. (Passed; the maintainer then gave the row the text "Game Saved!", which shows after it.) Running out of stamina, 22:00, midnight and waking exhausted show their messages as before, and a Play with a save shows "Welcome back. Day N."
-- [x] **Log**: the Output Log, filtered on `LogVestigeFeedback`, shows a line per report such as `UVestigeFeedbackSubsystem::Report: Vestige.Feedback.Day.Slept Day=2`, also for the save (`Vestige.Feedback.Save.Saved`), which showed nothing on screen until the maintainer gave it a text.
+- [x] **Day and stamina**: sleep: "You slept. Day N begins." shows, and "Game saved." no longer does. (Passed; @DunderGG then gave the row the text "Game Saved!", which shows after it.) Running out of stamina, 22:00, midnight and waking exhausted show their messages as before, and a Play with a save shows "Welcome back. Day N."
+- [x] **Log**: the Output Log, filtered on `LogVestigeFeedback`, shows a line per report such as `UVestigeFeedbackSubsystem::Report: Vestige.Feedback.Day.Slept Day=2`, also for the save (`Vestige.Feedback.Save.Saved`), which showed nothing on screen until @DunderGG gave it a text.
 - [x] **Edit without a build**: open `DA_FeedbackResponses` (`Content/Vestige/UI`), give the `Vestige.Feedback.Save.Saved` row the text "Game saved.", save and Play, then sleep: the text shows. Put it back afterwards, or tell the agent to keep it. (Kept as "Game Saved!", 2026-11-08.)
 - [x] **Missing row**: remove the `Vestige.Feedback.Farm.CantWater` row, Play and water grass: nothing shows, and the Output Log has a `LogVestigeFeedback` warning naming the tag and `DA_FeedbackResponses`. Close the asset without saving.
 - [x] **No grid**: in a level without a `BP_FarmGrid`, Play: no message on screen, and the Output Log warns that the level has no FarmGrid.

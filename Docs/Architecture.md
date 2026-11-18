@@ -212,7 +212,7 @@ Two things stay true at the same time: designs and code follow the always-on rul
 
 ### Budget
 
-**Target hardware (confirmed by the maintainer, 2026-10-29):** a 2020-era mid-range PC (an RTX 2060 or RX 5600 XT class GPU, a 6-core CPU, 16 GB of memory, an SSD) at 1920x1080 and the High scalability level.
+**Target hardware (confirmed by @DunderGG, 2026-10-29):** a 2020-era mid-range PC (an RTX 2060 or RX 5600 XT class GPU, a 6-core CPU, 16 GB of memory, an SSD) at 1920x1080 and the High scalability level.
 
 | Budget | Limit | Notes |
 |---|---|---|

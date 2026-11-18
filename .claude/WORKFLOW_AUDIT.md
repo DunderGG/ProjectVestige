@@ -2,7 +2,7 @@
 
 **Date:** 2026-11-14  
 **Scope:** `AGENTS.md`, `CLAUDE.md`, `.claude/README.md`, `.claude/settings.json`, `.claude/agent-flow.puml`, the seven `.claude/agents/*.md` files, and the workflow entries in `Docs/DecisionLog.md`.  
-**Status:** Fixes 1 to 6 and 8 are applied (see "Implementation status"). Fixes 7 and 9 wait for usage data and the maintainer's go-ahead. Every applied change had the maintainer's yes (`AGENTS.md`, "What still needs the maintainer's yes") and has a `Docs/DecisionLog.md` entry dated 2026-11-14.
+**Status:** Fixes 1 to 6 and 8 are applied (see "Implementation status"). Fixes 7 and 9 wait for usage data and @DunderGG's go-ahead. Every applied change had @DunderGG's yes (`AGENTS.md`, "What still needs the maintainer's yes") and has a `Docs/DecisionLog.md` entry dated 2026-11-14.
 
 This document replaces an earlier audit and a second review of it. The first pass over-read some documents and missed others, so every finding was re-checked against the repository files and Claude Code's published documentation ([permissions](https://code.claude.com/docs/en/permissions), [subagents](https://code.claude.com/docs/en/sub-agents)). Only the fixes that survived that check are below. Findings that did not survive are in the appendix, with the reason, so nobody re-raises them.
 
@@ -18,7 +18,7 @@ This document replaces an earlier audit and a second review of it. The first pas
 | 6. Out-of-date statements | Applied: nested subagents, hard-coded sizes, and the diagram, which now shows a lane-picking step that branches into the writing route and lanes A, B and C (re-rendered) | Correct outdated statements in the workflow files; Show lanes and the editor lock in the agent flow diagram; Draw the lanes in the agent flow diagram |
 | 7. `effort`, `maxTurns`, Sonnet trial | Not started: needs usage data from a few tasks first | |
 | 8. Reversibility tag | Applied | Work each roadmap item in a fresh session |
-| 9. Usage log | Not started: needs the maintainer's go-ahead, because it reads personal transcript files | |
+| 9. Usage log | Not started: needs @DunderGG's go-ahead, because it reads personal transcript files | |
 
 **To confirm on first real use:**
 
@@ -29,20 +29,20 @@ This document replaces an earlier audit and a second review of it. The first pas
 
 ## Summary
 
-The workflow's safeguards are good and should stay: one owner per responsibility, an independent reviewer, tests for every changed rule, a failing test first for bug fixes, and an explicit list of decisions reserved for the maintainer. The weaknesses are in how work is **routed**, how often the main session is **re-read**, and how many **permission prompts** reach the maintainer. In priority order:
+The workflow's safeguards are good and should stay: one owner per responsibility, an independent reviewer, tests for every changed rule, a failing test first for bug fixes, and an explicit list of decisions reserved for @DunderGG. The weaknesses are in how work is **routed**, how often the main session is **re-read**, and how many **permission prompts** reach @DunderGG. In priority order:
 
 1. The main session's turn count was the largest measured cost, and nothing in the workflow limits it before it has built up.
 2. "When in doubt, run the full flow" sends uncertain work to the most expensive path, and "doubt" has no boundary.
-3. The agents' own procedure (scratch files outside the repository, long raw commands) causes permission prompts that all reach the maintainer.
+3. The agents' own procedure (scratch files outside the repository, long raw commands) causes permission prompts that all reach @DunderGG.
 4. Three smaller process gaps: who reruns the suite after a fix round, report files written when nobody needs them, and statements in the docs that are now wrong.
 
 ## What to keep
 
-- Independent code and design review, and the reviewer treating the maintainer's ideas as proposals to check.
+- Independent code and design review, and the reviewer treating @DunderGG's ideas as proposals to check.
 - Automated tests for every changed rule, and a test that fails before a bug is fixed.
 - A build and a full suite run after the last source change.
 - Human decisions reserved for game feel, game design, licensing, money and anything that can't be undone.
-- The maintainer's recorded decision to let work continue on a recommended option while a design question is open, because the code built on it is kept cheap to change (see appendix, item A).
+- @DunderGG's recorded decision to let work continue on a recommended option while a design question is open, because the code built on it is kept cheap to change (see appendix, item A).
 - Narrow command permissions. Do not allow arbitrary shells, Python or editor commands just to stop the prompts.
 
 ## Evidence and limits
@@ -64,8 +64,8 @@ The workflow's safeguards are good and should stay: one owner per responsibility
 
 **Not measured, so treat as open:**
 
-- Real token usage and cost per role across several tasks. Claude Code keeps session transcripts in the user profile, so this is possible, but it reads personal data and needs the maintainer's go-ahead.
-- Which permission mode the maintainer uses and which model his main session runs on. `.claude/settings.local.json` is git-ignored and not in the checkout.
+- Real token usage and cost per role across several tasks. Claude Code keeps session transcripts in the user profile, so this is possible, but it reads personal data and needs @DunderGG's go-ahead.
+- Which permission mode @DunderGG uses and which model his main session runs on. `.claude/settings.local.json` is git-ignored and not in the checkout.
 - How an allow rule for a script call is matched (`PowerShell(& ./Tools/x.ps1 *)` or without the `&`). The documentation shows the rule shape but not the call operator, so the first run settles it.
 - How long the test suite takes to run.
 - Which version of Claude Code is installed (some features below need recent versions).
@@ -90,8 +90,8 @@ The workflow's safeguards are good and should stay: one owner per responsibility
 
 **Fix.** Three lanes, plus a list of tripwires:
 
-- **Lane A, trivial:** typos, lore, a value the maintainer already chose, a one-function fix with no rule change. One agent and one code review (today's "small task").
-- **Lane B, standard change inside an established system:** no game designer unless `Docs/GameDesign.md` and the maintainer's words leave player-facing behaviour open; **no architect and no design review**. Implementer, then test author if a rule changed, then one code review.
+- **Lane A, trivial:** typos, lore, a value @DunderGG already chose, a one-function fix with no rule change. One agent and one code review (today's "small task").
+- **Lane B, standard change inside an established system:** no game designer unless `Docs/GameDesign.md` and @DunderGG's words leave player-facing behaviour open; **no architect and no design review**. Implementer, then test author if a rule changed, then one code review.
 - **Lane C, new design:** the full flow.
 
 **Tripwires.** If any one applies, the change is Lane C:
@@ -105,7 +105,7 @@ The workflow's safeguards are good and should stay: one owner per responsibility
 
 **Tie-break:** unsure whether a *tripwire* applies means Lane C. Unsure about anything else means Lane B.
 
-**Safety net.** The main session puts a two-line routing note in the brief to the reviewer (owner class, tripwires checked). The code review verifies it, and a crossed tripwire is a `CHANGES NEEDED` finding that sends the task back to Lane C. This keeps independent checking, which matters because the maintainer cannot yet catch an architectural mistake himself.
+**Safety net.** The main session puts a two-line routing note in the brief to the reviewer (owner class, tripwires checked). The code review verifies it, and a crossed tripwire is a `CHANGES NEEDED` finding that sends the task back to Lane C. This keeps independent checking, which matters because @DunderGG cannot yet catch an architectural mistake himself.
 
 **Expected effect.** Lane B skips the two most expensive steps. No number can be given without usage data. The list above is a draft: adjust the tripwires after the first few tasks.
 
@@ -113,7 +113,7 @@ The workflow's safeguards are good and should stay: one owner per responsibility
 
 **Problem.** The documentation says:
 
-- Subagents that Claude starts run in the background by default, and **every permission prompt from one surfaces in the main session**, so each un-allowed command interrupts the maintainer.
+- Subagents that Claude starts run in the background by default, and **every permission prompt from one surfaces in the main session**, so each un-allowed command interrupts @DunderGG.
 - Reads outside the working directory and edits outside the working directory and additional directories need approval, and output redirects are checked the same way.
 - `.claude/settings.json` allows `Build.bat` and a few read commands, but not the documented test command (`UnrealEditor-Cmd.exe … Automation RunTests`), the off-screen game launch, Blender or the headless asset scripts.
 
@@ -123,12 +123,12 @@ All seven agent files send reports, build logs, scripts and `-userdir` folders t
 
 1. Use **`Saved/AgentWork/<task>/`** for reports, logs, editor scripts and `-userdir`. `Saved/` is already git-ignored (`.gitignore` line 3) and is inside the working directory, so no permission is widened. Delete the task folder after the commit so it does not grow.
 2. Move the exact build and test commands into a committed script (Fix 4) and allow **one narrow rule** for it instead of several long raw commands. The script takes no parameter that runs an arbitrary command.
-3. **Keep asset-changing commands gated.** Headless editor scripts and Blender can modify project files; they should keep prompting until the maintainer has approved the exact scope.
+3. **Keep asset-changing commands gated.** Headless editor scripts and Blender can modify project files; they should keep prompting until @DunderGG has approved the exact scope.
 4. Confirm the allow-rule form on the first run.
 
 This applies to Claude Code's permission system only. Copilot in VS Code has its own approval prompts that these rules do not affect.
 
-**Risk.** It changes permissions, so the maintainer approves the exact rule, and the script goes through the implementer and a code review like any code.
+**Risk.** It changes permissions, so @DunderGG approves the exact rule, and the script goes through the implementer and a code review like any code.
 
 ### Fix 4. One verify script that builds and runs the suite (Medium)
 
@@ -171,18 +171,18 @@ This applies to Claude Code's permission system only. Copilot in VS Code has its
 
 ### Fix 8. Tag each technical decision as easy or hard to undo (Low)
 
-`AGENTS.md` step 6 already requires the reply to list the technical decisions taken, a line each, "so they can question any of them". Add a short tag to each line saying whether it is **easy or hard to undo**, so the maintainer can see which ones deserve his attention. This is a wording change to an existing rule.
+`AGENTS.md` step 6 already requires the reply to list the technical decisions taken, a line each, "so they can question any of them". Add a short tag to each line saying whether it is **easy or hard to undo**, so @DunderGG can see which ones deserve his attention. This is a wording change to an existing rule.
 
 ### Fix 9. Log usage automatically (Low, optional)
 
-Counting tokens by hand conflicts with the maintainer's goal of minimal input, and judging cost per accepted task (tokens, interruptions and rework rounds together) is better than judging each agent call alone. Claude Code has a `SubagentStop` hook, and each subagent's transcript is stored under the user profile. A small hook script could append one line per agent (name, model, tokens) to `Saved/AgentWork/usage.csv`. The fields the hook receives were not verified, and it reads personal transcript files, so this needs the maintainer's go-ahead. Try it on a throwaway task first.
+Counting tokens by hand conflicts with @DunderGG's goal of minimal input, and judging cost per accepted task (tokens, interruptions and rework rounds together) is better than judging each agent call alone. Claude Code has a `SubagentStop` hook, and each subagent's transcript is stored under the user profile. A small hook script could append one line per agent (name, model, tokens) to `Saved/AgentWork/usage.csv`. The fields the hook receives were not verified, and it reads personal transcript files, so this needs @DunderGG's go-ahead. Try it on a throwaway task first.
 
 ## Plan
 
 | Phase | What | Effort | Risk |
 |---|---|---|---|
-| **0. Words only** | Fixes 1, 2, 6 and 8: fresh session per roadmap item, lanes and tripwires, corrected sentences, the reversibility tag | About an hour | Low. Needs the maintainer's yes and a decision-log entry |
-| **1. Tooling** | Fixes 3, 4 and 5: `Saved/AgentWork/`, `Tools/Verify-Vestige.ps1`, one narrow allow rule, reports only when needed | About a day | Medium. It changes permissions, so the maintainer approves the exact rule; the script goes through the implementer and a code review |
+| **0. Words only** | Fixes 1, 2, 6 and 8: fresh session per roadmap item, lanes and tripwires, corrected sentences, the reversibility tag | About an hour | Low. Needs @DunderGG's yes and a decision-log entry |
+| **1. Tooling** | Fixes 3, 4 and 5: `Saved/AgentWork/`, `Tools/Verify-Vestige.ps1`, one narrow allow rule, reports only when needed | About a day | Medium. It changes permissions, so @DunderGG approves the exact rule; the script goes through the implementer and a code review |
 | **2. Measure and tune** | Fix 7 and optionally Fix 9 | Over the next tasks | Low. Each change is easy to revert |
 | **3. Only if cost stays too high** | Consolidate the repeated paragraphs across the agent files; try an orchestrator subagent | Later | Higher. Worth doing only if phases 0 to 2 are not enough |
 
@@ -190,7 +190,7 @@ Counting tokens by hand conflicts with the maintainer's goal of minimal input, a
 
 ## Appendix: earlier findings not adopted
 
-**A. "Continuing on the recommendation can bypass the user's decision." Rejected.** The audit missed the clause in `AGENTS.md` that limits it: "the code built on the recommended option is kept cheap to change", plus the rule that an unanswered question goes into `Docs/GameDesign.md` section 15. It is also the maintainer's own recorded decision (`Docs/DecisionLog.md`, 2026-11-13: he asked to be needed as little as possible, and "every question to the maintainer, which stalled small tasks" is a rejected option). Pausing dependent work would increase the human input he asked to reduce. Irreversible cases (save formats, deleting without a copy, licensing) are already on the maintainer's-yes list.
+**A. "Continuing on the recommendation can bypass the user's decision." Rejected.** The audit missed the clause in `AGENTS.md` that limits it: "the code built on the recommended option is kept cheap to change", plus the rule that an unanswered question goes into `Docs/GameDesign.md` section 15. It is also @DunderGG's own recorded decision (`Docs/DecisionLog.md`, 2026-11-13: he asked to be needed as little as possible, and "every question to @DunderGG, which stalled small tasks" is a rejected option). Pausing dependent work would increase the human input he asked to reduce. Irreversible cases (save formats, deleting without a copy, licensing) are already on the maintainer's-yes list.
 
 **B. "The flow diagram lets the implementer and test author run in parallel." Rejected; the finding was factually wrong.** The fork in `agent-flow.puml` is between the code branch and the art branch. Inside the code branch the order is implementer, test author, code review, and the legend states the bug-fix exception. The only true remainder is the editor/build note in Fix 6.
 

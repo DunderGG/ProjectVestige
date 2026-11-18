@@ -159,7 +159,7 @@ Changes made in response to this audit. None of them replaces the lawyer's check
 | Finding | Status | What changed |
 |---|---|---|
 | LIC-01 | Addressed | Kept CC BY-NC-SA 4.0 for assets on purpose. `LICENSING.md` now says plainly that commercial asset use is reserved to the maintainer, that forks may sell GPL code but not the assets, and no longer calls the whole repository "open". |
-| LIC-02 | Addressed | The maintainer chose the narrow grant. Contributor terms (version 2) let the maintainer use contributions in official builds and accept store terms, but official builds keep their code under the GPL, so nobody (the maintainer included) can make a closed-source version. |
+| LIC-02 | Addressed | @DunderGG chose the narrow grant. Contributor terms (version 2) let the maintainer use contributions in official builds and accept store terms, but official builds keep their code under the GPL, so nobody (the maintainer included) can make a closed-source version. |
 | LIC-03 | Addressed, needs legal review | The additional permission is now in `LICENSE-EXCEPTION.txt` next to `LICENSE`, with a scope section. Our source files carry a copyright line and SPDX identifier pointing to it. |
 | LIC-04 | Addressed | Contributions are accepted only as pull requests; issues and ideas are not contributions. The PR template has a terms checkbox naming the terms version; PRs merge only when it is ticked, and the PR is the record. |
 | LIC-05 | Addressed | `LICENSING.md` and the contributor terms state the public grant and the maintainer's grant separately, including what it covers (stores, consoles, porting studios and publishers working for him) and what license applies to code and assets in an official build. |
