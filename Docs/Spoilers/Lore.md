@@ -351,7 +351,8 @@ Newest first. Add an entry whenever a lore choice is made or reversed. Never del
 
 | Date | Decision | Why |
 |---|---|---|
-| 2026-11-15 | **Provisional, pending David (big canon: the tone's mix).** Added [section 15](#15-tone-and-the-darkest-material) on the recommended balance, "warm with a shadow": three registers (surface, company, harm), humor aimed at objects, ads, propaganda and routines and never at people in pain, and a content baseline of aftermath only. The options and sample lines are in its pending decision | LoreAudit L-09 asked for one shared rule for the darkest material, and L-51 needs a place to point to. The balance is the writer's recommendation until David answers; no canon fact depends on it |
+| 2026-11-15 | **Decided by David (big canon: the tone's mix and the content baseline).** He approved option A, "Warm with a shadow", as the tone's mix: three registers (surface, company, harm), humor aimed at objects, ads, propaganda and routines and never at people in pain. He also approved the content baseline in [section 15](#15-tone-and-the-darkest-material) (aftermath only, no on-screen procedures, no gore, nothing sexual) as the default "for now": a working default, open to revisiting if the story's scope changes, not a permanent lock. The options B and C he did not choose are kept in the section's [decision record](#decision-the-tones-mix). Supersedes the provisional entry below | Closes LoreAudit L-09 (the comedy pass and scene revisions stay open as L-51). In his words: "A sounds good" and "the default sounds good for now". No canon fact depends on it |
+| 2026-11-15 | *Superseded by the entry above.* Provisional, pending David (big canon: the tone's mix). Added [section 15](#15-tone-and-the-darkest-material) on the recommended balance, "warm with a shadow": three registers (surface, company, harm), humor aimed at objects, ads, propaganda and routines and never at people in pain, and a content baseline of aftermath only. The options and sample lines were in its pending decision | LoreAudit L-09 asked for one shared rule for the darkest material, and L-51 needs a place to point to. The balance was the writer's recommendation until David answered; no canon fact depends on it |
 | 2026-11-15 | Decided by the writer within its limits: the living exhibit is condemned as a practice and met only on the survivor's terms; the clinic robot is meant to unsettle briefly and then disarm, asks before it examines, took no part in the trials, and whether it suspects its own ledger stays open | Settles the question L-09 left open without changing the timeline's survivor-led rules. Keeps the clinic robot's "missing names" clue open to later decisions, and keeps membership from being proof of knowledge or guilt |
 | 2026-11-15 | Decided by the writer within its limits: the trials' own euphemisms ("transferred", "nonviable", "subject", "accession code", "calibration noise", "housing") stay out of ordinary jokes, and a survivor may joke about their own ordeal while others follow their lead | Keeps early clues ordinary until the reveal, so nothing planted early turns sour afterward, and keeps humor about harm with the person who lived it |
 | 2026-11-13 | The Authority uses a discreet internal seal on restricted records and locations, but has no public symbol or uniform | Allows a visual clue for attentive discovery without making the Authority publicly identifiable or letting an isolated mark prove its involvement. |
@@ -422,12 +423,11 @@ Newest first. Add an entry whenever a lore choice is made or reversed. Never del
 - **The nomad:** their name, gender and pronouns, and which circuit contacts become named on-screen characters.
 - **Whether Wellspring is the final town name**, along with the region's name, the world's name and the game title (shared with GameDesign).
 - **The sibling:** their role, survival path, and when or whether the player meets them.
-- **The tone's mix (for David):** how the funny and the grim touch each other. Section 15 is built on option A, and its [pending decision](#pending-decision-the-tones-mix) lists the options with sample lines.
-- **Content boundaries (for David):** how far the story may show harm, captivity, medical subjects, death or intimacy. Until he decides, the default in section 15 holds: aftermath only, nothing graphic, nothing sexual.
+- **Content boundaries (default approved for now):** how far the story may show harm, captivity, medical subjects, death or intimacy beyond the [content baseline](#content-baseline) in section 15 (aftermath only, no on-screen procedures, no gore, nothing sexual). David approved the baseline as the default on 2026-11-15, "for now"; revisit it with him if the story's scope changes.
 
 ## 15. Tone and the darkest material
 
-> **Provisional.** This section is built on the writer's recommended balance (option A in the [pending decision](#pending-decision-the-tones-mix)) and is the working rule until David decides the tone's mix. The sample lines are illustrations for writers, not scene text, and none is Ready for the game.
+> **Approved by David on 2026-11-15.** He approved the tone's mix, option A "Warm with a shadow" (see the [decision](#decision-the-tones-mix)), and approved the [content baseline](#content-baseline) as the default "for now": it is the working default, open to revisiting if the story's scope changes. The sample lines are illustrations for writers, not scene text, and none is Ready for the game.
 
 This is the one place that says when the story is funny, whom the joke is about and where humor stops. [Pillar 4](../GameDesign.md#2-pillars) sets the aim: a serious world with a light touch. Scene rewrites, new scenes and found texts point here. What happened stays in sections 3 to 9, and the reveal and knowledge rules stay in the [timeline guardrails](StoryTimeline.md#reveal-and-knowledge-guardrails).
 
@@ -477,9 +477,9 @@ An ache inside a joke is allowed when it belongs to the character. The routine i
 - **Asking is courtesy.** Ask once, in plain words. Humor may sit around the form (its small print), never on the answer.
 - **Nothing times out.** A light line the player skips costs nothing.
 
-### Content baseline (provisional)
+### Content baseline
 
-Harm is shown through its aftermath: records, places and what survivors choose to say. No on-screen procedures, no gore, no scene that rebuilds suffering for effect, nothing sexual. This is the standing default until David sets the content boundaries.
+Harm is shown through its aftermath: records, places and what survivors choose to say. No on-screen procedures, no gore, no scene that rebuilds suffering for effect, nothing sexual. David approved this as the default on 2026-11-15, "for now". Writers do not go past it on their own. If the story's scope changes and a scene seems to need more, raise it with him before writing it.
 
 ### Do and don't (illustrations)
 
@@ -492,12 +492,12 @@ Harm is shown through its aftermath: records, places and what survivors choose t
 | The exhibit's place | A sign by the glass: "Observers: please log each observation. Do not tap the glass." | An ally: "Well, at least the view was good." (A quip at a captive's expense.) |
 | Closing a scene | Hob: "Kettle's on. Take the blanket." | Hob: "Some questions are better carried than answered." (General wisdom as a scene exit.) |
 
-### Pending decision: the tone's mix
+### Decision: the tone's mix
 
-**For David.** How should the funny and the grim touch each other? The same moment in each option: the morning after the player first finds the institute, the weather robot Sunny reads the forecast on the farm radio.
+**Decided by David, 2026-11-15: option A.** He was asked how the funny and the grim should touch each other, shown with the same moment in each option (the morning after the player first finds the institute, when the weather robot Sunny reads the forecast on the farm radio). The writer had recommended A, because it matches pillar 4 and the opening's promise, and the grim lands harder against warmth.
 
-- **A. Warm with a shadow (recommended, and assumed until he decides).** Jokes live in the world's objects and institutions, never in people in pain. The cheerful world carries on, and the contrast does the work. *Sunny: "Good morning, Wellspring! Light haze, a gentle breeze and no radiation storms before Thursday. Please enjoy the day responsibly." Hob turns the volume down, puts the kettle on and says nothing.*
-- **B. Two worlds apart.** Town and farm are funny; the harm chapters carry no comedy, and the cheerful objects go quiet there too. The safest option. It costs the contrast, and the harm chapters become one solemn register. *Hob leaves the radio off. The farm is quiet all morning, and nobody mentions the weather.*
-- **C. Dark comedy.** Satire reaches into the harm itself, through the institutions' own cheerful voices. Sharper and more memorable, and the most likely to land on a survivor; it conflicts with the faction sheets' rule that nothing softens the harm. *Sunny: "Our thoughts go to the Index's Observation Program, closed for refurbishment. We apologize for any inconvenience to the exhibit."*
+- **A. Warm with a shadow (chosen).** Jokes live in the world's objects and institutions, never in people in pain. The cheerful world carries on, and the contrast does the work. *Sunny: "Good morning, Wellspring! Light haze, a gentle breeze and no radiation storms before Thursday. Please enjoy the day responsibly." Hob turns the volume down, puts the kettle on and says nothing.*
+- **B. Two worlds apart (not chosen).** Funny town and farm, no comedy in the harm chapters. Safest, but it costs the contrast and turns the harm chapters into one solemn register.
+- **C. Dark comedy (not chosen).** Satire inside the harm itself, in the institutions' own cheerful voices. Sharper, but the most likely to land on a survivor, and it conflicts with the faction sheets' rule that nothing softens the harm.
 
-**Recommendation: A.** It matches pillar 4 and the opening's promise (the darker history arrives gradually and does not turn the cozy world into a disguise), and the grim lands harder against warmth. B removes that contrast; C breaks the guardrails above. Changing the answer touches this section and the planned comedy pass (L-51), not any canon fact.
+Changing this later touches this section and the comedy pass (L-51), not any canon fact. His other answer, on content boundaries, is recorded under [Content baseline](#content-baseline).
