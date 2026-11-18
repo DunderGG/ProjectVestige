@@ -294,3 +294,67 @@
 **PLAYER:** I want to know what it means.
 
 **HOB:** Then we keep reading carefully. Not all truths come wrapped in a clean answer.
+
+## E-12 - The waiting room
+
+**Status:** Draft. The wording is not final, and the prop texts and line lengths are not checked against the UI.
+**Placement:** The Wellspring clinic during opening hours (07:00 to 19:00). The player's first visit, any time after the first visit to the town ([O-03](Phase-01-Opening.md)). No fixed order relative to [E-10](#e-10---town-life-forecast-festival-and-first-irregularity); neither scene refers to the other. A player who never goes in loses no story.
+**Speakers:** PLAYER, SAL (the clinic robot; see the [character sheet](../Characters/ClinicRobot.md); the name is a *(working name)*).
+**Knowledge:** The player knows the clinic is one of the town's failing places and nothing more. SAL knows from town talk that the sleeper is awake and farms next door. It has not examined a human in decades, has seen no evidence of the trials, and treats its register as an ordinary record. Nobody mentions the institute, a handbill or any program. The register lines the player can read are ordinary, and no one comments on them.
+
+[The waiting-room lights come on one bank at a time as PLAYER crosses the room; SAL has lit them from the desk. It stands with a register open in front of it and a ruler in one hand, and it finishes ruling the line under the last entry before it looks up.]
+
+**SAL:** Morning line. The form says to keep the register current. I read that as: every morning.
+
+[It sets the ruler down and looks up. It goes still.]
+
+**SAL:** Oh. You're the sleeper, from the farm. Welcome to the Wellspring clinic. Care without the wait.
+
+[A short pause.]
+
+**SAL:** That is the slogan. Today it is also accurate.
+
+**SAL:** Please, come in, sit anywhere. There's a chart ready, it has a number and nothing else, and the third lamp is a little—
+
+[SAL stops. It puts both hands flat on the desk, as if to hold the room down. When it speaks again, it is slower.]
+
+**SAL:** Forgive the enthusiasm. I'm Sal. I haven't had a patient in decades, and I rehearsed this. It was longer.
+
+**SAL:** May I take your pulse? You may say no. It's on the form, in bold.
+
+**PLAYER - CHOICES**
+
+- **[Agree]** "Go ahead."
+  - [SAL comes around the desk and holds out one hand, palm up. After a short beat PLAYER's wrist is offered automatically; this is not a second choice. If PLAYER steps away before the count begins, SAL lowers its hand, says "Of course," and the scene ends as in Decline.]
+  - **SAL:** Thank you.
+  - [It counts in silence, eyes on its own hand and not on PLAYER. About fifteen seconds; the only sound is the lamp.]
+  - **SAL:** Sixty-six. Regular. That is a good number. I'm not saying it to be kind; it is the number.
+  - **SAL:** I won't write it down unless you ask me to. The chart can stay empty.
+- **[Advice only]** "Not the pulse. Advice, if you have any."
+  - **SAL:** Advice needs no pulse and no form.
+  - **SAL:** Drink clean water before you're thirsty. Eat before you're hungry. Rest when the day has been long. That's the leaflet. It has aged well.
+  - **SAL:** If anything worries you, come and ask. I'll tell you what I know, and what I don't.
+  - **SAL:** Hours are 07:00 to 19:00. Emergencies, any time. I am here for both.
+- **[Decline]** "No, thank you."
+  - **SAL:** Of course. Thank you for telling me.
+  - [SAL's hands come off the desk. It looks easier than before. The lights stay on.]
+
+**Outcomes:**
+
+- **Agree:** SAL takes the pulse and keeps the number in memory. It writes nothing down, and it does not mention the number again unless PLAYER asks.
+- **Advice only:** SAL gives the leaflet's advice and examines nothing.
+- **Decline:** Nothing is examined. SAL does not raise the pulse again unless PLAYER asks for care.
+- **In every case:** The first visit is done and SAL's standing with PLAYER is the same. No choice gains or loses anything, and none gates a later scene. [T-01](Phase-03-Transition.md) does not need E-12, and E-12 does not need T-01. If PLAYER walks away without choosing, SAL does not call after them; on the next visit it greets PLAYER plainly and does not repeat the question.
+
+**Optional look (props, no dialogue needed; skipping costs nothing).** Content IDs are proposed, and the implementer sets their type.
+
+| Content ID (proposed) | Field | Text (Draft) |
+|---|---|---|
+| `Base.ClinicWallSign` | Sign above the desk | **CIVITAS SALUS: CARE WITHOUT THE WAIT!** Please take a seat. You will be seen shortly. |
+| `Base.ClinicInfoCard` | Card on the desk | **You may decline any part of an examination, at any time, without giving a reason.** *(small print)* Waiting times are estimates. Parking is validated for the first hour. |
+| `Base.ClinicRegisterPage` | Register, open page. A strip of clinic-green card covers the name and date columns; the rest is readable. | Heading: WELLSPRING CLINIC, REGISTER OF ATTENDANCE. Columns: No. / Name / Date / Complaint / Outcome. Rows: 4,098 Cough, persistent: Discharged. 4,099 Fever, three days: Transferred. 4,100 Wrist, sprained: Discharged. 4,101 Rash, hands: Referred. 4,102 Weakness, general: Transferred. 4,103 Burn, forearm: Discharged. Below the last entry: a long run of ruled lines, each initialed S. |
+| `Base.ClinicRegisterBark` | SAL, if PLAYER reads the register | **SAL:** The names are under the strip, and the strip stays on. The form is firm about it, and so am I. |
+
+No row is highlighted and nobody comments on an outcome. The name and date columns stay covered.
+
+**Translation notes:** "Keep the register current" means "keep it up to date". "It was longer" refers to the rehearsed greeting. "Care without the wait" is a pre-war advertising slogan. There are no player-name placeholders in this scene.

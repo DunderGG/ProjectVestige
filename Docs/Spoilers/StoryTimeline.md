@@ -126,7 +126,7 @@ The nomad's visits offer trade, practical news and a view of human survival that
 
 As trust grows, a copied route note creates a harder problem: closing the route protects contacts but cuts off supplies and warnings. The nomad can choose to warn only the people who need to know, replace the compromised signal and ask a few trusted stops to share the work. Names, destinations and a complete map remain private.
 
-Other encounters can build the feeling of a populated robot world: the administrator's concern for Wellspring, the clinic robot's curiosity, the mail carrier's undelivered letters, festivals and faction visitors. Keep their scenes rooted in their present concerns. They need not hint at the trials.
+Other encounters can build the feeling of a populated robot world: the administrator's concern for Wellspring, the clinic robot's curiosity ([Sal](Characters/ClinicRobot.md), first met in [E-12](Dialogue/Phase-02-Early.md#e-12---the-waiting-room)), the mail carrier's undelivered letters, festivals and faction visitors. Keep their scenes rooted in their present concerns. They need not hint at the trials.
 
 ### The family mystery continues in parallel
 
@@ -134,7 +134,7 @@ Farm finds, messages and the mail carrier can gradually widen the family's story
 
 ### First irregularities
 
-If a darker-history clue appears in this phase, keep it isolated and interpretable in more than one way: a missing name in a clinic ledger, a sealed medical shipment, a record marked "transferred," or disagreement about a former patient. The clue should not yet establish a program, its perpetrators or the survivor's experience. A player who misses it should still be able to understand the later reveal.
+If a darker-history clue appears in this phase, keep it isolated and interpretable in more than one way: a missing name in a clinic ledger, a sealed medical shipment, a record marked "transferred," or disagreement about a former patient. The clue should not yet establish a program, its perpetrators or the survivor's experience. A player who misses it should still be able to understand the later reveal. The clinic's register is the first place this clue can appear: in [E-12](Dialogue/Phase-02-Early.md#e-12---the-waiting-room) a few outcome lines read "Transferred" among ordinary ones, and on their own they say only that those patients left the clinic's care.
 
 The character arcs need not wait for each other. Gage can earn the Bastion invitation while Cleo is still working through the Wellspring monograph; the nomad may have an active route problem before or after either hub visit. Gate each scene on its own relationship and evidence, not on a single rigid order of romances or faction visits.
 

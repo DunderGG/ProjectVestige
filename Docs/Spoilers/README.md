@@ -10,6 +10,7 @@ The documents in this folder reveal the story, its secrets and the characters' b
 - [Characters/Hob.md](Characters/Hob.md): Hob's character sheet.
 - [Characters/Archivist.md](Characters/Archivist.md): the Index archivist's character sheet.
 - [Characters/Nomad.md](Characters/Nomad.md): the nomad's character sheet.
+- [Characters/ClinicRobot.md](Characters/ClinicRobot.md): Sal, the Wellspring clinic robot, and the clinic register clue.
 - [Characters/Alice.md](Characters/Alice.md): Alice's pre-war character concept and potential human romance arc in the planned release roster.
 - [Characters/Reed.md](Characters/Reed.md): a provisional human romance character who blends into robot society through social presentation.
 - [Characters/AuthorityIntermediary.md](Characters/AuthorityIntermediary.md): Morrow, a human-origin covert recruiter with a fully mechanical interior and a convincing human exterior.

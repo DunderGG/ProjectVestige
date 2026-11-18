@@ -133,7 +133,7 @@ The finished colors and artwork remain open for concept art. Keeper spaces and e
 ## Open Decisions
 
 - Whether Hob formally belongs to the Keepers or remains a Keeper-aligned example whose identity is defined by choice rather than membership.
-- Which Keeper character or characters anchor the Wellspring story and embody the different interpretations of purpose.
+- Which Keeper character or characters anchor the Wellspring story and embody the different interpretations of purpose. [Sal](../Characters/ClinicRobot.md), the clinic robot, is a named Keeper by choice, but its sheet does not make it the anchor, and it is neither a Keeper who is wrong nor one who resists the sleeper ([LoreAudit.md L-49](../LoreAudit.md) asks for both).
 - What ongoing cross-role maintenance practice Wellspring chooses, if any, and whether it is adopted beyond the town.
 - Which benefits of restored services belong to town restoration, without adding a separate Keeper progression track.
 - Final colors and finished artwork for the symbol.
