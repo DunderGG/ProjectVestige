@@ -2,7 +2,7 @@
 
 The documents in this folder reveal the story, its secrets and the characters' backstories. Skip them if you want to discover the game by playing it.
 
-- [Lore.md](Lore.md): the world's history, the factions, the characters, the money and the companies.
+- [Lore.md](Lore.md): the world's history, the factions, the characters, the money and the companies, and the tone guide for writers (section 15).
 - [StoryTimeline.md](StoryTimeline.md): the provisional story phases, reveal pacing and character knowledge guardrails.
 - [StoryFlow/](StoryFlow/README.md): the story-flow overview and phase diagrams.
 - [LoreAudit.md](LoreAudit.md): a critical review of lore coherence, characters, tone and writer-facing gaps.

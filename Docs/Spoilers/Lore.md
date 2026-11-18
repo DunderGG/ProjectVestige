@@ -7,6 +7,7 @@ The story and the world: its history, the people and robots in it, the money and
 - [GameDesign.md](../GameDesign.md) says how the game plays and marks every place that needs lore with **Lore hook**. This document answers those hooks.
 - Names marked *(working name)* are proposals and can still change. Search for that tag before a name goes into content.
 - The world is our own. Don't borrow names, iconography or signature ideas from other games or franchises.
+- Writing a scene, a found text or a joke? Read [section 15](#15-tone-and-the-darkest-material) first: it says where humor lands, where it stops and how the darkest material is handled.
 - **Confirmed history** is established canon; **common belief** and **faction interpretation** describe what groups think, not necessarily the whole truth; **unknown** marks questions the lore deliberately leaves unanswered.
 
 Keep this document up to date. When a lore choice is made or changed, update the relevant section and add a line to the [decision log](#13-decision-log).
@@ -27,6 +28,7 @@ Contents
 12. [Lore and mods](#12-lore-and-mods)
 13. [Decision log](#13-decision-log)
 14. [Open questions](#14-open-questions)
+15. [Tone and the darkest material](#15-tone-and-the-darkest-material)
 
 ---
 
@@ -54,7 +56,7 @@ Dates in this timeline are relative to the war, not to an absolute calendar year
 
 - The pre-war world was bright, confident and loud. Chrome, enamel, brass, rounded shapes, cheerful jingles. Everything was "of tomorrow".
 - Robots were sold as appliances with personalities: they cooked, farmed, taught, nursed, sorted mail and directed traffic. By the end, most human jobs were supervising robots, and many people had no job at all.
-- Advertising was everywhere, and much of it survives: painted billboards, talking vending machines, jingles still looping on radio stations. This is a main source of the game's comic relief.
+- Advertising was everywhere, and much of it survives: painted billboards, talking vending machines, jingles still looping on radio stations. This is a main source of the game's comic relief (where humor lands and where it stops: [section 15](#15-tone-and-the-darkest-material)).
 - Pre-war tech interfaces (**Lore hook** in GameDesign section 12) were designed to look friendly and homely: cream enamel casings, brass bezels, round dials, warm orange glow tubes, chirpy voice prompts and a lot of small print. The game's UI borrows this style.
 
 ### Thinking machines
@@ -349,6 +351,9 @@ Newest first. Add an entry whenever a lore choice is made or reversed. Never del
 
 | Date | Decision | Why |
 |---|---|---|
+| 2026-11-15 | **Provisional, pending David (big canon: the tone's mix).** Added [section 15](#15-tone-and-the-darkest-material) on the recommended balance, "warm with a shadow": three registers (surface, company, harm), humor aimed at objects, ads, propaganda and routines and never at people in pain, and a content baseline of aftermath only. The options and sample lines are in its pending decision | LoreAudit L-09 asked for one shared rule for the darkest material, and L-51 needs a place to point to. The balance is the writer's recommendation until David answers; no canon fact depends on it |
+| 2026-11-15 | Decided by the writer within its limits: the living exhibit is condemned as a practice and met only on the survivor's terms; the clinic robot is meant to unsettle briefly and then disarm, asks before it examines, took no part in the trials, and whether it suspects its own ledger stays open | Settles the question L-09 left open without changing the timeline's survivor-led rules. Keeps the clinic robot's "missing names" clue open to later decisions, and keeps membership from being proof of knowledge or guilt |
+| 2026-11-15 | Decided by the writer within its limits: the trials' own euphemisms ("transferred", "nonviable", "subject", "accession code", "calibration noise", "housing") stay out of ordinary jokes, and a survivor may joke about their own ordeal while others follow their lead | Keeps early clues ordinary until the reveal, so nothing planted early turns sour afterward, and keeps humor about harm with the person who lived it |
 | 2026-11-13 | The Authority uses a discreet internal seal on restricted records and locations, but has no public symbol or uniform | Allows a visual clue for attentive discovery without making the Authority publicly identifiable or letting an isolated mark prove its involvement. |
 | 2026-11-13 | Morrow initially believes they are guiding people toward safety or help; the Authority hides the coercive purpose and changes its information and assignments to fit current needs | Gives Morrow an evolving understanding rather than making them fully informed or wholly unaware throughout, while distinguishing what they agreed to—the conversion—from the recruitment role they did not accept. |
 | 2026-11-13 | Morrow accepted a fully mechanical conversion believing it would address a serious survival need, but did not agree to become an Authority recruiter | Separates consent to a survival intervention from the later imposed role, allowing Morrow's understanding and choices to evolve as the Authority changes its story. The need and procedure remain open. |
@@ -417,3 +422,82 @@ Newest first. Add an entry whenever a lore choice is made or reversed. Never del
 - **The nomad:** their name, gender and pronouns, and which circuit contacts become named on-screen characters.
 - **Whether Wellspring is the final town name**, along with the region's name, the world's name and the game title (shared with GameDesign).
 - **The sibling:** their role, survival path, and when or whether the player meets them.
+- **The tone's mix (for David):** how the funny and the grim touch each other. Section 15 is built on option A, and its [pending decision](#pending-decision-the-tones-mix) lists the options with sample lines.
+- **Content boundaries (for David):** how far the story may show harm, captivity, medical subjects, death or intimacy. Until he decides, the default in section 15 holds: aftermath only, nothing graphic, nothing sexual.
+
+## 15. Tone and the darkest material
+
+> **Provisional.** This section is built on the writer's recommended balance (option A in the [pending decision](#pending-decision-the-tones-mix)) and is the working rule until David decides the tone's mix. The sample lines are illustrations for writers, not scene text, and none is Ready for the game.
+
+This is the one place that says when the story is funny, whom the joke is about and where humor stops. [Pillar 4](../GameDesign.md#2-pillars) sets the aim: a serious world with a light touch. Scene rewrites, new scenes and found texts point here. What happened stays in sections 3 to 9, and the reveal and knowledge rules stay in the [timeline guardrails](StoryTimeline.md#reveal-and-knowledge-guardrails).
+
+### The balance
+
+**Warm on the surface, serious underneath, funny in the details.** The world is grim; most of the people in it are not. Three registers:
+
+| Register | Where | How it sounds |
+|---|---|---|
+| **Surface** | Signs, ads, radio, machines, item and crop texts, town barks, festivals | Dry, cheerful, absurd. The world's objects are the funniest things in it. |
+| **Company** | Farm and town scenes, friendships, romances, the family's traces | Warm, with jokes between people and a serious undertow. A joke and a hard truth can share a scene. |
+| **Harm** | Captivity, medical vulnerability, the trials and their survivors, the parents' illness and death, the Quiet's dead | Plain, quiet and led by the character who lived it. No jokes inside the scene. |
+
+Every scene outside the harm register has at least one light beat; a detail is enough. A harm scene has none, and the next scene gives the warmth back instead of carrying the weight forward. A scene may close on a task, a joke, a silence or a plain statement; it does not need a cautious note or a moral. Aphorisms are rare for every character and rarest for Hob (see [his sheet](Characters/Hob.md)). A good day, a repaired pump or a festival can simply be good.
+
+### Where humor lands
+
+- Obsolete systems and their small print: a vending machine that refuses foreign currency, a lift that announces floors that are gone, "delivery times may vary".
+- Pre-war advertising and slogans, and festivals that are half holy day and half sale.
+- Propaganda and polite condescension. A Continuance believer's patience is funny until you notice they mean it.
+- Robot routines and institutional pomposity: the empty council chamber, curfew units, drills, forms, peer review.
+- The sleeper's pre-war habits (asking a machine first) and Hob's literal domestic care, with affection.
+
+An ache inside a joke is allowed when it belongs to the character. The routine is the joke; the person it was for is not.
+
+### Where humor stops
+
+- Human suffering and the bodies of the harmed: injury, frames, housing, illness, the pod and the player's own body.
+- Captivity and its places (the exhibit, the cases, the collars). A place can chill; nobody quips about it.
+- Family loss: the parents, the pear tree, the cedar box.
+- The Quiet. Robots' memory of watching and being unable to help is grief, not irony.
+- The player's "no". A refusal is never a punchline and is never answered with a nag.
+- The trials' own words (transferred, nonviable, subject, accession code, calibration noise, housing) in ordinary jokes. Early clues stay ordinary, and nothing planted early turns sour after the reveal.
+- A survivor may joke about their own ordeal if it is their voice. Others may smile if invited and never start it.
+
+### Unsettle, condemn or invite
+
+| Concept | Stance | Rule for writers |
+|---|---|---|
+| **The living exhibit** | Condemn the practice. Unsettle through place and procedure. Invite help only as asked. | The glass, the signs and the codes carry the chill; the person does not. First contact asks, and the person decides contact, care, privacy or testimony. "No" is a complete outcome and a failure of nothing. Not a rescue mission, a reveal or an unlock. |
+| **The clinic robot** | Unsettle briefly, then disarm. | Its eagerness is both the comedy and the unease: no patient in decades, a rehearsed greeting, too much enthusiasm. It asks before it looks, takes a no at once and becomes a trusted ally. It never jokes about the player's body. It took no part in the trials; whether it suspects its own ledger stays open. |
+| **The programs** (frame conversions, integrations, the Authority's program) | Condemn. | Say plainly that it was harm. The researchers' stated purpose is never the last word. Judge people by evidence, not by membership. |
+
+### Knowledge, consent and tone
+
+- **Mood follows knowledge.** A character shows dread, relief or a joke only about what they have seen. An early clue is written as ordinary in its own moment, with no ominous wink forward.
+- **Asking is courtesy.** Ask once, in plain words. Humor may sit around the form (its small print), never on the answer.
+- **Nothing times out.** A light line the player skips costs nothing.
+
+### Content baseline (provisional)
+
+Harm is shown through its aftermath: records, places and what survivors choose to say. No on-screen procedures, no gore, no scene that rebuilds suffering for effect, nothing sexual. This is the standing default until David sets the content boundaries.
+
+### Do and don't (illustrations)
+
+| Situation | Do | Don't |
+|---|---|---|
+| The clinic robot's first greeting | "I haven't had a patient in decades. Forgive the enthusiasm. May I take your pulse? You may say no. It's on the form, in bold." | "A live one! Hold still, this won't take long, and possibly longer." (It starts without asking, and the body is the joke.) |
+| A robot routine | The mail carrier: "Letter for Mr. Pell, 14 Larkspur Row. Not in again. I'll try Thursday." | "Another dead addressee. Forty-one this week. I'm on a streak." (Loss as a score.) |
+| The forecast | Sunny: "Tomorrow, light drizzle, then a radiation storm from the east at four. Bring a coat, and for the storm, a bigger coat." | Sunny: "Nobody's out in it anyway." (A joke on the Quiet's dead.) |
+| Condescension | A believer: "How brave of you to carry that yourself. Please don't be discouraged if it goes badly." | "Ha! Soft little human, you'll snap!" (Cartoon contempt; the Continuance is polite.) |
+| The exhibit's place | A sign by the glass: "Observers: please log each observation. Do not tap the glass." | An ally: "Well, at least the view was good." (A quip at a captive's expense.) |
+| Closing a scene | Hob: "Kettle's on. Take the blanket." | Hob: "Some questions are better carried than answered." (General wisdom as a scene exit.) |
+
+### Pending decision: the tone's mix
+
+**For David.** How should the funny and the grim touch each other? The same moment in each option: the morning after the player first finds the institute, the weather robot Sunny reads the forecast on the farm radio.
+
+- **A. Warm with a shadow (recommended, and assumed until he decides).** Jokes live in the world's objects and institutions, never in people in pain. The cheerful world carries on, and the contrast does the work. *Sunny: "Good morning, Wellspring! Light haze, a gentle breeze and no radiation storms before Thursday. Please enjoy the day responsibly." Hob turns the volume down, puts the kettle on and says nothing.*
+- **B. Two worlds apart.** Town and farm are funny; the harm chapters carry no comedy, and the cheerful objects go quiet there too. The safest option. It costs the contrast, and the harm chapters become one solemn register. *Hob leaves the radio off. The farm is quiet all morning, and nobody mentions the weather.*
+- **C. Dark comedy.** Satire reaches into the harm itself, through the institutions' own cheerful voices. Sharper and more memorable, and the most likely to land on a survivor; it conflicts with the faction sheets' rule that nothing softens the harm. *Sunny: "Our thoughts go to the Index's Observation Program, closed for refurbishment. We apologize for any inconvenience to the exhibit."*
+
+**Recommendation: A.** It matches pillar 4 and the opening's promise (the darker history arrives gradually and does not turn the cozy world into a disguise), and the grim lands harder against warmth. B removes that contrast; C breaks the guardrails above. Changing the answer touches this section and the planned comedy pass (L-51), not any canon fact.

@@ -18,6 +18,8 @@ Relationship arcs and hub visits may happen in different orders. The player shou
 
 The family mystery runs alongside the larger story. Its late message is an intimate thread, not a prerequisite for discovering the trials or responding to them.
 
+How each phase should sound, and where humor stops, is in [Lore.md section 15](Lore.md#15-tone-and-the-darkest-material).
+
 The Continuance Authority is a separate optional political mystery. Its founders' survival and present leadership are a late reveal; discovering it is not required to understand the Iron Creed's and Index's human trials or the family story. The Authority's own human program is a later, separate revelation within that thread.
 
 ## Story flow
