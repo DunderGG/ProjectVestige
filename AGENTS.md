@@ -62,8 +62,8 @@ Every change to code or content goes through specialist roles, in this order or 
 
 **Lanes.** Smaller changes skip what they don't need. Before starting any agent the main session picks a lane and writes it, with the tripwires it checked, in two lines at the top of the reviewer's brief.
 
-- **Lane A, trivial:** a stale doc line, a tuning value the user already chose, a fix in one function that changes no rule. One agent doing the change and one code review: the implementer for code, the test author for tests, the main session for docs.
-- **Lane B, a change inside an established system:** no tripwire applies. The implementer, the test author when a rule changes, and one code review. No architect and no design review.
+- **Lane A, trivial:** a stale doc line, a tuning value the user already chose, a fix in one function that changes no rule. One agent doing the change and a code review: the implementer for code, the test author for tests, the main session for docs. Findings go back to that agent until the reviewer approves, as in step 5.
+- **Lane B, a change inside an established system:** no tripwire applies. The implementer, the test author when a rule changes, and a code review whose findings go back until the reviewer approves. No architect and no design review.
 - **Lane C, a new design:** any tripwire applies. The full flow, steps 0 to 6.
 
 Step 0 runs in any lane only when the task changes how the game plays and `Docs/GameDesign.md` and the user's own words don't settle it.

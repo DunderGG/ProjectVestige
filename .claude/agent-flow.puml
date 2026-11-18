@@ -59,10 +59,12 @@ case (**Writing**\nlore, story, text with a voice)
     enters it as FText data in lane A or B.
   end note
 case (**Lane A**\ntrivial)
-  :**One agent** does the change
-  Implementer for code, test author for tests,
-  main session for docs;
-  :**Code review** by the reviewer;
+  repeat
+    :**One agent** does the change
+    Implementer for code, test author for tests,
+    main session for docs;
+  repeat while (**Code review** by the reviewer) is (changes needed)
+  ->approved;
 case (**Lane B**\ninside an established system)
   repeat
     #DCEBFA:**Implementer**
