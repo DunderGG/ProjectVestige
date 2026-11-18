@@ -1,5 +1,5 @@
 @startuml agent-flow
-' Project Vestige agent flow. The rules behind it are in AGENTS.md, "How work is done".
+' Project Vestige agent flow. The rules behind it are in AGENTS.md, "How work is done" and "Lanes".
 ' Render: right-click in VS Code > Preview Current Diagram (PlantUML extension), or
 ' java -jar plantuml.jar -tpng .claude/agent-flow.puml
 skinparam shadowing false
@@ -15,40 +15,89 @@ start
 :**Task picked up**
 Main session: roadmap item, the user's words;
 
-#FFF1D6:**Game designer** (when how the game plays changes)
-Checks GameDesign.md, prepares questions
-with options and a recommendation;
+:**Main session picks a lane**
+Writes the lane and the tripwires it checked
+in two lines at the top of the reviewer's brief;
+note right
+  **Tripwires** (any one means lane C):
+  1. a new class, component or subsystem,
+     or a change to an ownership row
+  2. a new or changed data asset type or
+     field, a content ID scheme, or anything saved
+  3. a new engine framework or Build.cs
+     dependency, or a new ability, effect
+     or attribute
+  4. per frame, timer or new-day work, or a
+     loop over many objects
+  5. a change to an interface other classes call,
+     or to the layers or include direction
+  6. a system with no guide in Docs/Systems/
+
+  Unsure about a tripwire: lane C.
+  Unsure about anything else: lane B.
+  The code review checks the lane.
+end note
+
+#FFF1D6:**Game designer** (any lane, only when how the game plays
+changes and GameDesign.md and the user's words don't settle it)
+Prepares questions with options and a recommendation;
 note right
   The user decides game feel
   and design; the designer
   records the answers
 end note
 
-repeat
-  #E8E0F7:**Architect**
-  Owner, layer, guide, test plan;
-  note right
-    Design questions go to the
-    user through the designer.
-    For the maintainer's yes:
-    rule changes, licensing,
-    money, anything that
-    can't be undone
-  end note
-repeat while (**Design review** by the reviewer) is (changes needed) not (approved)
-
 fork
+switch (Which lane?)
+case (**Writing**\nlore, story, text with a voice)
+  #F3E5F5:**Writer**
+  Writes in Docs/Spoilers/, decides line-level
+  writing and minor canon, asks only about big canon;
+  note right
+    No architect, no design review, no code review.
+    Text for the game is marked Ready; the implementer
+    enters it as FText data in lane A or B.
+  end note
+case (**Lane A**\ntrivial)
+  :**One agent** does the change
+  Implementer for code, test author for tests,
+  main session for docs;
+  :**Code review** by the reviewer;
+case (**Lane B**\ninside an established system)
   repeat
     #DCEBFA:**Implementer**
     Writes the C++, builds clean;
     #DDF3EE:**Test author**
-    Tests, build, full suite, PlayTest.md;
+    Tests (when a rule changes), full suite, PlayTest.md;
   repeat while (**Code review** by the reviewer
 code, tests, docs) is (changes needed)
   ->approved;
+case (**Lane C**\nnew design, a tripwire applies)
+  repeat
+    #E8E0F7:**Architect**
+    Owner, layer, guide, test plan;
+    note right
+      Design questions go to the
+      user through the designer.
+      For the maintainer's yes:
+      rule changes, licensing,
+      money, anything that
+      can't be undone
+    end note
+  repeat while (**Design review** by the reviewer) is (changes needed) not (approved)
+  repeat
+    #DCEBFA:**Implementer**
+    Writes the C++, builds clean;
+    #DDF3EE:**Test author**
+    Tests, full suite, PlayTest.md;
+  repeat while (**Code review** by the reviewer
+code, tests, docs) is (changes needed)
+  ->approved;
+endswitch
+
 fork again
   repeat
-    #F9E1EC:**Artist** (when art is needed)
+    #F9E1EC:**Artist** (when art is needed, in any lane)
     Blender script, export, import,
     preview renders;
   repeat while (**Art review** by the art reviewer
@@ -57,19 +106,18 @@ renders, mesh, scripts, licensing) is (changes needed)
 end fork
 
 :**Commit** (main session)
-Clean build and full suite after the last change, checklist;
+Build and suite verified after the last change, checklist;
 #E2F2DF:**Done**
-Report to the user lists each technical decision;
+Report to the user lists each technical decision,
+tagged easy or hard to undo;
 stop
 
 legend bottom left
   **Shortcuts**
   Bug fix: the test author writes a failing test first, then the implementer fixes it, then the code review.
   Working for a contributor: nothing stands in for the maintainer's review of the pull request.
-  No change to how the game plays: skip the game designer.
-  Lane B (no tripwire, see AGENTS.md "Lanes"): skip the architect and the design review.
-  Lane A (trivial): one agent and one code review.
+  Art: the artist and the art review run alongside the code steps of any lane that needs art.
   Editor and build steps never run at the same time, even across the code and art branches.
-  Lore, story and typo fixes: no flow.
+  Typo fixes: no flow.
 endlegend
 @enduml

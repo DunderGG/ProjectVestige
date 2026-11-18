@@ -15,7 +15,7 @@ This document replaces an earlier audit and a second review of it. The first pas
 | 3. No avoidable permission prompts | Applied: scratch folder `Saved/AgentWork/`, one allow rule for the script, one `Edit(/Saved/AgentWork/**)` rule. Asset-changing commands stay gated | Keep agent scratch files and reports inside the repository |
 | 4. Verify script | Applied: `Tools/Verify-Vestige.ps1`. First run: 394 tests passed, 47 s; a second run took 24 s. An independent review found that a crashed test run could report success; fixed before the commit | Add a verify script that builds and runs the tests |
 | 5. Reports only when needed | Applied | Keep agent scratch files and reports inside the repository |
-| 6. Out-of-date statements | Applied: nested subagents, hard-coded sizes, the diagram's legend (re-rendered) | Correct outdated statements in the workflow files; Show lanes and the editor lock in the agent flow diagram |
+| 6. Out-of-date statements | Applied: nested subagents, hard-coded sizes, and the diagram, which now shows a lane-picking step that branches into the writing route and lanes A, B and C (re-rendered) | Correct outdated statements in the workflow files; Show lanes and the editor lock in the agent flow diagram; Draw the lanes in the agent flow diagram |
 | 7. `effort`, `maxTurns`, Sonnet trial | Not started: needs usage data from a few tasks first | |
 | 8. Reversibility tag | Applied | Work each roadmap item in a fresh session |
 | 9. Usage log | Not started: needs David's go-ahead, because it reads personal transcript files | |
