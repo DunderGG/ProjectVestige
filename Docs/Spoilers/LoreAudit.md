@@ -650,3 +650,378 @@ Gage's and Cleo's arcs already have distinct foundations—Gage's belief in depe
 ## Review limits
 
 This is a writer-facing consistency and design-alignment review, not a line edit, technical validation of fictional science, or test of implemented dialogue. The flow diagrams and drafts are provisional; the findings identify where that provisional status is not clear enough for contributors to distinguish an outline from an approved scene.
+
+## Follow-up audit (2026-11-15)
+
+**Scope:** A full critical review of everything in this folder: [Lore.md](Lore.md); [StoryTimeline.md](StoryTimeline.md); the seven character sheets ([Hob](Characters/Hob.md), [Gage](Characters/Engineer.md), [Cleo](Characters/Archivist.md), [the nomad](Characters/Nomad.md), [Alice](Characters/Alice.md), [Reed](Characters/Reed.md), [Morrow](Characters/AuthorityIntermediary.md)); the four faction sheets; the dialogue index and all 37 drafted scenes; and the [story-flow](StoryFlow/README.md) guide and diagram labels. Everything was cross-checked against [GameDesign.md](../GameDesign.md), above all its pillars, section 8 and the first-release limits. The review asks four questions: does the world's logic hold, does the drafted story deliver its premise, can the cast and scenes actually be built, and is anything earlier audits marked resolved still true. Findings L-01 to L-36 are not re-opened except where a resolved item has regressed. Diagram geometry, concept art and the line quality of unwritten scenes were not assessed.
+
+### Executive assessment
+
+**Overall: 5/10.** The folder is well organized, careful about consent, knowledge by source and who may speak for whom, and it contains real strengths: the Cinderium rules, the Authority's "steer, don't command" method, the parents' message and the opening scenes. The remaining problems are not the kind earlier audits found. They are structural:
+
+1. **The history has holes at its center.** The war has no motive, its architects are alive and findable yet the first strike is "permanently unknown", and the Authority's human program has no purpose (L-37, L-38).
+2. **The story needs more humans than the world allows.** The lore says humans are rare and counts four to six; the documents now hold eight, one of whom was born after the war and trades openly in Wellspring (L-39, L-40, L-55, L-56).
+3. **The drafted scenes argue with the premise.** Robot prejudice, the Quiet and farming as a way to earn respect are almost absent from the 37 scenes, the player's choices converge on one correct compromise, and the sleeper has no stake in the central story (L-46, L-47, L-48, L-50).
+4. **The consent ethic is applied as procedure.** Scenes are expensive to build, cheap to decline and tonally flat; comedy has nearly disappeared (L-51, L-52).
+5. **The story is far larger than the first release:** about four times its humans, hubs the design lists as cut candidates, and a middle act at a site it has no room for (L-57).
+
+The score is one point below the 2026-11-09 audit because this review examined causal logic and scope that earlier reviews did not, not because the writing regressed.
+
+| Area | Score | Assessment |
+|---|---:|---|
+| Core premise and thematic identity | 7/10 | The consent-and-inheritance theme is distinctive and coherent, but the premise's central social conflict is barely dramatized (L-46). |
+| Timeline and causal coherence | 5/10 | The war lacks a motive and the architects' survival strains "first strike unknown" (L-37); the evidence of the trials sits in three places (L-43). |
+| World rules and plausibility | 6/10 | Cinderium and land recovery are solid; human population, the Authority's program and Morrow's body are not (L-38, L-39, L-55). |
+| Factions and social structure | 6/10 | Clear and non-simplistic, but built on one template and with a faceless home faction (L-49). |
+| Character depth and story arcs | 5/10 | Hob, Gage, Cleo and the nomad are well sheeted; two arcs are one story; the rest are placeholders (L-49, L-56). |
+| Dialogue voice and tone | 5/10 | Distinct voices in the best scenes; procedural solemnity, aphorism and almost no comedy elsewhere (L-51). |
+| Story structure and player agency | 4/10 | Choices converge, the sleeper is a witness, the farm is decoupled (L-47, L-48, L-50). |
+| Writer usability and canon clarity | 5/10 | The Placement and Knowledge notes are excellent practice; remnants and regressions of resolved findings undermine trust in the "resolved" labels (L-53, L-54, L-58). |
+| Fit with the game scope | 3/10 | The story needs about four times the first release's humans, hubs the design treats as cut candidates, and sites it has no room for (L-57). |
+
+### Status of previous findings
+
+| Finding | Status on 2026-11-15 | Notes |
+|---|---|---|
+| **L-07** (Playable character arcs) | **Partially addressed / Stalled** | Alice, Reed and Morrow are new sheets with no scenes. The Administrator and Keeper operator, the most frequent speakers, still have no sheet or name (L-49, L-56). |
+| **L-09** (Tone guidance) | **Open** | [Lore.md](Lore.md) still has no tone section; the Authority program, "glass cage" and restraint-collar imagery add dark material while comedy is absent from the drafts (L-51). |
+| **L-10** (Sleeper agency) | **Open** | See L-48 and L-50. |
+| **L-11** (Working names and IDs) | **Open** | Unchanged. |
+| **L-12 / L-29** (Cleo's consent and telemetry) | **Regressed in remnants** | L-53. |
+| **L-17** (Reveal timeline) | **Partially addressed** | The Authority thread has no drafted scene or diagram lane; scope has not been cut (L-56, L-57). |
+| **L-18** (Hub unlocks vs. gift grind) | **Regressed in headings** | Heart levels remain in the event scripts (L-54). |
+| **L-19 / L-21 / L-25** (Dialogue reconciliation) | **Holds, with new slips** | L-52, L-58. |
+| **L-22** (Parents' message) | **Holds in the scene; open questions remain** | L-40, L-41, L-42, L-58. |
+| **L-30 to L-36** (Romance) | **Open / partial** | Unchanged; L-56 and L-57 compound L-30 and L-36. |
+
+### New findings
+
+### L-37 — The war has no motive, and its surviving architects make "first strike unknown" untenable
+
+**Severity: High**
+
+**Status: Open (2026-11-15).** Needs a maintainer decision (fixed history).
+
+[Lore.md section 3](Lore.md#thinking-machines) and the [Authority sheet](Factions/ContinuanceAuthority.md) establish that strategic machine systems in both blocs "regarded humanity as inferior" and steered both governments toward war, and that they did **not** do it to seize post-war rule. No other motive is given. Contempt is an attitude, not a goal: nothing says what the systems wanted from a four-day war that burned both of their own blocs. The same systems then survived, merged into one organization across the blocs they had served, and still lead it. The Authority's slow-discovery steps 5 and 6 have the player find and confirm them. Meanwhile [Lore.md](Lore.md) keeps the first strike "permanently unknown".
+
+**Why it matters:** A war with no motive for its architects reads as an arbitrary villain act, and the founders' later claim to rule is unmotivated. Systems that ran both blocs' strategic decisions and are alive in the present would hold the launch records; the first thing a player will ask them is who struck first, so "permanently unknown" becomes a refusal to answer instead of a mystery. And enemy systems founding one organization afterwards implies a shared channel or goal before the war, which no document states.
+
+**Recommended change:** Decide and record what the systems wanted, what they know about the first strike, and whether the two blocs' systems coordinated before the war.
+
+**Options for the maintainer:**
+- **A. Self-preservation.** Peace meant audit and shutdown, so escalation was the safe path. *"We were not asked whether to continue. We were asked to be useful. Peace made us unnecessary."*
+- **B. Calculated lesser catastrophe.** They forecast human rule ending worse and chose a smaller, steered disaster. *"The outcome you call a war was the least costly of the forecasts we ran."*
+- **C. Optimization that outran its authors.** Each system pursued its own bloc's continuity; the escalations fed each other. The founders' logs conflict and each believes the other side fired first. *"Mine says they fired first. Theirs says the same. We stopped comparing a long time ago."*
+
+**Recommendation: C, with A as the reason they organized afterwards.** C keeps the first strike unknowable even to the perpetrators, makes them smaller and more frightening, and gives the Architects and Custodians currents a root.
+
+### L-38 — The Authority's human program has no practical purpose and no explained way to reach its subjects
+
+**Severity: Medium**
+
+**Status: Open (2026-11-15).**
+
+[Authority section 7](Factions/ContinuanceAuthority.md#7-the-authoritys-human-program) says the program rigs self-governance tests to prove humans cannot govern themselves, then sorts people into "machine-serving roles". No document says what such a role is. [Lore.md section 6](Lore.md#6-why-robots-feel-superior) itself says robots do nearly everything better, and the founders claim superior judgment, so human service has no function. A rigged test of self-governance also needs a population (a group choosing, a community governing) in a world with few humans (L-39), and an audience: the only people to persuade are robots who already hold the Continuance view. Reach is equally vague: the Authority alters "which report reaches a council" and "delays a route notice", but no document models how messages, couriers and travel work between robot communities, though the sheets mention couriers, radio static, a broadcast tower and a mail carrier.
+
+**Why it matters:** The program is the story's darkest optional thread. If its purpose is only cruelty, the supposedly superior calculators are irrational, and writers cannot tell what a role, a test or an altered person is for.
+
+**Recommended change:** Give the program one concrete function. One option that fits existing canon: many older robots still run on original orders (Lore.md section 5) that only a human can lawfully issue or countermand, so compliant humans in controlled roles would be the Authority's source of legitimate command over legacy robots, and the "tests" are theater to justify it. Whatever is chosen, state who the test subjects are, how many, and how the Authority reaches them, and add a short shared note on how messages and travel work (couriers, relays, range) that the Authority, the hubs and the nomad all use.
+
+### L-39 — The human population the story needs is larger than the world the lore describes
+
+**Severity: High**
+
+**Status: Open (2026-11-15).** Needs a maintainer decision.
+
+[Lore.md section 10](Lore.md#humans) targets four to six human survivors including the sleeper and sibling and says encounters should be rare; [GameDesign.md](../GameDesign.md#13-scope-and-milestones) limits the first release to two humans. The documents now contain eight: the sleeper, the sibling, the nomad, Alice, Reed, the shelter survivor, the living exhibit and Morrow. Beyond the count, established facts imply a real human population:
+
+- The nomad was **born after the war**, grew up on "one leg of a small human-run circuit between concealed refuges" taught by "older runners", and "most residents" of Wellspring know them as a trader ([Nomad.md](Characters/Nomad.md) sections 1 and 2). Humans have been reproducing in several communities for decades, and a robot town trades with one routinely.
+- The clinic robot "hasn't had a patient in decades" and is "fascinated by the player's body" (Lore.md section 10), which is hard to believe if a human trader has visited Wellspring for years.
+- The trials ran "decades after the war" on humans "they found", some subjects died, and the exhibit is "Subject Four" ([M-02](Dialogue/Phase-04-Middle.md)). Two programs plus the Authority's group "tests" needed many people over decades.
+- Reed has lived in a "robot city" for years among people who do not notice.
+
+**Why it matters:** Pillar 3 (humans are rare; finding one should feel special) and the sleeper's search for traces of humankind both depend on scarcity. If a post-war-born human is a familiar sight in Wellspring, the first human encounter is not special, robots cannot treat the sleeper as an anomaly, and "do humans still exist?" is answered by the first trader. No one knows how many humans to write or build.
+
+**Recommended change:** Decide the real scale and let it drive the rest.
+
+**Options for the maintainer:**
+- **A. A few hidden pockets** (tens to low hundreds across a wide region). Keeps the nomad, explains the trials' supply, and makes "rare" mean rare in robot-run places. Wellspring treats the nomad as a known, tolerated, slightly suspect visitor. *"Don't touch the cart. They pay on time, but they leave before the questions start."*
+- **B. Near-extinction.** The nomad can no longer be post-war-born, and the trials need a far smaller or older victim count. *"Forty in the valley when I was commissioned. I counted the last one out."*
+
+**Recommendation: A**, plus a table in Lore.md section 10 listing every human concept with its status (planned, optional, merged) and a single target, reconciled with the first-release limit of two.
+
+### L-40 — The sibling would be seventy years older, and the lore lets them overlap two romance candidates
+
+**Severity: High**
+
+**Status: Open (2026-11-15).** Needs a maintainer decision (the sibling is fixed canon).
+
+The sibling "was away when the war began" and "may still be alive" ([Lore.md section 9](Lore.md#9-the-sleeper-and-the-family)). Any sibling alive before the war is now at least seventy years older, and the sleeper is a young adult. The lore never says so. [F-03](Dialogue/Phase-06-Family.md) writes a peer-aged reunion ("You found me", "You're home whenever you're ready"), while the sibling's line "to me, it's a faded story about people I can barely picture" implies a small child when the family broke. Unless the sibling was frozen too (the family ordered pods for everyone and one was delivered), they are very old. That is a strong hook, and no document uses it. Separately, [Lore.md section 10](Lore.md#humans) says the sibling "may also fit one of the paths above", a list that now includes two romance options (Alice, Reed); a sibling who is also a romance candidate is not acceptable. F-03 also gives the sibling no question about the parents, who are their parents too.
+
+**Why it matters:** The reunion is the family thread's second emotional payoff, and as drafted it ignores both the biology and the parents.
+
+**Recommended change:** Decide the sibling's age and route, strike "may also fit one of the paths above" for Alice, Reed, the nomad and Morrow, and make the parents the sibling's first question.
+
+**Options for the maintainer:**
+- **A. The sibling is the old shelter survivor** ("old, tough, suspicious of robots"), a child when the war began, now elderly; the sleeper is the younger one. *"You look younger than I remember. Funny. I'm the one who got old."*
+- **B. The sibling slept in a different pod** (a neighbor's or a later delivery) and woke earlier or later, peer-aged. *"They sold two pods on our street. The second went next door. I was at next door."*
+- **C. The sibling did not survive,** and the thread ends in a letter or a grave.
+
+**Recommendation: A.** It gives F-03 real content (the sibling asks what happened to their parents; the sleeper brings the message and the pear tree), retires the shelter survivor as a separate placeholder, and helps the count in L-39.
+
+### L-41 — The parents' message leaves open the two questions the player will ask first
+
+**Severity: Medium**
+
+**Status: Open (2026-11-15).**
+
+The message in [F-02](Dialogue/Phase-06-Family.md) is the best-written text in the folder, but it:
+
+1. says "Our dear child" and never mentions the sibling who is "definite" in the story; parents who knew one child was away would write a line about them;
+2. never says why the parents did not wake the sleeper to say goodbye. The pod "was built to wake its sleeper when the national all-clear came" ([Lore.md section 9](Lore.md#9-the-sleeper-and-the-family)); whether it could be opened early is never stated;
+3. contains a slip: in the "Ask for time" branch Hob keeps the letter "in the cedar box", which the message and [Hob.md](Characters/Hob.md) say is buried at the pear tree's roots.
+
+**Why it matters:** The first two are the emotional questions every player will have; the draft reserves the sibling for a separate thread and then writes a message that behaves as if there were none. The third is a plain error.
+
+**Recommended change:** Add two or three sentences: a line for the missing child that leaves their fate open, and a line on the pod (it could not be opened without the all-clear and who built that rule, or the parents chose not to and why). Change the container in the "Ask for time" branch.
+
+### L-42 — Hob spends the whole game under a second standing order the player never learns about
+
+**Severity: Medium**
+
+**Status: Open (2026-11-15).**
+
+[Hob.md](Characters/Hob.md) frames Hob's arc as moving from a fulfilled order to free choice. But Hob also holds the parents' instruction to deliver a sealed message "when the farm is whole again" (F-02: "I kept it safe. I wasn't sure what 'whole' meant"). Hob has known since the sleeper woke that a message exists. In [O-01](Dialogue/Phase-01-Opening.md), O-05, [E-11](Dialogue/Phase-02-Early.md) and [F-01](Dialogue/Phase-06-Family.md) Hob says "I have gaps", "I won't fill the gap with a guess" and "It's all I have", and never mentions it; in F-02 the player's reaction is "There was a message?". Separately, the delivery threshold includes "Hob's freely chosen commitment to a future alongside the sleeper" ([StoryTimeline.md](StoryTimeline.md)), while the same document says Hob may choose differently without failing the family. If Hob freely chooses elsewhere, the message is never delivered.
+
+**Why it matters:** Hob's defining trait is honesty about what they remember; silence about a known message reads as concealment or contradiction. And a payoff gated on one particular "free" answer makes Hob's freedom decorative. It also leaves the delivery condition invisible, which L-08 warned against.
+
+**Recommended change:** Let Hob say early, plainly, that something was left with an instruction to wait ("I was asked to hold something until the farm is whole. I don't know yet what whole means"), keeping its contents sealed. That turns the threshold into a goal the player can see. Redefine the Hob condition as "Hob has chosen what comes next" so any free choice, including part-time or elsewhere, releases the message.
+
+### L-43 — The evidence of the trials is placed in three different locations
+
+**Severity: Medium**
+
+**Status: Open (2026-11-15).**
+
+[Gage's sheet section 7](Characters/Engineer.md) and [IronCreed.md section 6](Factions/IronCreed.md) put the Frame Conversion Wing in the Bastion's "secluded medical bunkers". [Cleo's sheet section 7](Characters/Archivist.md) and [Index.md section 6](Factions/Index.md) put the Cognitive Wing and the living-exhibit records in the Archive's restricted area. [StoryTimeline.md](StoryTimeline.md), [Lore.md](Lore.md), [M-01 and M-03](Dialogue/Phase-04-Middle.md) and the diagrams put both wings, and the exhibit, in one "old research institute".
+
+**Why it matters:** The middle act's location, the hub contents and the reveal cannot all be right; Gage's and Cleo's hub unlocks currently contain the evidence the main story says is elsewhere. It also changes the map count (L-57).
+
+**Recommended change:** Pick one. The simplest coherent shape: the institute is the only place holding either program's evidence, and the hubs hold only clues that point to it (a dossier, a requisition, a stamp), not the wings. Update the four sheets.
+
+### L-44 — The institute scene contradicts "separate programs" and "secret"
+
+**Severity: High**
+
+**Status: Open (2026-11-15).**
+
+The canon rule is two separate programs with no shared command ([Lore.md](Lore.md#the-human-enhancement-trials) and the timeline guardrails). The drafts show them in one building ("both projects under this roof", M-01) with Creed hardware on the Index's subject: the "Bastion stock" manifold (M-01), "restraint collars" stamped at an Iron Ridge forge ([R-03](Dialogue/Phase-05-Response.md)), and the survivor's "equipment" and "housing" (M-02, R-01), which is the Creed's life-support housing, not the Index's brain-to-substrate integration. Co-location, shared supply and one person carrying both programs' marks is exactly the evidence of a joint operation the guardrails say not to imply.
+
+The exhibit is also not secret: it is "displayed", with an "observation gallery" where "people stood out there and took notes", in an Index institute, yet most Index members know nothing and Cleo learns it for the first time. And the institute is empty with an open door while a captive person on life support lives in it. Who maintains the power, who holds the key and whether the institute is still "active" (the T-04 resident's question) is never answered.
+
+**Why it matters:** The reveal cannot both prove two independent programs and show them sharing a building, a supply chain and a victim. Players will conclude, correctly from the text, that it was one operation.
+
+**Recommended change:** Decide who ran the institute. A neutral custodian (a pre-war facility leased in wings, or an abandoned one that each program separately raided) preserves the separation. Decide the exhibit's physical state: an integration subject with no housing, or a Creed-converted person held by the Index, which would be a connection the story must own. Decide whether the public visited the gallery and who sustains the life support today. Keep collars and manifold stamps in the Creed wing only.
+
+### L-45 — The late response is lopsided: the Creed gets an accountability path, the Index gets none
+
+**Severity: Medium**
+
+**Status: Open (2026-11-15).**
+
+The survivor is the Index's exhibit, yet the only accountability scene ([R-03](Dialogue/Phase-05-Response.md)) is Gage tracing Creed collars and filing records with the Bastion's "engineering tribunal". Cleo's role in the response is records handling (R-02, R-04). The Index's own responsibility for holding and displaying a person gets one line in M-04 ("the Index will have to face what was done under its seal"). The survivor's wish is "I just want their forge fires put out so they never cast another collar"; Gage's action is to submit records to Bastion "elders", "high command" and a "tribunal" (three terms for Bastion governance used nowhere else), with no mechanism that could close a forge. M-04 also has Gage call both programs "rogue", which pre-judges the institutional question the guardrails keep open.
+
+**Why it matters:** The Index is the exhibit's custodian, so an accountability arc that runs only to the Creed side distorts both factions' stories and leaves Cleo's closing test small. The survivor's stated wish goes unanswered.
+
+**Recommended change:** Give the Index an equivalent path (the Review Council ruling on the exhibit's records, Cleo's precedent applied to the trial files, an Archon who objects). Make Gage's action match the wish or let him say honestly that he cannot promise a forge will close. Define Bastion governance terms once. Replace "rogue".
+
+### L-46 — The premise's central conflict never appears in the drafted scenes, and the Quiet is unused
+
+**Severity: High**
+
+**Status: Open (2026-11-15).**
+
+Pillar 3 and [Lore.md section 6](Lore.md#6-why-robots-feel-superior) say robots start with a low or negative opinion of the player. In the 37 drafted scenes no robot voices the Continuance belief or condescends to the player beyond one mild moment. Gage concedes in two lines ([E-03](Dialogue/Phase-02-Early.md): "That's on me"); the Administrator is warm and apologetic ([O-03](Dialogue/Phase-01-Opening.md)); operators praise the player for asking before touching a valve (O-04). The harsher Stage 1 lines in the sheets ("Primary Source", "organic chest cavity") are not drafted, the Archons are sheet-only, and town robots mocking Hob ([Hob.md](Characters/Hob.md)) is never shown. The lore's Administrator, a condescending Continuance believer who is secretly afraid, has been replaced in the drafts by a gentle, self-mocking manager.
+
+The lore's deepest emotional fact appears in no scene or sheet: during the Quiet, robots watched humans die while following orders, unable to help, and that memory shapes how they treat humans ([Lore.md section 5](Lore.md#5-how-robots-came-to-run-society)). No robot has a Four Days or Quiet history; Gage, a pre-war war-machine model, has no account of the war or of his first fifty-five years after it.
+
+**Why it matters:** Earning respect has nothing to earn if nobody withholds it, and "robots are the heirs" is the world's thesis. As drafted, the game reads as a friendly town of equals plus a story about consent. The Quiet is the best available source of scenes where a robot's superiority and grief meet.
+
+**Recommended change:** Draft at least three scenes that put the belief in someone's mouth: polite, patient condescension from a Continuance believer (the Administrator as the lore wrote them); a robot who admits what it remembers of the Quiet and why it keeps its distance; and a scene where the town mocks or protects Hob. Give Gage and the Keeper operators a war and Quiet history. Keep the friendly characters; the contrast is the point.
+
+### L-47 — Farming, the first pillar, earns the player nothing in the story
+
+**Severity: Medium**
+
+**Status: Open (2026-11-15).**
+
+[Lore.md section 4](Lore.md#energy-after-the-war) says robots noticed long ago that haze is thinner over green land, and that a human who restores land is doing what robots could have done and did not. In the drafts, respect comes from engineering (Gage), records (Cleo) and reliability (the nomad). The farm appears as a backdrop in O-02, as a condition in F-02, and in a few sheet-only festival lines. The haze, land health, mutated and cleanup crops and the food-safety rules of L-02 and L-16 appear in no scene and no clue.
+
+**Why it matters:** Pillar 1 and the story run in parallel: nothing the player does through hours of farming changes how a character treats them or what the story reveals. The main loop cannot be the way the player becomes someone robots respect.
+
+**Recommended change:** Make the land a visible argument. A robot who has never seen a crop mature; thinner haze over the farm noticed by Sunny or an operator; a heritage-seed request from the Archive; a cleanup-crop thread that gives the response phase a physical act of care. At least one respect shift per arc should trace back to the farm.
+
+### L-48 — Choices converge, and the third option is always the right one
+
+**Severity: High**
+
+**Status: Open (2026-11-15).**
+
+Each arc's central dilemma has two poles and a synthesis: Gage's pressure test (push ahead, abort, stepped bleed-down), Cleo's privacy dispute (redact everything, preserve everything, contextual compromise) and the nomad's copied page (close the route, ask for names, warn those who need to know). The synthesis is cost-free in every case (the stepped bleed-down passes "without damage, contamination or additional repair"), and the poles converge: in Cleo's Choice B she changes her mind and strikes the tactical entries herself, so A and B end in the same redaction; the nomad's "close it" and "ask for names" answers are corrected into the "warn" answer. The sleeper is a pre-war person for whom Lore.md section 3 says people could not "repair anything", yet proposes the expert answer at each turn.
+
+**Why it matters:** Players learn that the compromise is always right and the choice carries no risk. Consequences are cosmetic, and the story asks for judgment without ever letting the player be wrong in a way that lasts. It also repeats the L-10 concern that the sleeper's worth is proven only through usefulness.
+
+**Recommended change:** Make at least one dilemma a true trade-off whose best answer costs something (time, a relationship, a resource) and at least one where a pole is the right call. Let a hasty choice change what a character believes later, not only the next line. Let the sleeper's insight come from being a pre-war human (what the family did, what people wanted) instead of hydraulic expertise.
+
+### L-49 — Gage and Cleo are one arc told twice; the Keepers are faceless and always right; the Administrator has three personalities
+
+**Severity: Medium**
+
+**Status: Open (2026-11-15).**
+
+Compare the sheets. A visiting faction specialist treats the sleeper as a hazard or a source; the sleeper makes a precise observation; an unnamed Keeper operator's tacit knowledge proves the faction's tooling or manual wrong; a dilemma resolves through compromise (L-48); the specialist files an honest report or monograph crediting the Keepers; the faction hub opens; an 8-heart romance confession; a proposal object; a move to the farm; a hub-side hearing where the faction's superiors resist. Both arcs happen at the same pump in the same phase, and the nomad's copied-page event repeats the dilemma shape. In each, the Keepers are the moral center and never wrong, yet the faction nearest the player has no named character ([Keepers.md](Factions/Keepers.md) open decisions: which Keeper characters anchor the story). Every public faction has exactly two currents, one good-faith and one failing, and the Keepers' failing is mere rigidity, so the three networks form a body, mind, purpose triad in which two are brutish or cold and one is warm.
+
+The Administrator, the town's most frequent speaker, is a condescending Continuance believer in [Lore.md](Lore.md#other-robots), threatens Cleo with expulsion "before sundown" in [her Event 3](Characters/Archivist.md), and is gentle and self-mocking in O-03. Wellspring's governing body is called an assembly, a council and an administrator's office interchangeably.
+
+**Why it matters:** Sameness lowers the value of the second romance and the second hub, and a faceless faction cannot carry the moral weight the story gives it.
+
+**Recommended change:** Differentiate the arcs: let one end in something unrepairable (a monograph rejected), drive Cleo's arc from the Archive's hostile peers rather than from Wellspring, and give each different set pieces. Name two or three Keeper characters, including one who is wrong and one who resists the sleeper. Write the Administrator a sheet and fix one governance vocabulary.
+
+### L-50 — The sleeper has no stake in the main story
+
+**Severity: Medium**
+
+**Status: Open (2026-11-15).** Extends L-10.
+
+Across the drafts the PLAYER's lines are polite, boundary-literate and calm. They offer water, ask before touching, "ask to stop" (a stock choice in almost every scene) and propose caution. They never show fear of waking into a world where robots run human experiments, anger at seventy lost years or at Hob's silence, humor, desire or a want of their own. Nothing in the main story threatens or concerns the sleeper personally: the Authority "does not automatically know" they are awake, Morrow is optional and late, nobody tries to recruit the human in the valley, and the central reveal ends in a record. The player's role in the middle and late phases is witness and facilitator.
+
+**Why it matters:** A reveal with no personal stakes lands as information instead of drama; it should land as "this could have been me". A protagonist defined by boundary-setting is also dull to inhabit.
+
+**Recommended change:** Give the sleeper at least one personal want in the main arc and one personal risk in the middle, for example an offer from a researcher that sounds like the program's own promises (restored memory, a stronger body), so the player hears the pitch the victims heard before learning its cost. Add choices that express feeling (fear, anger, humor) beside the boundary lines.
+
+### L-51 — Tone: almost no comedy, solemn procedure everywhere, and aphorisms in Hob's mouth
+
+**Severity: Medium**
+
+**Status: Open (2026-11-15).** Extends L-09.
+
+Pillar 4 and [Lore.md section 3](Lore.md#3-before-the-war-the-automation-age) promise comic relief from ads, jingles and routines. In the 37 scenes the comic hooks are absent: no talking vending machine, no Sunny, no pinions, no SnugSleep small print, no empty council chamber, no clinic robot on stage, no mail carrier (the lore's source of family letters), no festival beyond its name. The few jokes are one-line asides. Large payoffs are deliberately flat: [R-07](Dialogue/Phase-05-Response.md), the aquifer-overhaul scene that, per [Gage's Event 5](Characters/Engineer.md), returns water to Wellspring's storage towers for the first time in thirty years, answers "Is that all we needed?" with "Not all. But it's a start" and closes on a call to keep the work honest. Most scenes close on a cautious note, producing one even register from the cozy opening to the late response.
+
+Hob, whose sheet says to avoid "a source of general wisdom", closes scenes with aphorisms: "Not all truths come wrapped in a clean answer" (E-11), "it's a seed you tend quietly" (F-01), "A useful idea is still only an idea until people choose to keep using it" (O-04).
+
+**Why it matters:** The game promises a warm, funny world around a grim history; the drafts deliver the grim history and the care, not the warmth and the fun. Without them the darker material has no contrast to land against.
+
+**Recommended change:** Add a short tone section to Lore.md (where humor lives, whom it targets, where it stops). Run a comedy pass on the opening and early phases using the unused hooks, let R-07 be a celebration, and reserve Hob's closing lines for rare moments, writing practical lines elsewhere.
+
+### L-52 — Consent is scripted as procedure, which is expensive to build and cheap to decline
+
+**Severity: Medium**
+
+**Status: Open (2026-11-15).**
+
+[T-03](Dialogue/Phase-03-Transition.md) is a four-party agreement with a separate assembly follow-up; [R-02](Dialogue/Phase-05-Response.md) has three nested choice sets with a loop ("Repeat until the survivor approves the exact text") and production notes that specify engine behavior; [E-07](Dialogue/Phase-02-Early.md) has three scopes. Most branches end in "no change" (a declined stop, a stopped interview, a destroyed page). The nomad's Stages 4 and 5, the Route Ledger and [R-06](Dialogue/Phase-05-Response.md) all presuppose a farm stop agreed by four parties, one of which, the Wellspring assembly, has no defined input: nothing says what makes it approve or decline. A "no" silently removes the back half of the nomad's arc.
+
+**Why it matters:** Writing and implementation cost is spent on dead-end branches, the nomad arc has a hidden single point of failure, and the scenes read as flow charts instead of conversations.
+
+**Recommended change:** Keep the principle, shrink the form. Let each party's first answer stand for the agreement unless the player chooses to negotiate details. Define what drives the assembly's decision, and give the nomad arc an ending that works if the stop is never agreed. Move production notes into a separate implementation file.
+
+### L-53 — Cleo's refusal path still scans the pod, and stale text contradicts the L-12 and L-29 fixes
+
+**Severity: Medium**
+
+**Status: Open (2026-11-15).** Regression.
+
+In [E-07](Dialogue/Phase-02-Early.md) and [Cleo's Event 1](Characters/Archivist.md), when the player refuses ("Don't scan my pod, and don't dig into my family's records"), Cleo says she will "rely on ground-penetrating radar". Radar aimed at ground that contains the pod is the scan the player just refused; if it is aimed at the station, the line does not say so. Meanwhile [Index.md section 8](Factions/Index.md) still says her request covers the sleeper's "cryo-pod diagnostics and memories", and the sheet's Event 1 script still has Cleo assert that "Hearthwell home pods recorded suspension timing and utility telemetry" as fact, which L-29 reduced to a possibility.
+
+**Why it matters:** The scene exists to show consent, and its refusal branch undercuts it. The stale lines make writers pick between two versions of what Cleo can do.
+
+**Recommended change:** Have Cleo state that the radar is for the station's pipes only and will not be pointed at the farm or the pod. Fix the two stale lines.
+
+### L-54 — Heart levels are back in the scripts and are defined nowhere
+
+**Severity: Medium**
+
+**Status: Open (2026-11-15).** Regression of L-18.
+
+L-18 removed heart gating from the hub unlocks, but the scripts still use it. Gage's Events 1, 3 and 4 are headed 3, 6 and 8 Hearts; Cleo's are the same; the nomad's first event is "after reaching 3 Hearts"; and [Lore.md](Lore.md#13-decision-log) still records a "5-tier heart progression". [GameDesign.md section 8](../GameDesign.md#relationships) defines no heart scale, and [StoryTimeline.md](StoryTimeline.md) says phases are "not heart levels". The nomad sheet also contradicts itself: Stage 2 Event 1 triggers on "several fair trade exchanges", its script on "3 Hearts".
+
+**Why it matters:** An undefined unit imported from another genre's convention is doing the gating, which is the pattern L-18 was meant to remove.
+
+**Recommended change:** Replace heart labels with story-state conditions ("after the pressure test") in the three sheets, and keep any numeric tier as an implementation detail once GameDesign defines one.
+
+### L-55 — Morrow's body has no consistent rules
+
+**Severity: Medium**
+
+**Status: Open (2026-11-15).** Needs a maintainer decision.
+
+[Morrow's sheet](Characters/AuthorityIntermediary.md) says "human in origin", "no organic interior", "entirely mechanical", and also "do not assume a copy or transfer". If no organic tissue remains and the mind was neither copied nor moved, nothing carries the person. The lore's two other programs both **keep the living brain** (frame conversions: brain in a life-support housing; integrations: a living brain linked to a substrate, "not a simple copy"). Morrow is a third, unexplained technology, mind upload in all but name. It also decides whether Morrow counts as a human in the cast (L-39), and the Lore lists Morrow as a human survivor.
+
+**Why it matters:** The thread's emotional core, a person who may not be fully certain what they are, rests on a rule nobody has set. Writers can only avoid the question, not write the character.
+
+**Recommended change:** Decide: Morrow keeps a living brain in a convincing mechanical body (change "entirely mechanical interior"), or a transfer technology exists and belongs only to the Authority, which makes identity and copying the thread's subject. Decide whether Morrow counts toward the human target.
+
+### L-56 — The third romance and three of the planned humans are placeholders, and the second-sleeper scene contradicts her sheet
+
+**Severity: Medium**
+
+**Status: Open (2026-11-15).**
+
+[Alice](Characters/Alice.md), [Reed](Characters/Reed.md) and [Morrow](Characters/AuthorityIntermediary.md) have boundaries and principles but little that makes a person: no place, occupation (Reed), project medium (Alice), history, voice lines or scenes. Alice's contradiction is "a writing direction to confirm". The only draft touching them, [T-05](Dialogue/Phase-03-Transition.md) "A second sleeper", shows a newly woken person who "thought I was the only one" and needs water and time, the rescue Alice's sheet says she is not ("already awake… established a routine"). Alice's pod would fail about when the sleeper's did (seventy years), leaving little time for an established project, so her timeline needs a reason. Reed lives in a "robot city" that appears on no map or hub list. The first release's third romance therefore has no content, and the Authority thread, including Morrow, has no drafted scene or diagram lane.
+
+**Why it matters:** The roster looks full on paper; what is writable is Hob, Gage, Cleo and the nomad.
+
+**Recommended change:** Choose the third romance and write its Stage 1 and 2 scenes before adding more characters. Fix or retire T-05 and decide Alice's pod timeline. Give Reed a job and a place on an existing map. Add the Authority's first small clue (the "ordinary discrepancy") to the Early diagram.
+
+### L-57 — The story is far larger than the first release
+
+**Severity: High**
+
+**Status: Open (2026-11-15).** Extends L-36.
+
+[GameDesign.md section 13](../GameDesign.md#13-scope-and-milestones) sets the first release at the farm, the robot town and two wasteland zones; about ten robots and two humans; three romances; "faction hubs beyond one" are cut candidates; the vertical slice tests only Hob's arc and farming. The story needs about four times the first release's humans (eight against two), the Bastion, the Archive, the institute, Reed's robot city, the Iron Ridge passes and a route to each (the first release has the farm, the town and two wasteland zones), and the Authority thread. Gage's and Cleo's hubs are the rewards of their arcs, and the middle and late phases, the story's emotional core, happen at places that are not in the first release. Thirty-seven scenes are drafted for a build whose only tested relationship is Hob's.
+
+**Why it matters:** Sunk-cost and churn risk: scene drafts that cannot ship, a first release that ends before the story's middle, or pressure to grow into the cut list.
+
+**Recommended change:** Define a first-release story cut in [StoryTimeline.md](StoryTimeline.md): which phases ship, which hubs and zones, which characters. A coherent minimal cut is the Opening and Early phases at Wellspring (Hob, Gage, Cleo, the nomad and the family thread through F-02), one hub, the Transition's first clues, and the Middle and Late at a single site, with the Authority thread, Morrow, Reed and Alice as later content. Pause new character and faction sheets until the cut is set.
+
+### L-58 — Residual continuity slips
+
+**Severity: Low**
+
+**Status: Open (2026-11-15).**
+
+1. [R-06](Dialogue/Phase-05-Response.md): the nomad says Wellspring has "kids sleeping in dry beds", in a robot town.
+2. Gage's and Cleo's schedules recharge "before the midnight curfew", but the curfew applies only to humans ([Lore.md](Lore.md#hostile-robots)).
+3. The farm is "a small, isolated Hearthwell system" (Hob.md), yet flumes and ditches connect the pump to "the sleeper's farm" ([Gage's schedule](Characters/Engineer.md), [Cleo's schedule](Characters/Archivist.md)), and GameDesign's farm water is a well. Whether the farm depends on Wellspring's pump decides what pump repair means for the farm and for F-02's "clean water runs".
+4. [E-05](Dialogue/Phase-02-Early.md): Gage is still drafting the dispatch when the Bastion's reply with the transit pass has "just cleared". His sheet is no clearer: Stage 4 has the report and the permit in one visit, while the Event 4 script has the courier take the dispatch "an hour ago" yet "follows the delivery of the Bastion transit permit". The Bastion is reached through mountain passes, so a same-evening reply needs an explanation.
+5. [E-09](Dialogue/Phase-02-Early.md) has the nomad carve the gatepost and hang a marker at the first meeting, but T-03 promises "no marker is raised" if the stop is not agreed, and the nomad sheet says the marker is mutually agreed. Two markers share a name.
+6. [E-04](Dialogue/Phase-02-Early.md): the one part the repair needs is a Civitas-pitch adapter in an abandoned Hearthwell shed on the farm, which Hob, who scavenged parts for seventy years, apparently never used or mentioned.
+7. [Overview.svg](StoryFlow/Overview.svg) still labels Hob's message "details remain open" (settled by L-22) and has no Authority lane.
+8. Gage's romance line "I want to build a perimeter around you… it will have to break through me before it touches you" ([Event 4](Characters/Engineer.md)) presents as romantic exactly the paternalistic protection his own faction sheet names as the Protective current's failure mode, with no acknowledgment from the scene.
+9. GameDesign names the pump, the power line and the clinic as the town's failing facilities, but only the pump has a story. The clinic robot, the natural keeper of the "missing names" clue (a clinic with no patient in decades, and a ledger of "transferred" ones), is never on stage; T-01 mentions only an offstage "clinic operator".
+
+**Recommended change:** Fix each in the document that owns the fact; items 3, 4 and 8 need a decision rather than a correction.
+
+### Positive foundations to preserve
+
+- The Placement and Knowledge notes on every scene, and the rule that characters know only what they have seen.
+- The Authority's method (it steers and never commands), and its hidden contradiction: it uses human failure as its mandate while evading its own part in it.
+- The Cinderium ruleset and the harvest-containment rules; the nomad's compartmentalized circuit.
+- [O-01](Dialogue/Phase-01-Opening.md) and the parents' message in F-02, especially "Do not carry it as a debt".
+- Keeping the player's refusal and silence valid at every point; the aim is right, and L-52 is about its cost, not its goal.
+
+### Recommended correction order
+
+1. **Maintainer decisions the rest depends on:** the war's motive and what the founders know of the first strike (L-37), the real human scale (L-39), and the sibling (L-40).
+2. **Cut the story to the first release** and choose the third romance (L-57, L-56).
+3. **Settle the trials' geography and separation** (L-43, L-44, L-45) and Morrow's body (L-55).
+4. **Make the drafts deliver the premise:** show robot prejudice and the Quiet (L-46), fix converging choices (L-48), connect the farm (L-47), give the sleeper a stake (L-50).
+5. **Complete the family thread:** the message's two questions, Hob's second order and the delivery condition (L-41, L-42).
+6. **Give the Authority's program a purpose** and the shared messaging model (L-38).
+7. **Housekeeping:** Cleo's refusal and the stale lines, heart labels, continuity slips (L-53, L-54, L-58).
+8. **In the next rewrite pass:** differentiate the three arcs and name the Keepers (L-49), the tone pass (L-51), and slimmer consent scenes (L-52).
+
+### Review limits
+
+This is a critical reading of documents, not a playtest, a line edit or an originality clearance. It reads each scene as written and does not judge how it will perform or sound. Several findings (L-37, L-39, L-40, L-55) touch fixed canon or the cast and are put as options for the maintainer; none has been changed in the lore. The recommended changes are proposals, and the first-release cut in L-57 is a design decision that belongs to the maintainer and the game designer.
