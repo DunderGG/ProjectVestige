@@ -9,7 +9,7 @@ Run (from the project folder; Blender 5.0 is tested):
 This writes only Art/Export/SM_Bed.fbx. Options go after a double dash:
     -- --check-only                  build and check it, write nothing
     -- --export-dir DIR              write the FBX into DIR instead of Art/Export
-    -- --save-blend [FILE]           also save the .blend source (default Art/Blender/SM_Bed.blend)
+    -- --save-blend [FILE]           also save a .blend file to open in Blender (default Art/Blender/SM_Bed.blend; not committed)
     -- --preview-dir DIR             render the preview images into DIR (outside the repository, or in
                                      its git-ignored Saved folder, for example Saved/AgentWork/bed)
 A broken asset stops the run with a non-zero exit status before anything is written.

@@ -251,7 +251,7 @@ A change that breaks the budget is a bug and is fixed before more features go in
 
 What content does to performance is decided when it is made, so these apply to art and level work as well as code:
 
-- **Meshes:** Nanite for static, detailed meshes (buildings, rocks, ruins). Skinned meshes (the farmer, robots) and anything Nanite doesn't suit get LODs.
+- **Meshes:** Nanite for every static mesh, low-poly props included: with virtual shadow maps a mesh without it costs much more to draw into the shadows. Skinned meshes (the farmer, robots) and anything Nanite doesn't suit get LODs.
 - **Swaying crops and foliage** use World Position Offset sparingly: it makes virtual shadow maps redraw those shadows every frame. Set the mesh's WPO disable distance so distant plants stop moving.
 - **Lights:** the sun and sky light are the main lights. Extra movable lights (robot lamps, windows) are small, few and usually don't cast shadows. The sun turns in steps (`SunStepDegrees` on the day cycle), not every frame: virtual shadow maps redraw all of a light's cached shadows whenever its direction changes.
 - **Translucency:** the haze and similar effects use fog (exponential height fog, volumetric fog) and post-processing, not stacked translucent planes, which multiply GPU cost.

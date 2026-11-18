@@ -256,7 +256,7 @@ Only needed to make or change 3D models.
    |---|---|
    | `--check-only` | Builds and checks the asset and writes nothing. Use it to try a change. |
    | `--export-dir DIR` | Writes the FBX into `DIR` instead of `Art/Export`. |
-   | `--save-blend [FILE]` | Also saves the `.blend` source (by default `Art/Blender/<Asset>.blend`). Without it no `.blend` is written. |
+   | `--save-blend [FILE]` | Also saves a `.blend` file to open the mesh in Blender (by default `Art/Blender/<Asset>.blend`). The script is the source, so don't commit it. Without this option no `.blend` is written. |
    | `--preview-dir DIR` | Renders preview images into `DIR`: the game camera view from the asset's front and from its side, and three close views, with a 1 m farm tile for scale. `DIR` must be outside the repository, or inside its `Saved` folder, which Git ignores (for example `Saved/AgentWork/bed`). |
 
    For example, to try the bed without changing any file Git tracks, and look at it:

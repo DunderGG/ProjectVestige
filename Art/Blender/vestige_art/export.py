@@ -1,7 +1,7 @@
 # Copyright (C) 2026 David Bennehag and the Project Vestige contributors.
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-"""Writing the files: the FBX for Unreal and, only when asked, the .blend source."""
+"""Writing the files: the FBX for Unreal and, only when asked, a .blend file to open in Blender."""
 
 import os
 
@@ -51,7 +51,7 @@ def export_fbx(asset, export_dir):
 
 
 def save_blend(path):
-    """Saves the scene as the .blend source. Only called when --save-blend is given."""
+    """Saves the scene as a .blend file. Only called when --save-blend is given."""
     os.makedirs(os.path.dirname(path), exist_ok=True)
     bpy.ops.wm.save_as_mainfile(filepath=path)
     print(f"[export] wrote {path} ({os.path.getsize(path)} bytes)")

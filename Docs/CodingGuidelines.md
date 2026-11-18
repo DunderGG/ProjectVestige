@@ -519,7 +519,7 @@ Our assets live under `Content/Vestige/`, split by type. Leave the template's fo
 
 Variants go after the base name with underscores: `SM_Crop_Turnip_Stage0`, `SM_Crop_Turnip_Stage1`.
 
-Blender sources go in `Art/Blender/`, exported FBX files in `Art/Export/`, with the same names as the imported assets.
+Blender sources go in `Art/Blender/`: a script `make_<asset>.py` for a scripted mesh (one script may build several, as `make_farm_assets.py` does), or a `.blend` file for a mesh made by hand. Exported FBX files go in `Art/Export/`, with the same names as the imported assets.
 
 ## 15. Git workflow
 

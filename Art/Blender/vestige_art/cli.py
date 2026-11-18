@@ -55,7 +55,8 @@ def parse_args(asset_name, argv=None):
                         help="where the FBX goes (default: Art/Export)")
     parser.add_argument("--save-blend", metavar="FILE", nargs="?", default=None,
                         const=os.path.join(BLEND_DIR, asset_name + ".blend"),
-                        help="also save the .blend source (default file: Art/Blender/<asset>.blend). "
+                        help="also save a .blend file to open the mesh in Blender (default file: "
+                             "Art/Blender/<asset>.blend; the script is the source, so don't commit it). "
                              "Without this option no .blend is written.")
     parser.add_argument("--check-only", action="store_true",
                         help="build and check the asset, write nothing")

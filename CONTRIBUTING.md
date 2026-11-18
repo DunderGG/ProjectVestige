@@ -109,7 +109,7 @@ Low-poly and stylized, with simple shapes and flat or lightly textured colors. T
    - Held tools: the point where the hand grips.
 4. **Apply transforms** (rotation and scale) before exporting.
 5. **Export FBX** to `Art/Export/` with the same name the asset will have in Unreal, using *Forward: X*, *Up: Z* and *Apply Scalings: FBX Units Scale*.
-6. **Save the `.blend` source** in `Art/Blender/`. Every imported mesh should have its source in the repo so others can change it.
+6. **Save the source** in `Art/Blender/`, so others can change the mesh: the script that builds it (`make_<asset>.py`, see [Art/README.md](Art/README.md)), or the `.blend` file for a mesh made by hand. A scripted mesh needs no `.blend` in the repository: the script is its source.
 7. **Import** into `Content/Vestige/` in the folder for its type (`Meshes`, `Materials`, `Textures`...).
 
 `Art/Blender/make_farm_assets.py` generates the current crop and tool meshes from a script and is a working example of these settings.
@@ -154,7 +154,7 @@ Each crop, tool and item is a **data asset**: an asset in the Content Browser wh
 
 4. **Save it and check it.** Right-click the `Content/Vestige/Crops` folder and choose *Validate Assets*: a missing or badly formed Content Id, a Harvest Item Id that names no item, a missing ripe mesh, no growth stages, a stage without a mesh, start days that don't begin at 0 and increase, a start day at or after *Days To Mature*, or the ripe mesh among the growth stages, shows as an error. Restart the editor and check the Output Log for an "is used by more than one asset" error, which means another asset already has your ID.
 5. **Try it in the game.** Seeds are planted from the item in hand, so make a seed item for your crop first ([Adding an item](#adding-an-item)): besides its **Farm Seed Fragment** naming your crop, it needs a **Vestige Tool Fragment** whose *Tool Id* is `VestigeTool:Base.Seeds`, the Seeds tool every seed item uses. Then open `Content/Vestige/Blueprints/BP_PlayerState`, select its **Inventory** component and add your seeds under **Starting Items**; the first nine slots are the hotbar. Start a new game with them: while playing, open the console and type `NewGame` ([PlayTest.md](Docs/PlayTest.md#1-before-you-test) says how to open it). Till a tile with the hoe, press the number key of your seeds' slot (or scroll to it) and press E on the tilled tile. Change the starting items back before you commit, unless your pull request is meant to change them.
-6. **Open a pull request** with the data asset, the meshes, their `.blend` source and a screenshot of each growth stage in the game.
+6. **Open a pull request** with the data asset, the meshes, their source (script or `.blend`) and a screenshot of each growth stage in the game.
 
 ### Adding a tool
 
