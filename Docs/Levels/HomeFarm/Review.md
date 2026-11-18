@@ -19,7 +19,7 @@ On the first morning, the player should recognize home, the 8×8 field, and a ne
 - **§4 and §9:** tending the farm is part of the daily loop, but the rest of the day is a choice; the slice ends with a sprinkler and season funds, not a larger social-town map.
 - **§8:** the caretaker is loyal and has a relationship arc; the level can stage a welcome, but cannot supply that arc or invent dialogue.
 - **§10 and §13:** the farm is the largest map; the vertical slice proves the farming core. This does not authorize a town exit or additional gameplay stations.
-- **§14, 2026-11-14 entries:** David chose a fully walkable planned footprint and a farmhouse beside the shared approach, outside the field apron. Preserve these decisions.
+- **§14, 2026-11-14 entries:** the maintainer chose a fully walkable planned footprint and a farmhouse beside the shared approach, outside the field apron. Preserve these decisions.
 - **§15:** no open question currently settles the detailed farm layout.
 - **Roadmap 4.2, 4.4–4.5:** contamination/water, caretaker onboarding, and farm services are planned; the plan properly uses nonfunctional placeholders until those systems exist.
 - **GameDesignAudit.md:** no finding specifically reviews this level layout. Its broader scope and “Your pace” cautions remain relevant.

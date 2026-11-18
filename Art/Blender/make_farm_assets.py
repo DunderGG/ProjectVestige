@@ -592,7 +592,7 @@ GAME_CAMERA_PITCH = math.radians(30)
 GAME_CAMERA_FOV = math.radians(90)  # Unreal's default horizontal field of view
 LINEUP_CLOSE_SPACING = 0.7
 STAGE_START_SCALE = 0.8  # a crop's StageStartScale in its data asset
-# The night each growth stage starts on, and the night the crop is ripe, as David chose on 2026-11-13.
+# The night each growth stage starts on, and the night the crop is ripe, as the maintainer chose on 2026-11-13.
 # Keep in step with the crops' data assets; the day strips show what each morning looks like.
 DAY_SCHEDULES = {
     "Turnip": ([0, 1, 2], 3),

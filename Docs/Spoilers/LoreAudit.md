@@ -167,7 +167,7 @@ The file correctly marks many names as working names, but also uses them through
 2. [x] Define the fictional rules of Cinderium dust, radiation and land recovery (L-02; resolved 2026-10-27).
 3. [x] Explain infrastructure failure and Hob's maintenance limits (L-03; resolved 2026-10-27). Reconcile Hob's order and the town's crisis (L-04; resolved 2026-10-27).
 4. [ ] **L-07 partially addressed:** Character sheets outline the engineer's and archivist's arcs; implement and validate a complete arc once a playable story slice exists, and develop other characters as they become planned content. Clarify the sleeper's agency (L-10).
-5. [x] Set the human cast target and define why encounters are rare while global numbers remain unknown (L-05; resolved 2026-10-27). Define faction institutions and membership (L-06; resolved 2026-10-27). [x] Add shared tone guidance before expanding the cast (L-09; resolved 2026-11-15: [Lore.md section 15](Lore.md#15-tone-and-the-darkest-material) holds the guidance and David approved it; the comedy pass that applies it is tracked in L-51).
+5. [x] Set the human cast target and define why encounters are rare while global numbers remain unknown (L-05; resolved 2026-10-27). Define faction institutions and membership (L-06; resolved 2026-10-27). [x] Add shared tone guidance before expanding the cast (L-09; resolved 2026-11-15: [Lore.md section 15](Lore.md#15-tone-and-the-darkest-material) holds the guidance and the maintainer approved it; the comedy pass that applies it is tracked in L-51).
 6. Establish a working-name and stable-ID policy before terms become content or save data (L-11).
 
 ## Review limits
@@ -684,7 +684,7 @@ The score is one point below the 2026-11-09 audit because this review examined c
 | Finding | Status on 2026-11-15 | Notes |
 |---|---|---|
 | **L-07** (Playable character arcs) | **Partially addressed / Stalled** | Alice, Reed and Morrow are new sheets with no scenes. The Administrator and Keeper operator, the most frequent speakers, still have no sheet or name (L-49, L-56). |
-| **L-09** (Tone guidance) | **Resolved (2026-11-15)** | [Lore.md section 15](Lore.md#15-tone-and-the-darkest-material) holds the shared tone guidance (registers, where humor lands and stops, exhibit and clinic stances, content baseline), approved by David on 2026-11-15: option A for the tone's mix, and the content baseline as the default "for now". The comedy pass (L-51) has not started. The 2026-11-15 audit's "no tone section" note is answered; the Authority and "glass cage" imagery fall under its harm register. |
+| **L-09** (Tone guidance) | **Resolved (2026-11-15)** | [Lore.md section 15](Lore.md#15-tone-and-the-darkest-material) holds the shared tone guidance (registers, where humor lands and stops, exhibit and clinic stances, content baseline), approved by the maintainer on 2026-11-15: option A for the tone's mix, and the content baseline as the default "for now". The comedy pass (L-51) has not started. The 2026-11-15 audit's "no tone section" note is answered; the Authority and "glass cage" imagery fall under its harm register. |
 | **L-10** (Sleeper agency) | **Open** | See L-48 and L-50. |
 | **L-11** (Working names and IDs) | **Open** | Unchanged. |
 | **L-12 / L-29** (Cleo's consent and telemetry) | **Regressed in remnants** | L-53. |

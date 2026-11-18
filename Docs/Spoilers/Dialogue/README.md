@@ -19,7 +19,7 @@ The six phase files follow the timeline's story order. Each scene has a stable d
 - Use only relative references to the Four Days; do not state an absolute in-world year.
 - Do not read faction membership as proof of knowledge or guilt. The Index's cognitive integrations and Iron Creed's frame conversions are separate programs.
 - Silence, pauses, interruptions, and practical actions are part of the dialogue. A good line often does less rather than more.
-- Follow the tone rules in [Lore.md section 15](../Lore.md#15-tone-and-the-darkest-material): every scene outside the harm register gets a light beat, a harm scene gets none, humor never lands on people in pain, and a scene may end without a cautious note or a moral. That section is the approved tone guidance (David, 2026-11-15; the content baseline is approved as the default for now).
+- Follow the tone rules in [Lore.md section 15](../Lore.md#15-tone-and-the-darkest-material): every scene outside the harm register gets a light beat, a harm scene gets none, humor never lands on people in pain, and a scene may end without a cautious note or a moral. That section is the approved tone guidance (the maintainer, 2026-11-15; the content baseline is approved as the default for now).
 
 ## Scene index
 
