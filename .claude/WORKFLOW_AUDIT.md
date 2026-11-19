@@ -163,7 +163,7 @@ This applies to Claude Code's permission system only. Copilot in VS Code has its
 
 - `effort` can be set per agent in its frontmatter. None of the seven agents sets it, so all inherit the session's level.
 - `maxTurns` caps a runaway agent (for example one stuck on a hung build); the output is marked partial and the agent can be resumed.
-- Agents with `model: inherit` (the implementer and the artist) run on **whatever model the main session uses**. The implementer writes the most output, so this matters.
+- Agents with `model: inherit` (the implementer and the artist) run on **whatever model the main session uses**. (Since 2026-11-19 the implementer names `sonnet` as a trial and the artist `opus`; see `Docs/DecisionLog.md`, 2026-11-19.) The implementer writes the most output, so this matters.
 
 **Fix.**
 
