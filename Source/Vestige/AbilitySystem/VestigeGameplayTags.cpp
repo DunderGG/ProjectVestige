@@ -25,6 +25,12 @@ namespace VestigeGameplayTags
 		Feedback_Farm_NothingToPlant, "Vestige.Feedback.Farm.NothingToPlant", "Feedback: no seed in hand to plant.");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Feedback_Farm_CantPlant, "Vestige.Feedback.Farm.CantPlant", "Feedback: seeds need empty tilled soil.");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(
+		Feedback_Farm_OutOfSeason, "Vestige.Feedback.Farm.OutOfSeason", "Feedback: the seeds don't grow in this season.");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(
+		Feedback_Farm_TooLate, "Vestige.Feedback.Farm.TooLate", "Feedback: the crop can't ripen before the season ends.");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Feedback_Farm_TooLate_LastDay, "Vestige.Feedback.Farm.TooLate.LastDay",
+		"Feedback: the crop can't ripen before the season ends tomorrow.");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(
 		Feedback_Farm_CantWater, "Vestige.Feedback.Farm.CantWater", "Feedback: nothing on the tile can be watered.");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Feedback_Farm_NothingRipe, "Vestige.Feedback.Farm.NothingRipe", "Feedback: no ripe crop to harvest.");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(

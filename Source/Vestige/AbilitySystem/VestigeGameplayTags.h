@@ -54,6 +54,23 @@ namespace VestigeGameplayTags
 	/** The plant ability, on the press: the tile isn't empty tilled soil. */
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Feedback_Farm_CantPlant);
 
+	/**
+	 * The plant ability, on the press: the seed's crop doesn't grow in today's season. Today's values (Day, Season,
+	 * SeasonInSentence, DayOfSeason, DaysLeft), DaysToRipe, and PlantSeason and PlantSeasonInSentence, the next season it grows in.
+	 */
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Feedback_Farm_OutOfSeason);
+
+	/**
+	 * The plant ability, on the day's first press that would plant the crop too late to ripen; that press plants nothing.
+	 * Today's values as Farm.OutOfSeason, DaysToRipe, DaysToDeadline (the days before it would wither), and DeadlineSeason and
+	 * DeadlineSeasonInSentence, the first coming season it doesn't grow in. Also the key of the day's warnings on the farming
+	 * component, for either form.
+	 */
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Feedback_Farm_TooLate);
+
+	/** The plant ability, instead of Farm.TooLate when no days are left before the deadline season. The same values. */
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Feedback_Farm_TooLate_LastDay);
+
 	/** The water ability, on the press: nothing on the tile can be watered. */
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Feedback_Farm_CantWater);
 

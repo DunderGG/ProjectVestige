@@ -216,7 +216,7 @@ Before more tools and [4.6](#46-interface-and-input):
 
 When working nearby:
 
-- [ ] Remove the data fields nothing reads (`WaterNeed`, `ContaminationTolerance` on crops, `SellPrice` on items) until their feature is designed ([L2](CodeReview.md#low)). The crops' `Seasons` stays: its tags are the calendar's seasons (2026-11-14), and the seeds' warning and withering items in 4.2 read it next
+- [ ] Remove the data fields nothing reads (`WaterNeed`, `ContaminationTolerance` on crops, `SellPrice` on items) until their feature is designed ([L2](CodeReview.md#low)). The crops' `Seasons` stays: its tags are the calendar's seasons (2026-11-14), planting reads it (2026-11-19), and the withering item in 4.2 reads it next
 - [x] Standard ability tasks (wait delay, montages) instead of timers in abilities ([L3](CodeReview.md#low))
    - Done 2026-11-07 with H1: the tool abilities wait with `WaitDelay` and `WaitMovementModeChange`; no other ability used a timer. Montages come with tool animations
 - [ ] Blueprint tool abilities, H1's modding half: make `CanUseOn` and `UseOn` Blueprint-implementable, make the field's rules callable from Blueprints, and turn the tool's `Ability` into a soft class reference in its bundle, when mod support is designed ([Systems.md, section 9](Systems.md#9-abilities-attributes-and-effects-gameplay-ability-system), tools as abilities)
@@ -359,7 +359,8 @@ The code changes that the slice's content depends on. Doing them first means add
 - [ ] Clean water as a resource: a water source on the farm that the watering can fills from
 - [ ] Dirty water: easy to get, but raises tile radiation
 - [x] A 28-day season with the date and the days left shown on the HUD
-- [ ] Seeds show their days to harvest, and planting a crop that can't ripen before the season ends gives a warning
+- [x] Seeds show their days to harvest, and planting a crop that can't ripen before the season ends gives a warning
+   - Done 2026-11-19 with refusing out-of-season seeds, after design and code review by a senior Unreal C++ reviewer agent, whose approval counts as @DunderGG's ([Systems/22-FarmFields.md](Systems/22-FarmFields.md), "Seeds go in only in their seasons"; decision log): `UFarmCropData::GetSeasonFit` decides fits, out of season or too late from the calendar; seeds out of season are refused; the first too-late press of a crop each day plants nothing and warns, and the next press plants (`UFarmingComponent` keeps the day's warnings, not saved); the hand label reads "Cabbage Seeds (10 days to ripen)". `CanUseOn` now gives a feedback report with values. The three crops list `Vestige.Season.Spring`. Refusing and the press-again warning are still open for @DunderGG ([GameDesign.md, section 15](GameDesign.md#15-open-questions)). Tests `Vestige.FarmCrop.*` season fit and validation, `Vestige.Farming.OutOfSeasonSeedsAreRefused`, `TheFirstLatePressWarnsAndPlantsNothing` and the other planting tests, `Vestige.UI.SeedsInHandShowTheirDaysToRipen`. Play-test in [PlayTest.md](PlayTest.md), "Out-of-season seeds and the late-planting warning"
 - [ ] Out-of-season crops wither at 06:00 on the first day of the next season
    - `OnSeasonStarted`'s listeners run in no set order, so this item decides the order of its messages after the season message ([Systems/04-Time.md](Systems/04-Time.md), pitfalls)
 - [ ] A test for the "Welcome back" message's values (`Vestige.Feedback.Save.Loaded`, season and day of the season); the save subsystem builds that report privately, so the test needs a hook (code review, 2026-11-14)

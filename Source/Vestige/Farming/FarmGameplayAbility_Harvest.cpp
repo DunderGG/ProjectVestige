@@ -10,19 +10,19 @@
 #include "Farming/FarmTileState.h"
 #include "Inventory/VestigeInventoryComponent.h"
 
-bool UFarmGameplayAbility_Harvest::CanUseOn(const FIntPoint& Tile, FGameplayTag* OutFailureReason) const
+bool UFarmGameplayAbility_Harvest::CanUseOn(const FIntPoint& Tile, FVestigeFeedbackReport* OutFailure) const
 {
 	const UFarmField* Field = GetField();
 	const FFarmTileState* State = Field ? Field->GetTile(Tile) : nullptr;
 	if (!State)
 	{
-		return FailBecause(OutFailureReason, VestigeGameplayTags::Feedback_Tool_NoTarget);
+		return FailBecause(OutFailure, VestigeGameplayTags::Feedback_Tool_NoTarget);
 	}
 	if (!State->IsRipe() || !State->GetCrop())
 	{
-		return FailBecause(OutFailureReason, VestigeGameplayTags::Feedback_Farm_NothingRipe);
+		return FailBecause(OutFailure, VestigeGameplayTags::Feedback_Farm_NothingRipe);
 	}
-	return HasRoomForHarvest(*State->GetCrop()) || FailBecause(OutFailureReason, VestigeGameplayTags::Feedback_Inventory_Full);
+	return HasRoomForHarvest(*State->GetCrop()) || FailBecause(OutFailure, VestigeGameplayTags::Feedback_Inventory_Full);
 }
 
 bool UFarmGameplayAbility_Harvest::UseOn(const FIntPoint& Tile)

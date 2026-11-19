@@ -7,6 +7,9 @@
 #include "Content/VestigeItemData.h"
 #include "FarmSeedFragment.generated.h"
 
+class UFarmCropData;
+class UVestigeContentCatalog;
+
 /** Makes an item a seed: planting it grows the crop CropId names. */
 UCLASS()
 class UFarmSeedFragment : public UVestigeItemFragment
@@ -14,6 +17,12 @@ class UFarmSeedFragment : public UVestigeItemFragment
 	GENERATED_BODY()
 
 public:
+	/**
+	 * The crop Item's seed fragment names, found in Catalog: the one way from an item to its crop. Nullptr when either is null,
+	 * the item isn't a seed, or the catalogue has no such crop. Never loads.
+	 */
+	static const UFarmCropData* FindCropOf(const UVestigeItemData* Item, const UVestigeContentCatalog* Catalog);
+
 	/** The crop planting this seed grows (FarmCrop:Base.Turnip). */
 	const FPrimaryAssetId& GetCropId() const { return CropId; }
 

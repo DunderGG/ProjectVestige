@@ -9,6 +9,51 @@
 #include "FarmCropData.generated.h"
 
 class UStaticMesh;
+struct FVestigeCalendar;
+
+/** Whether planting a crop on a day fits its seasons. A fixed set of rule outcomes (Systems.md, section 22). */
+enum class EFarmSeasonFit : uint8
+{
+	/** The crop grows in the day's season and can ripen before a season it doesn't grow in begins. */
+	Fits,
+
+	/** The crop doesn't grow in the day's season. */
+	OutOfSeason,
+
+	/** The crop grows in the day's season, but needs more days to ripen than are left before a season it doesn't grow in. */
+	TooLate
+};
+
+/**
+ * The answer of UFarmCropData::GetSeasonFit for planting a crop on one day, with the numbers a report about it names. Never
+ * saved: it is worked out when asked.
+ */
+struct FFarmSeasonFit
+{
+	EFarmSeasonFit Fit = EFarmSeasonFit::Fits;
+
+	/** The watered days the crop needs to ripen: its DaysToMature. */
+	int32 DaysToRipe = 0;
+
+	/**
+	 * The days the crop has before it would wither: the day's DaysLeft plus the days of each following season in a row that the
+	 * crop grows in. MAX_int32 when no coming season ends its growth, and while it is out of season.
+	 */
+	int32 DaysToDeadline = MAX_int32;
+
+	/** Out of season: the index in the calendar's seasons of the next season the crop grows in. Else INDEX_NONE. */
+	int32 PlantSeasonIndex = INDEX_NONE;
+
+	/** The index in the calendar's seasons of the first coming season the crop doesn't grow in, or INDEX_NONE without one. */
+	int32 DeadlineSeasonIndex = INDEX_NONE;
+
+	/**
+	 * The values a feedback report about this fit on day count Day gives its text: the calendar's GetReportValues(Day),
+	 * DaysToRipe, and out of season PlantSeason and PlantSeasonInSentence, too late DaysToDeadline, DeadlineSeason and
+	 * DeadlineSeasonInSentence (the seasons' DisplayName and NameInSentence). A season whose index is INDEX_NONE gives no value.
+	 */
+	FFormatNamedArguments GetReportValues(const FVestigeCalendar& Calendar, int32 Day) const;
+};
 
 /** How a crop looks on one growth day: one mesh at a uniform scale, standing on its origin at the base. */
 struct FFarmCropGrowthLook
@@ -78,11 +123,25 @@ public:
 	 */
 	FFarmCropGrowthLook GetGrowthLook(int32 GrowthDays) const;
 
+	/**
+	 * Whether the crop grows in Season, a season of Calendar: when its Seasons lists that tag exactly, or lists none of the
+	 * calendar's seasons (a crop of every season). A listed child of a season tag doesn't count.
+	 */
+	bool GrowsIn(const FGameplayTag& Season, const FVestigeCalendar& Calendar) const;
+
+	/**
+	 * Whether planting the crop on day count Day fits its seasons in Calendar: out of season when it doesn't grow in the day's
+	 * season, too late when it needs more days to ripen than it has before a coming season it doesn't grow in. Every crop fits
+	 * in a calendar without seasons. Assumes a watering every night. Pure: reads no clock or world.
+	 */
+	FFarmSeasonFit GetSeasonFit(const FVestigeCalendar& Calendar, int32 Day) const;
+
 #if WITH_EDITOR
 	/**
-	 * Reports a HarvestItemId that is empty, of another content type, or names no item; a DaysToMature below 1, a StageStartScale
-	 * outside (0, 1], a missing ripe mesh, no growth stages, a stage without a mesh, a first StartDay other than 0, start days
-	 * that don't strictly increase or reach DaysToMature, and the ripe mesh used by a stage.
+	 * Reports a HarvestItemId that is empty, of another content type, or names no item; no Seasons, and a season the game
+	 * data's calendar doesn't have (skipped when that calendar has no seasons); a DaysToMature below 1, a StageStartScale outside
+	 * (0, 1], a missing ripe mesh, no growth stages, a stage without a mesh, a first StartDay other than 0, start days that don't
+	 * strictly increase or reach DaysToMature, and the ripe mesh used by a stage.
 	 */
 	virtual EDataValidationResult IsDataValid(FDataValidationContext& Context) const override;
 #endif
@@ -103,13 +162,22 @@ public:
 
 	/** For tests only. Crops get their stage start scale in the editor. */
 	void SetStageStartScaleForTests(float InStageStartScale) { StageStartScale = InStageStartScale; }
+
+	/** For tests only. Crops get their seasons in the editor. */
+	void SetSeasonsForTests(const FGameplayTagContainer& InSeasons) { Seasons = InSeasons; }
 #endif
 
 protected:
 	virtual FPrimaryAssetType GetContentType() const override { return AssetType; }
 
 private:
-	/** Seasons the crop grows in, tags of the calendar's seasons (DA_GameData). Nothing reads it yet: crops grow in any season. */
+	/** Whether Seasons lists any of Calendar's seasons exactly. A crop that lists none grows in every season. */
+	bool ListsAnySeasonOf(const FVestigeCalendar& Calendar) const;
+
+	/**
+	 * Seasons the crop grows in, tags of the calendar's seasons (DA_GameData), matched exactly. Seeds are planted only in these,
+	 * and a crop listing none of the calendar's seasons grows in every season (data validation reports an empty list).
+	 */
 	UPROPERTY(EditDefaultsOnly, Category = "Farming", meta = (AllowPrivateAccess = "true", Categories = "Vestige.Season"))
 	FGameplayTagContainer Seasons;
 

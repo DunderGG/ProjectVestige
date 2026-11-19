@@ -19,9 +19,28 @@ class UVestigeTestToolAbility : public UVestigeGameplayAbility_UseTool
 {
 	GENERATED_BODY()
 
+public:
+	/** The presses this ability was told were refused (OnPressRefused), since the last Reset, in the static counters below. */
+	static int32 GetRefusedPresses() { return RefusedPresses; }
+
+	/** The reason of the last refused press, or an empty tag. */
+	static const FGameplayTag& GetLastRefusal() { return LastRefusal; }
+
+	static void ResetRefusals()
+	{
+		RefusedPresses = 0;
+		LastRefusal = FGameplayTag();
+	}
+
 protected:
-	virtual bool CanUseOn(const FIntPoint& Tile, FGameplayTag* OutFailureReason) const override;
+	virtual bool CanUseOn(const FIntPoint& Tile, FVestigeFeedbackReport* OutFailure) const override;
 	virtual bool UseOn(const FIntPoint& Tile) override;
+	virtual void OnPressRefused(const FIntPoint& Tile, const FVestigeFeedbackReport& Refusal) override;
+
+private:
+	// Static, since an ability is an instance per actor that the test doesn't hold; the tests run one at a time.
+	static inline int32 RefusedPresses = 0;
+	static inline FGameplayTag LastRefusal;
 };
 
 #endif

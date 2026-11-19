@@ -13,6 +13,7 @@ class AVestigePlayerCharacter;
 class APawn;
 class UAbilitySystemComponent;
 class UCommonInputSubsystem;
+class UFarmCropData;
 enum class ECommonInputType : uint8;
 class UVestigeClockSubsystem;
 class UVestigeFeedbackResponses;
@@ -63,6 +64,12 @@ public:
 	 */
 	static FText FormatDate(const FVestigeDate& Date, const FText& SeasonName);
 
+	/**
+	 * The status line's item in hand: ItemName, and for a seed whose crop is Crop also its days to ripen, "Cabbage Seeds (10 days
+	 * to ripen)". The name alone when Crop is null.
+	 */
+	static FText FormatItemInHand(const FText& ItemName, const UFarmCropData* Crop);
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
@@ -88,7 +95,10 @@ private:
 	/** Rebuilds the date, clock and item in hand line and remembers the day and minute it shows; the date only on a new day. */
 	void RefreshStatusText();
 
-	/** Rebuilds the item in hand's name and the status line. Bound to the inventory's OnItemInHandChanged. */
+	/**
+	 * Rebuilds the item in hand's text and the status line. Bound to the inventory's OnItemInHandChanged. A seed's days to ripen
+	 * don't change with the date, so nothing else rebuilds it.
+	 */
 	void RefreshItemInHandText();
 
 	/** Bound to the interaction component's OnFocusChanged. */

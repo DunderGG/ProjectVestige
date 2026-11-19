@@ -14,11 +14,13 @@ class UFarmingComponent;
 class UFarmTargetingComponent;
 class UVestigeInventoryComponent;
 class UVestigeToolData;
+struct FVestigeFeedbackReport;
 
 /**
  * Base of every tool ability: what all tool uses share. A tool data asset names its subclass (UFarmGameplayAbility_Till...),
  * which UFarmingComponent grants while the tool is in hand, with the tool asset as the spec's source object. The subclass
- * says what the tool does to a tile (CanUseOn, UseOn); this class runs the uses.
+ * says what the tool does to a tile (CanUseOn, UseOn) and may remember a press's refusal (OnPressRefused); this class runs
+ * the uses and reports why a press changed nothing.
  *
  * One press of the use key is one activation. The first use happens at once; each use that changed the farm costs the
  * tool's StaminaCost through the game data's stamina cost effect and then takes the tool's UseSeconds (OutOfStaminaTimeScale times
@@ -70,10 +72,11 @@ protected:
 
 	/**
 	 * Whether a use would change the tile at Tile (column X, row Y) of the field now. Changes nothing and reports nothing.
-	 * When it returns false and OutFailureReason isn't null, sets it to why: a Vestige.Feedback tag, which the base reports
-	 * on the press. Every false must give a reason.
+	 * When it returns false and OutFailure isn't null, sets it to why: a feedback report (a Vestige.Feedback tag and the values
+	 * its text uses), which the base reports on the press. Every false must give a reason. A repeat passes nullptr, so values
+	 * that cost something to build are built only when OutFailure isn't null.
 	 */
-	virtual bool CanUseOn(const FIntPoint& Tile, FGameplayTag* OutFailureReason) const
+	virtual bool CanUseOn(const FIntPoint& Tile, FVestigeFeedbackReport* OutFailure) const
 		PURE_VIRTUAL(UVestigeGameplayAbility_UseTool::CanUseOn, return false;);
 
 	/**
@@ -82,8 +85,15 @@ protected:
 	 */
 	virtual bool UseOn(const FIntPoint& Tile) PURE_VIRTUAL(UVestigeGameplayAbility_UseTool::UseOn, return false;);
 
-	/** For CanUseOn: sets OutFailureReason to Reason when it isn't null, and returns false. */
-	static bool FailBecause(FGameplayTag* OutFailureReason, const FGameplayTag& Reason);
+	/**
+	 * The press's CanUseOn refused Tile with Refusal, which the base reports right after this call, so a subclass can remember
+	 * what the player is told. Not called for a repeat, nor for the base's own Tool.NoTarget. Must not end the ability or change
+	 * the farm. Does nothing by default.
+	 */
+	virtual void OnPressRefused(const FIntPoint& Tile, const FVestigeFeedbackReport& Refusal) {}
+
+	/** For CanUseOn: sets OutFailure to Reason with Arguments, the values its text uses, when it isn't null, and returns false. */
+	static bool FailBecause(FVestigeFeedbackReport* OutFailure, const FGameplayTag& Reason, FFormatNamedArguments Arguments = {});
 
 	/** The tool this ability was granted for: the spec's source object. Null only if the spec has none. */
 	const UVestigeToolData* GetTool() const;
@@ -140,10 +150,10 @@ private:
 	void EndUse();
 
 	/**
-	 * On the press: reports Reason, a Vestige.Feedback tag, for the player through UVestigeFeedbackSubsystem. Returns whether
-	 * the ability is still active, since a listener may end it.
+	 * On the press: reports Report, a Vestige.Feedback tag and its values, for the player through UVestigeFeedbackSubsystem.
+	 * Returns whether the ability is still active, since a listener may end it.
 	 */
-	bool ReportFeedback(const FGameplayTag& Reason);
+	bool ReportFeedback(const FVestigeFeedbackReport& Report);
 
 	/** How many times as long a use takes while the player is out of stamina. */
 	UPROPERTY(EditDefaultsOnly, Category = "Stamina", meta = (AllowPrivateAccess = "true", ClampMin = 1))

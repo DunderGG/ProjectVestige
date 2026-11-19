@@ -9,6 +9,7 @@
 #include "Components/ActorTestSpawner.h"
 #include "Content/FarmCropData.h"
 #include "Content/FarmSeedFragment.h"
+#include "Content/VestigeCalendar.h"
 #include "Content/VestigeContentCatalog.h"
 #include "Content/VestigeGameData.h"
 #include "Content/VestigeItemData.h"
@@ -36,6 +37,7 @@
 #include "Player/VestigePlayerState.h"
 #include "Tests/VestigeTestEventRecorder.h"
 #include "Tests/VestigeTestToolAbility.h"
+#include "Time/VestigeClockSubsystem.h"
 #include "TimerManager.h"
 #include "UObject/StrongObjectPtr.h"
 
@@ -310,7 +312,53 @@ namespace FarmingTests
 				[this](const FVestigeFeedbackReport& Report)
 				{
 					Reports.Add(Report.Tag);
+					LastArguments = Report.Arguments;
 				});
+		}
+
+		/** The values of the last report heard since ListenToFeedback. */
+		FFormatNamedArguments LastArguments;
+
+		static FString TextOf(const FFormatNamedArguments& Values, const TCHAR* Key)
+		{
+			const FFormatArgumentValue* Value = Values.Find(Key);
+			return Value && Value->GetType() == EFormatArgumentType::Text ? Value->GetTextValue().ToString() : FString();
+		}
+
+		static int32 NumberOf(const FFormatNamedArguments& Values, const TCHAR* Key)
+		{
+			const FFormatArgumentValue* Value = Values.Find(Key);
+			return Value && Value->GetType() == EFormatArgumentType::Int ? static_cast<int32>(Value->GetIntValue()) : INDEX_NONE;
+		}
+
+		static inline const FName CabbageSeedsName = TEXT("Base.CabbageSeeds");
+		static inline const FName PotatoSeedsName = TEXT("Base.PotatoSeeds");
+
+		UVestigeClockSubsystem& Clock() { return *UVestigeClockSubsystem::Get(&Spawner.GetWorld()); }
+
+		const FVestigeSeason& GetSeason(int32 Index) { return Clock().GetCalendar().GetSeasons()[Index]; }
+
+		/** Replaces the bag with this many seeds of the item, in slot 0 and in hand. */
+		void HoldSeeds(FName SeedsName, int32 Count) { SetBag({{0, SeedsName, Count}}); }
+
+		int32 GetSeedsOf(FName SeedsName) const { return Inventory->GetItemCount(FPrimaryAssetId(UVestigeItemData::AssetType, SeedsName)); }
+
+		/** The crop the seeds of this item grow. */
+		const UFarmCropData* GetCropOf(FName SeedsName) { return UFarmSeedFragment::FindCropOf(GetBaseItem(SeedsName), &Catalog()); }
+
+		/**
+		 * Moves the clock to the day of the first season with this many days left, where a spring crop of more days to ripen
+		 * than that is too late. Returns whether it could.
+		 */
+		bool JumpToDaysLeft(int32 DaysLeft) { return Clock().JumpToDay(Clock().GetCalendar().GetDaysPerSeason() - DaysLeft); }
+
+		/** Tills the target tile, holds the seeds, and goes to a day with one day left in the first season. */
+		void SetUpLatePlanting(FName SeedsName)
+		{
+			ASSERT_THAT(IsTrue(GetCropOf(SeedsName)->GetDaysToMature() > 1));
+			ASSERT_THAT(IsTrue(JumpToDaysLeft(1)));
+			Grid->GetField()->Till(TargetCoordinates);
+			HoldSeeds(SeedsName, 3);
 		}
 
 		/** Moves the farmer one tile on along the row, so the target becomes tile (4, 0). */
@@ -533,6 +581,228 @@ namespace FarmingTests
 			// Hold replaces the whole bag, so the seeds are gone by now; the tile shows nothing was planted.
 			ASSERT_THAT(IsTrue(TargetTile()->GetState() == EFarmTileState::Tilled));
 			ASSERT_THAT(IsTrue(GetStamina() == GetMaxStamina()));
+		}
+
+		TEST_METHOD(OutOfSeasonSeedsAreRefused)
+		{
+			ListenToFeedback();
+			Grid->GetField()->Till(TargetCoordinates);
+			HoldSeeds(TurnipSeedsId.PrimaryAssetName, 3);
+			ASSERT_THAT(IsTrue(Clock().JumpToDay(Clock().GetCalendar().GetDaysPerSeason() + 1)));
+
+			UseToolAndFinish();
+
+			ASSERT_THAT(IsTrue(Reports == TArray<FGameplayTag>{VestigeGameplayTags::Feedback_Farm_OutOfSeason}));
+			ASSERT_THAT(IsTrue(TextOf(LastArguments, TEXT("SeasonInSentence")) == GetSeason(1).NameInSentence.ToString()));
+			ASSERT_THAT(IsTrue(TextOf(LastArguments, TEXT("PlantSeasonInSentence")) == GetSeason(0).NameInSentence.ToString()));
+			ASSERT_THAT(IsTrue(TargetTile()->GetState() == EFarmTileState::Tilled));
+			ASSERT_THAT(IsTrue(GetSeeds() == 3));
+			ASSERT_THAT(IsTrue(GetStamina() == GetMaxStamina()));
+		}
+
+		TEST_METHOD(TheSeasonIsReportedBeforeTheTile)
+		{
+			ListenToFeedback();
+			HoldSeeds(TurnipSeedsId.PrimaryAssetName, 3);
+			ASSERT_THAT(IsTrue(Clock().JumpToDay(Clock().GetCalendar().GetDaysPerSeason() + 1)));
+
+			UseToolAndFinish();
+
+			ASSERT_THAT(IsTrue(TargetTile()->GetState() == EFarmTileState::Grass));
+			ASSERT_THAT(IsTrue(Reports == TArray<FGameplayTag>{VestigeGameplayTags::Feedback_Farm_OutOfSeason}));
+		}
+
+		TEST_METHOD(TheFirstLatePressWarnsAndPlantsNothing)
+		{
+			ListenToFeedback();
+			SetUpLatePlanting(CabbageSeedsName);
+			const TStrongObjectPtr<UVestigeTestEventRecorder> Recorder = ListenToBlueprintEvents();
+
+			UseToolAndFinish();
+
+			ASSERT_THAT(IsTrue(Reports == TArray<FGameplayTag>{VestigeGameplayTags::Feedback_Farm_TooLate}));
+			ASSERT_THAT(IsTrue(NumberOf(LastArguments, TEXT("DaysToRipe")) == GetCropOf(CabbageSeedsName)->GetDaysToMature()));
+			ASSERT_THAT(IsTrue(NumberOf(LastArguments, TEXT("DaysToDeadline")) == 1));
+			ASSERT_THAT(IsTrue(TextOf(LastArguments, TEXT("DeadlineSeasonInSentence")) == GetSeason(1).NameInSentence.ToString()));
+			ASSERT_THAT(IsTrue(TargetTile()->GetState() == EFarmTileState::Tilled));
+			ASSERT_THAT(IsTrue(GetSeedsOf(CabbageSeedsName) == 3));
+			ASSERT_THAT(IsTrue(GetStamina() == GetMaxStamina()));
+			ASSERT_THAT(IsTrue(Recorder->GetEvents().IsEmpty()));
+		}
+
+		TEST_METHOD(TheNextPressThatDayPlantsWithoutAWarning)
+		{
+			ListenToFeedback();
+			SetUpLatePlanting(CabbageSeedsName);
+			UseToolAndFinish();
+			ASSERT_THAT(IsTrue(Reports.Num() == 1));
+
+			UseToolAndFinish();
+
+			ASSERT_THAT(IsTrue(Reports.Num() == 1));
+			ASSERT_THAT(IsTrue(TargetTile()->GetState() == EFarmTileState::Planted));
+			ASSERT_THAT(IsTrue(TargetTile()->GetCrop() == GetCropOf(CabbageSeedsName)));
+			ASSERT_THAT(IsTrue(GetSeedsOf(CabbageSeedsName) == 2));
+		}
+
+		TEST_METHOD(AHeldPressAfterTheWarningPlantsNothing)
+		{
+			ListenToFeedback();
+			SetUpLatePlanting(CabbageSeedsName);
+			Grid->GetField()->Till(FIntPoint(4, 0));
+			const TStrongObjectPtr<UVestigeTestEventRecorder> Recorder = ListenToBlueprintEvents();
+
+			FarmingComponent->StartUsingTool();
+			ASSERT_THAT(IsTrue(Reports.Num() == 1));
+			ASSERT_THAT(IsTrue(IsUsingTool()));
+
+			// The held press reaches the next tilled tile: the repeat doesn't plant there, and says nothing.
+			const FFarmTileState* Next = StepToNextTile();
+			ASSERT_THAT(IsNotNull(Next));
+			ASSERT_THAT(IsTrue(Next->GetState() == EFarmTileState::Tilled));
+			ASSERT_THAT(IsTrue(Reports.Num() == 1));
+			ASSERT_THAT(IsTrue(GetSeedsOf(CabbageSeedsName) == 3));
+			ASSERT_THAT(IsTrue(GetStamina() == GetMaxStamina()));
+			ASSERT_THAT(IsTrue(Recorder->GetEvents().IsEmpty()));
+
+			// A new press that day plants.
+			FarmingComponent->StopUsingTool();
+			ASSERT_THAT(IsFalse(IsUsingTool()));
+			UseToolAndFinish();
+			ASSERT_THAT(IsTrue(NextTile()->GetState() == EFarmTileState::Planted));
+			ASSERT_THAT(IsTrue(GetSeedsOf(CabbageSeedsName) == 2));
+			ASSERT_THAT(IsTrue(Reports.Num() == 1));
+		}
+
+		TEST_METHOD(OnlyThePressRefusalIsToldToTheAbility)
+		{
+			UVestigeToolData* Tool = NewObject<UVestigeToolData>();
+			Tool->SetContentIdForTests(TEXT("Test.Tiller"));
+			Tool->SetAbilityForTests(UVestigeTestToolAbility::StaticClass());
+			ASSERT_THAT(IsTrue(Catalog().AddForTests(*Tool)));
+			UVestigeItemData* Item = NewObject<UVestigeItemData>();
+			Item->SetContentIdForTests(TEXT("Test.Tiller"));
+			UVestigeToolFragment* ToolFragment = NewObject<UVestigeToolFragment>(Item);
+			ToolFragment->SetToolIdForTests(Tool->GetPrimaryAssetId());
+			Item->AddFragmentForTests(ToolFragment);
+			ASSERT_THAT(IsTrue(Catalog().AddForTests(*Item)));
+			SetBag({{0, Item->GetContentId(), 1}});
+			ListenToFeedback();
+			UVestigeTestToolAbility::ResetRefusals();
+			Grid->GetField()->Till(TargetCoordinates);
+			Grid->GetField()->Till(FIntPoint(4, 0));
+
+			// The press on a tilled tile is refused with its reason.
+			FarmingComponent->StartUsingTool();
+			ASSERT_THAT(IsTrue(UVestigeTestToolAbility::GetRefusedPresses() == 1));
+			ASSERT_THAT(IsTrue(UVestigeTestToolAbility::GetLastRefusal() == VestigeGameplayTags::Feedback_Farm_CantTill));
+			ASSERT_THAT(IsTrue(IsUsingTool()));
+
+			// The held repeat reaching another refused tile is not.
+			StepToNextTile();
+			ASSERT_THAT(IsTrue(UVestigeTestToolAbility::GetRefusedPresses() == 1));
+			FarmingComponent->StopUsingTool();
+
+			// A press off the field is the base's own report, which the ability isn't told about.
+			UVestigeTestToolAbility::ResetRefusals();
+			Reports.Reset();
+			Farmer->SetActorLocation(FVector(-500.f, -500.f, 0.f));
+			UseToolAndFinish();
+			ASSERT_THAT(IsTrue(Reports == TArray<FGameplayTag>{VestigeGameplayTags::Feedback_Tool_NoTarget}));
+			ASSERT_THAT(IsTrue(UVestigeTestToolAbility::GetRefusedPresses() == 0));
+		}
+
+		TEST_METHOD(TheWarningIsPerCrop)
+		{
+			ListenToFeedback();
+			SetUpLatePlanting(CabbageSeedsName);
+			ASSERT_THAT(IsTrue(GetCropOf(PotatoSeedsName)->GetDaysToMature() > 1));
+			UseToolAndFinish();
+
+			HoldSeeds(PotatoSeedsName, 3);
+			UseToolAndFinish();
+			ASSERT_THAT(IsTrue(
+				Reports == TArray<FGameplayTag>{VestigeGameplayTags::Feedback_Farm_TooLate, VestigeGameplayTags::Feedback_Farm_TooLate}));
+			ASSERT_THAT(IsTrue(TargetTile()->GetState() == EFarmTileState::Tilled));
+
+			HoldSeeds(CabbageSeedsName, 3);
+			UseToolAndFinish();
+			ASSERT_THAT(IsTrue(Reports.Num() == 2));
+			ASSERT_THAT(IsTrue(TargetTile()->GetCrop() == GetCropOf(CabbageSeedsName)));
+		}
+
+		TEST_METHOD(TheWarningIsKeptAcrossAToolSwitch)
+		{
+			ListenToFeedback();
+			SetUpLatePlanting(CabbageSeedsName);
+			UseToolAndFinish();
+
+			Hold(TEXT("Base.Hoe"), 0);
+			HoldSeeds(CabbageSeedsName, 3);
+			UseToolAndFinish();
+
+			ASSERT_THAT(IsTrue(Reports.Num() == 1));
+			ASSERT_THAT(IsTrue(TargetTile()->GetState() == EFarmTileState::Planted));
+		}
+
+		TEST_METHOD(AnotherDayWarnsAgain)
+		{
+			ListenToFeedback();
+			SetUpLatePlanting(CabbageSeedsName);
+			UseToolAndFinish();
+
+			ASSERT_THAT(IsTrue(JumpToDaysLeft(0)));
+			UseToolAndFinish();
+
+			ASSERT_THAT(IsTrue(Reports.Num() == 2));
+			ASSERT_THAT(IsTrue(TargetTile()->GetState() == EFarmTileState::Tilled));
+			ASSERT_THAT(IsTrue(GetSeedsOf(CabbageSeedsName) == 3));
+		}
+
+		TEST_METHOD(OnTheLastDayTheWarningSaysTomorrow)
+		{
+			ListenToFeedback();
+			SetUpLatePlanting(CabbageSeedsName);
+			ASSERT_THAT(IsTrue(JumpToDaysLeft(0)));
+
+			UseToolAndFinish();
+			ASSERT_THAT(IsTrue(Reports == TArray<FGameplayTag>{VestigeGameplayTags::Feedback_Farm_TooLate_LastDay}));
+			ASSERT_THAT(IsTrue(NumberOf(LastArguments, TEXT("DaysToDeadline")) == 0));
+			ASSERT_THAT(IsTrue(TargetTile()->GetState() == EFarmTileState::Tilled));
+
+			UseToolAndFinish();
+			ASSERT_THAT(IsTrue(Reports.Num() == 1));
+			ASSERT_THAT(IsTrue(TargetTile()->GetState() == EFarmTileState::Planted));
+		}
+
+		TEST_METHOD(ATileReasonComesBeforeTheWarningAndLeavesItUnasked)
+		{
+			ListenToFeedback();
+			SetUpLatePlanting(CabbageSeedsName);
+			// Facing grass: the tile is the reason, and the player isn't warned about the crop yet.
+			Farmer->SetActorLocation(FVector(350.f, 50.f, 0.f));
+			UseToolAndFinish();
+			ASSERT_THAT(IsTrue(Reports == TArray<FGameplayTag>{VestigeGameplayTags::Feedback_Farm_CantPlant}));
+
+			Farmer->SetActorLocation(FVector(250.f, 50.f, 0.f));
+			UseToolAndFinish();
+			ASSERT_THAT(IsTrue(Reports.Num() == 2));
+			ASSERT_THAT(IsTrue(Reports[1] == VestigeGameplayTags::Feedback_Farm_TooLate));
+			ASSERT_THAT(IsTrue(TargetTile()->GetState() == EFarmTileState::Tilled));
+		}
+
+		TEST_METHOD(APlantingThatFitsGivesNoWarning)
+		{
+			ListenToFeedback();
+			Grid->GetField()->Till(TargetCoordinates);
+			HoldSeeds(CabbageSeedsName, 3);
+			ASSERT_THAT(IsTrue(
+				GetCropOf(CabbageSeedsName)->GetSeasonFit(Clock().GetCalendar(), Clock().GetCurrentDay()).Fit == EFarmSeasonFit::Fits));
+
+			UseToolAndFinish();
+
+			ASSERT_THAT(IsTrue(Reports.IsEmpty()));
+			ASSERT_THAT(IsTrue(TargetTile()->GetState() == EFarmTileState::Planted));
 		}
 
 		TEST_METHOD(TheNextUseWaitsUntilTheLastHasFinished)

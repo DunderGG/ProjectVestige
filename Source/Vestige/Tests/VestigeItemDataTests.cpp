@@ -6,6 +6,8 @@
 #include "Components/ActorTestSpawner.h"
 #include "Content/FarmCropData.h"
 #include "Content/FarmSeedFragment.h"
+#include "Content/VestigeCalendar.h"
+#include "Content/VestigeGameData.h"
 #include "Content/VestigeItemData.h"
 #include "Content/VestigeToolData.h"
 #include "Content/VestigeToolFragment.h"
@@ -201,6 +203,7 @@ namespace VestigeItemDataTests
 			FFarmCropGrowthStage GrowthStage;
 			GrowthStage.Mesh = &Stage;
 			Crop.SetGrowthStagesForTests({GrowthStage}, TSoftObjectPtr<UStaticMesh>(&Ripe));
+			Crop.SetSeasonsForTests(FGameplayTagContainer(UVestigeGameData::Get().GetCalendar().GetSeasons()[0].Tag));
 			ASSERT_THAT(IsFalse(PassesValidation(Crop)));
 
 			Crop.SetHarvestItemIdForTests(TurnipItemId);

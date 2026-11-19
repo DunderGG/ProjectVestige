@@ -5,11 +5,14 @@
 
 #include "Components/ActorTestSpawner.h"
 #include "Content/FarmCropData.h"
+#include "Content/VestigeCalendar.h"
 #include "Content/VestigeContentCatalog.h"
+#include "Content/VestigeGameData.h"
 #include "Content/VestigeItemData.h"
 #include "CQTest.h"
 #include "Engine/AssetManager.h"
 #include "Engine/StaticMesh.h"
+#include "GameplayTagContainer.h"
 #include "Materials/Material.h"
 #include "Materials/MaterialInterface.h"
 #include "Misc/DataValidation.h"
@@ -339,6 +342,198 @@ namespace FarmCropDataTests
 			}
 		}
 
+		// Seasons. The made-up calendar has four seasons of ten days, named Alpha to Delta, on the real season tags.
+		static constexpr int32 SeasonDays = 10;
+		static constexpr const TCHAR* Spring = TEXT("Vestige.Season.Spring");
+		static constexpr const TCHAR* Summer = TEXT("Vestige.Season.Summer");
+		static constexpr const TCHAR* Autumn = TEXT("Vestige.Season.Autumn");
+		static constexpr const TCHAR* Winter = TEXT("Vestige.Season.Winter");
+
+		static FGameplayTag Tag(const TCHAR* TagName) { return FGameplayTag::RequestGameplayTag(FName(TagName)); }
+
+		static FVestigeSeason MakeSeason(const TCHAR* TagName, const TCHAR* Name)
+		{
+			FVestigeSeason Season;
+			Season.Tag = Tag(TagName);
+			Season.DisplayName = FText::FromString(Name);
+			Season.NameInSentence = FText::FromString(FString(Name).ToLower());
+			return Season;
+		}
+
+		static FVestigeCalendar MakeCalendar()
+		{
+			return FVestigeCalendar::MakeForTests(SeasonDays,
+				{MakeSeason(Spring, TEXT("Alpha")), MakeSeason(Summer, TEXT("Beta")), MakeSeason(Autumn, TEXT("Gamma")),
+					MakeSeason(Winter, TEXT("Delta"))});
+		}
+
+		/** A crop that takes Days to ripen and grows in the seasons of these tags. */
+		UFarmCropData& MakeSeasonCrop(int32 Days, std::initializer_list<const TCHAR*> SeasonTags)
+		{
+			UFarmCropData& Crop = Spawner.SpawnObject<UFarmCropData>();
+			Crop.SetDaysToMatureForTests(Days);
+			FGameplayTagContainer Listed;
+			for (const TCHAR* SeasonTag : SeasonTags)
+			{
+				Listed.AddTag(Tag(SeasonTag));
+			}
+			Crop.SetSeasonsForTests(Listed);
+			return Crop;
+		}
+
+		TEST_METHOD(ACropFitsWhenItRipensOnTheSeasonsLastDay)
+		{
+			const FVestigeCalendar Calendar = MakeCalendar();
+			// Day 7 has 3 days left in season one.
+			const FFarmSeasonFit Fits = MakeSeasonCrop(3, {Spring}).GetSeasonFit(Calendar, 7);
+			ASSERT_THAT(IsTrue(Fits.Fit == EFarmSeasonFit::Fits));
+			ASSERT_THAT(IsTrue(Fits.DaysToDeadline == 3));
+
+			const FFarmSeasonFit Late = MakeSeasonCrop(4, {Spring}).GetSeasonFit(Calendar, 7);
+			ASSERT_THAT(IsTrue(Late.Fit == EFarmSeasonFit::TooLate));
+			ASSERT_THAT(IsTrue(Late.DaysToDeadline == 3));
+			ASSERT_THAT(IsTrue(Late.DaysToRipe == 4));
+			ASSERT_THAT(IsTrue(Late.DeadlineSeasonIndex == 1));
+		}
+
+		TEST_METHOD(ACropIsOutOfSeasonInASeasonItDoesntList)
+		{
+			const FVestigeCalendar Calendar = MakeCalendar();
+			const FFarmSeasonFit Fit = MakeSeasonCrop(3, {Spring}).GetSeasonFit(Calendar, SeasonDays + 1);
+			ASSERT_THAT(IsTrue(Fit.Fit == EFarmSeasonFit::OutOfSeason));
+			ASSERT_THAT(IsTrue(Fit.PlantSeasonIndex == 0));
+		}
+
+		TEST_METHOD(TheSeasonToPlantIsTheNextOneTheCropListsIntoTheNextYear)
+		{
+			const FVestigeCalendar Calendar = MakeCalendar();
+			const UFarmCropData& Crop = MakeSeasonCrop(3, {Spring, Autumn});
+			ASSERT_THAT(IsTrue(Crop.GetSeasonFit(Calendar, SeasonDays + 1).PlantSeasonIndex == 2));
+			ASSERT_THAT(IsTrue(Crop.GetSeasonFit(Calendar, 3 * SeasonDays + 1).PlantSeasonIndex == 0));
+		}
+
+		TEST_METHOD(AFollowingListedSeasonAddsItsDays)
+		{
+			const FVestigeCalendar Calendar = MakeCalendar();
+			// Day 8 has 2 days left of spring, and summer adds ten more.
+			const FFarmSeasonFit Fits = MakeSeasonCrop(12, {Spring, Summer}).GetSeasonFit(Calendar, 8);
+			ASSERT_THAT(IsTrue(Fits.Fit == EFarmSeasonFit::Fits));
+			ASSERT_THAT(IsTrue(Fits.DaysToDeadline == 12));
+			ASSERT_THAT(IsTrue(Fits.DeadlineSeasonIndex == 2));
+
+			ASSERT_THAT(IsTrue(MakeSeasonCrop(13, {Spring, Summer}).GetSeasonFit(Calendar, 8).Fit == EFarmSeasonFit::TooLate));
+		}
+
+		TEST_METHOD(ACropOfEverySeasonIsNeverTooLate)
+		{
+			const FVestigeCalendar Calendar = MakeCalendar();
+			const UFarmCropData& Crop = MakeSeasonCrop(1000, {Spring, Summer, Autumn, Winter});
+			for (const int32 Day : {1, 10, 25, 4 * SeasonDays})
+			{
+				const FFarmSeasonFit Fit = Crop.GetSeasonFit(Calendar, Day);
+				ASSERT_THAT(IsTrue(Fit.Fit == EFarmSeasonFit::Fits));
+				ASSERT_THAT(IsTrue(Fit.DeadlineSeasonIndex == INDEX_NONE));
+			}
+		}
+
+		TEST_METHOD(ACropListingNoSeasonGrowsInEverySeason)
+		{
+			const FVestigeCalendar Calendar = MakeCalendar();
+			const UFarmCropData& Crop = MakeSeasonCrop(1000, {});
+			for (const FVestigeSeason& Season : Calendar.GetSeasons())
+			{
+				ASSERT_THAT(IsTrue(Crop.GrowsIn(Season.Tag, Calendar)));
+			}
+			ASSERT_THAT(IsTrue(Crop.GetSeasonFit(Calendar, SeasonDays + 1).Fit == EFarmSeasonFit::Fits));
+		}
+
+		TEST_METHOD(ACropListingOnlyUnknownSeasonsGrowsInEverySeason)
+		{
+			const FVestigeCalendar Calendar = MakeCalendar();
+			const UFarmCropData& Crop = MakeSeasonCrop(1000, {TEXT("Vestige.Feedback.Farm")});
+			for (const FVestigeSeason& Season : Calendar.GetSeasons())
+			{
+				ASSERT_THAT(IsTrue(Crop.GrowsIn(Season.Tag, Calendar)));
+			}
+			ASSERT_THAT(IsTrue(Crop.GetSeasonFit(Calendar, 1).Fit == EFarmSeasonFit::Fits));
+		}
+
+		TEST_METHOD(WithoutSeasonsEveryCropFits)
+		{
+			const FVestigeCalendar Calendar = FVestigeCalendar::MakeForTests(SeasonDays, {});
+			const UFarmCropData& Crop = MakeSeasonCrop(1000, {Spring});
+			ASSERT_THAT(IsTrue(Crop.GetSeasonFit(Calendar, 1).Fit == EFarmSeasonFit::Fits));
+			ASSERT_THAT(IsTrue(Crop.GetSeasonFit(Calendar, 57).Fit == EFarmSeasonFit::Fits));
+		}
+
+		TEST_METHOD(OnTheLastDayNoDaysAreLeftBeforeTheDeadline)
+		{
+			const FVestigeCalendar Calendar = MakeCalendar();
+			const FFarmSeasonFit Late = MakeSeasonCrop(2, {Spring}).GetSeasonFit(Calendar, SeasonDays);
+			ASSERT_THAT(IsTrue(Late.Fit == EFarmSeasonFit::TooLate));
+			ASSERT_THAT(IsTrue(Late.DaysToDeadline == 0));
+		}
+
+		TEST_METHOD(SeasonsMatchExactly)
+		{
+			// The feedback tags are used only for their parent/child relation: Farm.TooLate is a child of Farm, which an inexact
+			// match would take for the season Farm. MakeForTests doesn't check that its tags are seasons.
+			FVestigeSeason First;
+			First.Tag = Tag(TEXT("Vestige.Feedback.Farm"));
+			FVestigeSeason Second;
+			Second.Tag = Tag(TEXT("Vestige.Feedback.Tool"));
+			const FVestigeCalendar Calendar = FVestigeCalendar::MakeForTests(SeasonDays, {First, Second});
+			const UFarmCropData& Crop = MakeSeasonCrop(3, {TEXT("Vestige.Feedback.Farm.TooLate"), TEXT("Vestige.Feedback.Tool")});
+
+			const FFarmSeasonFit Fit = Crop.GetSeasonFit(Calendar, 1);
+			ASSERT_THAT(IsTrue(Fit.Fit == EFarmSeasonFit::OutOfSeason));
+			ASSERT_THAT(IsTrue(Fit.PlantSeasonIndex == 1));
+			ASSERT_THAT(IsFalse(Crop.GrowsIn(First.Tag, Calendar)));
+			ASSERT_THAT(IsTrue(Crop.GrowsIn(Second.Tag, Calendar)));
+		}
+
+		/** The text of the value named Key, or an empty string when there is none. */
+		static FString TextOf(const FFormatNamedArguments& Values, const TCHAR* Key)
+		{
+			const FFormatArgumentValue* Value = Values.Find(Key);
+			return Value && Value->GetType() == EFormatArgumentType::Text ? Value->GetTextValue().ToString() : FString();
+		}
+
+		static int32 NumberOf(const FFormatNamedArguments& Values, const TCHAR* Key)
+		{
+			const FFormatArgumentValue* Value = Values.Find(Key);
+			return Value && Value->GetType() == EFormatArgumentType::Int ? static_cast<int32>(Value->GetIntValue()) : INDEX_NONE;
+		}
+
+		TEST_METHOD(TheSeasonFitValuesNameTheSeasons)
+		{
+			const FVestigeCalendar Calendar = MakeCalendar();
+
+			// Out of season on the first day of summer: the next season is spring of next year.
+			const UFarmCropData& SpringCrop = MakeSeasonCrop(5, {Spring});
+			const int32 SummerDay = SeasonDays + 1;
+			const FFormatNamedArguments Out = SpringCrop.GetSeasonFit(Calendar, SummerDay).GetReportValues(Calendar, SummerDay);
+			ASSERT_THAT(IsTrue(TextOf(Out, TEXT("PlantSeason")) == TEXT("Alpha")));
+			ASSERT_THAT(IsTrue(TextOf(Out, TEXT("PlantSeasonInSentence")) == TEXT("alpha")));
+			ASSERT_THAT(IsTrue(TextOf(Out, TEXT("SeasonInSentence")) == TEXT("beta")));
+			ASSERT_THAT(IsTrue(NumberOf(Out, TEXT("DaysToRipe")) == 5));
+			ASSERT_THAT(IsFalse(Out.Contains(TEXT("DaysToDeadline"))));
+
+			// Too late with 2 days left in spring.
+			const FFormatNamedArguments Late = SpringCrop.GetSeasonFit(Calendar, 8).GetReportValues(Calendar, 8);
+			ASSERT_THAT(IsTrue(NumberOf(Late, TEXT("DaysToRipe")) == 5));
+			ASSERT_THAT(IsTrue(NumberOf(Late, TEXT("DaysToDeadline")) == 2));
+			ASSERT_THAT(IsTrue(TextOf(Late, TEXT("DeadlineSeason")) == TEXT("Beta")));
+			ASSERT_THAT(IsTrue(TextOf(Late, TEXT("DeadlineSeasonInSentence")) == TEXT("beta")));
+			ASSERT_THAT(IsFalse(Late.Contains(TEXT("PlantSeason"))));
+
+			// A crop that fits names only its days to ripen.
+			const FFormatNamedArguments Fits = MakeSeasonCrop(2, {Spring}).GetSeasonFit(Calendar, 8).GetReportValues(Calendar, 8);
+			ASSERT_THAT(IsTrue(NumberOf(Fits, TEXT("DaysToRipe")) == 2));
+			ASSERT_THAT(IsFalse(Fits.Contains(TEXT("PlantSeason"))));
+			ASSERT_THAT(IsFalse(Fits.Contains(TEXT("DeadlineSeason"))));
+		}
+
 #if WITH_EDITOR
 		static bool HasErrors(const UObject& Object)
 		{
@@ -353,10 +548,28 @@ namespace FarmCropDataTests
 			UFarmCropData& Crop = MakeCrop(4, StartDays);
 			Crop.SetContentIdForTests(TEXT("Test.Crop"));
 			Crop.SetHarvestItemIdForTests(FPrimaryAssetId(UVestigeItemData::AssetType, TEXT("Base.Turnip")));
+			Crop.SetSeasonsForTests(FGameplayTagContainer(UVestigeGameData::Get().GetCalendar().GetSeasons()[0].Tag));
 			return Crop;
 		}
 
 		TEST_METHOD(ACropWithMeshesAndAHarvestItemIsValid) { ASSERT_THAT(IsFalse(HasErrors(MakeValidCrop()))); }
+
+		TEST_METHOD(ACropWithoutSeasonsIsInvalid)
+		{
+			UFarmCropData& Crop = MakeValidCrop();
+			Crop.SetSeasonsForTests(FGameplayTagContainer());
+
+			ASSERT_THAT(IsTrue(HasErrors(Crop)));
+		}
+
+		TEST_METHOD(ASeasonNotInTheCalendarIsInvalid)
+		{
+			UFarmCropData& Crop = MakeValidCrop();
+			// The parent tag of the seasons is no season of the calendar.
+			Crop.SetSeasonsForTests(FGameplayTagContainer(FGameplayTag::RequestGameplayTag(TEXT("Vestige.Season"))));
+
+			ASSERT_THAT(IsTrue(HasErrors(Crop)));
+		}
 
 		TEST_METHOD(ACropWithoutARipeMeshIsInvalid)
 		{

@@ -3,16 +3,47 @@
 
 #include "Content/FarmCropData.h"
 
+#include "Content/VestigeCalendar.h"
 #include "Content/VestigeItemData.h"
 #include "Engine/StaticMesh.h"
 
 #if WITH_EDITOR
+#include "Content/VestigeGameData.h"
 #include "Misc/DataValidation.h"
 #endif
 
 #define LOCTEXT_NAMESPACE "FarmCropData"
 
 const FPrimaryAssetType UFarmCropData::AssetType(TEXT("FarmCrop"));
+
+FFormatNamedArguments FFarmSeasonFit::GetReportValues(const FVestigeCalendar& Calendar, int32 Day) const
+{
+	FFormatNamedArguments Values = Calendar.GetReportValues(Day);
+	Values.Add(TEXT("DaysToRipe"), DaysToRipe);
+
+	const TArray<FVestigeSeason>& CalendarSeasons = Calendar.GetSeasons();
+	switch (Fit)
+	{
+	case EFarmSeasonFit::Fits:
+		break;
+	case EFarmSeasonFit::OutOfSeason:
+		if (CalendarSeasons.IsValidIndex(PlantSeasonIndex))
+		{
+			Values.Add(TEXT("PlantSeason"), CalendarSeasons[PlantSeasonIndex].DisplayName);
+			Values.Add(TEXT("PlantSeasonInSentence"), CalendarSeasons[PlantSeasonIndex].NameInSentence);
+		}
+		break;
+	case EFarmSeasonFit::TooLate:
+		Values.Add(TEXT("DaysToDeadline"), DaysToDeadline);
+		if (CalendarSeasons.IsValidIndex(DeadlineSeasonIndex))
+		{
+			Values.Add(TEXT("DeadlineSeason"), CalendarSeasons[DeadlineSeasonIndex].DisplayName);
+			Values.Add(TEXT("DeadlineSeasonInSentence"), CalendarSeasons[DeadlineSeasonIndex].NameInSentence);
+		}
+		break;
+	}
+	return Values;
+}
 
 int32 UFarmCropData::GetGrowthStageIndex(int32 GrowthDays) const
 {
@@ -56,6 +87,74 @@ FFarmCropGrowthLook UFarmCropData::GetGrowthLook(int32 GrowthDays) const
 	return {GrowthStages[StageIndex].Mesh.Get(), Scale};
 }
 
+bool UFarmCropData::GrowsIn(const FGameplayTag& Season, const FVestigeCalendar& Calendar) const
+{
+	return Seasons.HasTagExact(Season) || !ListsAnySeasonOf(Calendar);
+}
+
+FFarmSeasonFit UFarmCropData::GetSeasonFit(const FVestigeCalendar& Calendar, int32 Day) const
+{
+	FFarmSeasonFit Fit;
+	Fit.DaysToRipe = DaysToMature;
+
+	// Every crop fits in a calendar without seasons. A crop of every season (GrowsIn) finds no deadline below and fits too.
+	const FVestigeDate Date = Calendar.GetDate(Day);
+	if (!Date.HasSeason())
+	{
+		return Fit;
+	}
+
+	const TArray<FVestigeSeason>& CalendarSeasons = Calendar.GetSeasons();
+	const int32 SeasonCount = CalendarSeasons.Num();
+	if (!GrowsIn(Date.Season, Calendar))
+	{
+		Fit.Fit = EFarmSeasonFit::OutOfSeason;
+		for (int32 Offset = 1; Offset < SeasonCount; ++Offset)
+		{
+			const int32 Index = (Date.SeasonIndex + Offset) % SeasonCount;
+			if (GrowsIn(CalendarSeasons[Index].Tag, Calendar))
+			{
+				Fit.PlantSeasonIndex = Index;
+				break;
+			}
+		}
+		return Fit;
+	}
+
+	int32 DaysToDeadline = Date.DaysLeft;
+	for (int32 Offset = 1; Offset < SeasonCount; ++Offset)
+	{
+		const int32 Index = (Date.SeasonIndex + Offset) % SeasonCount;
+		if (!GrowsIn(CalendarSeasons[Index].Tag, Calendar))
+		{
+			Fit.DeadlineSeasonIndex = Index;
+			break;
+		}
+		DaysToDeadline += Calendar.GetDaysPerSeason();
+	}
+
+	// No coming season ends the crop's growth: it grows in every season of the calendar.
+	if (Fit.DeadlineSeasonIndex == INDEX_NONE)
+	{
+		return Fit;
+	}
+	Fit.DaysToDeadline = DaysToDeadline;
+	if (Fit.DaysToRipe > DaysToDeadline)
+	{
+		Fit.Fit = EFarmSeasonFit::TooLate;
+	}
+	return Fit;
+}
+
+bool UFarmCropData::ListsAnySeasonOf(const FVestigeCalendar& Calendar) const
+{
+	return Calendar.GetSeasons().ContainsByPredicate(
+		[this](const FVestigeSeason& Season)
+		{
+			return Seasons.HasTagExact(Season.Tag);
+		});
+}
+
 #if WITH_EDITOR
 EDataValidationResult UFarmCropData::IsDataValid(FDataValidationContext& Context) const
 {
@@ -69,6 +168,25 @@ EDataValidationResult UFarmCropData::IsDataValid(FDataValidationContext& Context
 	if (const TOptional<FText> Error = FindContentReferenceError(HarvestItemId, UVestigeItemData::AssetType))
 	{
 		ReportError(FText::Format(LOCTEXT("BadHarvestItemId", "Harvest Item Id {0}"), *Error));
+	}
+	if (Seasons.IsEmpty())
+	{
+		ReportError(LOCTEXT("NoSeasons", "Seasons is empty, so the crop grows in every season. List every season for that."));
+	}
+
+	// A calendar without seasons means the game data didn't load, which the asset manager already reports.
+	const FVestigeCalendar& Calendar = UVestigeGameData::Get().GetCalendar();
+	if (!Calendar.GetSeasons().IsEmpty())
+	{
+		for (const FGameplayTag& Season : Seasons)
+		{
+			if (!Calendar.FindSeason(Season))
+			{
+				ReportError(
+					FText::Format(LOCTEXT("SeasonNotInCalendar", "Seasons lists {0}, which isn't a season of the calendar in DA_GameData."),
+						FText::FromName(Season.GetTagName())));
+			}
+		}
 	}
 	if (DaysToMature < 1)
 	{

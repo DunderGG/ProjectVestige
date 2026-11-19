@@ -7,15 +7,15 @@
 #include "Farming/FarmField.h"
 #include "Farming/FarmTileState.h"
 
-bool UFarmGameplayAbility_Water::CanUseOn(const FIntPoint& Tile, FGameplayTag* OutFailureReason) const
+bool UFarmGameplayAbility_Water::CanUseOn(const FIntPoint& Tile, FVestigeFeedbackReport* OutFailure) const
 {
 	const UFarmField* Field = GetField();
 	const FFarmTileState* State = Field ? Field->GetTile(Tile) : nullptr;
 	if (!State)
 	{
-		return FailBecause(OutFailureReason, VestigeGameplayTags::Feedback_Tool_NoTarget);
+		return FailBecause(OutFailure, VestigeGameplayTags::Feedback_Tool_NoTarget);
 	}
-	return State->CanWater() || FailBecause(OutFailureReason, VestigeGameplayTags::Feedback_Farm_CantWater);
+	return State->CanWater() || FailBecause(OutFailure, VestigeGameplayTags::Feedback_Farm_CantWater);
 }
 
 bool UFarmGameplayAbility_Water::UseOn(const FIntPoint& Tile)

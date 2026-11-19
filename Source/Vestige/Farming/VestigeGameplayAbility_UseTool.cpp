@@ -148,7 +148,7 @@ void UVestigeGameplayAbility_UseTool::TryNextUse()
 	const TOptional<FIntPoint> Target = TargetingComponent ? TargetingComponent->GetTargetTile() : TOptional<FIntPoint>();
 	if (!Target || !GetField())
 	{
-		if (bFirst && !ReportFeedback(VestigeGameplayTags::Feedback_Tool_NoTarget))
+		if (bFirst && !ReportFeedback({VestigeGameplayTags::Feedback_Tool_NoTarget, {}}))
 		{
 			return;
 		}
@@ -158,13 +158,14 @@ void UVestigeGameplayAbility_UseTool::TryNextUse()
 
 	// Only the press says why the tool can't change the target; a repeat waits quietly, so a held key doesn't report on
 	// every tile.
-	FGameplayTag FailureReason;
-	if (!CanUseOn(*Target, bFirst ? &FailureReason : nullptr))
+	FVestigeFeedbackReport Failure;
+	if (!CanUseOn(*Target, bFirst ? &Failure : nullptr))
 	{
 		if (bFirst)
 		{
-			ensureMsgf(FailureReason.IsValid(), TEXT("%s::CanUseOn returned false without a reason."), *GetClass()->GetName());
-			if (!ReportFeedback(FailureReason))
+			ensureMsgf(Failure.Tag.IsValid(), TEXT("%s::CanUseOn returned false without a reason."), *GetClass()->GetName());
+			OnPressRefused(*Target, Failure);
+			if (!ReportFeedback(Failure))
 			{
 				return;
 			}
@@ -289,22 +290,24 @@ UVestigeInventoryComponent* UVestigeGameplayAbility_UseTool::GetInventory() cons
 	return Owner ? Owner->FindComponentByClass<UVestigeInventoryComponent>() : nullptr;
 }
 
-bool UVestigeGameplayAbility_UseTool::FailBecause(FGameplayTag* OutFailureReason, const FGameplayTag& Reason)
+bool UVestigeGameplayAbility_UseTool::FailBecause(
+	FVestigeFeedbackReport* OutFailure, const FGameplayTag& Reason, FFormatNamedArguments Arguments)
 {
-	if (OutFailureReason)
+	if (OutFailure)
 	{
-		*OutFailureReason = Reason;
+		OutFailure->Tag = Reason;
+		OutFailure->Arguments = MoveTemp(Arguments);
 	}
 	return false;
 }
 
-bool UVestigeGameplayAbility_UseTool::ReportFeedback(const FGameplayTag& Reason)
+bool UVestigeGameplayAbility_UseTool::ReportFeedback(const FVestigeFeedbackReport& Report)
 {
 	// The report runs other code (the HUD, Blueprint listeners later) that may end this ability, as UseOn may.
 	Step = EUseStep::Using;
-	if (Reason.IsValid())
+	if (Report.Tag.IsValid())
 	{
-		UVestigeFeedbackSubsystem::Report(GetWorld(), Reason);
+		UVestigeFeedbackSubsystem::Report(GetWorld(), Report.Tag, Report.Arguments);
 	}
 	return IsActive();
 }

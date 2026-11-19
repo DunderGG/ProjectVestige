@@ -9,7 +9,10 @@
 #include "AbilitySystemGlobals.h"
 #include "CommonInputSubsystem.h"
 #include "CommonInputTypeEnum.h"
+#include "Content/FarmCropData.h"
+#include "Content/FarmSeedFragment.h"
 #include "Content/VestigeCalendar.h"
+#include "Content/VestigeContentCatalog.h"
 #include "Content/VestigeItemData.h"
 #include "Core/VestigeFeedbackSubsystem.h"
 #include "Core/VestigeLog.h"
@@ -204,6 +207,16 @@ FText AVestigeHUD::FormatDate(const FVestigeDate& Date, const FText& SeasonName)
 		LOCTEXT("Date", "{Season}, Day {DayOfSeason}"), TEXT("Season"), SeasonName, TEXT("DayOfSeason"), Date.DayOfSeason);
 }
 
+FText AVestigeHUD::FormatItemInHand(const FText& ItemName, const UFarmCropData* Crop)
+{
+	if (!Crop)
+	{
+		return ItemName;
+	}
+	return FText::FormatNamed(LOCTEXT("ItemWithDaysToRipen", "{Item} ({DaysToRipe} {DaysToRipe}|plural(one=day,other=days) to ripen)"),
+		TEXT("Item"), ItemName, TEXT("DaysToRipe"), Crop->GetDaysToMature());
+}
+
 EVestigeHintDevice AVestigeHUD::GetHintDevice(ECommonInputType InputType)
 {
 	return InputType == ECommonInputType::Gamepad ? EVestigeHintDevice::Gamepad : EVestigeHintDevice::KeyboardAndMouse;
@@ -348,7 +361,9 @@ void AVestigeHUD::RefreshItemInHandText()
 	// Read now rather than passed, since a nested change may reach this handler out of order.
 	const UVestigeInventoryComponent* CurrentInventory = Inventory.Get();
 	const UVestigeItemData* Item = CurrentInventory ? CurrentInventory->GetItemInHand() : nullptr;
-	ItemInHandText = Item ? Item->GetDisplayName() : LOCTEXT("EmptyHand", "Empty hand");
+	ItemInHandText = Item
+		? FormatItemInHand(Item->GetDisplayName(), UFarmSeedFragment::FindCropOf(Item, UVestigeContentCatalog::Get(GetWorld())))
+		: LOCTEXT("EmptyHand", "Empty hand");
 	RefreshStatusText();
 }
 

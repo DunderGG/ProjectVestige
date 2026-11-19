@@ -4,12 +4,19 @@
 #include "Content/FarmSeedFragment.h"
 
 #include "Content/FarmCropData.h"
+#include "Content/VestigeContentCatalog.h"
 
 #if WITH_EDITOR
 #include "Misc/DataValidation.h"
 #endif
 
 #define LOCTEXT_NAMESPACE "FarmSeedFragment"
+
+const UFarmCropData* UFarmSeedFragment::FindCropOf(const UVestigeItemData* Item, const UVestigeContentCatalog* Catalog)
+{
+	const UFarmSeedFragment* Seed = Item ? Item->FindFragment<UFarmSeedFragment>() : nullptr;
+	return Seed && Catalog ? Catalog->Find<UFarmCropData>(Seed->GetCropId()) : nullptr;
+}
 
 #if WITH_EDITOR
 EDataValidationResult UFarmSeedFragment::IsDataValid(FDataValidationContext& Context) const

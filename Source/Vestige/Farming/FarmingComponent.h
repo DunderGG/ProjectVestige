@@ -6,6 +6,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "GameplayAbilitySpecHandle.h"
+#include "GameplayTagContainer.h"
 #include "FarmingComponent.generated.h"
 
 class AController;
@@ -32,7 +33,8 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnFarmToolUsed, const UVestigeTool
  * a ripe tile. It never calls the abilities' rules; they read the target from UFarmTargetingComponent and content from the
  * content catalogue, and report what they did, which this component broadcasts as the extension points OnCropHarvested and
  * OnToolUsed. Finds tools in the content catalogue (UVestigeContentCatalog), which loaded them before play, so nothing
- * waits on a load. Systems.md, sections 2, 7 and 8.
+ * waits on a load. It also keeps the day's warnings the tool abilities have given (RememberWarning), so a tool switch
+ * doesn't forget them; it knows no rule behind them. Systems.md, sections 2, 7, 8 and 22.
  */
 UCLASS(ClassGroup = (Farming), meta = (BlueprintSpawnableComponent))
 class UFarmingComponent : public UActorComponent
@@ -84,6 +86,16 @@ public:
 
 	/** A tool ability harvested Crop from the tile at Tile: broadcasts OnCropHarvested. Called by the tool abilities only. */
 	void ReportCropHarvested(const UFarmCropData& Crop, const FIntPoint& Tile);
+
+	/**
+	 * Remembers that the player was given Warning (a Vestige.Feedback tag) about Subject (a content ID) on day count Day. The
+	 * warnings of any other day are forgotten first. Called by the tool abilities only, which decide what a warning means. Not
+	 * saved, and forgotten with the pawn.
+	 */
+	void RememberWarning(const FGameplayTag& Warning, const FPrimaryAssetId& Subject, int32 Day);
+
+	/** Whether RememberWarning was called with Warning and Subject on day count Day. False for any day but the last remembered. */
+	bool WasWarned(const FGameplayTag& Warning, const FPrimaryAssetId& Subject, int32 Day) const;
 
 	/**
 	 * Broadcast when the tool in hand changes. It carries no value: a listener called during a nested broadcast may be called
@@ -175,6 +187,12 @@ private:
 
 	/** The inventory whose OnItemInHandChanged this component listens to. */
 	TWeakObjectPtr<UVestigeInventoryComponent> Inventory;
+
+	/** The day count the remembered warnings were given on, or INDEX_NONE before the first. */
+	int32 WarningsDay = INDEX_NONE;
+
+	/** The warnings given on WarningsDay, each a reason tag and the content it was about. Not a UPROPERTY: it holds no UObject. */
+	TSet<TPair<FGameplayTag, FPrimaryAssetId>> Warnings;
 
 	/** The tool whose ability harvests, granted all the time (VestigeTool:Base.Hand). Was HandToolId (a redirect loads it). */
 	UPROPERTY(EditDefaultsOnly, Category = "Farming", meta = (AllowPrivateAccess = "true", AllowedTypes = "VestigeTool"))

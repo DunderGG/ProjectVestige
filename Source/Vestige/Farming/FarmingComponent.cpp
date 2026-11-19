@@ -207,6 +207,22 @@ void UFarmingComponent::ReportCropHarvested(const UFarmCropData& Crop, const FIn
 	OnCropHarvested.Broadcast(&Crop, Tile);
 }
 
+void UFarmingComponent::RememberWarning(const FGameplayTag& Warning, const FPrimaryAssetId& Subject, int32 Day)
+{
+	// Comparing the day here, rather than listening to the new day, also forgets the warnings after a developer's day jump.
+	if (Day != WarningsDay)
+	{
+		Warnings.Reset();
+		WarningsDay = Day;
+	}
+	Warnings.Add(MakeTuple(Warning, Subject));
+}
+
+bool UFarmingComponent::WasWarned(const FGameplayTag& Warning, const FPrimaryAssetId& Subject, int32 Day) const
+{
+	return Day == WarningsDay && Warnings.Contains(MakeTuple(Warning, Subject));
+}
+
 void UFarmingComponent::UpdateGrantedTool()
 {
 	UAbilitySystemComponent* AbilitySystem = FindAbilitySystem();

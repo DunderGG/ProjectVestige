@@ -6,26 +6,64 @@
 #include "AbilitySystem/VestigeGameplayTags.h"
 #include "Content/FarmCropData.h"
 #include "Content/FarmSeedFragment.h"
+#include "Content/VestigeCalendar.h"
 #include "Content/VestigeContentCatalog.h"
-#include "Content/VestigeItemData.h"
+#include "Core/VestigeFeedbackSubsystem.h"
 #include "Farming/FarmField.h"
+#include "Farming/FarmingComponent.h"
 #include "Farming/FarmTileState.h"
 #include "Inventory/VestigeInventoryComponent.h"
+#include "Time/VestigeClockSubsystem.h"
 
-bool UFarmGameplayAbility_Plant::CanUseOn(const FIntPoint& Tile, FGameplayTag* OutFailureReason) const
+void UFarmGameplayAbility_Plant::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
+	const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
+{
+	bWarnedThisPress = false;
+	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
+}
+
+bool UFarmGameplayAbility_Plant::CanUseOn(const FIntPoint& Tile, FVestigeFeedbackReport* OutFailure) const
 {
 	// The seed first: without one, the tile doesn't matter.
-	if (!FindCropInHand())
+	const UFarmCropData* Crop = FindCropInHand();
+	if (!Crop)
 	{
-		return FailBecause(OutFailureReason, VestigeGameplayTags::Feedback_Farm_NothingToPlant);
+		return FailBecause(OutFailure, VestigeGameplayTags::Feedback_Farm_NothingToPlant);
+	}
+
+	// Without a clock (an editor world) every crop fits.
+	const UVestigeClockSubsystem* Clock = UVestigeClockSubsystem::Get(GetWorld());
+	const FFarmSeasonFit Fit = Clock ? Crop->GetSeasonFit(Clock->GetCalendar(), Clock->GetCurrentDay()) : FFarmSeasonFit();
+	const auto FailBecauseOfSeason = [OutFailure, Clock, &Fit](const FGameplayTag& Reason)
+	{
+		// Only the press, which reports them, builds the values; a repeat stays quiet.
+		return FailBecause(OutFailure, Reason,
+			OutFailure && Clock ? Fit.GetReportValues(Clock->GetCalendar(), Clock->GetCurrentDay()) : FFormatNamedArguments());
+	};
+
+	// The season before the tile: no tile would take these seeds, so tilling first would be wasted work.
+	if (Fit.Fit == EFarmSeasonFit::OutOfSeason)
+	{
+		return FailBecauseOfSeason(VestigeGameplayTags::Feedback_Farm_OutOfSeason);
 	}
 	const UFarmField* Field = GetField();
 	const FFarmTileState* State = Field ? Field->GetTile(Tile) : nullptr;
 	if (!State)
 	{
-		return FailBecause(OutFailureReason, VestigeGameplayTags::Feedback_Tool_NoTarget);
+		return FailBecause(OutFailure, VestigeGameplayTags::Feedback_Tool_NoTarget);
 	}
-	return State->CanPlant() || FailBecause(OutFailureReason, VestigeGameplayTags::Feedback_Farm_CantPlant);
+	if (!State->CanPlant())
+	{
+		return FailBecause(OutFailure, VestigeGameplayTags::Feedback_Farm_CantPlant);
+	}
+
+	// Too late comes last, so the warning shows only when a seed would really go in.
+	if (Fit.Fit == EFarmSeasonFit::TooLate && !IsTooLatePlantingConfirmed(*Crop, Clock->GetCurrentDay()))
+	{
+		return FailBecauseOfSeason(
+			Fit.DaysToDeadline == 0 ? VestigeGameplayTags::Feedback_Farm_TooLate_LastDay : VestigeGameplayTags::Feedback_Farm_TooLate);
+	}
+	return true;
 }
 
 bool UFarmGameplayAbility_Plant::UseOn(const FIntPoint& Tile)
@@ -44,11 +82,34 @@ bool UFarmGameplayAbility_Plant::UseOn(const FIntPoint& Tile)
 	return true;
 }
 
+void UFarmGameplayAbility_Plant::OnPressRefused(const FIntPoint& Tile, const FVestigeFeedbackReport& Refusal)
+{
+	if (!Refusal.Tag.MatchesTag(VestigeGameplayTags::Feedback_Farm_TooLate))
+	{
+		return;
+	}
+	UFarmingComponent* FarmingComponent = GetFarming();
+	const UFarmCropData* Crop = FindCropInHand();
+	const UVestigeClockSubsystem* Clock = UVestigeClockSubsystem::Get(GetWorld());
+	if (!FarmingComponent || !Crop || !Clock)
+	{
+		return;
+	}
+
+	// Either form of the warning is remembered under Farm.TooLate, so the next press that day plants.
+	FarmingComponent->RememberWarning(VestigeGameplayTags::Feedback_Farm_TooLate, Crop->GetPrimaryAssetId(), Clock->GetCurrentDay());
+	bWarnedThisPress = true;
+}
+
 const UFarmCropData* UFarmGameplayAbility_Plant::FindCropInHand() const
 {
 	const UVestigeInventoryComponent* Inventory = GetInventory();
-	const UVestigeItemData* Item = Inventory ? Inventory->GetItemInHand() : nullptr;
-	const UFarmSeedFragment* Seed = Item ? Item->FindFragment<UFarmSeedFragment>() : nullptr;
-	const UVestigeContentCatalog* Catalog = Seed ? UVestigeContentCatalog::Get(GetWorld()) : nullptr;
-	return Catalog ? Catalog->Find<UFarmCropData>(Seed->GetCropId()) : nullptr;
+	return UFarmSeedFragment::FindCropOf(Inventory ? Inventory->GetItemInHand() : nullptr, UVestigeContentCatalog::Get(GetWorld()));
+}
+
+bool UFarmGameplayAbility_Plant::IsTooLatePlantingConfirmed(const UFarmCropData& Crop, int32 Day) const
+{
+	const UFarmingComponent* FarmingComponent = GetFarming();
+	return !bWarnedThisPress && FarmingComponent
+		&& FarmingComponent->WasWarned(VestigeGameplayTags::Feedback_Farm_TooLate, Crop.GetPrimaryAssetId(), Day);
 }

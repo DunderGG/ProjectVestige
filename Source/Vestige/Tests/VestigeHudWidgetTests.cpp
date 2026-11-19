@@ -11,6 +11,7 @@
 #include "CommonInputTypeEnum.h"
 #include "Components/TextBlock.h"
 #include "Core/VestigeFeedbackSubsystem.h"
+#include "Content/FarmCropData.h"
 #include "Content/VestigeCalendar.h"
 #include "CQTest.h"
 #include "GameFramework/GameModeBase.h"
@@ -213,6 +214,65 @@ namespace VestigeHudWidgetTests
 			ASSERT_THAT(AreEqual(AVestigeHUD::FormatDate(Date, Calendar.GetSeasonName(Date)).ToString(), FString(TEXT("Day 30"))));
 		}
 
+		/** A crop that takes Days to ripen. */
+		UFarmCropData& MakeCrop(int32 Days)
+		{
+			UFarmCropData& Crop = Spawner.SpawnObject<UFarmCropData>();
+			Crop.SetDaysToMatureForTests(Days);
+			return Crop;
+		}
+
+		TEST_METHOD(SeedsInHandShowTheirDaysToRipen)
+		{
+			const FText Seeds = FText::FromString(TEXT("Cabbage Seeds"));
+
+			ASSERT_THAT(AreEqual(
+				AVestigeHUD::FormatItemInHand(Seeds, &MakeCrop(10)).ToString(), FString(TEXT("Cabbage Seeds (10 days to ripen)"))));
+		}
+
+		TEST_METHOD(ASeedOfOneDayShowsOneDay)
+		{
+			const FText Seeds = FText::FromString(TEXT("Radish Seeds"));
+
+			ASSERT_THAT(
+				AreEqual(AVestigeHUD::FormatItemInHand(Seeds, &MakeCrop(1)).ToString(), FString(TEXT("Radish Seeds (1 day to ripen)"))));
+		}
+
+		TEST_METHOD(OtherItemsInHandShowTheirNameOnly)
+		{
+			const FText Hoe = FText::FromString(TEXT("Hoe"));
+
+			ASSERT_THAT(AreEqual(AVestigeHUD::FormatItemInHand(Hoe, nullptr).ToString(), FString(TEXT("Hoe"))));
+		}
+
+		TEST_METHOD(TheLateWarningAgreesWithItsNumbers)
+		{
+			const UClass* GameModeClass = LoadClass<AGameModeBase>(nullptr, GameModePath);
+			ASSERT_THAT(IsNotNull(GameModeClass));
+			const UClass* HudActorClass = GameModeClass->GetDefaultObject<AGameModeBase>()->HUDClass;
+			ASSERT_THAT(IsTrue(HudActorClass && HudActorClass->IsChildOf<AVestigeHUD>()));
+			const UVestigeFeedbackResponses* Responses = HudActorClass->GetDefaultObject<AVestigeHUD>()->GetFeedbackResponses();
+			ASSERT_THAT(IsNotNull(Responses));
+			const FVestigeFeedbackResponse* Response = Responses->FindResponse(VestigeGameplayTags::Feedback_Farm_TooLate);
+			ASSERT_THAT(IsNotNull(Response));
+
+			const auto Format = [Response](int32 DaysToRipe, int32 DaysToDeadline)
+			{
+				FFormatNamedArguments Values;
+				Values.Add(TEXT("DaysToRipe"), DaysToRipe);
+				Values.Add(TEXT("DaysToDeadline"), DaysToDeadline);
+				Values.Add(TEXT("DeadlineSeasonInSentence"), FText::FromString(TEXT("summer")));
+				return FText::Format(Response->Message, Values).ToString();
+			};
+
+			const FString One = Format(1, 1);
+			ASSERT_THAT(IsTrue(One.Contains(TEXT("1 day to ripen")), One));
+			ASSERT_THAT(IsTrue(One.Contains(TEXT("1 day is left")), One));
+			const FString Many = Format(10, 8);
+			ASSERT_THAT(IsTrue(Many.Contains(TEXT("10 days to ripen")), Many));
+			ASSERT_THAT(IsTrue(Many.Contains(TEXT("8 days are left")), Many));
+		}
+
 		TEST_METHOD(EveryFeedbackTagHasAResponse)
 		{
 			const UClass* GameModeClass = LoadClass<AGameModeBase>(nullptr, GameModePath);
@@ -229,12 +289,19 @@ namespace VestigeHudWidgetTests
 				TEXT("Day"), TEXT("Season"), TEXT("SeasonInSentence"), TEXT("DayOfSeason"), TEXT("DaysLeft")};
 			const TArray<FString> SeasonStartValues = {
 				TEXT("Day"), TEXT("Season"), TEXT("SeasonInSentence"), TEXT("DayOfSeason"), TEXT("DaysLeft"), TEXT("PreviousSeason")};
+			const TArray<FString> OutOfSeasonValues = {TEXT("Day"), TEXT("Season"), TEXT("SeasonInSentence"), TEXT("DayOfSeason"),
+				TEXT("DaysLeft"), TEXT("DaysToRipe"), TEXT("PlantSeason"), TEXT("PlantSeasonInSentence")};
+			const TArray<FString> TooLateValues = {TEXT("Day"), TEXT("Season"), TEXT("SeasonInSentence"), TEXT("DayOfSeason"),
+				TEXT("DaysLeft"), TEXT("DaysToRipe"), TEXT("DaysToDeadline"), TEXT("DeadlineSeason"), TEXT("DeadlineSeasonInSentence")};
 			const TMap<FGameplayTag, TArray<FString>> Expected = {
 				{VestigeGameplayTags::Feedback_Tool_NoTarget, NoValues},
 				{VestigeGameplayTags::Feedback_Tool_NothingInHand, NoValues},
 				{VestigeGameplayTags::Feedback_Farm_CantTill, NoValues},
 				{VestigeGameplayTags::Feedback_Farm_NothingToPlant, NoValues},
 				{VestigeGameplayTags::Feedback_Farm_CantPlant, NoValues},
+				{VestigeGameplayTags::Feedback_Farm_OutOfSeason, OutOfSeasonValues},
+				{VestigeGameplayTags::Feedback_Farm_TooLate, TooLateValues},
+				{VestigeGameplayTags::Feedback_Farm_TooLate_LastDay, TooLateValues},
 				{VestigeGameplayTags::Feedback_Farm_CantWater, NoValues},
 				{VestigeGameplayTags::Feedback_Farm_NothingRipe, NoValues},
 				{VestigeGameplayTags::Feedback_Inventory_Full, NoValues},

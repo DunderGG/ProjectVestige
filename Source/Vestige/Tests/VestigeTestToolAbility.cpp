@@ -6,20 +6,27 @@
 #if WITH_TESTS
 
 #include "AbilitySystem/VestigeGameplayTags.h"
+#include "Core/VestigeFeedbackSubsystem.h"
 #include "Farming/FarmField.h"
 #include "Farming/FarmTileState.h"
 
-bool UVestigeTestToolAbility::CanUseOn(const FIntPoint& Tile, FGameplayTag* OutFailureReason) const
+bool UVestigeTestToolAbility::CanUseOn(const FIntPoint& Tile, FVestigeFeedbackReport* OutFailure) const
 {
 	const UFarmField* Field = GetField();
 	const FFarmTileState* State = Field ? Field->GetTile(Tile) : nullptr;
-	return (State && State->CanTill()) || FailBecause(OutFailureReason, VestigeGameplayTags::Feedback_Farm_CantTill);
+	return (State && State->CanTill()) || FailBecause(OutFailure, VestigeGameplayTags::Feedback_Farm_CantTill);
 }
 
 bool UVestigeTestToolAbility::UseOn(const FIntPoint& Tile)
 {
 	UFarmField* Field = GetField();
 	return Field && Field->Till(Tile) && Field->Water(Tile);
+}
+
+void UVestigeTestToolAbility::OnPressRefused(const FIntPoint& Tile, const FVestigeFeedbackReport& Refusal)
+{
+	++RefusedPresses;
+	LastRefusal = Refusal.Tag;
 }
 
 #endif
