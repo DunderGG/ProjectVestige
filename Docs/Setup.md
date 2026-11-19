@@ -34,6 +34,8 @@ Contents
 
 Every path needs a C++ compiler: the project has its own C++ module, and the launcher's engine ships no compiled copy of it. Without Visual Studio's compiler, the editor can't open the project.
 
+**Optional: Python 3.9 or later**, used only by `Tools/measure_agent_tokens.py`, which shows where the AI agents' tokens go. No install is needed: the engine's own Python works (`"C:\Program Files\Epic Games\UE_5.8\Engine\Binaries\ThirdParty\Python3\Win64\python.exe" Tools/measure_agent_tokens.py`).
+
 ### Hardware
 
 - **Windows 10 or 11, 64-bit.** The project is developed and built on Windows only.

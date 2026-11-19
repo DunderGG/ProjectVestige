@@ -21,6 +21,8 @@ The main Claude session runs the flow, because a subagent can't ask the user que
 
 The diagram's source is [`agent-flow.puml`](agent-flow.puml) (PlantUML). After changing it, render the image again: in VS Code, open the file and press Alt+D to preview it, or right-click > Export Current Diagram; from a terminal in `.claude/`, `java -jar <path to plantuml.jar> -tpng agent-flow.puml` (the VS Code PlantUML extension ships a `plantuml.jar`).
 
+To see where a task's tokens went, run `python Tools/measure_agent_tokens.py` for the last sessions, one line each, or `python Tools/measure_agent_tokens.py --session latest` for one session split by the roles in the diagram; it reads Claude Code's transcripts on this PC and prints numbers only.
+
 **Lanes.** The main session picks a lane before starting any agent: A (trivial) is one agent and a code review; B (a change inside an established system) is the implementer, the test author when a rule changes and a code review, with no architect or design review; in both, review findings go back to the author until the reviewer approves; C (a new design, meaning a tripwire in `AGENTS.md`, "Lanes", applies) is the full flow. Unsure about a tripwire means C; unsure about anything else means B.
 
 **Writing.** Lore, story, dialogue and other text with a voice go to the writer and skip the flow. Text that goes into the game is marked Ready by the writer, then entered by the implementer as `FText` data and code-reviewed in its lane.
