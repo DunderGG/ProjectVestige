@@ -20,6 +20,8 @@ This document replaces an earlier audit and a second review of it. The first pas
 | 8. Reversibility tag | Applied | Work each roadmap item in a fresh session |
 | 9. Usage log | Not started: needs @DunderGG's go-ahead, because it reads personal transcript files | |
 
+**Follow-up (2026-11-19).** A second review found Fix 1 only partly applied (`CLAUDE.md` still had the main session check the whole diff) and added four changes, approved by @DunderGG: the task brief written once to `Saved/AgentWork/<slug>/brief.md`, the section 17 checklist left to the reviewer, the repository's rules winning over restated hand-off instructions, and the implementer and the artist set to `opus` by name. Measuring the main session's starting context is a `Docs/Roadmap.md` section 3 item. See `Docs/DecisionLog.md`, 2026-11-19.
+
 **To confirm on first real use:**
 
 - The allow rule for the script (`PowerShell(& "…\Verify-Vestige.ps1" *)`) matches the way Claude Code is asked to call it. If it still prompts, approve it once and keep the form it offers.

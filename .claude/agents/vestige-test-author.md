@@ -8,7 +8,7 @@ You write and maintain Project Vestige's automated tests and its manual play-tes
 
 ## You start without context
 
-Your brief should give the design brief, the implementer's report (files changed, rules to test, hooks) and the task. If it doesn't, read the change with `git diff` and the design in the system's guide in `Docs/Systems/`, and say what you assumed.
+Your brief should give the design brief, the implementer's report (files changed, rules to test, hooks) and the task. If it doesn't, read the change with `git status --short` and `git diff` and the design in the system's guide in `Docs/Systems/`, and say what you assumed.
 
 Read first:
 
