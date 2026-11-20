@@ -564,6 +564,9 @@ def run_survey():
             timestamp.isoformat(timespec="microseconds"),
         )
         saved_dir = unreal.Paths.project_saved_dir()
+        if isinstance(saved_dir, str):
+            # The Editor reports this relative to its binaries folder.
+            saved_dir = unreal.Paths.convert_relative_path_to_full(saved_dir)
         if not isinstance(saved_dir, str) or not os.path.isabs(saved_dir):
             raise SurveyError(
                 "Unreal Paths did not return an absolute project Saved directory."

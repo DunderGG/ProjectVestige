@@ -132,7 +132,8 @@ class SurveyLevelTests(unittest.TestCase):
         self.unreal.UnrealEditorSubsystem = type("UnrealEditorSubsystem", (), {})
         self.unreal.EditorActorSubsystem = type("EditorActorSubsystem", (), {})
         self.unreal.Paths = types.SimpleNamespace(
-            project_saved_dir=lambda: self.saved_dir
+            project_saved_dir=lambda: self.saved_dir,
+            convert_relative_path_to_full=lambda path: path,
         )
         self.unreal.EditorLoadingAndSavingUtils = types.SimpleNamespace(
             get_dirty_map_packages=lambda: []
@@ -279,6 +280,21 @@ class SurveyLevelTests(unittest.TestCase):
         self.assertIn("/Game/Maps/L_Farm", markdown)
         self.assertIn("A\\|B", markdown)
         self.assertIn("axis-aligned box", markdown)
+
+    def test_relative_saved_dir_is_resolved_to_a_full_path(self):
+        self.configure_editor([])
+        relative_dir = "../../../../Vestige/Saved/"
+        self.unreal.Paths.project_saved_dir = lambda: relative_dir
+        self.unreal.Paths.convert_relative_path_to_full = lambda path: (
+            self.saved_dir if path == relative_dir else path
+        )
+        output = io.StringIO()
+
+        with contextlib.redirect_stdout(output):
+            succeeded = self.survey.run_survey()
+
+        self.assertTrue(succeeded, output.getvalue())
+        self.assertTrue(list(Path(self.saved_dir).rglob("*.json")))
 
     def test_empty_map_survey_does_not_assume_farm_actors(self):
         self.configure_editor([])
