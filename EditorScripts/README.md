@@ -28,6 +28,6 @@ python -B -m unittest discover -s EditorScripts/Tests -v
 ## Adding a script
 
 - A new script goes here when it imports the `unreal` module; a script that runs from a terminal goes in `Tools/`.
-- Follow [Systems.md, section 23](../Docs/Systems/23-EditorScripting.md): start the file with the copyright and SPDX header from [LICENSING.md](../LICENSING.md), keep it read-only unless its design says otherwise, and write its output under the ignored `Saved/` folder.
+- Follow [Systems.md, section 23](../Docs/Systems/23-EditorScripting.md): start the file with the copyright and SPDX header from [LICENSING.md](../LICENSING.md) and check that the path table there covers it, keep it read-only unless its design says otherwise, and write its output under the ignored `Saved/` folder.
 - Put its tests in `Tests/` as `test_<script>.py`, using a stand-in `unreal` module so they run without the Editor, and add its line to the table above.
 - Scripts stay out of `Content/Python/`: the Editor adds that folder to Python's path and runs any `init_unreal.py` in it at startup, while these scripts are meant to run only when someone starts them.
