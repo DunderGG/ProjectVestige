@@ -514,7 +514,12 @@ Our assets live under `Content/Vestige/`, split by type. Leave the template's fo
 | `M_` / `MI_` | Material / material instance | `MI_Soil_Watered` |
 | `T_` | Texture (with suffix `_D`, `_N`, `_ORM`) | `T_Soil_D` |
 | `IA_` / `IMC_` | Input action / mapping context | `IA_UseTool` |
-| `S_` / `SC_` | Sound wave / sound cue | `S_Hoe` |
+| `S_` / `SC_` | Sound wave / sound cue | `S_Water_FillCan` |
+| `MSS_` / `MSP_` | MetaSound source / MetaSound patch | `MSS_Footstep_Soil` |
+| `SCL_` | Sound class | `SCL_Effects` |
+| `SMX_` | Submix | `SMX_Reverb` |
+| `SCON_` / `ATT_` | Sound concurrency / sound attenuation | `SCON_Footsteps` |
+| `CB_` / `CBM_` / `PP_` | Control bus / control bus mix / parameter patch | `CB_Volume_Effects` |
 | `NS_` | Niagara system | `NS_WaterSplash` |
 
 Variants go after the base name with underscores: `SM_Crop_Turnip_Stage0`, `SM_Crop_Turnip_Stage1`.

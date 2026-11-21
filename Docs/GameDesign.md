@@ -199,7 +199,7 @@ A farm tile has a state (grass, tilled, planted), and on top of that:
   - **The watering can holds 8 waterings;** one watering is one step of water on one tile. The first planting of 16 tiles takes two fills, so the player meets the well on the first day.
   - **The well gives 24 a day,** back in full each morning; what isn't drawn is not carried over. A dry well blocks nothing: it says so and refills overnight.
   - **The farm has one clean-water store,** which the well draws from; the sprinkler and the rain collectors and purifier to come draw from and add to the same store, whichever map is open.
-  - **Filling is free and instant:** F at the well tops up the can wherever it is in the bag, with no stamina, no clock time and no tool swap, and says "Can filled." on each fill until a splash and a sound tell it instead.
+  - **Filling is free and instant:** F at the well tops up the can wherever it is in the bag, with no stamina, no clock time and no tool swap, and says "Can filled." on each fill with a splash sound, which also plays when the well runs dry part-way through a fill; the text stays with the sound (@DunderGG, 2026-11-21) and is reconsidered when a visual splash comes.
   - **The well's prompt shows what is left today:** "Fill can (16 left)", and "(0 left)" when dry, so F still says why.
   - **A new game, and a save from before limited water, start with a full can and a full well.**
   - **The well stands in the service yard,** on the far side of the field from the farmhouse, about 9 m from the nearest field edge: a short walk that makes a refill a small choice, not a trek.

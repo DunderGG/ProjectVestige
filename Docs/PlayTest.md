@@ -122,9 +122,11 @@ The key hints and the prompt name the keys of the device you used last, keyboard
 Filling the watering can at the well now plays a splash (the first sound in the game, a script-made one: [Systems.md, section 14](Systems.md#14-audio)), along with the "Can filled." message. The rules (which rows play it, a short mono one-shot, sound classes, nothing looping) are automated tests; the path from the HUD to the sound playing is not automated or seen in a run, so the first check also confirms it plays at all. The commit is the one titled "Play a splash when the can fills at the well".
 
 - [ ] **The splash sounds like water into a can** (why a person: hearing, a new sound for the first time): in Play in Editor with speakers or headphones on, half empty the can and press F at the well. The splash plays at once (if you hear nothing, check the Output Log with `log LogVestigeFeedback Verbose` for "Playing S_Water_FillCan" and say which it was), about two thirds of a second, and sounds like water poured into a tin can (a slosh, small bubbles, a faint ring), with no click at the start or the end. If it sounds like a synthesizer, say so: the fallback is a recording.
-- [ ] **The level is right** (why a person: loudness, hardware): it is clearly audible at your normal volume, not startling, and not buried. There is no other sound yet, so judge it against silence.
-- [ ] **Both fills** (why a person: hearing): use the well up until it runs dry part-way through filling the can (the message says it ran dry): the splash plays with that message too. A full can ("The can is full") and a dry well make no sound.
-- [ ] **Pause** (why a person: feel; only if the game can be paused): pause during the splash: it pauses with the game and goes on when you resume.
+   - There is a weird metallic cling sound at the start of the splash, and the water sound sounds very artificial. This can be refined later on.
+   - Kept open for the roadmap item "Replace the well splash with one that sounds like water into a can" (@DunderGG, 2026-11-21).
+- [x] **The level is right** (why a person: loudness, hardware): it is clearly audible at your normal volume, not startling, and not buried. There is no other sound yet, so judge it against silence.
+- [x] **Both fills** (why a person: hearing): use the well up until it runs dry part-way through filling the can (the message says it ran dry): the splash plays with that message too. A full can ("The can is full") and a dry well make no sound.
+- [x] **Pause** (why a person: feel; only if the game can be paused): pause during the splash: it pauses with the game and goes on when you resume.
 
 ### Editor chores
 
