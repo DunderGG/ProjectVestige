@@ -20,7 +20,7 @@ The main Claude session runs the flow, because a subagent can't ask the user que
 
 ![The agent flow, from a task being picked up to done](agent-flow.png)
 
-The diagram's source is [`agent-flow.puml`](agent-flow.puml) (PlantUML). After changing it, render the image again: in VS Code, open the file and press Alt+D to preview it, or right-click > Export Current Diagram; from a terminal in `.claude/`, `java -jar <path to plantuml.jar> -tpng agent-flow.puml` (the VS Code PlantUML extension ships a `plantuml.jar`).
+The diagram's source is [`agent-flow.puml`](agent-flow.puml) (PlantUML). After changing it, render the image again: in VS Code, open the file and press Alt+D to preview it, or right-click > Export Current Diagram; from a terminal in `.claude/`, `java -jar <path to plantuml.jar> -tpng agent-flow.puml`. Activity colours use the current `:text; <<#colour>>` syntax, which needs a recent PlantUML: the `plantuml.jar` shipped with the VS Code extension (1.2024.3) is too old for it, so render with the extension set to the PlantUML server, or a current jar.
 
 To see where a task's tokens went, run `python Tools/measure_agent_tokens.py` for the last sessions, one line each, or `python Tools/measure_agent_tokens.py --session latest` for one session split by the roles in the diagram; it reads Claude Code's transcripts on this PC and prints numbers only.
 

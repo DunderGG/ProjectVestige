@@ -18,7 +18,7 @@ Main session: roadmap item, the user's words;
 :**Main session picks a lane**
 Writes the lane and the tripwires it checked
 in two lines at the top of the reviewer's brief;
-note right
+note left
   **Tripwires** (any one means lane C):
   1. a new class, component or subsystem,
      or a change to an ownership row
@@ -38,20 +38,20 @@ note right
   The code review checks the lane.
 end note
 
-#FFF1D6:**Game designer** (any lane, only when how the game plays
+:**Game designer** (any lane, only when how the game plays
 changes and GameDesign.md and the user's words don't settle it)
-Prepares questions with options and a recommendation;
-note right
+Prepares questions with options and a recommendation; <<#FFF1D6>>
+note left
   The user decides game feel
   and design; the designer
   records the answers
 end note
 
 if (**Writing** needed?\nlore, story, text with a voice) then (yes)
-  #F3E5F5:**Writer**
+  :**Writer**
   Writes in Docs/Spoilers/, decides line-level
-  writing and minor canon, asks only about big canon;
-  note right
+  writing and minor canon, asks only about big canon; <<#F3E5F5>>
+  note left
     Runs before the implementer. No architect,
     no design review, no code review.
     Text for the game is marked Ready; the implementer
@@ -72,17 +72,17 @@ case (**Lane A**\ntrivial)
   ->approved;
 case (**Lane B**\ninside an established system)
   repeat
-    #DCEBFA:**Implementer**
-    Writes the C++, builds clean;
-    #DDF3EE:**Test author**
-    Tests (when a rule changes), full suite, PlayTest.md;
+    :**Implementer**
+    Writes the C++, builds clean; <<#DCEBFA>>
+    :**Test author**
+    Tests (when a rule changes), full suite, PlayTest.md; <<#DDF3EE>>
   repeat while (**Code review** by the reviewer
 code, tests, docs) is (changes needed)
   ->approved;
 case (**Lane C**\nnew design, a tripwire applies)
   repeat
-    #E8E0F7:**Architect**
-    Owner, layer, guide, test plan;
+    :**Architect**
+    Owner, layer, guide, test plan; <<#E8E0F7>>
     note right
       Design questions go to the
       user through the designer.
@@ -93,10 +93,10 @@ case (**Lane C**\nnew design, a tripwire applies)
     end note
   repeat while (**Design review** by the reviewer) is (changes needed) not (approved)
   repeat
-    #DCEBFA:**Implementer**
-    Writes the C++, builds clean;
-    #DDF3EE:**Test author**
-    Tests, full suite, PlayTest.md;
+    :**Implementer**
+    Writes the C++, builds clean; <<#DCEBFA>>
+    :**Test author**
+    Tests, full suite, PlayTest.md; <<#DDF3EE>>
   repeat while (**Code review** by the reviewer
 code, tests, docs) is (changes needed)
   ->approved;
@@ -105,9 +105,9 @@ endswitch
 fork again
   -> **Art**\nmeshes, materials, textures;
   repeat
-    #F9E1EC:**Artist** (when art is needed, in any lane)
+    :**Artist** (when art is needed, in any lane)
     Blender script, export, import,
-    preview renders;
+    preview renders; <<#F9E1EC>>
   repeat while (**Art review** by the art reviewer
 renders, mesh, scripts, licensing) is (changes needed)
   ->approved;
@@ -115,9 +115,9 @@ renders, mesh, scripts, licensing) is (changes needed)
 fork again
   -> **Sound**\neffects, music, ambience;
   repeat
-    #E3F1F7:**Audio designer** (when sound is needed, in any lane)
+    :**Audio designer** (when sound is needed, in any lane)
     Audio plan, sound script or licensed
-    recording, import, measurements;
+    recording, import, measurements; <<#E3F1F7>>
     note right
       Can't hear: every new sound
       gets a listening check
@@ -130,9 +130,9 @@ end fork
 
 :**Commit** (main session)
 Build and suite verified after the last change, checklist;
-#E2F2DF:**Done**
+:**Done**
 Report to the user lists each technical decision,
-tagged easy or hard to undo;
+tagged easy or hard to undo; <<#E2F2DF>>
 stop
 
 legend bottom left
