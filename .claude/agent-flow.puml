@@ -47,17 +47,22 @@ note right
   records the answers
 end note
 
-fork
-switch (Which lane?)
-case (**Writing**\nlore, story, text with a voice)
+if (**Writing** needed?\nlore, story, text with a voice) then (yes)
   #F3E5F5:**Writer**
   Writes in Docs/Spoilers/, decides line-level
   writing and minor canon, asks only about big canon;
   note right
-    No architect, no design review, no code review.
+    Runs before the implementer. No architect,
+    no design review, no code review.
     Text for the game is marked Ready; the implementer
     enters it as FText data in lane A or B.
+    A writing-only task goes straight to the commit.
   end note
+else (no)
+endif
+
+fork
+switch (Which lane?)
 case (**Lane A**\ntrivial)
   repeat
     :**One agent** does the change
