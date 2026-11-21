@@ -101,7 +101,7 @@ namespace FarmTileLooks
 	inline const FLinearColor WateredColor(0.12f, 0.07f, 0.03f);
 	inline const FLinearColor GrowingColor(0.20f, 0.70f, 0.15f);
 	inline const FLinearColor RipeColor(1.00f, 0.60f, 0.05f);
-	inline const FLinearColor WitheredColor(0.30f, 0.26f, 0.20f);
+	inline const FLinearColor WitheredColor(0.25f, 0.18f, 0.08f);
 
 	/**
 	 * How Tile is drawn with Settings: the tilled soil mesh once the tile isn't grass, and the mesh and scale its crop's data gives

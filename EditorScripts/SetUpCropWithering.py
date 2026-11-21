@@ -4,7 +4,7 @@
 """Make the withered crop look and its two feedback texts (Systems.md, sections 15 and 22).
 
 1. Saves Used with Instanced Static Meshes on M_Crop, if it isn't saved already.
-2. Makes MI_Crop_Withered, an instance of M_Crop in a dry brown-grey with a high roughness, or updates its two values.
+2. Makes MI_Crop_Withered, an instance of M_Crop in a dry straw-brown with a high roughness, or updates its two values.
 3. Sets it as WitheredCropMaterial in BP_FarmGrid's look settings (its UFarmFieldMeshesComponent, Looks).
 4. Adds the DA_FeedbackResponses rows Vestige.Feedback.Farm.Withered and Vestige.Feedback.Farm.ClearFirst. A row that is
    already there is left as it is, so a text changed by hand in the editor is never overwritten; the log says so.
@@ -27,10 +27,11 @@ WITHERED_MATERIAL_NAME = "MI_Crop_Withered"
 FARM_GRID_BLUEPRINT = "/Game/Vestige/Blueprints/BP_FarmGrid"
 FEEDBACK_RESPONSES = "/Game/Vestige/UI/DA_FeedbackResponses"
 
-# Linear colour, the same dry brown-grey as the placeholder's FarmTileLooks::WitheredColor (sRGB about #958B7C): lighter
-# and much greyer than the tilled soil (#6B4A2B), so a dead plant stands out against dry and wet soil alike, and far from
-# the water (azure) and contamination (magenta) cues and from the living crops' greens, yellows and purples.
-WITHERED_BASE_COLOR = (0.30, 0.26, 0.20)
+# Linear colour, the same dry straw-brown as the placeholder's FarmTileLooks::WitheredColor (sRGB about #897650, chosen by
+# @DunderGG on 2026-11-20): lighter and yellower than the tilled soil (#6B4A2B), so a dead plant stands out against dry
+# and wet soil alike, warmer than the well's grey stone (#9A9384) so it doesn't read as rubble, and far from the water
+# (azure) and contamination (magenta) cues and from the living crops' greens, yellows and purples.
+WITHERED_BASE_COLOR = (0.25, 0.18, 0.08)
 WITHERED_ROUGHNESS = 0.95
 
 TEXT_NAMESPACE = "VestigeFeedback"
