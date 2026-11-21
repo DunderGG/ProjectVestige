@@ -98,6 +98,7 @@ code, tests, docs) is (changes needed)
 endswitch
 
 fork again
+  -> **Art**\nmeshes, materials, textures;
   repeat
     #F9E1EC:**Artist** (when art is needed, in any lane)
     Blender script, export, import,
@@ -107,6 +108,7 @@ renders, mesh, scripts, licensing) is (changes needed)
   ->approved;
 
 fork again
+  -> **Sound**\neffects, music, ambience;
   repeat
     #E3F1F7:**Audio designer** (when sound is needed, in any lane)
     Audio plan, sound script or licensed
