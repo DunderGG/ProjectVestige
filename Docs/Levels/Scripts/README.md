@@ -1,6 +1,6 @@
 # Reusable Unreal Editor level tools
 
-The first **Editor-only authoring tool**, [SurveyLevel.py](../../../Scripts/Editor/SurveyLevel.py), is implemented with passing helper tests; its in-Editor validation is still pending. The other tools below remain proposals. The tools should work with any level in the project without assuming that it is a farm. HomeFarm is only the first example: its [plan](../HomeFarm/README.md) and [diagram](../HomeFarm/HomeFarm.svg) are not measurements of the existing map.
+The first **Editor-only authoring tool**, [SurveyLevel.py](../../../EditorScripts/SurveyLevel.py), is implemented with passing helper tests; its in-Editor validation is still pending. The other tools below remain proposals. The tools should work with any level in the project without assuming that it is a farm. HomeFarm is only the first example: its [plan](../HomeFarm/README.md) and [diagram](../HomeFarm/HomeFarm.svg) are not measurements of the existing map.
 
 The first tool's technical design is now in [Systems.md, section 23](../../Systems/23-EditorScripting.md). This document remains the proposal for later tools and optional extensions; do not treat those ideas as part of the survey's first implementation.
 
@@ -124,7 +124,7 @@ Farm-specific checks remain optional HomeFarm extensions. The shared validator m
 
 ## Unreal Editor setup
 
-Unreal Python runs **inside the Editor**, not in a packaged game or an ordinary system Python process. The project file does not explicitly enable the Python Editor Script Plugin, and the installed UE 5.8 plugin is disabled by default; check **Edit > Plugins > Scripting** before running the survey. Enabling it and restarting the Editor is a project setup change, not something a survey should do silently. Once the plugin is enabled, use **Tools > Execute Python Script** and select [SurveyLevel.py](../../../Scripts/Editor/SurveyLevel.py).
+Unreal Python runs **inside the Editor**, not in a packaged game or an ordinary system Python process. The project file does not explicitly enable the Python Editor Script Plugin, and the installed UE 5.8 plugin is disabled by default; check **Edit > Plugins > Scripting** before running the survey. Enabling it and restarting the Editor is a project setup change, not something a survey should do silently. Once the plugin is enabled, use **Tools > Execute Python Script** and select [SurveyLevel.py](../../../EditorScripts/SurveyLevel.py).
 
 For actor work, prefer `unreal.EditorActorSubsystem`; old `EditorLevelLibrary` examples are marked deprecated in UE 5.8. Enable other scripting plugins only if the chosen APIs need them. See Epic's [Python Editor scripting guide](https://dev.epicgames.com/documentation/en-us/unreal-engine/scripting-the-unreal-editor-using-python?application_version=5.8), [EditorActorSubsystem API](https://dev.epicgames.com/documentation/en-us/unreal-engine/python-api/class/EditorActorSubsystem?application_version=5.8), and [ScopedEditorTransaction API](https://dev.epicgames.com/documentation/en-us/unreal-engine/python-api/class/ScopedEditorTransaction?application_version=5.8).
 

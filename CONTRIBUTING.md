@@ -74,7 +74,11 @@ ProjectVestige/
         Export/             FBX files exported from Blender, ready to import
     Config/                 Engine and project settings
     Docs/                   Project documentation
+    EditorScripts/          Python scripts run inside the Unreal Editor
+    Tools/                  Scripts run from a terminal (build and test, workflow checks)
 ```
+
+Scripts are split by where they run: inside the Unreal Editor in [EditorScripts/](EditorScripts/README.md), from a terminal in [Tools/](Tools/README.md); each folder's README lists its scripts and how to run them.
 
 Read these before making larger changes:
 

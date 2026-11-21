@@ -15,7 +15,7 @@ The local Lyra source has no comparable generic Editor Python level-survey tool.
 
 **Rules:**
 
-- Keep the first survey in `Scripts/Editor/SurveyLevel.py`, outside `Source/Vestige/` and `Content/`. It runs only when a developer explicitly executes it inside the Unreal Editor. It is not game code, a runtime subsystem, a build step, or a packaged-game feature.
+- Keep the first survey in `EditorScripts/SurveyLevel.py`, outside `Source/Vestige/` and `Content/`. It runs only when a developer explicitly executes it inside the Unreal Editor. It is not game code, a runtime subsystem, a build step, or a packaged-game feature.
 - Start the Python file with the repository's copyright and SPDX license header, as for other source files.
 - Run it from the Editor's **Tools > Execute Python Script** menu after the plugin is enabled; never launch it as system Python or from Editor startup command-line execution.
 - The Python Editor Script Plugin is required. Enable it manually for the project and restart the Editor before running the script; the Editor may record this setup in `Vestige.uproject`. Do not silently include that setup change in the tool's implementation, and do not add `Editor Scripting Utilities` or an Editor module. `UnrealEditorSubsystem` and `EditorActorSubsystem` are exposed by `UnrealEd`; the older `EditorLevelLibrary` APIs are deprecated.
