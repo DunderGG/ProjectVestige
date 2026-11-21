@@ -25,14 +25,17 @@ The importer flips Y (Art/README.md, "Left and right"), but the pump, the spout 
 the X-Z plane, so nothing here is side-specific.
 
 Parts and materials (the slot names are the Unreal material instances the slots become):
-    MI_Prop_Stone       the ring: two courses of 12 flat faces, the upper one turned half a face so the joints
-                        stagger, and a coping. The faces stay crisp (finish_object's angle is 26 degrees, under
-                        the 30 degrees at which the 12 faces meet), so the ring reads as cut stone
+    MI_Prop_Stone       the ring: two courses of 12 flat faces, the upper one and the coping turned half a face
+                        so the joints stagger and the coping overhangs the upper course evenly. The faces stay
+                        crisp (finish_object's angle is 26 degrees, under the 30 degrees at which the 12 faces
+                        meet), so the ring reads as cut stone
     MI_Prop_PaintTeal   the pump's column and head
     MI_Prop_Brass       the dial's bezel, the spout and the lever's grip
     MI_Prop_DarkMetal   the pump's base plate, the lever's pivot and bar, and the dial's centre
+    MI_Prop_Rust        a crust round the foot of the column: the machine's one big patch of wear
     MI_Prop_Water       the water in the ring and the ring on the dial: the water cue (palette.py)
-Collision: UCX_SM_Well_00, the ring as a 12-sided hull (0.55 m high, over the farmer's 0.45 m step), and
+Collision: UCX_SM_Well_00, the ring as a 12-sided hull turned with the coping (0.55 m high, over the farmer's
+0.45 m step; the lower course's corners reach 1.5 cm past it at the floor, which nobody can feel), and
 UCX_SM_Well_01, a box round the pump's base, column and head. The lever and the spout have none.
 Nothing is textured and there is no UV map: every colour is a flat material.
 """
@@ -42,6 +45,7 @@ import os
 import sys
 
 import bmesh
+from mathutils import Matrix
 
 sys.dont_write_bytecode = True  # no __pycache__ folder in the repository
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -54,14 +58,16 @@ NAME = "SM_Well"
 
 # Sizes in metres, built from the floor up.
 RING_RADIUS = 0.45                      # the coping's, so the well is 0.90 m across
-COURSE_1_RADIUS, COURSE_1_TOP = 0.44, 0.26
+COURSE_1_RADIUS, COURSE_1_TOP = 0.45, 0.26   # its flat sides (0.435) cover the upper course's corners
 COURSE_2_RADIUS, COURSE_2_TOP = 0.43, 0.48
 RING_TOP = 0.55                         # the coping's top
+STAGGER_DEGREES = 15.0                  # the upper course and the coping, turned half a face
 OPENING_RADIUS = 0.24                   # the hole in the coping
 WATER_Z = 0.50                          # 5 cm under the rim, so the game camera sees most of the water
 RING_SIDES = 12
 PUMP_X = 0.30                           # the pump's column stands on the ring's +X side
 PLATE_TOP = 0.59
+RUST_TOP = 0.67                         # the rust crust round the column's foot
 COLUMN_TOP = 0.99
 HEAD_TOP = 1.13
 DIAL_Z = 0.78
@@ -81,8 +87,9 @@ def add_disc(bm, outline, axis, at, mat):
 
 
 def build():
-    slots = materials.Slots(["Stone", "PaintTeal", "Brass", "DarkMetal", "Water"])
-    stone, teal, brass, dark, water = (slots[k] for k in ("Stone", "PaintTeal", "Brass", "DarkMetal", "Water"))
+    keys = ("Stone", "PaintTeal", "Brass", "DarkMetal", "Rust", "Water")
+    slots = materials.Slots(list(keys))
+    stone, teal, brass, dark, rust, water = (slots[k] for k in keys)
     bm = bmesh.new()
 
     # The ring. The two courses are solid under the water (nobody sees inside them), so they are only
@@ -90,18 +97,28 @@ def build():
     # is drawn. The lower course keeps its top, which shows as a ledge where it is wider than the upper
     # one. The coping is a ring: its inner wall shows above the water.
     geo.add_prism(bm, polygon(COURSE_1_RADIUS, RING_SIDES), "Z", 0.0, COURSE_1_TOP, stone, skip=("lo",))
-    geo.add_prism(bm, polygon(COURSE_2_RADIUS, RING_SIDES, start_degrees=15), "Z", COURSE_1_TOP, COURSE_2_TOP,
-                  stone, skip=("lo", "hi"))
-    geo.add_ring(bm, (0.0, 0.0, COURSE_2_TOP), OPENING_RADIUS, RING_RADIUS, RING_TOP - COURSE_2_TOP, RING_SIDES,
-                 stone, cap_bottom=False)
+    geo.add_prism(bm, polygon(COURSE_2_RADIUS, RING_SIDES, start_degrees=STAGGER_DEGREES), "Z", COURSE_1_TOP,
+                  COURSE_2_TOP, stone, skip=("lo", "hi"))
+    # The coping is turned like the upper course, so it overhangs that course by an even 2 cm all round
+    # (0.45 - 0.43) and its shadow on the course is a level band, not a sawtooth.
+    coping = geo.add_ring(bm, (0.0, 0.0, COURSE_2_TOP), OPENING_RADIUS, RING_RADIUS, RING_TOP - COURSE_2_TOP,
+                          RING_SIDES, stone, cap_bottom=False)
+    bmesh.ops.rotate(bm, verts=list({v for f in coping for v in f.verts}), cent=(0.0, 0.0, 0.0),
+                     matrix=Matrix.Rotation(math.radians(STAGGER_DEGREES), 3, "Z"))
 
     # The water: a one-sided disc a little wider than the opening, so its edge is inside the coping.
     add_disc(bm, polygon(OPENING_RADIUS + 0.015, RING_SIDES), "Z", WATER_Z, water)
 
     # The pump: a base plate on the coping, a tapering column, a head, a spout toward +X.
     geo.add_box(bm, (0.235, -0.10, RING_TOP), (0.43, 0.10, PLATE_TOP), dark, bevel=0.008, skip=("-z",))
-    geo.add_cylinder(bm, (PUMP_X, 0.0, PLATE_TOP), 0.065, COLUMN_TOP - PLATE_TOP, 16, teal, top_radius=0.055,
-                     cap_bottom=False, cap_top=False)
+    # Rust: a crust round the column's foot, where the spilt water stands (GameDesign.md, section 12: wear and
+    # rust are big shapes of their own faces). Eight sides and a wider base, so it reads as a lumpy crust, not
+    # a machined collar; the column starts on its top.
+    geo.add_cylinder(bm, (PUMP_X, 0.0, PLATE_TOP), 0.082, RUST_TOP - PLATE_TOP, 8, rust, top_radius=0.068,
+                     cap_bottom=False)
+    column_foot_radius = 0.065 - 0.010 * (RUST_TOP - PLATE_TOP) / (COLUMN_TOP - PLATE_TOP)
+    geo.add_cylinder(bm, (PUMP_X, 0.0, RUST_TOP), column_foot_radius, COLUMN_TOP - RUST_TOP, 16, teal,
+                     top_radius=0.055, cap_bottom=False, cap_top=False)
     geo.add_box(bm, (PUMP_X - 0.07, -0.08, COLUMN_TOP), (PUMP_X + 0.07, 0.08, HEAD_TOP), teal, bevel=0.015)
     geo.add_tube(bm, [(0.32, 0.0, 1.06), (0.385, 0.0, 1.06), (0.43, 0.0, 1.02)], [0.034, 0.032, 0.028], 8, brass,
                  caps=(False, True))
@@ -120,8 +137,10 @@ def build():
 
     asset = geo.finish_object(NAME, bm, slots, shade="angle", angle=26.0)
 
-    # Collision: the ring as a hull of its 12-sided outline, and a box round the pump.
-    geo.add_collision_hull(asset, [(x, y, z) for x, y in polygon(RING_RADIUS, RING_SIDES) for z in (0.0, RING_TOP)])
+    # Collision: the ring as a hull of the coping's 12-sided outline (turned like the coping), and a box round
+    # the pump. A hull round the lower course's corners as well would need 48 points, over the 32 allowed.
+    outline = polygon(RING_RADIUS, RING_SIDES, start_degrees=STAGGER_DEGREES)
+    geo.add_collision_hull(asset, [(x, y, z) for x, y in outline for z in (0.0, RING_TOP)])
     geo.add_collision_box(asset, (PUMP_X - 0.07, -0.10, RING_TOP), (0.44, 0.10, COLLISION_PUMP_TOP))
     return asset
 

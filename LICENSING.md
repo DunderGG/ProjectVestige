@@ -129,7 +129,7 @@ This setup has not yet been reviewed by a lawyer. Before Project Vestige is sold
 - whether it fits the Unreal Engine EULA and each target store and console's SDK terms;
 - the contributor terms and the way agreement is recorded;
 - the AI-generated images and any AI-generated 3D models; and the meshes the scripts in `Art/Blender/` generate (`Art/Blender/*.blend`, `Art/Export/*.fbx` and the meshes imported from them), which no generative model made but scripts written by AI agents did: who owns them, whether they are protected by copyright, and what each store requires to be disclosed about AI-generated content;
-- code, scripts and docs written by AI agents for the maintainer (most of `Source/`, the scripts in `Art/Blender/` and `EditorScripts/`, much of `Docs/`, and content assets that agents' editor scripts (in `EditorScripts/` or outside the repository) made or changed, for example `M_Crop` with its `MI_Crop_*` instances and `MI_Crop_Withered` and the crop and item data assets): ownership, copyright, and what stores require to be disclosed;
+- code, scripts and docs written by AI agents for the maintainer (most of `Source/`, the scripts in `Art/Blender/` and `EditorScripts/`, much of `Docs/`, and content assets that agents' editor scripts (in `EditorScripts/` or outside the repository) made or changed, for example `M_Crop` with its `MI_Crop_*` instances and `MI_Crop_Withered`, `M_Prop` with its `MI_Prop_*` instances, and the crop and item data assets): ownership, copyright, and what stores require to be disclosed;
 - whether CC BY 4.0's ban on adding technical restrictions (DRM) affects third-party CC BY assets in store and console builds;
 - the maintainer's commercial use of contributed assets under CC BY-NC-SA.
 
