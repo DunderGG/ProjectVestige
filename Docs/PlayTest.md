@@ -132,12 +132,6 @@ The one-shot `EditorScripts/SurveyLevel.py` tool surveys only the currently open
 - [x] **Leave editor state alone** (why a person: editor-only state): before running, note the selected actor and whether the map is already marked unsaved. Run the survey and confirm selection and the map's dirty/unsaved state are unchanged. If the test map has an actor with a blank label, confirm it remains blank in the Outliner and is reported as unavailable; do not rename or save the actor to make the check pass.
 - [x] **Same short name, separate output** (why a person: editor-only integration): open two maps from different folders that share the same asset name, running the script on each. Confirm their reports are in separate hash-suffixed folders under `Saved/LevelReports/` and neither run overwrites the other's files.
 
-### Straw-brown withered crops, 2026-11-20
-
-Withered crops are now a dry straw-brown instead of the grey-brown that looked like the well's stone (commit "Make withered crops straw-brown"). Setup as in the archived "Out-of-season crops wither" check: `SetDay 28`, plant and water a few turnips (one planted last, so it is a Stage 0 seedling), sleep.
-
-- [ ] **The new colour by day and at night** (why a person: a new look under Lumen): in `L_Farm` from the game camera, the withered crops read as dead straw, not as stone or rubble next to the well, and clearly apart from dry and wet soil and the living crops. Look again at night (`SkipToTime 2200`). Can you see a withered Stage 0 seedling from the normal camera against dry soil? The renders show it fairly faint; if it's hard to spot, the art reviewer's fix is a slightly brighter value of the same hue (about 0.30, 0.22, 0.10 linear).
-
 ## 3. Smoke test
 
 About five minutes in `L_Farm`, in Play in Editor at High. Run it before pushing and at the end of each milestone, and after any editor chore. Back up `Saved/SaveGames/` first.
