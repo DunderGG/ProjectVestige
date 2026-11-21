@@ -37,3 +37,6 @@ Content/Fab/
 Content/Megascans/
 Content/MSPresets/
 Content/Quixel/
+
+# Python bytecode that Blender and the editor write next to the art and editor scripts when they run them.
+__pycache__/
