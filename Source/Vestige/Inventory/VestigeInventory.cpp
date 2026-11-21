@@ -75,7 +75,7 @@ bool FVestigeInventory::TryRemove(const UVestigeItemData& Item, int32 Count)
 		Left -= Removed;
 		if (Slot.Count == 0)
 		{
-			Slot.Item = nullptr;
+			Slot.Clear();
 		}
 	}
 	return true;
@@ -91,7 +91,7 @@ bool FVestigeInventory::TryRemoveFromSlot(int32 SlotIndex, int32 Count)
 	Slot.Count -= Count;
 	if (Slot.Count == 0)
 	{
-		Slot.Item = nullptr;
+		Slot.Clear();
 	}
 	return true;
 }
@@ -106,6 +106,44 @@ int32 FVestigeInventory::PlaceInSlot(int32 SlotIndex, const UVestigeItemData& It
 	Slot.Item = &Item;
 	Slot.Count = FMath::Min(Count, VestigeInventoryRules::GetStackSize(Item));
 	return Slot.Count;
+}
+
+TOptional<int32> FVestigeInventory::FindStat(int32 SlotIndex, const FGameplayTag& Tag) const
+{
+	if (!Slots.IsValidIndex(SlotIndex))
+	{
+		return {};
+	}
+	const FVestigeItemStat* Stat = Slots[SlotIndex].Stats.FindByPredicate(
+		[&Tag](const FVestigeItemStat& Candidate)
+		{
+			return Candidate.Tag == Tag;
+		});
+	return Stat ? TOptional<int32>(Stat->Value) : TOptional<int32>();
+}
+
+bool FVestigeInventory::SetStat(int32 SlotIndex, const FGameplayTag& Tag, int32 Value)
+{
+	if (!Slots.IsValidIndex(SlotIndex) || Slots[SlotIndex].IsEmpty() || !Tag.IsValid()
+		|| VestigeInventoryRules::GetStackSize(*Slots[SlotIndex].Item) > 1)
+	{
+		return false;
+	}
+	TArray<FVestigeItemStat>& Stats = Slots[SlotIndex].Stats;
+	FVestigeItemStat* Existing = Stats.FindByPredicate(
+		[&Tag](const FVestigeItemStat& Candidate)
+		{
+			return Candidate.Tag == Tag;
+		});
+	if (Existing)
+	{
+		Existing->Value = Value;
+	}
+	else
+	{
+		Stats.Add({Tag, Value});
+	}
+	return true;
 }
 
 int32 FVestigeInventory::GetRoomFor(const UVestigeItemData& Item) const

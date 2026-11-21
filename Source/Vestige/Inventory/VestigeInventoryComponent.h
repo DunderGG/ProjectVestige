@@ -5,12 +5,14 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "GameplayTagContainer.h"
 #include "Core/VestigeSaveable.h"
 #include "Inventory/VestigeInventory.h"
 #include "VestigeInventoryComponent.generated.h"
 
 class UVestigeItemData;
 struct FVestigeInventorySaveData;
+struct FVestigeInventorySlotSaveData;
 
 DECLARE_MULTICAST_DELEGATE(FOnVestigeInventoryChanged);
 DECLARE_MULTICAST_DELEGATE(FOnVestigeItemInHandChanged);
@@ -49,6 +51,9 @@ class UVestigeInventoryComponent : public UActorComponent, public IVestigeSaveab
 public:
 	UVestigeInventoryComponent();
 
+	/** The inventory on the player state of Pawn (an actor that isn't a pawn, or a pawn without a player state, has none), or nullptr. */
+	static UVestigeInventoryComponent* FindForPawn(const AActor* Pawn);
+
 	/** True if all Count of the item fit. False for an ID that names no item. */
 	bool CanAddItem(const FPrimaryAssetId& ItemId, int32 Count) const;
 
@@ -60,6 +65,16 @@ public:
 
 	/** Removes Count from the slot at Slot only. Returns false, changing nothing, if that slot holds fewer. */
 	bool TryRemoveItemFromSlot(int32 Slot, int32 Count);
+
+	/** The stat Tag of the item in Slot, or nothing if the slot is empty or has no such stat. An absent stat means the item is fresh. */
+	TOptional<int32> FindSlotStat(int32 Slot, const FGameplayTag& Tag) const;
+
+	/**
+	 * Sets the stat Tag of the item in Slot and broadcasts OnInventoryChanged, but never OnItemInHandChanged, since the item
+	 * didn't change. Writing the value the slot already has changes and broadcasts nothing. Returns false, changing nothing,
+	 * if the slot is empty, its item stacks or Tag is invalid.
+	 */
+	bool SetSlotStat(int32 Slot, const FGameplayTag& Tag, int32 Value);
 
 	/** How many of the item the inventory holds, across all its stacks. */
 	int32 GetItemCount(const FPrimaryAssetId& ItemId) const;
@@ -94,8 +109,9 @@ public:
 	 * Replaces the contents with the saved slots and selected hotbar slot, without replaying any action, and broadcasts
 	 * OnInventoryChanged and, if the hand changed, OnItemInHandChanged. Each stack goes back in its slot; what doesn't fit
 	 * there (a bad slot, a stack size lowered since) is added like any item. A selected slot outside the hotbar selects the
-	 * first, with a warning. Returns how many saved stacks were skipped, wholly or partly: unknown items, and items with no
-	 * room left.
+	 * first, with a warning. Each stack's stats go back with it; one whose tag no longer exists, and those of a stack that
+	 * didn't go back into its own slot, are left out. Returns how many saved stacks and stats were skipped, wholly or partly:
+	 * unknown items, items with no room left, and stats left out.
 	 */
 	int32 RestoreFromSaveData(const FVestigeInventorySaveData& Data);
 
@@ -137,6 +153,12 @@ private:
 
 	/** The content catalogue's definition of the item with this ID, or nullptr, with a warning, if there is none. */
 	const UVestigeItemData* FindItem(const FPrimaryAssetId& ItemId) const;
+
+	/**
+	 * Sets the saved stats of a stack on its slot, or leaves them all out when the stack didn't go back into its own slot.
+	 * Returns how many it left out.
+	 */
+	int32 RestoreStats(const FVestigeInventorySlotSaveData& Saved, bool bStackIsInItsSlot);
 
 	/** Empties the slots to SlotCount and selects the first hotbar slot, without broadcasting. */
 	void ResetSlots();

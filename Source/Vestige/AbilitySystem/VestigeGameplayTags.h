@@ -89,6 +89,27 @@ namespace VestigeGameplayTags
 	/** The harvest ability, on the press: the inventory has no room for the harvest, which stays in the ground. */
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Feedback_Inventory_Full);
 
+	/** The watering can: it holds no water, so nothing is watered. */
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Feedback_Water_CanEmpty);
+
+	/** The well: the can is already full, so nothing is drawn. */
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Feedback_Water_CanFull);
+
+	/** The well: the can was filled to the top. */
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Feedback_Water_CanFilled);
+
+	/** The well: it has no water left today. */
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Feedback_Water_WellDry);
+
+	/** The well: it gave the last of today's water before the can was full. */
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Feedback_Water_WellRanDry);
+
+	/**
+	 * The stat of an item slot that holds clean water: the watering can's water, in waterings. A stat tag, not a feedback tag:
+	 * its name is written into saves (Systems.md, section 8, slot stats, and section 24), so it is never renamed.
+	 */
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(ItemStat_Water_Clean);
+
 	/** The stamina set: stamina has just reached zero. */
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Feedback_Stamina_Empty);
 

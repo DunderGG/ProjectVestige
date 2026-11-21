@@ -66,9 +66,10 @@ public:
 
 	/**
 	 * The status line's item in hand: ItemName, and for a seed whose crop is Crop also its days to ripen, "Cabbage Seeds (10 days
-	 * to ripen)". The name alone when Crop is null.
+	 * to ripen)". The name alone when Crop is null. For a water container (Capacity is not INDEX_NONE) also its water, "Watering Can
+	 * (5/8)".
 	 */
-	static FText FormatItemInHand(const FText& ItemName, const UFarmCropData* Crop);
+	static FText FormatItemInHand(const FText& ItemName, const UFarmCropData* Crop, int32 Water = INDEX_NONE, int32 Capacity = INDEX_NONE);
 
 protected:
 	virtual void BeginPlay() override;
@@ -111,6 +112,9 @@ private:
 	void RefreshInventoryTexts();
 
 	void RefreshBagText();
+
+	/** The water in the can in the selected hotbar slot, or INDEX_NONE if the hand holds no can. */
+	int32 GetHandWater() const;
 
 	/** Follows the stamina on the player state's ability system, which outlives the pawn, so this happens once, at BeginPlay. */
 	void FollowAbilitySystem();
@@ -165,6 +169,9 @@ private:
 	EVestigeHintDevice HintDevice = EVestigeHintDevice::KeyboardAndMouse;
 
 	FText ItemInHandText;
+
+	/** The water of the can in hand that ItemInHandText shows, or INDEX_NONE for no can, so a change of it rebuilds the text. */
+	int32 ShownHandWater = INDEX_NONE;
 
 	/** The date part of the status line, for StatusDay, so the clock's steps don't format it again. */
 	FText DateText;

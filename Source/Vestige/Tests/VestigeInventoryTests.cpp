@@ -9,6 +9,7 @@
 #include "CQTest.h"
 #include "GameFramework/GameModeBase.h"
 #include "GameFramework/PlayerState.h"
+#include "GameplayTagContainer.h"
 #include "Inventory/VestigeInventory.h"
 #include "Inventory/VestigeInventoryComponent.h"
 #include "Inventory/VestigeInventorySaveData.h"
@@ -442,6 +443,105 @@ namespace VestigeInventoryTests
 			Data.SelectedHotbarSlot = 20;
 			Loaded.RestoreFromSaveData(Data);
 			ASSERT_THAT(IsTrue(Loaded.GetSelectedHotbarSlot() == 0));
+		}
+
+		static FGameplayTag StatTag() { return FGameplayTag::RequestGameplayTag(TEXT("Vestige.ItemStat.Water.Clean")); }
+
+		TEST_METHOD(ASlotStatIsSetReadAndBroadcast)
+		{
+			const UVestigeItemData& Can = MakeItem(TEXT("Base.Can"), 1);
+			UVestigeInventoryComponent& Component = MakeComponent(4, {&Can});
+			ASSERT_THAT(IsTrue(Component.TryAddItem(Can.GetPrimaryAssetId(), 1)));
+			ASSERT_THAT(IsFalse(Component.FindSlotStat(0, StatTag()).IsSet()));
+			int32 Broadcasts = 0;
+			int32 HandBroadcasts = 0;
+			Component.OnInventoryChanged.AddLambda([&Broadcasts]() { ++Broadcasts; });
+			Component.OnItemInHandChanged.AddLambda([&HandBroadcasts]() { ++HandBroadcasts; });
+
+			ASSERT_THAT(IsTrue(Component.SetSlotStat(0, StatTag(), 5)));
+			ASSERT_THAT(IsTrue(Component.FindSlotStat(0, StatTag()) == 5));
+			ASSERT_THAT(IsTrue(Broadcasts == 1));
+			ASSERT_THAT(IsTrue(HandBroadcasts == 0));
+
+			// The same value again changes and tells nothing; a new one replaces it.
+			ASSERT_THAT(IsTrue(Component.SetSlotStat(0, StatTag(), 5)));
+			ASSERT_THAT(IsTrue(Broadcasts == 1));
+			ASSERT_THAT(IsTrue(Component.SetSlotStat(0, StatTag(), 0)));
+			ASSERT_THAT(IsTrue(Component.FindSlotStat(0, StatTag()) == 0));
+			ASSERT_THAT(IsTrue(Broadcasts == 2));
+		}
+
+		TEST_METHOD(ASlotStatIsRefusedForAnEmptySlotAStackAndAnInvalidTag)
+		{
+			const UVestigeItemData& Can = MakeItem(TEXT("Base.Can"), 1);
+			const UVestigeItemData& Seeds = MakeItem(TEXT("Base.Seeds"), 10);
+			UVestigeInventoryComponent& Component = MakeComponent(4, {&Can, &Seeds});
+			ASSERT_THAT(IsTrue(Component.TryAddItem(Can.GetPrimaryAssetId(), 1)));
+			ASSERT_THAT(IsTrue(Component.TryAddItem(Seeds.GetPrimaryAssetId(), 3)));
+
+			ASSERT_THAT(IsFalse(Component.SetSlotStat(3, StatTag(), 1)));
+			ASSERT_THAT(IsFalse(Component.SetSlotStat(9, StatTag(), 1)));
+			ASSERT_THAT(IsFalse(Component.SetSlotStat(1, StatTag(), 1)));
+			ASSERT_THAT(IsFalse(Component.SetSlotStat(0, FGameplayTag(), 1)));
+			ASSERT_THAT(IsFalse(Component.FindSlotStat(0, StatTag()).IsSet()));
+		}
+
+		TEST_METHOD(ASlotsStatsLeaveWithItsItem)
+		{
+			const UVestigeItemData& Can = MakeItem(TEXT("Base.Can"), 1);
+			UVestigeInventoryComponent& Component = MakeComponent(4, {&Can});
+			ASSERT_THAT(IsTrue(Component.TryAddItem(Can.GetPrimaryAssetId(), 1)));
+			Component.SetSlotStat(0, StatTag(), 2);
+
+			ASSERT_THAT(IsTrue(Component.TryRemoveItemFromSlot(0, 1)));
+			ASSERT_THAT(IsTrue(Component.TryAddItem(Can.GetPrimaryAssetId(), 1)));
+
+			ASSERT_THAT(IsFalse(Component.FindSlotStat(0, StatTag()).IsSet()));
+		}
+
+		TEST_METHOD(SlotStatsRoundTripInTheirSlots)
+		{
+			const UVestigeItemData& Can = MakeItem(TEXT("Base.Can"), 1);
+			UVestigeInventoryComponent& Saved = MakeComponent(4, {&Can});
+			Saved.RestoreFromSaveData(MakeSave({{2, TEXT("Base.Can"), 1}}));
+			Saved.SetSlotStat(2, StatTag(), 0);
+			UVestigeInventoryComponent& Restored = MakeComponent(4, {&Can});
+
+			const int32 Skipped = Restored.RestoreFromSaveData(Saved.GetSaveData());
+
+			ASSERT_THAT(IsTrue(Skipped == 0));
+			ASSERT_THAT(IsTrue(Restored.FindSlotStat(2, StatTag()) == 0));
+		}
+
+		TEST_METHOD(TheStatsOfAStackOutOfItsSlotAreLeftOut)
+		{
+			const UVestigeItemData& Can = MakeItem(TEXT("Base.Can"), 1);
+			UVestigeInventoryComponent& Component = MakeComponent(4, {&Can});
+			FVestigeInventorySlotSaveData Slot{9, TEXT("Base.Can"), 1};
+			Slot.Stats.Add({TEXT("Vestige.ItemStat.Water.Clean"), 2});
+
+			const int32 Skipped = Component.RestoreFromSaveData(MakeSave({Slot}));
+
+			// The can goes in as a normal add, and its water isn't carried over, so it reads as a new one.
+			ASSERT_THAT(IsTrue(Skipped == 1));
+			ASSERT_THAT(IsTrue(Component.GetItemCount(Can.GetPrimaryAssetId()) == 1));
+			ASSERT_THAT(IsFalse(Component.FindSlotStat(0, StatTag()).IsSet()));
+		}
+
+		TEST_METHOD(ASavedStatWithAnUnknownTagIsLeftOutAndCounted)
+		{
+			const UVestigeItemData& Can = MakeItem(TEXT("Base.Can"), 1);
+			UVestigeInventoryComponent& Component = MakeComponent(4, {&Can});
+			FVestigeInventorySlotSaveData Slot{1, TEXT("Base.Can"), 1};
+			Slot.Stats.Add({TEXT("SomeMod.ItemStat.Rust"), 3});
+			Slot.Stats.Add({TEXT("Vestige.ItemStat.Water.Clean"), 4});
+
+			const int32 Skipped = Component.RestoreFromSaveData(MakeSave({Slot}));
+
+			ASSERT_THAT(IsTrue(Skipped == 1));
+			ASSERT_THAT(IsTrue(Component.GetSlots()[1].Item == &Can));
+			ASSERT_THAT(IsTrue(Component.FindSlotStat(1, StatTag()) == 4));
+			ASSERT_THAT(IsTrue(Component.GetSlots()[1].Stats.Num() == 1));
 		}
 
 		/** Catches a missing editor step: the game mode must name a player state whose inventory starts with the tools and seeds. */

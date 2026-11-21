@@ -13,6 +13,7 @@ Python scripts that run **inside the Unreal Editor**, through Unreal's Python Ed
 | [SurveyLevel.py](SurveyLevel.py) | Reads the currently open Editor map, without changing it, and writes a Markdown report, a versioned JSON report and a completion manifest to `Saved/LevelReports/<map>_<hash>/`. |
 | [Tests/test_survey_level.py](Tests/test_survey_level.py) | Tests for `SurveyLevel.py`, run outside the Editor with a stand-in for the `unreal` module. |
 | [SetUpCropWithering.py](SetUpCropWithering.py) | Makes `MI_Crop_Withered` (an instance of `M_Crop`), sets it as `BP_FarmGrid`'s withered crop material, and adds the `Farm.Withered` and `Farm.ClearFirst` rows to `DA_FeedbackResponses` ([Systems.md, sections 15 and 22](../Docs/Systems.md)). Changes and saves those assets; a rerun writes only what differs and never overwrites a text edited by hand. Also runs headless (the command is in its docstring). |
+| [SetUpWell.py](SetUpWell.py) | Adds the water container fragment (Capacity 8) to `DA_Item_WateringCan`, the five `Water.*` rows to `DA_FeedbackResponses`, makes `BP_Well` with `SM_Well` and places it in `L_Farm` ([Systems.md, section 24](../Docs/Systems/24-Water.md)). Saves those assets and the map; a rerun writes only what differs and never overwrites a text edited by hand. Also runs headless (the command is in its docstring). |
 | [Tests/test_set_up_crop_withering.py](Tests/test_set_up_crop_withering.py) | Tests for `SetUpCropWithering.py`'s row planning, with a stand-in `unreal` module. |
 
 ## Running the tests

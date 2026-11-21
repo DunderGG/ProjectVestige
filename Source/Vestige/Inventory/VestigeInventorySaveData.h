@@ -6,6 +6,20 @@
 #include "CoreMinimal.h"
 #include "VestigeInventorySaveData.generated.h"
 
+/** One stat of the item in a slot (Systems.md, section 8, slot stats): the stat tag's name and its value. */
+USTRUCT()
+struct FVestigeItemStatSaveData
+{
+	GENERATED_BODY()
+
+	/** The stat tag's name (Vestige.ItemStat.Water.Clean), which a rename would break. */
+	UPROPERTY()
+	FName Stat;
+
+	UPROPERTY()
+	int32 Value = 0;
+};
+
 /** One non-empty inventory slot in a save. */
 USTRUCT()
 struct FVestigeInventorySlotSaveData
@@ -22,6 +36,12 @@ struct FVestigeInventorySlotSaveData
 
 	UPROPERTY()
 	int32 Count = 0;
+
+	/**
+	 * The item's stats. A save from before stats has none, which the layout allows without a new version: the item is then fresh.
+	 */
+	UPROPERTY()
+	TArray<FVestigeItemStatSaveData> Stats;
 };
 
 /**

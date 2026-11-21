@@ -4,9 +4,26 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayTagContainer.h"
 #include "VestigeInventory.generated.h"
 
 class UVestigeItemData;
+
+/**
+ * One piece of state of the item in a slot: a gameplay tag (Vestige.ItemStat.*) and a number. The inventory gives it no meaning;
+ * what it stands for, its limits and its fresh value belong to whatever reads it (Systems.md, section 8, slot stats).
+ */
+USTRUCT()
+struct FVestigeItemStat
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	FGameplayTag Tag;
+
+	UPROPERTY()
+	int32 Value = 0;
+};
 
 /** One inventory slot: empty, or a stack of one item. */
 USTRUCT()
@@ -22,7 +39,19 @@ struct FVestigeInventorySlot
 	UPROPERTY()
 	int32 Count = 0;
 
+	/** The state of the one item here, so only an item that doesn't stack has any. Empty when the slot is empty. */
+	UPROPERTY()
+	TArray<FVestigeItemStat> Stats;
+
 	bool IsEmpty() const { return Item == nullptr; }
+
+	/** Takes the item out, with its stats. */
+	void Clear()
+	{
+		Item = nullptr;
+		Count = 0;
+		Stats.Reset();
+	}
 };
 
 /**
@@ -62,6 +91,15 @@ public:
 	 * Returns how many it put there. For restoring a save, which keeps each stack in its slot.
 	 */
 	int32 PlaceInSlot(int32 SlotIndex, const UVestigeItemData& Item, int32 Count);
+
+	/** The stat Tag of the item in the slot at SlotIndex, or nothing if the slot doesn't exist, is empty or has no such stat. */
+	TOptional<int32> FindStat(int32 SlotIndex, const FGameplayTag& Tag) const;
+
+	/**
+	 * Adds or replaces the stat Tag of the item in the slot at SlotIndex. Returns false, changing nothing, if the slot doesn't
+	 * exist or is empty, its item stacks (only an item with a stack size of 1 has stats) or Tag is invalid.
+	 */
+	bool SetStat(int32 SlotIndex, const FGameplayTag& Tag, int32 Value);
 
 	/** How many of Item more would fit. */
 	int32 GetRoomFor(const UVestigeItemData& Item) const;

@@ -7,12 +7,22 @@
 #include "Content/VestigeItemData.h"
 #include "Core/VestigeSaveRegistry.h"
 #include "Engine/World.h"
+#include "GameFramework/Pawn.h"
+#include "GameFramework/PlayerState.h"
+#include "GameplayTagsManager.h"
 #include "Inventory/VestigeInventoryLog.h"
 #include "Inventory/VestigeInventorySaveData.h"
 
 UVestigeInventoryComponent::UVestigeInventoryComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
+}
+
+UVestigeInventoryComponent* UVestigeInventoryComponent::FindForPawn(const AActor* Pawn)
+{
+	const APawn* AsPawn = Cast<APawn>(Pawn);
+	const APlayerState* PlayerState = AsPawn ? AsPawn->GetPlayerState() : nullptr;
+	return PlayerState ? PlayerState->FindComponentByClass<UVestigeInventoryComponent>() : nullptr;
 }
 
 void UVestigeInventoryComponent::BeginPlay()
@@ -125,6 +135,26 @@ bool UVestigeInventoryComponent::TryRemoveItemFromSlot(int32 Slot, int32 Count)
 	return true;
 }
 
+TOptional<int32> UVestigeInventoryComponent::FindSlotStat(int32 Slot, const FGameplayTag& Tag) const
+{
+	return Inventory.FindStat(Slot, Tag);
+}
+
+bool UVestigeInventoryComponent::SetSlotStat(int32 Slot, const FGameplayTag& Tag, int32 Value)
+{
+	// A stat that is there with this value proves the slot and the tag are fine.
+	if (FindSlotStat(Slot, Tag) == Value)
+	{
+		return true;
+	}
+	if (!Inventory.SetStat(Slot, Tag, Value))
+	{
+		return false;
+	}
+	OnInventoryChanged.Broadcast();
+	return true;
+}
+
 int32 UVestigeInventoryComponent::GetItemCount(const FPrimaryAssetId& ItemId) const
 {
 	const UVestigeItemData* Item = FindItem(ItemId);
@@ -139,7 +169,11 @@ FVestigeInventorySaveData UVestigeInventoryComponent::GetSaveData() const
 	{
 		if (!Slots[Index].IsEmpty())
 		{
-			Data.Slots.Add({Index, Slots[Index].Item->GetContentId(), Slots[Index].Count});
+			FVestigeInventorySlotSaveData& Saved = Data.Slots.Add_GetRef({Index, Slots[Index].Item->GetContentId(), Slots[Index].Count});
+			for (const FVestigeItemStat& Stat : Slots[Index].Stats)
+			{
+				Saved.Stats.Add({Stat.Tag.GetTagName(), Stat.Value});
+			}
 		}
 	}
 	Data.SelectedHotbarSlot = FMath::Max(SelectedHotbarSlot, 0);
@@ -161,7 +195,9 @@ int32 UVestigeInventoryComponent::RestoreFromSaveData(const FVestigeInventorySav
 			++SkippedCount;
 			continue;
 		}
-		const int32 Left = Saved.Count - Inventory.PlaceInSlot(Saved.Slot, *Item, Saved.Count);
+		const int32 Placed = Inventory.PlaceInSlot(Saved.Slot, *Item, Saved.Count);
+		const int32 Left = Saved.Count - Placed;
+		SkippedCount += RestoreStats(Saved, Placed > 0);
 		if (Left > 0)
 		{
 			Leftovers.Emplace(Item, Left);
@@ -191,6 +227,35 @@ int32 UVestigeInventoryComponent::RestoreFromSaveData(const FVestigeInventorySav
 
 	BroadcastChanges();
 	return SkippedCount;
+}
+
+int32 UVestigeInventoryComponent::RestoreStats(const FVestigeInventorySlotSaveData& Saved, bool bStackIsInItsSlot)
+{
+	if (Saved.Stats.IsEmpty())
+	{
+		return 0;
+	}
+	if (!bStackIsInItsSlot)
+	{
+		VESTIGE_LOG(this, LogVestigeInventory, Warning,
+			"The {ItemId} saved in slot {Slot} didn't go back there, so its {Count} stats were left out.", Saved.ItemId, Saved.Slot,
+			Saved.Stats.Num());
+		return Saved.Stats.Num();
+	}
+
+	int32 LeftOut = 0;
+	for (const FVestigeItemStatSaveData& Stat : Saved.Stats)
+	{
+		const FGameplayTag Tag = UGameplayTagsManager::Get().RequestGameplayTag(Stat.Stat, false);
+		if (!Tag.IsValid() || !Inventory.SetStat(Saved.Slot, Tag, Stat.Value))
+		{
+			VESTIGE_LOG(this, LogVestigeInventory, Warning,
+				"The saved stat {Stat} of {ItemId} in slot {Slot} isn't a stat of that item, so it was left out.", Stat.Stat, Saved.ItemId,
+				Saved.Slot);
+			++LeftOut;
+		}
+	}
+	return LeftOut;
 }
 
 int32 UVestigeInventoryComponent::GetHotbarSlotCount() const

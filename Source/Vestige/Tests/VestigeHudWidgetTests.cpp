@@ -245,6 +245,14 @@ namespace VestigeHudWidgetTests
 			ASSERT_THAT(AreEqual(AVestigeHUD::FormatItemInHand(Hoe, nullptr).ToString(), FString(TEXT("Hoe"))));
 		}
 
+		TEST_METHOD(TheCanInHandShowsItsWater)
+		{
+			const FText Can = FText::FromString(TEXT("Watering Can"));
+
+			ASSERT_THAT(AreEqual(AVestigeHUD::FormatItemInHand(Can, nullptr, 5, 8).ToString(), FString(TEXT("Watering Can (5/8)"))));
+			ASSERT_THAT(AreEqual(AVestigeHUD::FormatItemInHand(Can, nullptr, 0, 8).ToString(), FString(TEXT("Watering Can (0/8)"))));
+		}
+
 		TEST_METHOD(TheLateWarningAgreesWithItsNumbers)
 		{
 			const UClass* GameModeClass = LoadClass<AGameModeBase>(nullptr, GameModePath);
@@ -333,6 +341,11 @@ namespace VestigeHudWidgetTests
 				{VestigeGameplayTags::Feedback_Farm_Withered, WitheredValues},
 				{VestigeGameplayTags::Feedback_Farm_ClearFirst, NoValues},
 				{VestigeGameplayTags::Feedback_Inventory_Full, NoValues},
+				{VestigeGameplayTags::Feedback_Water_CanEmpty, NoValues},
+				{VestigeGameplayTags::Feedback_Water_CanFull, NoValues},
+				{VestigeGameplayTags::Feedback_Water_CanFilled, NoValues},
+				{VestigeGameplayTags::Feedback_Water_WellDry, NoValues},
+				{VestigeGameplayTags::Feedback_Water_WellRanDry, NoValues},
 				{VestigeGameplayTags::Feedback_Stamina_Empty, NoValues},
 				{VestigeGameplayTags::Feedback_Rest_GettingLate, NoValues},
 				{VestigeGameplayTags::Feedback_Rest_PastMidnight, NoValues},

@@ -41,6 +41,14 @@ namespace VestigeGameplayTags
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Feedback_Farm_NothingRipe, "Vestige.Feedback.Farm.NothingRipe", "Feedback: no ripe crop to harvest.");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(
 		Feedback_Inventory_Full, "Vestige.Feedback.Inventory.Full", "Feedback: no room in the inventory, so the harvest stays.");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Feedback_Water_CanEmpty, "Vestige.Feedback.Water.CanEmpty", "Feedback: the watering can is empty.");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Feedback_Water_CanFull, "Vestige.Feedback.Water.CanFull", "Feedback: the watering can is already full.");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Feedback_Water_CanFilled, "Vestige.Feedback.Water.CanFilled", "Feedback: the watering can was filled.");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Feedback_Water_WellDry, "Vestige.Feedback.Water.WellDry", "Feedback: the well has no water left today.");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(
+		Feedback_Water_WellRanDry, "Vestige.Feedback.Water.WellRanDry", "Feedback: the well ran dry before the can was full.");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(
+		ItemStat_Water_Clean, "Vestige.ItemStat.Water.Clean", "Item stat: clean water in a container, in waterings. Saved by name.");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Feedback_Stamina_Empty, "Vestige.Feedback.Stamina.Empty", "Feedback: stamina has just run out.");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(
 		Feedback_Rest_GettingLate, "Vestige.Feedback.Rest.GettingLate", "Feedback: bed after midnight means waking exhausted.");

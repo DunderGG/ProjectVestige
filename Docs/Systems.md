@@ -108,3 +108,7 @@ The guides, one file each in [`Systems/`](Systems/). The numbered headings below
 ## 23. Editor scripting
 
 [Systems/23-EditorScripting.md](Systems/23-EditorScripting.md)
+
+## 24. Water sources and the watering can
+
+[Systems/24-Water.md](Systems/24-Water.md)

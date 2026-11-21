@@ -18,6 +18,7 @@
 #include "Core/VestigeLog.h"
 #include "Engine/GameViewportClient.h"
 #include "Engine/World.h"
+#include "Farming/FarmWateringCan.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/PlayerState.h"
@@ -207,8 +208,13 @@ FText AVestigeHUD::FormatDate(const FVestigeDate& Date, const FText& SeasonName)
 		LOCTEXT("Date", "{Season}, Day {DayOfSeason}"), TEXT("Season"), SeasonName, TEXT("DayOfSeason"), Date.DayOfSeason);
 }
 
-FText AVestigeHUD::FormatItemInHand(const FText& ItemName, const UFarmCropData* Crop)
+FText AVestigeHUD::FormatItemInHand(const FText& ItemName, const UFarmCropData* Crop, int32 Water, int32 Capacity)
 {
+	if (Capacity != INDEX_NONE && Water != INDEX_NONE)
+	{
+		return FText::FormatNamed(LOCTEXT("ItemWithWater", "{Item} ({Water}/{Capacity})"), TEXT("Item"), ItemName, TEXT("Water"), Water,
+			TEXT("Capacity"), Capacity);
+	}
 	if (!Crop)
 	{
 		return ItemName;
@@ -361,14 +367,27 @@ void AVestigeHUD::RefreshItemInHandText()
 	// Read now rather than passed, since a nested change may reach this handler out of order.
 	const UVestigeInventoryComponent* CurrentInventory = Inventory.Get();
 	const UVestigeItemData* Item = CurrentInventory ? CurrentInventory->GetItemInHand() : nullptr;
+	ShownHandWater = GetHandWater();
 	ItemInHandText = Item
-		? FormatItemInHand(Item->GetDisplayName(), UFarmSeedFragment::FindCropOf(Item, UVestigeContentCatalog::Get(GetWorld())))
+		? FormatItemInHand(Item->GetDisplayName(), UFarmSeedFragment::FindCropOf(Item, UVestigeContentCatalog::Get(GetWorld())),
+			  ShownHandWater, FarmWateringCan::GetCapacity(Item))
 		: LOCTEXT("EmptyHand", "Empty hand");
 	RefreshStatusText();
 }
 
+int32 AVestigeHUD::GetHandWater() const
+{
+	const UVestigeInventoryComponent* CurrentInventory = Inventory.Get();
+	return CurrentInventory ? FarmWateringCan::GetWater(*CurrentInventory, CurrentInventory->GetSelectedHotbarSlot()) : INDEX_NONE;
+}
+
 void AVestigeHUD::RefreshInventoryTexts()
 {
+	// A pour or a fill changes a stat of the slot, which fires this but not OnItemInHandChanged, so the hand's text follows here.
+	if (GetHandWater() != ShownHandWater)
+	{
+		RefreshItemInHandText();
+	}
 	RefreshBagText();
 
 	// The hotbar hints name the items in the hotbar slots.

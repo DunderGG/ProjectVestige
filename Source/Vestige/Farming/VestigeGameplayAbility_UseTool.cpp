@@ -63,6 +63,7 @@ void UVestigeGameplayAbility_UseTool::ActivateAbility(const FGameplayAbilitySpec
 	TargetChangedHandle =
 		TargetingComponent->OnTargetTileChanged.AddUObject(this, &UVestigeGameplayAbility_UseTool::ContinueAfterTargetChange);
 	bFirstTry = true;
+	bToolRefusalReported = false;
 	TryNextUse();
 }
 
@@ -79,6 +80,7 @@ void UVestigeGameplayAbility_UseTool::EndAbility(const FGameplayAbilitySpecHandl
 	Farming.Reset();
 	Step = EUseStep::Idle;
 	bFirstTry = false;
+	bToolRefusalReported = false;
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 }
 
@@ -151,6 +153,24 @@ void UVestigeGameplayAbility_UseTool::TryNextUse()
 		if (bFirst && !ReportFeedback({VestigeGameplayTags::Feedback_Tool_NoTarget, {}}))
 		{
 			return;
+		}
+		WaitForTargetOrEnd();
+		return;
+	}
+
+	// The tool itself may be unusable (an empty can). Said the first time in an activation, on the press or on a repeat, so a held
+	// key reports once; a new press reports again.
+	FVestigeFeedbackReport ToolRefusal;
+	if (!CanUseToolNow(&ToolRefusal))
+	{
+		ensureMsgf(ToolRefusal.Tag.IsValid(), TEXT("%s::CanUseToolNow returned false without a reason."), *GetClass()->GetName());
+		if (!bToolRefusalReported)
+		{
+			bToolRefusalReported = true;
+			if (!ReportFeedback(ToolRefusal))
+			{
+				return;
+			}
 		}
 		WaitForTargetOrEnd();
 		return;

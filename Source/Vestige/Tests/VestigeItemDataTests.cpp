@@ -6,6 +6,7 @@
 #include "Components/ActorTestSpawner.h"
 #include "Content/FarmCropData.h"
 #include "Content/FarmSeedFragment.h"
+#include "Content/FarmWaterContainerFragment.h"
 #include "Content/VestigeCalendar.h"
 #include "Content/VestigeGameData.h"
 #include "Content/VestigeItemData.h"
@@ -68,6 +69,18 @@ namespace VestigeItemDataTests
 
 			ASSERT_THAT(IsNull(Item.FindFragment<UFarmSeedFragment>()));
 			ASSERT_THAT(IsNull(Item.FindFragmentByClass(nullptr)));
+		}
+
+		TEST_METHOD(TheWateringCanHoldsEightWaterings)
+		{
+			const UVestigeItemData* Can =
+				LoadContent<UVestigeItemData>(FPrimaryAssetId(UVestigeItemData::AssetType, TEXT("Base.WateringCan")));
+			ASSERT_THAT(IsNotNull(Can));
+
+			const UFarmWaterContainerFragment* Container = Can->FindFragment<UFarmWaterContainerFragment>();
+			ASSERT_THAT(IsNotNull(Container));
+			ASSERT_THAT(IsTrue(Container->GetCapacity() == 8));
+			ASSERT_THAT(IsTrue(Can->GetMaxStackSize() == 1));
 		}
 
 		TEST_METHOD(TheTurnipSeedsPlantTheTurnip)
@@ -148,6 +161,30 @@ namespace VestigeItemDataTests
 			AddSeedFragment(Item, TurnipCropId);
 
 			ASSERT_THAT(IsFalse(PassesValidation(Item)));
+		}
+
+		TEST_METHOD(AWaterContainerDoesntStack)
+		{
+			UVestigeItemData& Item = MakeItem();
+			UFarmWaterContainerFragment* Container = NewObject<UFarmWaterContainerFragment>(&Item);
+			Item.AddFragmentForTests(Container);
+
+			Item.SetMaxStackSizeForTests(1);
+			ASSERT_THAT(IsTrue(PassesValidation(*Container)));
+			Item.SetMaxStackSizeForTests(5);
+			ASSERT_THAT(IsFalse(PassesValidation(*Container)));
+		}
+
+		TEST_METHOD(AWaterContainerHoldsAtLeastOne)
+		{
+			UVestigeItemData& Item = MakeItem();
+			Item.SetMaxStackSizeForTests(1);
+			UFarmWaterContainerFragment* Container = NewObject<UFarmWaterContainerFragment>(&Item);
+			Item.AddFragmentForTests(Container);
+
+			Container->SetCapacityForTests(0);
+
+			ASSERT_THAT(IsFalse(PassesValidation(*Container)));
 		}
 
 		TEST_METHOD(ASeedWithoutACropIsInvalid)

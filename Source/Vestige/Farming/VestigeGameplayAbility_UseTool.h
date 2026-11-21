@@ -71,6 +71,14 @@ protected:
 		const FGameplayAbilityActivationInfo ActivationInfo) const override;
 
 	/**
+	 * Whether the tool can be used at all now, whatever tile is targeted: the watering can has water, say. Asked after the base
+	 * has found a target tile and before CanUseOn, so the reasons come in the player's order (no target, the tool, the tile).
+	 * Changes nothing and reports nothing. When it returns false it must set OutFailure, which the base reports the first time
+	 * in an activation and waits quietly after that, like a target that can't be worked. OutFailure is never null. True by default.
+	 */
+	virtual bool CanUseToolNow(FVestigeFeedbackReport* OutFailure) const { return true; }
+
+	/**
 	 * Whether a use would change the tile at Tile (column X, row Y) of the field now. Changes nothing and reports nothing.
 	 * When it returns false and OutFailure isn't null, sets it to why: a feedback report (a Vestige.Feedback tag and the values
 	 * its text uses), which the base reports on the press. Every false must give a reason. A repeat passes nullptr, so values
@@ -169,4 +177,7 @@ private:
 
 	/** Set from activation until the first try, which reports why when the tool can't change the target. */
 	bool bFirstTry = false;
+
+	/** Whether this activation has reported CanUseToolNow's refusal, so a held key says it once. Reset on a new press. */
+	bool bToolRefusalReported = false;
 };

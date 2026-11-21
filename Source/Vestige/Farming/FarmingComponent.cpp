@@ -79,9 +79,7 @@ const UVestigeToolData* UFarmingComponent::GetHarvestTool() const
 
 UVestigeInventoryComponent* UFarmingComponent::FindInventory() const
 {
-	const APawn* Pawn = Cast<APawn>(GetOwner());
-	const APlayerState* PlayerState = Pawn ? Pawn->GetPlayerState() : nullptr;
-	return PlayerState ? PlayerState->FindComponentByClass<UVestigeInventoryComponent>() : nullptr;
+	return UVestigeInventoryComponent::FindForPawn(GetOwner());
 }
 
 void UFarmingComponent::FollowInventory()
