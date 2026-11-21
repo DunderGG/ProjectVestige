@@ -21,8 +21,8 @@ DECLARE_MULTICAST_DELEGATE(FOnFarmFieldReady);
  * grid finds its field there by FieldId at BeginPlay, has its UFarmFieldMeshesComponent draw it, and converts between world
  * and grid space. There is no actor per tile: a tile is its coordinates in the field. Levels place BP_FarmGrid, which sets
  * the art the field is drawn with.
- * It is also the interactable for its tiles: facing a ripe tile offers Harvest (Systems.md, section 7, harvesting with F),
- * used from InteractionVolume, which covers the field and one tile around it.
+ * It is also the interactable for its tiles: facing a ripe tile offers Harvest and a withered one Clear (Systems.md, section 7,
+ * harvesting with F), used from InteractionVolume, which covers the field and one tile around it.
  */
 UCLASS()
 class AFarmGrid : public AActor, public IVestigeInteractable
@@ -36,15 +36,18 @@ public:
 	/** The action of the option that harvests the faced ripe tile. */
 	static const FName HarvestAction;
 
+	/** The action of the option that clears the faced withered tile. */
+	static const FName ClearAction;
+
 	AFarmGrid();
 
 	/**
-	 * Offers Harvest, at the tile's centre, while Interactor's targeting component aims at a ripe tile of this grid. A component
-	 * lookup and a tile read: asked five times a second while the farmer is near.
+	 * Offers Harvest or Clear, at the tile's centre, while Interactor's targeting component aims at a ripe or withered tile of
+	 * this grid. A component lookup and a tile read: asked five times a second while the farmer is near.
 	 */
 	virtual void GetInteractionOptions_Implementation(AActor* Interactor, TArray<FVestigeInteractionOption>& OutOptions) const override;
 
-	/** Harvest: asks Interactor's farming component to harvest the tile it aims at. */
+	/** Harvest or Clear: asks Interactor's farming component to harvest or clear the tile it aims at. */
 	virtual void Interact_Implementation(AActor* Interactor, const FVestigeInteractionOption& Option) override;
 
 	/**

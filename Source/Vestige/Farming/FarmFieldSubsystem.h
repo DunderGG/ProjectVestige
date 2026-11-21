@@ -9,6 +9,7 @@
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "FarmFieldSubsystem.generated.h"
 
+struct FVestigeDate;
 class UFarmCropData;
 class UFarmField;
 class UVestigeClockSubsystem;
@@ -71,6 +72,9 @@ private:
 
 	/** Starts a new day on every field. Bound to UVestigeClockSubsystem::OnNewDay. */
 	void AdvanceFields(int32 NewDay);
+
+	/** Withers the out-of-season crops of every field and tells the player once. Bound to UVestigeClockSubsystem::OnSeasonStarted. */
+	void WitherOutOfSeasonCrops(const FVestigeDate& Date);
 
 	UPROPERTY()
 	TMap<FName, TObjectPtr<UFarmField>> Fields;

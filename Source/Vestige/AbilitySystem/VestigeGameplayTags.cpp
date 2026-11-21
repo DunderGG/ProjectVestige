@@ -34,6 +34,10 @@ namespace VestigeGameplayTags
 		Feedback_Farm_CantWater, "Vestige.Feedback.Farm.CantWater", "Feedback: nothing to water on the tile, which is grass.");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(
 		Feedback_Farm_Soaked, "Vestige.Feedback.Farm.Soaked", "Feedback: the tile already holds all the water it can.");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Feedback_Farm_Withered, "Vestige.Feedback.Farm.Withered",
+		"Feedback: crops out of season withered as the season began. Values: the date's five and Count.");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Feedback_Farm_ClearFirst, "Vestige.Feedback.Farm.ClearFirst",
+		"Feedback: a withered crop must be cleared before tilling or planting.");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Feedback_Farm_NothingRipe, "Vestige.Feedback.Farm.NothingRipe", "Feedback: no ripe crop to harvest.");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(
 		Feedback_Inventory_Full, "Vestige.Feedback.Inventory.Full", "Feedback: no room in the inventory, so the harvest stays.");

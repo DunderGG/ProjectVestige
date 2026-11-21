@@ -80,6 +80,12 @@ namespace VestigeGameplayTags
 	/** The harvest ability, on the press: no ripe crop on the tile. */
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Feedback_Farm_NothingRipe);
 
+	/** The field subsystem, on a season's first morning: crops out of season withered. Gives the date's five values and Count. */
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Feedback_Farm_Withered);
+
+	/** The till and plant abilities, on the press: a withered crop stands on the tile and must be cleared first. */
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Feedback_Farm_ClearFirst);
+
 	/** The harvest ability, on the press: the inventory has no room for the harvest, which stays in the ground. */
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Feedback_Inventory_Full);
 

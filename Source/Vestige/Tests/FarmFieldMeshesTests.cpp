@@ -15,6 +15,7 @@
 #include "Materials/Material.h"
 #include "Materials/MaterialExpressionPerInstanceCustomData.h"
 #include "Materials/MaterialInstanceDynamic.h"
+#include "Time/VestigeClockSubsystem.h"
 #include "UObject/UObjectIterator.h"
 
 // A namespace keeps the fixture's short name from hiding other declarations in unity builds.
@@ -166,6 +167,63 @@ namespace FarmFieldMeshesTests
 
 			ASSERT_THAT(IsTrue(Meshes->GetInstanceCount(Seedling) == 0));
 			ASSERT_THAT(IsTrue(Meshes->GetInstanceCount(NextStage) == 1));
+		}
+
+		/** A second grid, from the Blueprint levels place, showing the same field with the real art and withered material. */
+		AFarmGrid* SpawnBlueprintGrid()
+		{
+			UClass* GridClass = LoadClass<AFarmGrid>(nullptr, TEXT("/Game/Vestige/Blueprints/BP_FarmGrid.BP_FarmGrid_C"));
+			if (!GridClass)
+			{
+				return nullptr;
+			}
+			AFarmGrid& BlueprintGrid = Spawner.SpawnActor<AFarmGrid>(FActorSpawnParameters(), GridClass);
+			BlueprintGrid.DispatchBeginPlay();
+			return &BlueprintGrid;
+		}
+
+		TEST_METHOD(WitheringMovesTheCropToTheWitheredSetAndClearingRemovesIt)
+		{
+			const FPrimaryAssetId TurnipId(UFarmCropData::AssetType, TEXT("Base.Turnip"));
+			const UFarmCropData* Turnip = UVestigeContentCatalog::Get(&Spawner.GetWorld())->Find<UFarmCropData>(TurnipId);
+			ASSERT_THAT(IsNotNull(Turnip));
+			const UVestigeClockSubsystem* Clock = UVestigeClockSubsystem::Get(&Spawner.GetWorld());
+			ASSERT_THAT(IsNotNull(Clock));
+			const AFarmGrid* BlueprintGrid = SpawnBlueprintGrid();
+			ASSERT_THAT(IsNotNull(BlueprintGrid));
+			const UFarmFieldMeshesComponent& BlueprintMeshes = *BlueprintGrid->GetMeshes();
+			UMaterialInterface* WitheredMaterial = BlueprintMeshes.GetLookSettings().WitheredCropMaterial;
+			ASSERT_THAT(IsNotNull(WitheredMaterial));
+			const UStaticMesh* Stage = Turnip->GetGrowthLook(0).Mesh;
+			ASSERT_THAT(IsNotNull(Stage));
+			PlantAndWater(FIntPoint(2, 3), *Turnip);
+			ASSERT_THAT(IsTrue(BlueprintMeshes.GetInstanceCount(Stage) == 1));
+			const int32 TotalBefore = BlueprintMeshes.GetTotalInstanceCount();
+
+			const int32 Withered = Field->WitherCropsOutOfSeason(Clock->GetCalendar().GetSeasons()[1].Tag, Clock->GetCalendar());
+
+			ASSERT_THAT(IsTrue(Withered == 1));
+			ASSERT_THAT(IsTrue(BlueprintMeshes.GetInstanceCount(Stage) == 0));
+			ASSERT_THAT(IsTrue(BlueprintMeshes.GetInstanceCount(Stage, WitheredMaterial) == 1));
+			ASSERT_THAT(IsTrue(BlueprintMeshes.GetTotalInstanceCount() == TotalBefore));
+
+			ASSERT_THAT(IsTrue(Field->ClearWithered(FIntPoint(2, 3))));
+			ASSERT_THAT(IsTrue(BlueprintMeshes.GetInstanceCount(Stage, WitheredMaterial) == 0));
+			ASSERT_THAT(IsTrue(BlueprintMeshes.GetTotalInstanceCount() == TotalBefore - 1));
+		}
+
+		TEST_METHOD(TheGridBlueprintsWitheredMaterialIsAnInstanceOfTheCropMaterialForInstancedMeshes)
+		{
+			const AFarmGrid* BlueprintGrid = SpawnBlueprintGrid();
+			ASSERT_THAT(IsNotNull(BlueprintGrid));
+			UMaterialInterface* Withered = BlueprintGrid->GetMeshes()->GetLookSettings().WitheredCropMaterial;
+			ASSERT_THAT(IsNotNull(Withered));
+
+			ASSERT_THAT(IsTrue(Withered->GetUsageByFlag(MATUSAGE_InstancedStaticMeshes)));
+			UMaterial* BaseMaterial = Withered->GetMaterial();
+			ASSERT_THAT(IsNotNull(BaseMaterial));
+			ASSERT_THAT(IsTrue(BaseMaterial->GetName() == TEXT("M_Crop")));
+			ASSERT_THAT(IsFalse(BaseMaterial->IsUsageFlagDirty(MATUSAGE_InstancedStaticMeshes)));
 		}
 
 		TEST_METHOD(AResizeDrawsEveryTileOfTheNewSize)

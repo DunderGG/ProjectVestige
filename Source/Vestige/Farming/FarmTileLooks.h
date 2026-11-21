@@ -31,6 +31,17 @@ struct FFarmTileLookSettings
 	UPROPERTY(EditAnywhere, Category = "Farming", meta = (ClampMin = 0))
 	float SoilSurfaceHeight = 6.f;
 
+	/**
+	 * Put on every slot of a withered crop's mesh (MI_Crop_Withered, an instance of M_Crop with Used with Instanced Static Meshes
+	 * saved). Empty keeps the mesh's own materials.
+	 */
+	UPROPERTY(EditAnywhere, Category = "Farming")
+	TObjectPtr<UMaterialInterface> WitheredCropMaterial;
+
+	/** How much of its height a withered crop keeps: a slumped dead plant. Also applies to the placeholder. */
+	UPROPERTY(EditAnywhere, Category = "Farming", meta = (ClampMin = 0.1, ClampMax = 1))
+	float WitheredCropHeightScale = 0.75f;
+
 	/** Placeholder for soil without art, and for grass: the engine cube, flattened into a slab. */
 	UPROPERTY(EditAnywhere, Category = "Farming|Placeholders")
 	TObjectPtr<UStaticMesh> PlaceholderSoilMesh;
@@ -71,7 +82,7 @@ struct FFarmTileLook
 {
 	FFarmTilePartLook Soil;
 
-	/** Set while something grows on the tile. */
+	/** Set while a crop grows or stands withered on the tile. */
 	TOptional<FFarmTilePartLook> Crop;
 };
 
@@ -90,11 +101,12 @@ namespace FarmTileLooks
 	inline const FLinearColor WateredColor(0.12f, 0.07f, 0.03f);
 	inline const FLinearColor GrowingColor(0.20f, 0.70f, 0.15f);
 	inline const FLinearColor RipeColor(1.00f, 0.60f, 0.05f);
+	inline const FLinearColor WitheredColor(0.30f, 0.26f, 0.20f);
 
 	/**
 	 * How Tile is drawn with Settings: the tilled soil mesh once the tile isn't grass, and the mesh and scale its crop's data gives
-	 * for its growth days (UFarmCropData::GetGrowthLook), standing on the soil surface. The water of the soil and the crop is the
-	 * tile's level as a fraction of MaxWaterLevel, the field's cap.
+	 * for its growth days (UFarmCropData::GetGrowthLook), standing on the soil surface; a withered crop with the withered material
+	 * and a lower scale. The water of the soil and the crop is the tile's level as a fraction of MaxWaterLevel, the field's cap.
 	 */
 	FFarmTileLook GetLook(const FFarmTileState& Tile, const FFarmTileLookSettings& Settings, int32 MaxWaterLevel);
 }

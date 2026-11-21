@@ -1561,6 +1561,114 @@ namespace FarmingTests
 			FarmingComponent->StopUsingTool();
 		}
 
+		/** Tills, plants a turnip in, waters once and withers the target tile, through the field's rules. */
+		void WitherTargetCrop()
+		{
+			UFarmField* Field = Grid->GetField();
+			const UFarmCropData* Crop = Catalog().Find<UFarmCropData>(FPrimaryAssetId(UFarmCropData::AssetType, TEXT("Base.Turnip")));
+			ASSERT_THAT(IsNotNull(Crop));
+			Field->Till(TargetCoordinates);
+			ASSERT_THAT(IsTrue(Field->Plant(TargetCoordinates, Crop)));
+			Field->Water(TargetCoordinates);
+			ASSERT_THAT(IsTrue(Field->WitherCropsOutOfSeason(GetSeason(1).Tag, Clock().GetCalendar()) == 1));
+			ASSERT_THAT(IsTrue(TargetTile()->IsWithered()));
+		}
+
+		TEST_METHOD(FacingAWitheredTileOffersClearNotHarvest)
+		{
+			WitherTargetCrop();
+			TArray<FVestigeInteractionOption> Options;
+
+			IVestigeInteractable::Execute_GetInteractionOptions(Grid, Farmer, Options);
+
+			ASSERT_THAT(IsTrue(Options.Num() == 1));
+			ASSERT_THAT(IsTrue(Options[0].Action == AFarmGrid::ClearAction));
+			ASSERT_THAT(IsTrue(Options[0].Action != AFarmGrid::HarvestAction));
+			ASSERT_THAT(IsTrue(Options[0].bHasLocation));
+			ASSERT_THAT(IsTrue(Options[0].Location.Equals(Grid->GetTileTransform(TargetCoordinates).GetLocation())));
+		}
+
+		TEST_METHOD(InteractingWithAWitheredTileClearsItForTheHandsStamina)
+		{
+			WitherTargetCrop();
+			Hold(TEXT("Base.Hoe"), 0);
+			const TStrongObjectPtr<UVestigeTestEventRecorder> Recorder = ListenToBlueprintEvents();
+			const int32 WaterBefore = TargetTile()->GetWaterLevel();
+
+			GetInteraction().Interact();
+
+			ASSERT_THAT(IsTrue(TargetTile()->GetState() == EFarmTileState::Tilled));
+			ASSERT_THAT(IsNull(TargetTile()->GetCrop()));
+			ASSERT_THAT(IsTrue(TargetTile()->GetWaterLevel() == WaterBefore));
+			ASSERT_THAT(IsTrue(GetStamina() == GetMaxStamina() - GetBaseTool(TEXT("Base.Hand"))->GetStaminaCost()));
+			const TArray<FString> Expected = {FString::Printf(TEXT("ToolUsed Base.Hand %s"), *TargetCoordinates.ToString())};
+			ASSERT_THAT(IsTrue(Recorder->GetEvents() == Expected));
+			AbilitySystem->CancelAllAbilities();
+		}
+
+		TEST_METHOD(AFullBagStillClearsAWitheredCrop)
+		{
+			WitherTargetCrop();
+			Hold(TEXT("Base.Hand"), 0);
+			const UVestigeItemData* Seed = GetBaseItem(TurnipSeedsId.PrimaryAssetName);
+			ASSERT_THAT(IsNotNull(Seed));
+			TArray<FVestigeInventorySlotSaveData> FullBag;
+			for (int32 Slot = 0; Slot < Inventory->GetSlots().Num(); ++Slot)
+			{
+				FullBag.Add({Slot, Seed->GetContentId(), Seed->GetMaxStackSize()});
+			}
+			SetBag(MoveTemp(FullBag));
+			ListenToFeedback();
+
+			HarvestAndFinish();
+
+			ASSERT_THAT(IsTrue(TargetTile()->GetState() == EFarmTileState::Tilled));
+			ASSERT_THAT(IsTrue(Reports.IsEmpty()));
+		}
+
+		TEST_METHOD(TheHoeOnAWitheredTileIsRefusedAndCostsNothing)
+		{
+			WitherTargetCrop();
+			Hold(TEXT("Base.Hoe"), 0);
+			ListenToFeedback();
+			const TStrongObjectPtr<UVestigeTestEventRecorder> Recorder = ListenToBlueprintEvents();
+
+			UseToolAndFinish();
+
+			ASSERT_THAT(IsTrue(Reports == TArray<FGameplayTag>{VestigeGameplayTags::Feedback_Farm_ClearFirst}));
+			ASSERT_THAT(IsTrue(TargetTile()->IsWithered()));
+			ASSERT_THAT(IsTrue(GetStamina() == GetMaxStamina()));
+			ASSERT_THAT(IsTrue(Recorder->GetEvents().IsEmpty()));
+		}
+
+		TEST_METHOD(SeedsOnAWitheredTileAreRefusedAndKept)
+		{
+			WitherTargetCrop();
+			Hold(TEXT("Base.Seeds"), 3);
+			ListenToFeedback();
+			const TStrongObjectPtr<UVestigeTestEventRecorder> Recorder = ListenToBlueprintEvents();
+
+			UseToolAndFinish();
+
+			ASSERT_THAT(IsTrue(Reports == TArray<FGameplayTag>{VestigeGameplayTags::Feedback_Farm_ClearFirst}));
+			ASSERT_THAT(IsTrue(TargetTile()->IsWithered()));
+			ASSERT_THAT(IsTrue(GetSeeds() == 3));
+			ASSERT_THAT(IsTrue(GetStamina() == GetMaxStamina()));
+			ASSERT_THAT(IsTrue(Recorder->GetEvents().IsEmpty()));
+		}
+
+		TEST_METHOD(TheWateringCanWatersAWitheredTile)
+		{
+			WitherTargetCrop();
+			Hold(TEXT("Base.WateringCan"), 0);
+			const int32 WaterBefore = TargetTile()->GetWaterLevel();
+
+			UseToolAndFinish();
+
+			ASSERT_THAT(IsTrue(TargetTile()->GetWaterLevel() == WaterBefore + 1));
+			ASSERT_THAT(IsTrue(TargetTile()->IsWithered()));
+		}
+
 		TEST_METHOD(TheGridsInteractionVolumeCoversTheFieldAndOneTileAround)
 		{
 			// Standing on the ring of tiles left of the field, facing in at a ripe edge tile.

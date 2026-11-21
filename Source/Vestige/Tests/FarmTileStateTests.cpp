@@ -291,6 +291,140 @@ namespace FarmTileStateTests
 			ASSERT_THAT(IsFalse(Grass.IsWatered()));
 			ASSERT_THAT(IsTrue(Grass.GetGrowthDays() == 0));
 		}
+
+		/** Tilled soil with a crop that has grown for Days, watered to Level, and then withered. */
+		FFarmTileState MakeWithered(const UFarmCropData& Crop, int32 Days, int32 Level)
+		{
+			FFarmTileState State;
+			State.Restore(EFarmTileState::Planted, Level, Days, &Crop, 2);
+			State.Wither();
+			return State;
+		}
+
+		TEST_METHOD(AnUnripeCropWithersKeepingItsCropGrowthAndWater)
+		{
+			const UFarmCropData& Crop = Spawner.SpawnObject<UFarmCropData>();
+			FFarmTileState State;
+			State.Restore(EFarmTileState::Planted, 2, 1, &Crop, 2);
+			ASSERT_THAT(IsTrue(State.CanWither()));
+
+			ASSERT_THAT(IsTrue(State.Wither()));
+
+			ASSERT_THAT(IsTrue(State.IsWithered()));
+			ASSERT_THAT(IsTrue(State.GetState() == EFarmTileState::Withered));
+			ASSERT_THAT(IsTrue(State.GetCrop() == &Crop));
+			ASSERT_THAT(IsTrue(State.GetGrowthDays() == 1));
+			ASSERT_THAT(IsTrue(State.GetWaterLevel() == 2));
+			ASSERT_THAT(IsFalse(State.CanWither()));
+		}
+
+		TEST_METHOD(ARipeCropGrassAndEmptySoilDoNotWither)
+		{
+			const UFarmCropData& Crop = Spawner.SpawnObject<UFarmCropData>();
+			FFarmTileState Ripe;
+			Ripe.Restore(EFarmTileState::Planted, 0, Crop.GetDaysToMature(), &Crop, 2);
+			FFarmTileState Grass;
+			FFarmTileState Empty;
+			Empty.Till();
+
+			ASSERT_THAT(IsFalse(Ripe.CanWither()));
+			ASSERT_THAT(IsFalse(Ripe.Wither()));
+			ASSERT_THAT(IsFalse(Grass.Wither()));
+			ASSERT_THAT(IsFalse(Empty.Wither()));
+
+			ASSERT_THAT(IsTrue(Ripe.GetState() == EFarmTileState::Planted));
+			ASSERT_THAT(IsTrue(Grass.GetState() == EFarmTileState::Grass));
+			ASSERT_THAT(IsTrue(Empty.GetState() == EFarmTileState::Tilled));
+		}
+
+		TEST_METHOD(AWitheredCropNeverGrowsButItsWaterStillFalls)
+		{
+			const UFarmCropData& Crop = Spawner.SpawnObject<UFarmCropData>();
+			FFarmTileState State = MakeWithered(Crop, 1, 2);
+
+			State.AdvanceDay(1);
+			State.AddWater(1, 2);
+			State.AdvanceDay(1);
+
+			ASSERT_THAT(IsTrue(State.IsWithered()));
+			ASSERT_THAT(IsTrue(State.GetGrowthDays() == 1));
+			ASSERT_THAT(IsTrue(State.GetWaterLevel() == 1));
+			ASSERT_THAT(IsFalse(State.IsRipe()));
+		}
+
+		TEST_METHOD(AWitheredTileTakesWaterAndRefusesTillingPlantingAndHarvesting)
+		{
+			const UFarmCropData& Crop = Spawner.SpawnObject<UFarmCropData>();
+			FFarmTileState State = MakeWithered(Crop, 1, 0);
+
+			ASSERT_THAT(IsTrue(State.AddWater(1, 2)));
+			ASSERT_THAT(IsTrue(State.GetWaterLevel() == 1));
+			ASSERT_THAT(IsFalse(State.CanTill()));
+			ASSERT_THAT(IsFalse(State.Till()));
+			ASSERT_THAT(IsFalse(State.CanPlant()));
+			ASSERT_THAT(IsFalse(State.Plant(&Crop)));
+			ASSERT_THAT(IsFalse(State.Harvest()));
+
+			ASSERT_THAT(IsTrue(State.IsWithered()));
+			ASSERT_THAT(IsTrue(State.GetCrop() == &Crop));
+		}
+
+		TEST_METHOD(ClearingAWitheredTileLeavesEmptyTilledSoilWithItsWater)
+		{
+			const UFarmCropData& Crop = Spawner.SpawnObject<UFarmCropData>();
+			FFarmTileState State = MakeWithered(Crop, 1, 2);
+			ASSERT_THAT(IsTrue(State.CanClearWithered()));
+
+			ASSERT_THAT(IsTrue(State.ClearWithered()));
+
+			ASSERT_THAT(IsTrue(State.GetState() == EFarmTileState::Tilled));
+			ASSERT_THAT(IsNull(State.GetCrop()));
+			ASSERT_THAT(IsTrue(State.GetGrowthDays() == 0));
+			ASSERT_THAT(IsTrue(State.GetWaterLevel() == 2));
+			ASSERT_THAT(IsTrue(State.CanPlant()));
+		}
+
+		TEST_METHOD(OnlyAWitheredTileCanBeCleared)
+		{
+			const UFarmCropData& Crop = Spawner.SpawnObject<UFarmCropData>();
+			FFarmTileState Grass;
+			FFarmTileState Empty;
+			Empty.Till();
+			FFarmTileState Planted = MakePlanted(Crop);
+
+			ASSERT_THAT(IsFalse(Grass.ClearWithered()));
+			ASSERT_THAT(IsFalse(Empty.ClearWithered()));
+			ASSERT_THAT(IsFalse(Planted.ClearWithered()));
+
+			ASSERT_THAT(IsTrue(Grass.GetState() == EFarmTileState::Grass));
+			ASSERT_THAT(IsTrue(Empty.GetState() == EFarmTileState::Tilled));
+			ASSERT_THAT(IsTrue(Planted.GetCrop() == &Crop));
+		}
+
+		TEST_METHOD(ARestoredWitheredTileKeepsItsCropGrowthAndWater)
+		{
+			const UFarmCropData& Crop = Spawner.SpawnObject<UFarmCropData>();
+			FFarmTileState State;
+
+			State.Restore(EFarmTileState::Withered, 1, 1, &Crop, 2);
+
+			ASSERT_THAT(IsTrue(State.IsWithered()));
+			ASSERT_THAT(IsTrue(State.GetCrop() == &Crop));
+			ASSERT_THAT(IsTrue(State.GetGrowthDays() == 1));
+			ASSERT_THAT(IsTrue(State.GetWaterLevel() == 1));
+		}
+
+		TEST_METHOD(ARestoredWitheredTileWithoutItsCropIsEmptyTilledSoil)
+		{
+			FFarmTileState State;
+
+			State.Restore(EFarmTileState::Withered, 1, 3, nullptr, 2);
+
+			ASSERT_THAT(IsTrue(State.GetState() == EFarmTileState::Tilled));
+			ASSERT_THAT(IsNull(State.GetCrop()));
+			ASSERT_THAT(IsTrue(State.GetGrowthDays() == 0));
+			ASSERT_THAT(IsTrue(State.GetWaterLevel() == 1));
+		}
 	};
 }
 

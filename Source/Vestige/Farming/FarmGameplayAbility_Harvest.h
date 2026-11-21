@@ -10,8 +10,9 @@
 class UFarmCropData;
 
 /**
- * The hand's behaviour: harvests a ripe crop into the inventory on the player state, leaving tilled soil, if the bag has
- * room for its yield; a full bag leaves the crop in the ground. Reports On Crop Harvested. Named by DA_Tool_Hand.
+ * The hand's behaviour: clears a withered crop (nothing is yielded), or harvests a ripe crop into the inventory on the player
+ * state, leaving tilled soil, if the bag has room for its yield; a full bag leaves the crop in the ground. Reports On Crop
+ * Harvested. Named by DA_Tool_Hand.
  */
 UCLASS()
 class UFarmGameplayAbility_Harvest : public UVestigeGameplayAbility_UseTool

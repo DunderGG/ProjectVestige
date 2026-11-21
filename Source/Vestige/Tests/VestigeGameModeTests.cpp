@@ -5,9 +5,13 @@
 
 #include "AbilitySystem/VestigeGameplayTags.h"
 #include "Components/ActorTestSpawner.h"
+#include "Content/FarmCropData.h"
 #include "Content/VestigeCalendar.h"
+#include "Content/VestigeContentCatalog.h"
 #include "Core/VestigeFeedbackSubsystem.h"
 #include "CQTest.h"
+#include "Farming/FarmField.h"
+#include "Farming/FarmFieldSubsystem.h"
 #include "Game/VestigeGameMode.h"
 #include "Game/VestigePlayerController.h"
 #include "GameMapsSettings.h"
@@ -207,6 +211,60 @@ namespace VestigeGameModeTests
 			PassHours(Clock->GetDayEndHour());
 
 			CheckNewSeasonReport(Reports, VestigeGameplayTags::Feedback_Day_StayedUp_NewSeason);
+		}
+
+		/** Plants a turnip (a first-season crop) in a field of its own, as a season's end finds it. Returns whether it could. */
+		bool PlantTurnipIn(const FName& FieldId)
+		{
+			UFarmFieldSubsystem* Fields = UFarmFieldSubsystem::Get(&Spawner.GetWorld());
+			const UFarmCropData* Turnip = UVestigeContentCatalog::Get(&Spawner.GetWorld())
+											  ->Find<UFarmCropData>(FPrimaryAssetId(UFarmCropData::AssetType, TEXT("Base.Turnip")));
+			if (!Fields || !Turnip)
+			{
+				return false;
+			}
+			UFarmField& Field = Fields->FindOrAddField(FieldId, FIntPoint(4, 4));
+			return Field.Till(FIntPoint(1, 1)) && Field.Plant(FIntPoint(1, 1), Turnip);
+		}
+
+		TEST_METHOD(ASeasonsFirstMorningTellsWhatWitheredRightAfterTheDayMessage)
+		{
+			ASSERT_THAT(IsTrue(Clock->GetCalendar().GetSeasons().Num() > 1));
+			ASSERT_THAT(IsTrue(PlantTurnipIn(TEXT("Base.Farm"))));
+			ASSERT_THAT(IsTrue(PlantTurnipIn(TEXT("Base.Other"))));
+			TArray<FVestigeFeedbackReport> Reports;
+			RecordReports(Reports);
+			const FVestigeSeason& Second = Clock->GetCalendar().GetSeasons()[1];
+
+			SetClockDay(Clock->GetCalendar().GetDaysPerSeason(), 22.f);
+			Clock->EndDay();
+
+			// The day message first, then the withered line, then anything the save says.
+			ASSERT_THAT(IsTrue(Reports.Num() >= 2));
+			ASSERT_THAT(AreEqual(Reports[0].Tag.ToString(), VestigeGameplayTags::Feedback_Day_Slept_NewSeason.GetTag().ToString()));
+			ASSERT_THAT(AreEqual(Reports[1].Tag.ToString(), VestigeGameplayTags::Feedback_Farm_Withered.GetTag().ToString()));
+			ASSERT_THAT(IsTrue(GetNumber(Reports[1], TEXT("Count")) == 2));
+			ASSERT_THAT(IsTrue(GetNumber(Reports[1], TEXT("Day")) == Clock->GetCalendar().GetDaysPerSeason() + 1));
+			ASSERT_THAT(AreEqual(GetText(Reports[1], TEXT("SeasonInSentence")), Second.NameInSentence.ToString()));
+			for (int32 Index = 2; Index < Reports.Num(); ++Index)
+			{
+				ASSERT_THAT(IsTrue(Reports[Index].Tag != VestigeGameplayTags::Feedback_Farm_Withered));
+			}
+		}
+
+		TEST_METHOD(ASeasonsFirstMorningWithNothingToWitherSaysNothingMore)
+		{
+			UFarmFieldSubsystem::Get(&Spawner.GetWorld())->FindOrAddField(TEXT("Base.Farm"), FIntPoint(4, 4)).Till(FIntPoint(1, 1));
+			TArray<FVestigeFeedbackReport> Reports;
+			RecordReports(Reports);
+
+			SetClockDay(Clock->GetCalendar().GetDaysPerSeason(), 22.f);
+			Clock->EndDay();
+
+			for (const FVestigeFeedbackReport& Report : Reports)
+			{
+				ASSERT_THAT(IsTrue(Report.Tag != VestigeGameplayTags::Feedback_Farm_Withered));
+			}
 		}
 
 		TEST_METHOD(TheLastDaysMorningHasItsOwnMessage)

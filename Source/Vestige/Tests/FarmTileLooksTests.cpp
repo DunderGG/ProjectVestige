@@ -255,6 +255,97 @@ namespace FarmTileLooksTests
 			ASSERT_THAT(IsTrue(Look.Crop->Transform.GetScale3D().Equals(FVector(GrowthLook.Scale))));
 			ASSERT_THAT(IsTrue(FMath::IsNearlyEqual(Look.Crop->Transform.GetLocation().Z, Settings.SoilSurfaceHeight)));
 		}
+
+		static FFarmTileState WitheredTile(const UFarmCropData& Crop, int32 GrowthDays, int32 Water)
+		{
+			FFarmTileState Tile;
+			Tile.Restore(EFarmTileState::Withered, Water, GrowthDays, &Crop, MaxWater);
+			return Tile;
+		}
+
+		TEST_METHOD(AWitheredCropShowsItsStagesMeshWithTheWitheredMaterialLowerOnTheWetSoil)
+		{
+			AddSoilArt();
+			Settings.WitheredCropMaterial = &Spawner.SpawnObject<UMaterial>();
+			Settings.WitheredCropHeightScale = 0.5f;
+			UStaticMesh* RipeMesh = nullptr;
+			const UFarmCropData& Crop = MeshedCrop(10, RipeMesh);
+			const FFarmCropGrowthLook GrowthLook = Crop.GetGrowthLook(1);
+
+			const FFarmTileLook Look = ::FarmTileLooks::GetLook(WitheredTile(Crop, 1, 1), Settings, MaxWater);
+
+			ASSERT_THAT(IsTrue(Look.Crop.IsSet()));
+			ASSERT_THAT(IsTrue(Look.Crop->Mesh == GrowthLook.Mesh));
+			ASSERT_THAT(IsTrue(Look.Crop->Material == Settings.WitheredCropMaterial));
+			ASSERT_THAT(IsTrue(FMath::IsNearlyEqual(Look.Crop->Transform.GetScale3D().X, GrowthLook.Scale)));
+			ASSERT_THAT(IsTrue(FMath::IsNearlyEqual(Look.Crop->Transform.GetScale3D().Z, GrowthLook.Scale * 0.5f)));
+			ASSERT_THAT(IsTrue(FMath::IsNearlyEqual(Look.Crop->Transform.GetLocation().Z, Settings.SoilSurfaceHeight)));
+			ASSERT_THAT(IsTrue(Look.Soil.Mesh == Settings.TilledSoilMesh));
+			ASSERT_THAT(IsTrue(Look.Soil.Water == 0.5f));
+			ASSERT_THAT(IsTrue(Look.Crop->Water == 0.5f));
+		}
+
+		TEST_METHOD(AWitheredCropWithoutTheMaterialKeepsTheMeshsOwnAndStillSlumps)
+		{
+			AddSoilArt();
+			UStaticMesh* RipeMesh = nullptr;
+			const UFarmCropData& Crop = MeshedCrop(10, RipeMesh);
+			const FFarmCropGrowthLook GrowthLook = Crop.GetGrowthLook(1);
+
+			const FFarmTileLook Look = ::FarmTileLooks::GetLook(WitheredTile(Crop, 1, 0), Settings, MaxWater);
+
+			ASSERT_THAT(IsTrue(Look.Crop.IsSet()));
+			ASSERT_THAT(IsNull(Look.Crop->Material));
+			ASSERT_THAT(IsTrue(Look.Crop->Transform.GetScale3D().Z < GrowthLook.Scale));
+		}
+
+		TEST_METHOD(AWitheredCropsHeightFactorIsClampedToItsRange)
+		{
+			AddSoilArt();
+			UStaticMesh* RipeMesh = nullptr;
+			const UFarmCropData& Crop = MeshedCrop(10, RipeMesh);
+			const FFarmCropGrowthLook GrowthLook = Crop.GetGrowthLook(1);
+
+			Settings.WitheredCropHeightScale = 5.f;
+			const FFarmTileLook Tall = ::FarmTileLooks::GetLook(WitheredTile(Crop, 1, 0), Settings, MaxWater);
+			Settings.WitheredCropHeightScale = 0.f;
+			const FFarmTileLook Flat = ::FarmTileLooks::GetLook(WitheredTile(Crop, 1, 0), Settings, MaxWater);
+
+			ASSERT_THAT(IsTrue(FMath::IsNearlyEqual(Tall.Crop->Transform.GetScale3D().Z, GrowthLook.Scale)));
+			ASSERT_THAT(IsTrue(FMath::IsNearlyEqual(Flat.Crop->Transform.GetScale3D().Z, GrowthLook.Scale * 0.1f)));
+		}
+
+		TEST_METHOD(AWitheredPlaceholderIsBrownGreyAndLowerWithItsBottomOnTheSoil)
+		{
+			const UFarmCropData& Crop = Spawner.SpawnObject<UFarmCropData>();
+			const FFarmTileLook Growing = ::FarmTileLooks::GetLook(PlantedTile(Crop, 1), Settings, MaxWater);
+
+			const FFarmTileLook Withered = ::FarmTileLooks::GetLook(WitheredTile(Crop, 1, 0), Settings, MaxWater);
+
+			ASSERT_THAT(IsTrue(Withered.Crop.IsSet()));
+			ASSERT_THAT(IsTrue(Withered.Crop->Mesh == Settings.PlaceholderCropMesh));
+			ASSERT_THAT(IsTrue(Withered.Crop->Color == ::FarmTileLooks::WitheredColor));
+			const float GrowingHeight = Growing.Crop->Transform.GetScale3D().Z;
+			const float WitheredHeight = Withered.Crop->Transform.GetScale3D().Z;
+			ASSERT_THAT(IsTrue(FMath::IsNearlyEqual(WitheredHeight, GrowingHeight * Settings.WitheredCropHeightScale, 0.001f)));
+
+			// The cylinder is 100 cm tall and centred on its origin: its bottom is its Z minus half its scaled height.
+			const float Surface = Growing.Crop->Transform.GetLocation().Z - GrowingHeight * 50.f;
+			ASSERT_THAT(IsTrue(FMath::IsNearlyEqual(Withered.Crop->Transform.GetLocation().Z - WitheredHeight * 50.f, Surface, 0.01f)));
+		}
+
+		TEST_METHOD(ClearedSoilShowsNoCrop)
+		{
+			AddSoilArt();
+			const UFarmCropData& Crop = Spawner.SpawnObject<UFarmCropData>();
+			FFarmTileState Cleared = WitheredTile(Crop, 1, 1);
+			Cleared.ClearWithered();
+
+			const FFarmTileLook Look = ::FarmTileLooks::GetLook(Cleared, Settings, MaxWater);
+
+			ASSERT_THAT(IsFalse(Look.Crop.IsSet()));
+			ASSERT_THAT(IsTrue(Look.Soil.Mesh == Settings.TilledSoilMesh));
+		}
 	};
 }
 

@@ -273,6 +273,29 @@ namespace VestigeHudWidgetTests
 			ASSERT_THAT(IsTrue(Many.Contains(TEXT("8 days are left")), Many));
 		}
 
+		TEST_METHOD(TheWitheredLineAgreesWithItsCount)
+		{
+			const UClass* GameModeClass = LoadClass<AGameModeBase>(nullptr, GameModePath);
+			ASSERT_THAT(IsNotNull(GameModeClass));
+			const UClass* HudActorClass = GameModeClass->GetDefaultObject<AGameModeBase>()->HUDClass;
+			ASSERT_THAT(IsTrue(HudActorClass && HudActorClass->IsChildOf<AVestigeHUD>()));
+			const UVestigeFeedbackResponses* Responses = HudActorClass->GetDefaultObject<AVestigeHUD>()->GetFeedbackResponses();
+			ASSERT_THAT(IsNotNull(Responses));
+			const FVestigeFeedbackResponse* Response = Responses->FindResponse(VestigeGameplayTags::Feedback_Farm_Withered);
+			ASSERT_THAT(IsNotNull(Response));
+
+			const auto Format = [Response](int32 Count)
+			{
+				FFormatNamedArguments Values;
+				Values.Add(TEXT("Count"), Count);
+				Values.Add(TEXT("SeasonInSentence"), FText::FromString(TEXT("summer")));
+				return FText::Format(Response->Message, Values).ToString();
+			};
+
+			ASSERT_THAT(AreEqual(Format(1), FString(TEXT("1 crop withered. It doesn't grow in summer."))));
+			ASSERT_THAT(AreEqual(Format(3), FString(TEXT("3 crops withered. They don't grow in summer."))));
+		}
+
 		TEST_METHOD(EveryFeedbackTagHasAResponse)
 		{
 			const UClass* GameModeClass = LoadClass<AGameModeBase>(nullptr, GameModePath);
@@ -293,6 +316,8 @@ namespace VestigeHudWidgetTests
 				TEXT("DaysLeft"), TEXT("DaysToRipe"), TEXT("PlantSeason"), TEXT("PlantSeasonInSentence")};
 			const TArray<FString> TooLateValues = {TEXT("Day"), TEXT("Season"), TEXT("SeasonInSentence"), TEXT("DayOfSeason"),
 				TEXT("DaysLeft"), TEXT("DaysToRipe"), TEXT("DaysToDeadline"), TEXT("DeadlineSeason"), TEXT("DeadlineSeasonInSentence")};
+			const TArray<FString> WitheredValues = {
+				TEXT("Day"), TEXT("Season"), TEXT("SeasonInSentence"), TEXT("DayOfSeason"), TEXT("DaysLeft"), TEXT("Count")};
 			const TMap<FGameplayTag, TArray<FString>> Expected = {
 				{VestigeGameplayTags::Feedback_Tool_NoTarget, NoValues},
 				{VestigeGameplayTags::Feedback_Tool_NothingInHand, NoValues},
@@ -305,6 +330,8 @@ namespace VestigeHudWidgetTests
 				{VestigeGameplayTags::Feedback_Farm_CantWater, NoValues},
 				{VestigeGameplayTags::Feedback_Farm_Soaked, NoValues},
 				{VestigeGameplayTags::Feedback_Farm_NothingRipe, NoValues},
+				{VestigeGameplayTags::Feedback_Farm_Withered, WitheredValues},
+				{VestigeGameplayTags::Feedback_Farm_ClearFirst, NoValues},
 				{VestigeGameplayTags::Feedback_Inventory_Full, NoValues},
 				{VestigeGameplayTags::Feedback_Stamina_Empty, NoValues},
 				{VestigeGameplayTags::Feedback_Rest_GettingLate, NoValues},

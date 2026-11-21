@@ -18,6 +18,10 @@ bool UFarmGameplayAbility_Harvest::CanUseOn(const FIntPoint& Tile, FVestigeFeedb
 	{
 		return FailBecause(OutFailure, VestigeGameplayTags::Feedback_Tool_NoTarget);
 	}
+	if (State->CanClearWithered())
+	{
+		return true;
+	}
 	if (!State->IsRipe() || !State->GetCrop())
 	{
 		return FailBecause(OutFailure, VestigeGameplayTags::Feedback_Farm_NothingRipe);
@@ -30,6 +34,12 @@ bool UFarmGameplayAbility_Harvest::UseOn(const FIntPoint& Tile)
 	UFarmField* Field = GetField();
 	const FFarmTileState* State = Field ? Field->GetTile(Tile) : nullptr;
 	const UFarmCropData* Crop = State ? State->GetCrop() : nullptr;
+
+	// A withered crop is cleared, yields nothing and needs no room in the bag.
+	if (State && State->CanClearWithered())
+	{
+		return Field->ClearWithered(Tile);
+	}
 
 	// Room is asked before harvesting, so a full bag leaves the crop in the ground instead of destroying it.
 	if (!Crop || !State->IsRipe() || !HasRoomForHarvest(*Crop) || !Field->Harvest(Tile))

@@ -5,6 +5,7 @@
 
 #include "Components/ActorTestSpawner.h"
 #include "Content/FarmCropData.h"
+#include "Content/VestigeCalendar.h"
 #include "Content/VestigeContentCatalog.h"
 #include "Core/VestigeSaveRecord.h"
 #include "CQTest.h"
@@ -15,6 +16,7 @@
 #include "Farming/FarmFieldSubsystem.h"
 #include "Farming/FarmGrid.h"
 #include "Serialization/MemoryReader.h"
+#include "Time/VestigeClockSaveData.h"
 #include "Time/VestigeClockSubsystem.h"
 
 // A namespace keeps the fixture's short name from hiding other declarations in unity builds.
@@ -291,6 +293,143 @@ namespace FarmFieldTests
 			ASSERT_THAT(IsTrue(Field.GetTile(Tile)->GetState() == EFarmTileState::Tilled));
 			ASSERT_THAT(IsTrue(Field.GetTile(Tile)->GetGrowthDays() == 0));
 		}
+
+		// Withering. The made-up calendar has two seasons of ten days on the real season tags.
+		static constexpr const TCHAR* SpringTag = TEXT("Vestige.Season.Spring");
+		static constexpr const TCHAR* SummerTag = TEXT("Vestige.Season.Summer");
+
+		static FGameplayTag SeasonTag(const TCHAR* TagName) { return FGameplayTag::RequestGameplayTag(FName(TagName)); }
+
+		static FVestigeSeason MakeSeason(const TCHAR* TagName, const TCHAR* Name)
+		{
+			FVestigeSeason Season;
+			Season.Tag = SeasonTag(TagName);
+			Season.DisplayName = FText::FromString(Name);
+			Season.NameInSentence = FText::FromString(FString(Name).ToLower());
+			return Season;
+		}
+
+		static FVestigeCalendar MakeCalendar()
+		{
+			return FVestigeCalendar::MakeForTests(10, {MakeSeason(SpringTag, TEXT("Alpha")), MakeSeason(SummerTag, TEXT("Beta"))});
+		}
+
+		/** A crop of three days that grows in the seasons with these tags (none listed: every season). */
+		UFarmCropData& MakeSeasonCrop(std::initializer_list<const TCHAR*> SeasonTags)
+		{
+			UFarmCropData& Crop = Spawner.SpawnObject<UFarmCropData>();
+			FGameplayTagContainer Listed;
+			for (const TCHAR* Listing : SeasonTags)
+			{
+				Listed.AddTag(SeasonTag(Listing));
+			}
+			Crop.SetSeasonsForTests(Listed);
+			return Crop;
+		}
+
+		void Plant(UFarmField& Field, const FIntPoint& Coordinates, const UFarmCropData& Crop)
+		{
+			Field.Till(Coordinates);
+			Field.Plant(Coordinates, &Crop);
+			Field.Water(Coordinates);
+		}
+
+		TEST_METHOD(OnlyCropsThatDontGrowInTheNewSeasonWither)
+		{
+			const UFarmCropData& SpringCrop = MakeSeasonCrop({SpringTag});
+			const UFarmCropData& BothCrop = MakeSeasonCrop({SpringTag, SummerTag});
+			const UFarmCropData& AnyCrop = MakeSeasonCrop({});
+			UFarmField& Field = MakeField();
+			Plant(Field, FIntPoint(0, 0), SpringCrop);
+			Plant(Field, FIntPoint(1, 0), BothCrop);
+			Plant(Field, FIntPoint(2, 0), AnyCrop);
+			Plant(Field, FIntPoint(0, 1), SpringCrop);
+
+			const int32 Count = Field.WitherCropsOutOfSeason(SeasonTag(SummerTag), MakeCalendar());
+
+			ASSERT_THAT(IsTrue(Count == 2));
+			ASSERT_THAT(IsTrue(Field.GetTile(FIntPoint(0, 0))->IsWithered()));
+			ASSERT_THAT(IsTrue(Field.GetTile(FIntPoint(0, 1))->IsWithered()));
+			ASSERT_THAT(IsTrue(Field.GetTile(FIntPoint(1, 0))->GetState() == EFarmTileState::Planted));
+			ASSERT_THAT(IsTrue(Field.GetTile(FIntPoint(2, 0))->GetState() == EFarmTileState::Planted));
+		}
+
+		TEST_METHOD(AWitheredTileKeepsItsCropGrowthAndWater)
+		{
+			const UFarmCropData& Crop = MakeSeasonCrop({SpringTag});
+			UFarmField& Field = MakeField();
+			Plant(Field, Tile, Crop);
+			Field.AdvanceDay();
+			Field.Water(Tile);
+
+			Field.WitherCropsOutOfSeason(SeasonTag(SummerTag), MakeCalendar());
+
+			ASSERT_THAT(IsTrue(Field.GetTile(Tile)->GetCrop() == &Crop));
+			ASSERT_THAT(IsTrue(Field.GetTile(Tile)->GetGrowthDays() == 1));
+			ASSERT_THAT(IsTrue(Field.GetTile(Tile)->GetWaterLevel() == 1));
+		}
+
+		TEST_METHOD(AFieldWithAnyWitheredCropSaysSoOnceAndNothingElseSaysNothing)
+		{
+			const UFarmCropData& SpringCrop = MakeSeasonCrop({SpringTag});
+			UFarmField& Field = MakeField();
+			Plant(Field, FIntPoint(0, 0), SpringCrop);
+			Plant(Field, FIntPoint(1, 0), SpringCrop);
+			int32 ManyBroadcasts = 0;
+			int32 OneBroadcasts = 0;
+			Field.OnTilesChanged.AddLambda(
+				[&ManyBroadcasts]()
+				{
+					++ManyBroadcasts;
+				});
+			Field.OnTileChanged.AddLambda(
+				[&OneBroadcasts](const FIntPoint&)
+				{
+					++OneBroadcasts;
+				});
+
+			ASSERT_THAT(IsTrue(Field.WitherCropsOutOfSeason(SeasonTag(SummerTag), MakeCalendar()) == 2));
+			ASSERT_THAT(IsTrue(ManyBroadcasts == 1));
+			ASSERT_THAT(IsTrue(Field.WitherCropsOutOfSeason(SeasonTag(SummerTag), MakeCalendar()) == 0));
+
+			ASSERT_THAT(IsTrue(ManyBroadcasts == 1));
+			ASSERT_THAT(IsTrue(OneBroadcasts == 0));
+		}
+
+		TEST_METHOD(RipeCropsDontWitherInAFieldEither)
+		{
+			const UFarmCropData& Crop = MakeSeasonCrop({SpringTag});
+			UFarmField& Field = MakeField();
+			Plant(Field, Tile, Crop);
+			WaterForDays(Field, Crop.GetDaysToMature());
+			ASSERT_THAT(IsTrue(Field.GetTile(Tile)->IsRipe()));
+
+			ASSERT_THAT(IsTrue(Field.WitherCropsOutOfSeason(SeasonTag(SummerTag), MakeCalendar()) == 0));
+
+			ASSERT_THAT(IsTrue(Field.GetTile(Tile)->IsRipe()));
+		}
+
+		TEST_METHOD(ClearingAWitheredTileBroadcastsOneTileChange)
+		{
+			const UFarmCropData& Crop = MakeSeasonCrop({SpringTag});
+			UFarmField& Field = MakeField();
+			Plant(Field, Tile, Crop);
+			Field.WitherCropsOutOfSeason(SeasonTag(SummerTag), MakeCalendar());
+			TArray<FIntPoint> Changed;
+			Field.OnTileChanged.AddLambda(
+				[&Changed](const FIntPoint& Coordinates)
+				{
+					Changed.Add(Coordinates);
+				});
+
+			ASSERT_THAT(IsTrue(Field.ClearWithered(Tile)));
+			ASSERT_THAT(IsFalse(Field.ClearWithered(Tile)));
+			ASSERT_THAT(IsFalse(Field.ClearWithered(FIntPoint(9, 9))));
+
+			ASSERT_THAT(IsTrue(Changed == TArray<FIntPoint>{Tile}));
+			ASSERT_THAT(IsTrue(Field.GetTile(Tile)->GetState() == EFarmTileState::Tilled));
+			ASSERT_THAT(IsTrue(Field.GetTile(Tile)->GetWaterLevel() == 1));
+		}
 	};
 
 	/** The fields of the whole game, which outlive their maps, and the grids that show them. */
@@ -309,6 +448,7 @@ namespace FarmFieldTests
 			Clock = UVestigeClockSubsystem::Get(&Spawner.GetWorld());
 			ASSERT_THAT(IsNotNull(Fields));
 			ASSERT_THAT(IsNotNull(Clock));
+			ASSERT_THAT(IsNotNull(FindTurnip()));
 		}
 
 		/** A default 8 x 8 grid showing the field Base.Farm, as placed in L_Farm. */
@@ -535,6 +675,140 @@ namespace FarmFieldTests
 
 			ASSERT_THAT(IsNull(Fields->FindField(FarmId)));
 			ASSERT_THAT(IsTrue(Fields->GetSaveData().IsEmpty()));
+		}
+
+		// Withering with the game's clock. Turnips grow in the calendar's first season only.
+		int32 DaysPerSeason() const { return Clock->GetCalendar().GetDaysPerSeason(); }
+
+		const UFarmCropData* FindTurnip()
+		{
+			return UVestigeContentCatalog::Get(&Spawner.GetWorld())
+				->Find<UFarmCropData>(FPrimaryAssetId(UFarmCropData::AssetType, TEXT("Base.Turnip")));
+		}
+
+		/** The turnip, which BEFORE_EACH has checked is there. */
+		const UFarmCropData& Turnip() { return *FindTurnip(); }
+
+		/** Tills and plants a turnip at the start of a field's row and waters it. */
+		void PlantTurnip(UFarmField& Field, const FIntPoint& Coordinates)
+		{
+			Field.Till(Coordinates);
+			Field.Plant(Coordinates, &Turnip());
+			Field.Water(Coordinates);
+		}
+
+		/** Ends the last day of the first season, so the second begins and OnSeasonStarted is broadcast. */
+		void StartTheSecondSeason()
+		{
+			ASSERT_THAT(IsTrue(Clock->JumpToDay(DaysPerSeason())));
+			Clock->StartNextDay();
+		}
+
+		TEST_METHOD(TheNextSeasonWithersEveryFieldsOutOfSeasonCropsWithoutTheirMaps)
+		{
+			UFarmField& Farm = Fields->FindOrAddField(FarmId, FIntPoint(8, 8));
+			UFarmField& Other = Fields->FindOrAddField(TEXT("Base.Other"), FIntPoint(4, 4));
+			PlantTurnip(Farm, FIntPoint(0, 0));
+			PlantTurnip(Other, FIntPoint(1, 1));
+
+			StartTheSecondSeason();
+
+			ASSERT_THAT(IsTrue(Farm.GetTile(FIntPoint(0, 0))->IsWithered()));
+			ASSERT_THAT(IsTrue(Other.GetTile(FIntPoint(1, 1))->IsWithered()));
+		}
+
+		TEST_METHOD(AWateredCropOneNightShortWithersRatherThanRipens)
+		{
+			UFarmField& Farm = Fields->FindOrAddField(FarmId, FIntPoint(8, 8));
+			PlantTurnip(Farm, FIntPoint(0, 0));
+			for (int32 Night = 1; Night < Turnip().GetDaysToMature(); ++Night)
+			{
+				Farm.AdvanceDay();
+				Farm.Water(FIntPoint(0, 0));
+			}
+			ASSERT_THAT(IsTrue(Farm.GetTile(FIntPoint(0, 0))->GetGrowthDays() == Turnip().GetDaysToMature() - 1));
+
+			StartTheSecondSeason();
+
+			ASSERT_THAT(IsTrue(Farm.GetTile(FIntPoint(0, 0))->IsWithered()));
+			ASSERT_THAT(IsFalse(Farm.GetTile(FIntPoint(0, 0))->IsRipe()));
+			ASSERT_THAT(IsTrue(Farm.GetTile(FIntPoint(0, 0))->GetGrowthDays() == Turnip().GetDaysToMature() - 1));
+		}
+
+		TEST_METHOD(ARipeCropIsStillThereWhenTheSeasonStarts)
+		{
+			UFarmField& Farm = Fields->FindOrAddField(FarmId, FIntPoint(8, 8));
+			PlantTurnip(Farm, FIntPoint(0, 0));
+			for (int32 Night = 0; Night < Turnip().GetDaysToMature(); ++Night)
+			{
+				Farm.AdvanceDay();
+				Farm.Water(FIntPoint(0, 0));
+			}
+			ASSERT_THAT(IsTrue(Farm.GetTile(FIntPoint(0, 0))->IsRipe()));
+
+			StartTheSecondSeason();
+
+			ASSERT_THAT(IsTrue(Farm.GetTile(FIntPoint(0, 0))->IsRipe()));
+			ASSERT_THAT(IsFalse(Farm.GetTile(FIntPoint(0, 0))->IsWithered()));
+		}
+
+		TEST_METHOD(NothingWithersOnAUsualDay)
+		{
+			UFarmField& Farm = Fields->FindOrAddField(FarmId, FIntPoint(8, 8));
+			PlantTurnip(Farm, FIntPoint(0, 0));
+
+			Clock->StartNextDay();
+
+			ASSERT_THAT(IsTrue(Farm.GetTile(FIntPoint(0, 0))->GetState() == EFarmTileState::Planted));
+		}
+
+		TEST_METHOD(NothingWithersWhenAClockIsRestoredOrJumpsIntoTheNextSeason)
+		{
+			UFarmField& Farm = Fields->FindOrAddField(FarmId, FIntPoint(8, 8));
+			PlantTurnip(Farm, FIntPoint(0, 0));
+
+			FVestigeClockSaveData Data;
+			Data.Day = DaysPerSeason() + 1;
+			Data.TimeOfDay = Clock->GetDayStartHour();
+			Clock->RestoreFromSaveData(Data);
+			ASSERT_THAT(IsTrue(Farm.GetTile(FIntPoint(0, 0))->GetState() == EFarmTileState::Planted));
+
+			ASSERT_THAT(IsTrue(Clock->JumpToDay(2 * DaysPerSeason() + 1)));
+			ASSERT_THAT(IsTrue(Farm.GetTile(FIntPoint(0, 0))->GetState() == EFarmTileState::Planted));
+		}
+
+		TEST_METHOD(NothingWithersOnANewGame)
+		{
+			UFarmField& Farm = Fields->FindOrAddField(FarmId, FIntPoint(8, 8));
+			PlantTurnip(Farm, FIntPoint(0, 0));
+			Clock->JumpToDay(DaysPerSeason() + 1);
+
+			Clock->StartNewGame();
+
+			ASSERT_THAT(IsTrue(Farm.GetTile(FIntPoint(0, 0))->GetState() == EFarmTileState::Planted));
+		}
+
+		TEST_METHOD(TheSaveKeepsAWitheredTile)
+		{
+			UFarmField& Farm = Fields->FindOrAddField(FarmId, FIntPoint(8, 8));
+			PlantTurnip(Farm, FIntPoint(2, 3));
+			Farm.AdvanceDay();
+			Farm.Water(FIntPoint(2, 3));
+			Farm.WitherCropsOutOfSeason(Clock->GetCalendar().GetSeasons()[1].Tag, Clock->GetCalendar());
+			const FVestigeSaveRecord Record = Fields->WriteSaveRecord();
+			Fields->StartNewGame();
+			int32 LeftOut = 0;
+
+			ASSERT_THAT(IsTrue(Fields->ReadSaveRecord(Record, LeftOut)));
+
+			const UFarmField* Restored = Fields->FindField(FarmId);
+			ASSERT_THAT(IsNotNull(Restored));
+			const FFarmTileState* Tile = Restored->GetTile(FIntPoint(2, 3));
+			ASSERT_THAT(IsTrue(Tile->IsWithered()));
+			ASSERT_THAT(IsTrue(Tile->GetCrop() == &Turnip()));
+			ASSERT_THAT(IsTrue(Tile->GetGrowthDays() == 1));
+			ASSERT_THAT(IsTrue(Tile->GetWaterLevel() == 1));
+			ASSERT_THAT(IsTrue(LeftOut == 0));
 		}
 	};
 }

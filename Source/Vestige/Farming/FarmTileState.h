@@ -14,7 +14,9 @@ enum class EFarmTileState : uint8
 {
 	Grass,
 	Tilled,
-	Planted
+	Planted,
+	/** Appended last: saves hold the value, so the order never changes. A dead plant that keeps its crop, growth days and water. */
+	Withered
 };
 
 /**
@@ -69,11 +71,17 @@ public:
 	/** Removes a ripe crop, leaving tilled soil. Returns false, changing nothing, if nothing ripe grows here. */
 	bool Harvest();
 
+	/** Turns an unripe planted crop into a withered one. Returns false, changing nothing, if CanWither is false. */
+	bool Wither();
+
+	/** Clears a withered crop, leaving empty tilled soil with its water. Returns false, changing nothing, if the tile isn't withered. */
+	bool ClearWithered();
+
 	/** Called once per in-game day. A crop on a tile with any water grows one stage, then the tile loses NightlyFall steps. */
 	void AdvanceDay(int32 NightlyFall);
 
 	/**
-	 * Puts the tile straight into a saved state, without replaying any action. A planted state without a crop restores
+	 * Puts the tile straight into a saved state, without replaying any action. A planted or withered state without a crop restores
 	 * as empty tilled soil, watered grass as dry grass, the water level is clamped to 0..MaxLevel and growth to what the
 	 * crop can reach.
 	 */
@@ -85,6 +93,13 @@ public:
 	int32 GetWaterLevel() const { return WaterLevel; }
 	bool IsWatered() const { return WaterLevel > 0; }
 	bool IsRipe() const;
+	bool IsWithered() const { return State == EFarmTileState::Withered; }
+
+	/** Whether Wither would change the tile: a planted crop that isn't ripe (ripe crops don't wither). */
+	bool CanWither() const { return State == EFarmTileState::Planted && !IsRipe(); }
+
+	/** Whether ClearWithered would change the tile now. */
+	bool CanClearWithered() const { return IsWithered(); }
 
 	// Whether the action would change the tile now, without doing it. Harvesting can when IsRipe.
 	bool CanTill() const { return State == EFarmTileState::Grass; }
@@ -105,7 +120,7 @@ private:
 	UPROPERTY(VisibleInstanceOnly, Category = "Farming")
 	int32 GrowthDays = 0;
 
-	/** Set exactly while the tile is planted. Whoever loads the crop also loads its meshes. */
+	/** Set exactly while the tile is planted or withered. Whoever loads the crop also loads its meshes. */
 	UPROPERTY(VisibleInstanceOnly, Category = "Farming")
 	TObjectPtr<const UFarmCropData> Crop;
 };

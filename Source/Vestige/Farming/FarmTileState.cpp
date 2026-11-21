@@ -58,6 +58,28 @@ bool FFarmTileState::Harvest()
 	return true;
 }
 
+bool FFarmTileState::Wither()
+{
+	if (!CanWither())
+	{
+		return false;
+	}
+	State = EFarmTileState::Withered;
+	return true;
+}
+
+bool FFarmTileState::ClearWithered()
+{
+	if (!CanClearWithered())
+	{
+		return false;
+	}
+	State = EFarmTileState::Tilled;
+	Crop = nullptr;
+	GrowthDays = 0;
+	return true;
+}
+
 bool FFarmTileState::IsRipe() const
 {
 	return State == EFarmTileState::Planted && Crop && Crop->IsRipeAt(GrowthDays);
@@ -75,10 +97,11 @@ void FFarmTileState::AdvanceDay(int32 NightlyFall)
 void FFarmTileState::Restore(
 	EFarmTileState SavedState, int32 SavedWaterLevel, int32 SavedGrowthDays, const UFarmCropData* SavedCrop, int32 MaxLevel)
 {
-	// A planted tile can't exist without its crop, so a missing crop leaves empty tilled soil.
-	const bool bPlanted = SavedState == EFarmTileState::Planted && SavedCrop;
-	State = SavedState == EFarmTileState::Planted && !bPlanted ? EFarmTileState::Tilled : SavedState;
-	Crop = bPlanted ? SavedCrop : nullptr;
+	// A planted or withered tile can't exist without its crop, so a missing crop leaves empty tilled soil.
+	const bool bHasCropState = SavedState == EFarmTileState::Planted || SavedState == EFarmTileState::Withered;
+	const bool bKeepsCrop = bHasCropState && SavedCrop;
+	State = bHasCropState && !bKeepsCrop ? EFarmTileState::Tilled : SavedState;
+	Crop = bKeepsCrop ? SavedCrop : nullptr;
 	WaterLevel = State == EFarmTileState::Grass ? 0 : FMath::Clamp(SavedWaterLevel, 0, FMath::Max(MaxLevel, 0));
 	GrowthDays = Crop ? FMath::Clamp(SavedGrowthDays, 0, Crop->GetDaysToMature()) : 0;
 }

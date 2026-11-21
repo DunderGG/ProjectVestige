@@ -52,6 +52,10 @@ bool UFarmGameplayAbility_Plant::CanUseOn(const FIntPoint& Tile, FVestigeFeedbac
 	{
 		return FailBecause(OutFailure, VestigeGameplayTags::Feedback_Tool_NoTarget);
 	}
+	if (State->IsWithered())
+	{
+		return FailBecause(OutFailure, VestigeGameplayTags::Feedback_Farm_ClearFirst);
+	}
 	if (!State->CanPlant())
 	{
 		return FailBecause(OutFailure, VestigeGameplayTags::Feedback_Farm_CantPlant);

@@ -15,6 +15,10 @@ bool UFarmGameplayAbility_Till::CanUseOn(const FIntPoint& Tile, FVestigeFeedback
 	{
 		return FailBecause(OutFailure, VestigeGameplayTags::Feedback_Tool_NoTarget);
 	}
+	if (State->IsWithered())
+	{
+		return FailBecause(OutFailure, VestigeGameplayTags::Feedback_Farm_ClearFirst);
+	}
 	return State->CanTill() || FailBecause(OutFailure, VestigeGameplayTags::Feedback_Farm_CantTill);
 }
 

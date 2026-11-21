@@ -4,11 +4,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayTagContainer.h"
 #include "Farming/FarmTileState.h"
 #include "UObject/Object.h"
 #include "FarmField.generated.h"
 
 class UFarmCropData;
+struct FVestigeCalendar;
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnFarmFieldTileChanged, const FIntPoint& /* Coordinates */);
 DECLARE_MULTICAST_DELEGATE(FOnFarmFieldTilesChanged);
@@ -50,6 +52,14 @@ public:
 	/** Adds the rules' StepsPerWatering to the tile's water, up to the rules' MaxLevel. */
 	bool Water(const FIntPoint& Coordinates);
 	bool Harvest(const FIntPoint& Coordinates);
+	/** Clears a withered crop, leaving tilled soil with its water. */
+	bool ClearWithered(const FIntPoint& Coordinates);
+
+	/**
+	 * Withers every unripe planted crop that doesn't grow in Season (UFarmCropData::GrowsIn). Returns how many, logs it when
+	 * it isn't 0 and broadcasts OnTilesChanged once when anything withered.
+	 */
+	int32 WitherCropsOutOfSeason(const FGameplayTag& Season, const FVestigeCalendar& Calendar);
 
 	/**
 	 * Starts a new day on every tile: crops on watered tiles grow one stage, then every tile loses the nightly fall.

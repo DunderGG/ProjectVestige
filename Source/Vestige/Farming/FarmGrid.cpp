@@ -32,6 +32,7 @@ namespace FarmGridInteraction
 #define LOCTEXT_NAMESPACE "FarmGrid"
 
 const FName AFarmGrid::HarvestAction(TEXT("Harvest"));
+const FName AFarmGrid::ClearAction(TEXT("Clear"));
 
 AFarmGrid::AFarmGrid()
 {
@@ -160,21 +161,21 @@ void AFarmGrid::GetInteractionOptions_Implementation(AActor* Interactor, TArray<
 		return;
 	}
 	const FFarmTileState* Tile = GetTile(*Target);
-	if (!Tile || !Tile->IsRipe())
+	if (!Tile || !(Tile->IsRipe() || Tile->IsWithered()))
 	{
 		return;
 	}
 
-	FVestigeInteractionOption& HarvestOption = OutOptions.AddDefaulted_GetRef();
-	HarvestOption.Text = LOCTEXT("Harvest", "Harvest");
-	HarvestOption.Action = HarvestAction;
-	HarvestOption.bHasLocation = true;
-	HarvestOption.Location = GetTileTransform(*Target).GetLocation();
+	FVestigeInteractionOption& Option = OutOptions.AddDefaulted_GetRef();
+	Option.Text = Tile->IsWithered() ? LOCTEXT("Clear", "Clear") : LOCTEXT("Harvest", "Harvest");
+	Option.Action = Tile->IsWithered() ? ClearAction : HarvestAction;
+	Option.bHasLocation = true;
+	Option.Location = GetTileTransform(*Target).GetLocation();
 }
 
 void AFarmGrid::Interact_Implementation(AActor* Interactor, const FVestigeInteractionOption& Option)
 {
-	if (Option.Action != HarvestAction)
+	if (Option.Action != HarvestAction && Option.Action != ClearAction)
 	{
 		return;
 	}

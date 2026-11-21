@@ -76,23 +76,32 @@ namespace FarmTileLooks
 
 			FFarmTilePartLook Crop;
 			Crop.Water = WaterFraction;
+			const bool bWithered = Tile.IsWithered();
+			const float WitheredHeight = FMath::Clamp(Settings.WitheredCropHeightScale, 0.1f, 1.f);
 			const float SurfaceZ = Settings.TilledSoilMesh ? Settings.SoilSurfaceHeight : SoilTop;
 			const UFarmCropData* CropData = Tile.GetCrop();
 			const FFarmCropGrowthLook GrowthLook = CropData ? CropData->GetGrowthLook(Tile.GetGrowthDays()) : FFarmCropGrowthLook();
 			if (GrowthLook.Mesh)
 			{
 				Crop.Mesh = GrowthLook.Mesh;
-				Crop.Transform = FTransform(FQuat::Identity, FVector(0.f, 0.f, SurfaceZ), FVector(GrowthLook.Scale));
+				FVector Scale(GrowthLook.Scale);
+				if (bWithered)
+				{
+					Crop.Material = Settings.WitheredCropMaterial;
+					Scale.Z *= WitheredHeight;
+				}
+				Crop.Transform = FTransform(FQuat::Identity, FVector(0.f, 0.f, SurfaceZ), Scale);
 				return Crop;
 			}
 
 			// The placeholder ignores the stage scale: its height already follows the whole growth.
-			const float HeightScale = FMath::Lerp(CropSeedlingHeightScale, CropRipeHeightScale, GetGrowthFraction(Tile));
+			const float HeightScale = FMath::Lerp(CropSeedlingHeightScale, CropRipeHeightScale, GetGrowthFraction(Tile))
+				* (bWithered ? WitheredHeight : 1.f);
 			Crop.Mesh = Settings.PlaceholderCropMesh;
 			Crop.Material = Settings.PlaceholderMaterial;
 			Crop.Transform = FTransform(FQuat::Identity, FVector(0.f, 0.f, SurfaceZ + HeightScale * CylinderHalfHeight),
 				FVector(CropWidthScale, CropWidthScale, HeightScale));
-			Crop.Color = Tile.IsRipe() ? RipeColor : GrowingColor;
+			Crop.Color = bWithered ? WitheredColor : Tile.IsRipe() ? RipeColor : GrowingColor;
 			return Crop;
 		}
 	}
@@ -102,7 +111,7 @@ namespace FarmTileLooks
 		const float WaterFraction = Detail::GetWaterFraction(Tile, MaxWaterLevel);
 		FFarmTileLook Look;
 		Look.Soil = Detail::GetSoilLook(Tile, Settings, WaterFraction);
-		if (Tile.GetState() == EFarmTileState::Planted)
+		if (Tile.GetState() == EFarmTileState::Planted || Tile.IsWithered())
 		{
 			Look.Crop = Detail::GetCropLook(Tile, Settings, WaterFraction);
 		}

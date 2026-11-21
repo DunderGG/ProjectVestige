@@ -4,6 +4,7 @@
 #include "Farming/FarmField.h"
 
 #include "Content/FarmCropData.h"
+#include "Content/VestigeCalendar.h"
 #include "Farming/FarmLog.h"
 #include "ProfilingDebugging/CpuProfilerTrace.h"
 
@@ -66,6 +67,36 @@ bool UFarmField::Harvest(const FIntPoint& Coordinates)
 		{
 			return Tile.Harvest();
 		});
+}
+
+bool UFarmField::ClearWithered(const FIntPoint& Coordinates)
+{
+	return ChangeTile(Coordinates,
+		[](FFarmTileState& Tile)
+		{
+			return Tile.ClearWithered();
+		});
+}
+
+int32 UFarmField::WitherCropsOutOfSeason(const FGameplayTag& Season, const FVestigeCalendar& Calendar)
+{
+	TRACE_CPUPROFILER_EVENT_SCOPE(UFarmField::WitherCropsOutOfSeason);
+
+	int32 WitheredCount = 0;
+	for (FFarmTileState& Tile : Tiles)
+	{
+		if (Tile.CanWither() && Tile.GetCrop() && !Tile.GetCrop()->GrowsIn(Season, Calendar) && Tile.Wither())
+		{
+			++WitheredCount;
+		}
+	}
+	if (WitheredCount > 0)
+	{
+		VESTIGE_LOG(this, LogFarm, Log, "{Count} crops withered on field {FieldId} as {Season} began.", WitheredCount, FieldId,
+			Season.ToString());
+		OnTilesChanged.Broadcast();
+	}
+	return WitheredCount;
 }
 
 bool UFarmField::ChangeTile(const FIntPoint& Coordinates, TFunctionRef<bool(FFarmTileState&)> Action)

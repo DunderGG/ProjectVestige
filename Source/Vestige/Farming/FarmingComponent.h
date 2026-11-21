@@ -73,8 +73,9 @@ public:
 	void StopUsingTool();
 
 	/**
-	 * Harvests the target tile once, whatever is in hand, by activating the harvest ability without pressing it. Does nothing
-	 * while a tool use is under way. Called when the player interacts with a ripe tile (AFarmGrid).
+	 * Harvests a ripe target tile, or clears a withered one, once, whatever is in hand, by activating the harvest ability without
+	 * pressing it. Does nothing while a tool use is under way. Called when the player interacts with a ripe or withered tile
+	 * (AFarmGrid).
 	 */
 	void Harvest();
 

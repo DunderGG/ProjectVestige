@@ -3,8 +3,10 @@
 
 #include "Farming/FarmFieldSubsystem.h"
 
+#include "AbilitySystem/VestigeGameplayTags.h"
 #include "Content/FarmCropData.h"
 #include "Content/VestigeContentCatalog.h"
+#include "Core/VestigeFeedbackSubsystem.h"
 #include "Core/VestigeSaveRegistry.h"
 #include "Engine/GameInstance.h"
 #include "Engine/World.h"
@@ -64,6 +66,7 @@ void UFarmFieldSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 	if (Clock)
 	{
 		Clock->OnNewDay.AddUObject(this, &UFarmFieldSubsystem::AdvanceFields);
+		Clock->OnSeasonStarted.AddUObject(this, &UFarmFieldSubsystem::WitherOutOfSeasonCrops);
 	}
 	SaveRegistry = Collection.InitializeDependency<UVestigeSaveRegistry>();
 	if (SaveRegistry)
@@ -77,6 +80,7 @@ void UFarmFieldSubsystem::Deinitialize()
 	if (Clock)
 	{
 		Clock->OnNewDay.RemoveAll(this);
+		Clock->OnSeasonStarted.RemoveAll(this);
 	}
 	if (SaveRegistry)
 	{
@@ -195,4 +199,27 @@ void UFarmFieldSubsystem::AdvanceFields(int32 NewDay)
 	{
 		Pair.Value->AdvanceDay();
 	}
+}
+
+void UFarmFieldSubsystem::WitherOutOfSeasonCrops(const FVestigeDate& Date)
+{
+	TRACE_CPUPROFILER_EVENT_SCOPE(UFarmFieldSubsystem::WitherOutOfSeasonCrops);
+
+	if (!Clock)
+	{
+		return;
+	}
+	int32 WitheredCount = 0;
+	for (const TPair<FName, TObjectPtr<UFarmField>>& Pair : Fields)
+	{
+		WitheredCount += Pair.Value->WitherCropsOutOfSeason(Date.Season, Clock->GetCalendar());
+	}
+	if (WitheredCount == 0)
+	{
+		return;
+	}
+
+	FFormatNamedArguments Values = Clock->GetCalendar().GetReportValues(Date.Day);
+	Values.Add(TEXT("Count"), WitheredCount);
+	UVestigeFeedbackSubsystem::Report(GetGameInstance()->GetWorld(), VestigeGameplayTags::Feedback_Farm_Withered, MoveTemp(Values));
 }
