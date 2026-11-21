@@ -8,13 +8,38 @@
 
 class UFarmCropData;
 
-/** What is on a farm tile. Watering is separate, because tilled and planted soil can both be wet. */
+/** What is on a farm tile. Water is separate, because tilled and planted soil can both be wet. */
 UENUM(BlueprintType)
 enum class EFarmTileState : uint8
 {
 	Grass,
 	Tilled,
 	Planted
+};
+
+/**
+ * The numbers of the tile water rules, set in the Vestige Farm Fields developer settings and copied into every UFarmField.
+ * Each is at least 1 (GetClamped), so a field can always be watered and always dries.
+ */
+USTRUCT()
+struct FFarmWaterRules
+{
+	GENERATED_BODY()
+
+	/** The most water steps a tile holds. A tile at the cap is soaked and refuses the watering can. */
+	UPROPERTY(EditAnywhere, Category = "Water", meta = (ClampMin = 1))
+	int32 MaxLevel = 2;
+
+	/** The steps one use of the watering can adds. */
+	UPROPERTY(EditAnywhere, Category = "Water", meta = (ClampMin = 1))
+	int32 StepsPerWatering = 1;
+
+	/** The steps every tile loses each night, after its crop has grown. */
+	UPROPERTY(EditAnywhere, Category = "Water", meta = (ClampMin = 1))
+	int32 NightlyFall = 1;
+
+	/** Rules with every number lifted to at least 1. A pure function, so tests don't change the settings. */
+	static FFarmWaterRules GetClamped(const FFarmWaterRules& Rules);
 };
 
 /**
@@ -35,29 +60,36 @@ public:
 	/** Plants InCrop in tilled soil. Returns false, changing nothing, if the soil isn't empty and tilled or InCrop is null. */
 	bool Plant(const UFarmCropData* InCrop);
 
-	/** Waters tilled or planted soil until the next day. Returns false if the tile is grass or already watered. */
-	bool Water();
+	/**
+	 * Adds Steps water steps to tilled or planted soil, up to MaxLevel. Returns false, changing nothing, if Steps is less
+	 * than 1, the tile is grass or it already holds MaxLevel.
+	 */
+	bool AddWater(int32 Steps, int32 MaxLevel);
 
 	/** Removes a ripe crop, leaving tilled soil. Returns false, changing nothing, if nothing ripe grows here. */
 	bool Harvest();
 
-	/** Called once per in-game day. A watered crop grows one stage, then the soil dries out. */
-	void AdvanceDay();
+	/** Called once per in-game day. A crop on a tile with any water grows one stage, then the tile loses NightlyFall steps. */
+	void AdvanceDay(int32 NightlyFall);
 
 	/**
 	 * Puts the tile straight into a saved state, without replaying any action. A planted state without a crop restores
-	 * as empty tilled soil, watered grass as dry grass, and growth is clamped to what the crop can reach.
+	 * as empty tilled soil, watered grass as dry grass, the water level is clamped to 0..MaxLevel and growth to what the
+	 * crop can reach.
 	 */
-	void Restore(EFarmTileState SavedState, bool bSavedWatered, int32 SavedGrowthDays, const UFarmCropData* SavedCrop);
+	void Restore(EFarmTileState SavedState, int32 SavedWaterLevel, int32 SavedGrowthDays, const UFarmCropData* SavedCrop, int32 MaxLevel);
 
 	EFarmTileState GetState() const { return State; }
-	bool IsWatered() const { return bWatered; }
+
+	/** The water steps the soil holds, from 0 (dry). */
+	int32 GetWaterLevel() const { return WaterLevel; }
+	bool IsWatered() const { return WaterLevel > 0; }
 	bool IsRipe() const;
 
 	// Whether the action would change the tile now, without doing it. Harvesting can when IsRipe.
 	bool CanTill() const { return State == EFarmTileState::Grass; }
 	bool CanPlant() const { return State == EFarmTileState::Tilled; }
-	bool CanWater() const { return State != EFarmTileState::Grass && !bWatered; }
+	bool CanAddWater(int32 MaxLevel) const { return State != EFarmTileState::Grass && WaterLevel < MaxLevel; }
 	int32 GetGrowthDays() const { return GrowthDays; }
 
 	/** The crop growing here, or nullptr if nothing is planted. */
@@ -68,7 +100,7 @@ private:
 	EFarmTileState State = EFarmTileState::Grass;
 
 	UPROPERTY(VisibleInstanceOnly, Category = "Farming")
-	bool bWatered = false;
+	int32 WaterLevel = 0;
 
 	UPROPERTY(VisibleInstanceOnly, Category = "Farming")
 	int32 GrowthDays = 0;
@@ -94,8 +126,9 @@ struct FFarmTileSaveData
 	UPROPERTY()
 	EFarmTileState State = EFarmTileState::Grass;
 
+	/** Absent in saves from before tiles held a water level, which load dry. */
 	UPROPERTY()
-	bool bWatered = false;
+	int32 WaterLevel = 0;
 
 	UPROPERTY()
 	int32 GrowthDays = 0;

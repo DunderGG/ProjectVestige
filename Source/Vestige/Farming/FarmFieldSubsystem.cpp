@@ -10,6 +10,7 @@
 #include "Engine/World.h"
 #include "Farming/FarmField.h"
 #include "Farming/FarmFieldSaveData.h"
+#include "Farming/FarmFieldSettings.h"
 #include "Farming/FarmLog.h"
 #include "ProfilingDebugging/CpuProfilerTrace.h"
 #include "Time/VestigeClockSubsystem.h"
@@ -110,7 +111,7 @@ UFarmField* UFarmFieldSubsystem::FindField(FName FieldId) const
 UFarmField& UFarmFieldSubsystem::AddField(FName FieldId, const FIntPoint& Size)
 {
 	UFarmField* Field = NewObject<UFarmField>(this);
-	Field->Initialize(FieldId, Size);
+	Field->Initialize(FieldId, Size, UFarmFieldSettings::Get().GetWaterRules());
 	Fields.Add(FieldId, Field);
 	return *Field;
 }

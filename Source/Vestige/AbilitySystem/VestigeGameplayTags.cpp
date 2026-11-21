@@ -31,7 +31,9 @@ namespace VestigeGameplayTags
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Feedback_Farm_TooLate_LastDay, "Vestige.Feedback.Farm.TooLate.LastDay",
 		"Feedback: the crop can't ripen before the season ends tomorrow.");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(
-		Feedback_Farm_CantWater, "Vestige.Feedback.Farm.CantWater", "Feedback: nothing on the tile can be watered.");
+		Feedback_Farm_CantWater, "Vestige.Feedback.Farm.CantWater", "Feedback: nothing to water on the tile, which is grass.");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(
+		Feedback_Farm_Soaked, "Vestige.Feedback.Farm.Soaked", "Feedback: the tile already holds all the water it can.");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Feedback_Farm_NothingRipe, "Vestige.Feedback.Farm.NothingRipe", "Feedback: no ripe crop to harvest.");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(
 		Feedback_Inventory_Full, "Vestige.Feedback.Inventory.Full", "Feedback: no room in the inventory, so the harvest stays.");

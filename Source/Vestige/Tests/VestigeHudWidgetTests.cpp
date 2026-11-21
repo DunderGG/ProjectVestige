@@ -303,6 +303,7 @@ namespace VestigeHudWidgetTests
 				{VestigeGameplayTags::Feedback_Farm_TooLate, TooLateValues},
 				{VestigeGameplayTags::Feedback_Farm_TooLate_LastDay, TooLateValues},
 				{VestigeGameplayTags::Feedback_Farm_CantWater, NoValues},
+				{VestigeGameplayTags::Feedback_Farm_Soaked, NoValues},
 				{VestigeGameplayTags::Feedback_Farm_NothingRipe, NoValues},
 				{VestigeGameplayTags::Feedback_Inventory_Full, NoValues},
 				{VestigeGameplayTags::Feedback_Stamina_Empty, NoValues},

@@ -548,6 +548,70 @@ namespace FarmingTests
 			ASSERT_THAT(IsTrue(Reports.IsEmpty()));
 		}
 
+		TEST_METHOD(EachPressOfTheWateringCanAddsOneStepAndPaysForIt)
+		{
+			Grid->GetField()->Till(TargetCoordinates);
+			Hold(TEXT("Base.WateringCan"), 0);
+
+			UseToolAndFinish();
+			ASSERT_THAT(IsTrue(TargetTile()->GetWaterLevel() == 1));
+			UseToolAndFinish();
+			ASSERT_THAT(IsTrue(TargetTile()->GetWaterLevel() == 2));
+
+			ASSERT_THAT(IsTrue(GetStamina() == GetMaxStamina() - 2.f * GetHeldTool().GetStaminaCost()));
+		}
+
+		TEST_METHOD(ASoakedTileIsRefusedAsSoakedAndCostsNothing)
+		{
+			Grid->GetField()->Till(TargetCoordinates);
+			Hold(TEXT("Base.WateringCan"), 0);
+			UseToolAndFinish();
+			UseToolAndFinish();
+			const float StaminaWhenSoaked = GetStamina();
+			ListenToFeedback();
+			const TStrongObjectPtr<UVestigeTestEventRecorder> Recorder = ListenToBlueprintEvents();
+
+			UseToolAndFinish();
+
+			ASSERT_THAT(IsTrue(Reports == TArray<FGameplayTag>{VestigeGameplayTags::Feedback_Farm_Soaked}));
+			ASSERT_THAT(IsTrue(Recorder->GetEvents().IsEmpty()));
+			ASSERT_THAT(IsTrue(GetStamina() == StaminaWhenSoaked));
+			ASSERT_THAT(IsTrue(TargetTile()->GetWaterLevel() == 2));
+		}
+
+		TEST_METHOD(AHeldPressWatersEachTileOnceAndANewPressAddsTheNextStep)
+		{
+			Grid->GetField()->Till(TargetCoordinates);
+			Grid->GetField()->Till(FIntPoint(4, 0));
+			Hold(TEXT("Base.WateringCan"), 0);
+			ListenToFeedback();
+			FarmingComponent->StartUsingTool();
+			ASSERT_THAT(IsTrue(TargetTile()->GetWaterLevel() == 1));
+
+			AfterOneUse(
+				[this]()
+				{
+					// The repeat on the same tile is refused quietly, so the held key doesn't soak it.
+					ASSERT_THAT(IsTrue(TargetTile()->GetWaterLevel() == 1));
+					ASSERT_THAT(IsTrue(Reports.IsEmpty()));
+					ASSERT_THAT(IsTrue(GetStamina() == GetMaxStamina() - GetHeldTool().GetStaminaCost()));
+
+					// The next tile it faces gets its first step.
+					const FFarmTileState* Next = StepToNextTile();
+					ASSERT_THAT(IsNotNull(Next));
+					ASSERT_THAT(IsTrue(Next->GetWaterLevel() == 1));
+					Farmer->SetActorLocation(FVector(250.f, 50.f, 0.f));
+					ASSERT_THAT(IsTrue(TargetTile()->GetWaterLevel() == 1));
+
+					// Letting go and pressing again is a new press: the second step.
+					FarmingComponent->StopUsingTool();
+					AbilitySystem->CancelAllAbilities();
+					FarmingComponent->StartUsingTool();
+					ASSERT_THAT(IsTrue(TargetTile()->GetWaterLevel() == 2));
+					AbilitySystem->CancelAllAbilities();
+				});
+		}
+
 		TEST_METHOD(APressReportsWhyAUseChangesNothing)
 		{
 			ListenToFeedback();

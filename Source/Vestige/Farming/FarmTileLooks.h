@@ -20,13 +20,12 @@ struct FFarmTileLookSettings
 {
 	GENERATED_BODY()
 
-	/** Mesh for tilled, planted and watered soil. Origin at the bottom center, AFarmGrid::UnscaledTileSize wide. */
+	/**
+	 * Mesh for tilled and planted soil, dry or wet. Origin at the bottom center, AFarmGrid::UnscaledTileSize wide. Its material
+	 * reads the tile's water from per-instance custom data 3 (MI_FarmSoil_Tilled).
+	 */
 	UPROPERTY(EditAnywhere, Category = "Farming")
 	TObjectPtr<UStaticMesh> TilledSoilMesh;
-
-	/** Material put on every slot of TilledSoilMesh while the soil is watered. */
-	UPROPERTY(EditAnywhere, Category = "Farming")
-	TObjectPtr<UMaterialInterface> WateredSoilMaterial;
 
 	/** Height of TilledSoilMesh's surface, where crop meshes stand, in cm. */
 	UPROPERTY(EditAnywhere, Category = "Farming", meta = (ClampMin = 0))
@@ -62,6 +61,9 @@ struct FFarmTilePartLook
 
 	/** Per-instance custom data 0 to 2, read by the placeholder material. */
 	FLinearColor Color = FLinearColor::White;
+
+	/** How wet the tile is, from 0 (dry) to 1 (soaked): per-instance custom data 3, read by the soil's material. */
+	float Water = 0.f;
 };
 
 /** How a whole tile is drawn. */
@@ -76,8 +78,11 @@ struct FFarmTileLook
 /** What a tile looks like, from its state alone. Presentation rules, kept apart from drawing so they are tested without a world. */
 namespace FarmTileLooks
 {
-	/** How many floats of per-instance custom data each tile instance has: the color's red, green and blue. */
-	constexpr int32 NumCustomDataFloats = 3;
+	/** How many floats of per-instance custom data each tile instance has: the color's red, green and blue, then the water. */
+	constexpr int32 NumCustomDataFloats = 4;
+
+	/** The index of the water fraction in the custom data. */
+	constexpr int32 WaterCustomDataIndex = 3;
 
 	// Placeholder colors until there is art for everything.
 	inline const FLinearColor GrassColor(0.15f, 0.45f, 0.10f);
@@ -88,7 +93,8 @@ namespace FarmTileLooks
 
 	/**
 	 * How Tile is drawn with Settings: the tilled soil mesh once the tile isn't grass, and the mesh and scale its crop's data gives
-	 * for its growth days (UFarmCropData::GetGrowthLook), standing on the soil surface.
+	 * for its growth days (UFarmCropData::GetGrowthLook), standing on the soil surface. The water of the soil and the crop is the
+	 * tile's level as a fraction of MaxWaterLevel, the field's cap.
 	 */
-	FFarmTileLook GetLook(const FFarmTileState& Tile, const FFarmTileLookSettings& Settings);
+	FFarmTileLook GetLook(const FFarmTileState& Tile, const FFarmTileLookSettings& Settings, int32 MaxWaterLevel);
 }

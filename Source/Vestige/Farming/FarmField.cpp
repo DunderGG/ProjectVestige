@@ -7,9 +7,10 @@
 #include "Farming/FarmLog.h"
 #include "ProfilingDebugging/CpuProfilerTrace.h"
 
-void UFarmField::Initialize(FName InFieldId, const FIntPoint& InSize)
+void UFarmField::Initialize(FName InFieldId, const FIntPoint& InSize, const FFarmWaterRules& InWaterRules)
 {
 	FieldId = InFieldId;
+	WaterRules = FFarmWaterRules::GetClamped(InWaterRules);
 	Size = FIntPoint(FMath::Max(InSize.X, 1), FMath::Max(InSize.Y, 1));
 	Tiles.Reset();
 	Tiles.SetNum(Size.X * Size.Y);
@@ -52,9 +53,9 @@ bool UFarmField::Plant(const FIntPoint& Coordinates, const UFarmCropData* Crop)
 bool UFarmField::Water(const FIntPoint& Coordinates)
 {
 	return ChangeTile(Coordinates,
-		[](FFarmTileState& Tile)
+		[this](FFarmTileState& Tile)
 		{
-			return Tile.Water();
+			return Tile.AddWater(WaterRules.StepsPerWatering, WaterRules.MaxLevel);
 		});
 }
 
@@ -84,7 +85,7 @@ void UFarmField::AdvanceDay()
 
 	for (FFarmTileState& Tile : Tiles)
 	{
-		Tile.AdvanceDay();
+		Tile.AdvanceDay(WaterRules.NightlyFall);
 	}
 	OnTilesChanged.Broadcast();
 }
@@ -95,7 +96,7 @@ void UFarmField::Resize(const FIntPoint& NewSize)
 
 	const FIntPoint OldSize = Size;
 	TArray<FFarmTileState> OldTiles = MoveTemp(Tiles);
-	Initialize(FieldId, NewSize);
+	Initialize(FieldId, NewSize, WaterRules);
 	for (int32 Y = 0; Y < FMath::Min(OldSize.Y, Size.Y); ++Y)
 	{
 		for (int32 X = 0; X < FMath::Min(OldSize.X, Size.X); ++X)
@@ -118,7 +119,7 @@ TArray<FFarmTileSaveData> UFarmField::GetTilesSaveData() const
 		FFarmTileSaveData& Data = SavedTiles.AddDefaulted_GetRef();
 		Data.Coordinates = FIntPoint(Index % Size.X, Index / Size.X);
 		Data.State = Tile.GetState();
-		Data.bWatered = Tile.IsWatered();
+		Data.WaterLevel = Tile.GetWaterLevel();
 		Data.GrowthDays = Tile.GetGrowthDays();
 		Data.CropId = Tile.GetCrop() ? Tile.GetCrop()->GetContentId() : NAME_None;
 	}
@@ -149,7 +150,7 @@ int32 UFarmField::RestoreTilesFromSaveData(const TArray<FFarmTileSaveData>& Save
 				Data.Coordinates.ToString(), FieldId);
 			++SkippedCount;
 		}
-		Tiles[Index].Restore(Data.State, Data.bWatered, Data.GrowthDays, SavedCrop);
+		Tiles[Index].Restore(Data.State, Data.WaterLevel, Data.GrowthDays, SavedCrop, WaterRules.MaxLevel);
 	}
 	OnTilesChanged.Broadcast();
 	return SkippedCount;

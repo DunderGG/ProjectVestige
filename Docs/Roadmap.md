@@ -217,7 +217,7 @@ Before more tools and [4.6](#46-interface-and-input):
 
 When working nearby:
 
-- [ ] Remove the data fields nothing reads (`WaterNeed`, `ContaminationTolerance` on crops, `SellPrice` on items) until their feature is designed ([L2](CodeReview.md#low)). The crops' `Seasons` stays: its tags are the calendar's seasons (2026-11-14), planting reads it (2026-11-19), and the withering item in 4.2 reads it next
+- [ ] Remove the data fields nothing reads (`ContaminationTolerance` on crops, `SellPrice` on items) until their feature is designed ([L2](CodeReview.md#low)). The crops' `Seasons` stays: its tags are the calendar's seasons (2026-11-14), planting reads it (2026-11-19), and the withering item in 4.2 reads it next. `WaterNeed` went with tile water (2026-11-20): a crop needs any water
 - [x] Standard ability tasks (wait delay, montages) instead of timers in abilities ([L3](CodeReview.md#low))
    - Done 2026-11-07 with H1: the tool abilities wait with `WaitDelay` and `WaitMovementModeChange`; no other ability used a timer. Montages come with tool animations
 - [ ] Blueprint tool abilities, H1's modding half: make `CanUseOn` and `UseOn` Blueprint-implementable, make the field's rules callable from Blueprints, and turn the tool's `Ability` into a soft class reference in its bundle, when mod support is designed ([Systems.md, section 9](Systems.md#9-abilities-attributes-and-effects-gameplay-ability-system), tools as abilities)
@@ -356,7 +356,10 @@ The code changes that the slice's content depends on. Doing them first means add
 - [ ] Normal crops can mutate in irradiated soil *(decide how often)*
 - [ ] Radiation level on each tile: slows or stops growth, and can be cleaned
 - [ ] A way to clean radiation, such as a tool, fertilizer or a crop that absorbs it
-- [ ] Water level on each tile, so watering is a state the tile tracks
+- [x] Water level on each tile, so watering is a state the tile tracks
+   - Done 2026-11-20, after design and code review by a senior Unreal C++ reviewer agent, whose approval counts as @DunderGG's ([Systems/22-FarmFields.md](Systems/22-FarmFields.md); decision log): each tile holds a water level from 0 to 2; a watering-can use adds 1 (a held press waters each tile once), a full tile says "The soil is already soaked." and costs nothing; each night crops on wet tiles grow, then every tile loses 1. The numbers are in Project Settings > Game > Vestige Farm Fields (`UFarmFieldSettings`). Saves stay version 1: an older save loads with dry tiles. The soil darkens per step (`M_FarmSoil`, custom data index 3), replacing `M_Soil` and `M_Soil_Watered`. Built on the game designer's recommended options, still open for @DunderGG ([GameDesign.md, section 15](GameDesign.md#15-open-questions))
+- [ ] A dry crop looks thirsty (paler, a little drooped) while its tile is dry, so the player notices a crop that won't grow ([GameDesign.md, section 15](GameDesign.md#15-open-questions), recommended option)
+- [ ] Rename the soil's Blender material `M_Soil` in `Art/Blender/make_farm_assets.py` (`SM_Soil_Tilled`'s slot still carries the deleted material's name) at the next re-export, and reimport with no materials made (art review, 2026-11-20)
 - [ ] Clean water as a resource: a water source on the farm that the watering can fills from
 - [ ] Dirty water: easy to get, but raises tile radiation
 - [x] A 28-day season with the date and the days left shown on the HUD

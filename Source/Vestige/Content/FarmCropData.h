@@ -185,10 +185,6 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Farming|Growth", meta = (AllowPrivateAccess = "true", ClampMin = 1))
 	int32 DaysToMature = 3;
 
-	/** Tile water level, from 0 (dry) to 1 (soaked), the crop needs to grow that day. Not used yet: any watered tile grows. */
-	UPROPERTY(EditDefaultsOnly, Category = "Farming|Growth", meta = (AllowPrivateAccess = "true", ClampMin = 0, ClampMax = 1))
-	float WaterNeed = 0.f;
-
 	/** Highest tile contamination, from 0 (clean) to 1, the crop still grows in. Not used yet: tiles have no contamination. */
 	UPROPERTY(EditDefaultsOnly, Category = "Farming|Growth", meta = (AllowPrivateAccess = "true", ClampMin = 0, ClampMax = 1))
 	float ContaminationTolerance = 1.f;

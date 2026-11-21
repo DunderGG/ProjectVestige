@@ -14,10 +14,10 @@
 
 namespace FarmFieldMeshes
 {
-	/** A part's color as the per-instance custom data the placeholder material reads. */
-	TArray<float, TFixedAllocator<FarmTileLooks::NumCustomDataFloats>> ToCustomData(const FLinearColor& Color)
+	/** A part's color and water as the per-instance custom data its material reads: the color, then the water at WaterCustomDataIndex. */
+	TArray<float, TFixedAllocator<FarmTileLooks::NumCustomDataFloats>> ToCustomData(const FFarmTilePartLook& Look)
 	{
-		return {Color.R, Color.G, Color.B};
+		return {Look.Color.R, Look.Color.G, Look.Color.B, Look.Water};
 	}
 }
 
@@ -121,6 +121,8 @@ void UFarmFieldMeshesComponent::RedrawField()
 		return;
 	}
 
+	const int32 MaxWaterLevel = CurrentField->GetWaterRules().MaxLevel;
+
 	// Queued per set first, so each set takes all its instances in one call.
 	TArray<FPendingSet> Pending;
 	for (int32 Y = 0; Y < Size.Y; ++Y)
@@ -128,7 +130,7 @@ void UFarmFieldMeshesComponent::RedrawField()
 		for (int32 X = 0; X < Size.X; ++X)
 		{
 			const FIntPoint Coordinates(X, Y);
-			const FFarmTileLook Look = FarmTileLooks::GetLook(*CurrentField->GetTile(Coordinates), Looks);
+			const FFarmTileLook Look = FarmTileLooks::GetLook(*CurrentField->GetTile(Coordinates), Looks, MaxWaterLevel);
 			const FTransform TileTransform = GetTileTransform(Coordinates);
 			const int32 Index = Y * Size.X + X;
 			QueuePart(Pending, SoilInstances[Index], Look.Soil, TileTransform);
@@ -170,7 +172,7 @@ void UFarmFieldMeshesComponent::QueuePart(
 	}
 	FPendingSet& SetBatch = Pending[Instance.SetIndex];
 	SetBatch.Transforms.Add(Look.Transform * TileTransform);
-	SetBatch.CustomData.Append(FarmFieldMeshes::ToCustomData(Look.Color));
+	SetBatch.CustomData.Append(FarmFieldMeshes::ToCustomData(Look));
 	SetBatch.Instances.Add(&Instance);
 }
 
@@ -184,7 +186,7 @@ void UFarmFieldMeshesComponent::RedrawTile(const FIntPoint& Coordinates)
 		return;
 	}
 
-	const FFarmTileLook Look = FarmTileLooks::GetLook(*Tile, Looks);
+	const FFarmTileLook Look = FarmTileLooks::GetLook(*Tile, Looks, CurrentField->GetWaterRules().MaxLevel);
 	const FTransform TileTransform = GetTileTransform(Coordinates);
 	ShowPart(SoilInstances[Index], &Look.Soil, TileTransform);
 	ShowPart(CropInstances[Index], Look.Crop.GetPtrOrNull(), TileTransform);
@@ -200,7 +202,7 @@ void UFarmFieldMeshesComponent::ShowPart(FTileInstance& Instance, const FFarmTil
 
 	const int32 SetIndex = FindOrAddSet(*Look->Mesh, Look->Material);
 	const FTransform InstanceTransform = Look->Transform * TileTransform;
-	const auto CustomData = FarmFieldMeshes::ToCustomData(Look->Color);
+	const auto CustomData = FarmFieldMeshes::ToCustomData(*Look);
 	if (SetIndex != Instance.SetIndex)
 	{
 		HidePart(Instance);

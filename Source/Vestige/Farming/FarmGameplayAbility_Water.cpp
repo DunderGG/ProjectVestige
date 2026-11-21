@@ -15,11 +15,28 @@ bool UFarmGameplayAbility_Water::CanUseOn(const FIntPoint& Tile, FVestigeFeedbac
 	{
 		return FailBecause(OutFailure, VestigeGameplayTags::Feedback_Tool_NoTarget);
 	}
-	return State->CanWater() || FailBecause(OutFailure, VestigeGameplayTags::Feedback_Farm_CantWater);
+	if (State->GetState() == EFarmTileState::Grass)
+	{
+		return FailBecause(OutFailure, VestigeGameplayTags::Feedback_Farm_CantWater);
+	}
+	const bool bCanAddWater = State->CanAddWater(Field->GetWaterRules().MaxLevel) && !TilesWateredThisPress.Contains(Tile);
+	return bCanAddWater || FailBecause(OutFailure, VestigeGameplayTags::Feedback_Farm_Soaked);
 }
 
 bool UFarmGameplayAbility_Water::UseOn(const FIntPoint& Tile)
 {
 	UFarmField* Field = GetField();
-	return Field && Field->Water(Tile);
+	if (!Field || !Field->Water(Tile))
+	{
+		return false;
+	}
+	TilesWateredThisPress.Add(Tile);
+	return true;
+}
+
+void UFarmGameplayAbility_Water::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
+	const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
+{
+	TilesWateredThisPress.Reset();
+	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 }

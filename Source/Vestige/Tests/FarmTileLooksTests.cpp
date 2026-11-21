@@ -29,11 +29,9 @@ namespace FarmTileLooksTests
 			Settings.PlaceholderMaterial = &Spawner.SpawnObject<UMaterial>();
 		}
 
-		void AddSoilArt()
-		{
-			Settings.TilledSoilMesh = &Spawner.SpawnObject<UStaticMesh>();
-			Settings.WateredSoilMaterial = &Spawner.SpawnObject<UMaterial>();
-		}
+		void AddSoilArt() { Settings.TilledSoilMesh = &Spawner.SpawnObject<UStaticMesh>(); }
+
+		static constexpr int32 MaxWater = 2;
 
 		static FFarmTileState TilledTile()
 		{
@@ -45,7 +43,7 @@ namespace FarmTileLooksTests
 		static FFarmTileState PlantedTile(const UFarmCropData& Crop, int32 GrowthDays)
 		{
 			FFarmTileState Tile;
-			Tile.Restore(EFarmTileState::Planted, false, GrowthDays, &Crop);
+			Tile.Restore(EFarmTileState::Planted, 0, GrowthDays, &Crop, MaxWater);
 			return Tile;
 		}
 
@@ -53,7 +51,7 @@ namespace FarmTileLooksTests
 		{
 			AddSoilArt();
 
-			const FFarmTileLook Look = ::FarmTileLooks::GetLook(FFarmTileState(), Settings);
+			const FFarmTileLook Look = ::FarmTileLooks::GetLook(FFarmTileState(), Settings, MaxWater);
 
 			ASSERT_THAT(IsTrue(Look.Soil.Mesh == Settings.PlaceholderSoilMesh));
 			ASSERT_THAT(IsTrue(Look.Soil.Material == Settings.PlaceholderMaterial));
@@ -61,40 +59,112 @@ namespace FarmTileLooksTests
 			ASSERT_THAT(IsFalse(Look.Crop.IsSet()));
 		}
 
-		TEST_METHOD(TilledSoilUsesTheSoilArtAndTheWateredMaterialWhenWet)
+		TEST_METHOD(TilledSoilUsesTheSoilArtAndCarriesTheWaterFraction)
 		{
 			AddSoilArt();
 			FFarmTileState Tile = TilledTile();
 
-			const FFarmTileLook Dry = ::FarmTileLooks::GetLook(Tile, Settings);
-			Tile.Water();
-			const FFarmTileLook Wet = ::FarmTileLooks::GetLook(Tile, Settings);
+			const FFarmTileLook Dry = ::FarmTileLooks::GetLook(Tile, Settings, MaxWater);
+			Tile.AddWater(1, MaxWater);
+			const FFarmTileLook Wet = ::FarmTileLooks::GetLook(Tile, Settings, MaxWater);
 
 			ASSERT_THAT(IsTrue(Dry.Soil.Mesh == Settings.TilledSoilMesh));
 			ASSERT_THAT(IsNull(Dry.Soil.Material));
 			ASSERT_THAT(IsTrue(Wet.Soil.Mesh == Settings.TilledSoilMesh));
-			ASSERT_THAT(IsTrue(Wet.Soil.Material == Settings.WateredSoilMaterial));
+			ASSERT_THAT(IsTrue(Dry.Soil.Water == 0.f));
+			ASSERT_THAT(IsTrue(Wet.Soil.Water == 0.5f));
+		}
+
+		TEST_METHOD(SoilAndCropCarryTheWaterAsAFractionOfTheCap)
+		{
+			AddSoilArt();
+			UFarmCropData& Crop = Spawner.SpawnObject<UFarmCropData>();
+			const float Expected[] = {0.f, 0.5f, 1.f};
+
+			for (int32 Level = 0; Level <= MaxWater; ++Level)
+			{
+				FFarmTileState Tile;
+				Tile.Restore(EFarmTileState::Planted, Level, 0, &Crop, MaxWater);
+				const FFarmTileLook Look = ::FarmTileLooks::GetLook(Tile, Settings, MaxWater);
+
+				ASSERT_THAT(IsTrue(Look.Soil.Water == Expected[Level]));
+				ASSERT_THAT(IsTrue(Look.Crop.IsSet() && Look.Crop->Water == Expected[Level]));
+			}
+		}
+
+		TEST_METHOD(TheFractionFollowsTheFieldsCap)
+		{
+			FFarmTileState Tile;
+			Tile.Restore(EFarmTileState::Tilled, 1, 0, nullptr, 4);
+
+			const FFarmTileLook Look = ::FarmTileLooks::GetLook(Tile, Settings, 4);
+
+			ASSERT_THAT(IsTrue(Look.Soil.Water == 0.25f));
+		}
+
+		TEST_METHOD(ACapBelowOneIsReadAsOneAndGrassIsDry)
+		{
+			FFarmTileState Wet;
+			Wet.Restore(EFarmTileState::Tilled, 1, 0, nullptr, 1);
+
+			const FFarmTileLook Soaked = ::FarmTileLooks::GetLook(Wet, Settings, 0);
+			const FFarmTileLook Grass = ::FarmTileLooks::GetLook(FFarmTileState(), Settings, MaxWater);
+
+			ASSERT_THAT(IsTrue(Soaked.Soil.Water == 1.f));
+			ASSERT_THAT(IsTrue(Grass.Soil.Water == 0.f));
+		}
+
+		TEST_METHOD(TheSoilStaysInOneSetWhateverItsWater)
+		{
+			AddSoilArt();
+			FFarmTileState Tile = TilledTile();
+			const FFarmTileLook First = ::FarmTileLooks::GetLook(Tile, Settings, MaxWater);
+
+			for (int32 Level = 1; Level <= MaxWater; ++Level)
+			{
+				Tile.AddWater(1, MaxWater);
+				const FFarmTileLook Look = ::FarmTileLooks::GetLook(Tile, Settings, MaxWater);
+
+				ASSERT_THAT(IsTrue(Look.Soil.Mesh == First.Soil.Mesh));
+				ASSERT_THAT(IsTrue(Look.Soil.Material == First.Soil.Material));
+			}
+		}
+
+		TEST_METHOD(ThePlaceholderSoilGetsDarkerWithEachWaterStep)
+		{
+			FFarmTileState Tile = TilledTile();
+			float PreviousBrightness = TNumericLimits<float>::Max();
+
+			for (int32 Level = 0; Level <= MaxWater; ++Level)
+			{
+				const FLinearColor Color = ::FarmTileLooks::GetLook(Tile, Settings, MaxWater).Soil.Color;
+				const float Brightness = Color.R + Color.G + Color.B;
+
+				ASSERT_THAT(IsTrue(Brightness < PreviousBrightness));
+				PreviousBrightness = Brightness;
+				Tile.AddWater(1, MaxWater);
+			}
 		}
 
 		TEST_METHOD(WithoutSoilArtThePlaceholderShowsTilledAndWateredColors)
 		{
 			FFarmTileState Tile = TilledTile();
 
-			const FFarmTileLook Dry = ::FarmTileLooks::GetLook(Tile, Settings);
-			Tile.Water();
-			const FFarmTileLook Wet = ::FarmTileLooks::GetLook(Tile, Settings);
+			const FFarmTileLook Dry = ::FarmTileLooks::GetLook(Tile, Settings, MaxWater);
+			Tile.AddWater(MaxWater, MaxWater);
+			const FFarmTileLook Wet = ::FarmTileLooks::GetLook(Tile, Settings, MaxWater);
 
 			ASSERT_THAT(IsTrue(Dry.Soil.Mesh == Settings.PlaceholderSoilMesh));
-			ASSERT_THAT(IsTrue(Dry.Soil.Color == ::FarmTileLooks::TilledColor));
-			ASSERT_THAT(IsTrue(Wet.Soil.Color == ::FarmTileLooks::WateredColor));
+			ASSERT_THAT(IsTrue(Dry.Soil.Color.Equals(::FarmTileLooks::TilledColor)));
+			ASSERT_THAT(IsTrue(Wet.Soil.Color.Equals(::FarmTileLooks::WateredColor)));
 		}
 
 		TEST_METHOD(ACropWithoutStageMeshesIsAPlaceholderThatGrowsTallerAndRipens)
 		{
 			const UFarmCropData& Crop = Spawner.SpawnObject<UFarmCropData>();
 
-			const FFarmTileLook Seedling = ::FarmTileLooks::GetLook(PlantedTile(Crop, 0), Settings);
-			const FFarmTileLook Ripe = ::FarmTileLooks::GetLook(PlantedTile(Crop, Crop.GetDaysToMature()), Settings);
+			const FFarmTileLook Seedling = ::FarmTileLooks::GetLook(PlantedTile(Crop, 0), Settings, MaxWater);
+			const FFarmTileLook Ripe = ::FarmTileLooks::GetLook(PlantedTile(Crop, Crop.GetDaysToMature()), Settings, MaxWater);
 
 			ASSERT_THAT(IsTrue(Seedling.Crop.IsSet() && Ripe.Crop.IsSet()));
 			ASSERT_THAT(IsTrue(Seedling.Crop->Mesh == Settings.PlaceholderCropMesh));
@@ -130,7 +200,7 @@ namespace FarmTileLooksTests
 			ASSERT_THAT(IsNotNull(Crop));
 			ASSERT_THAT(IsNotNull(Crop->GetGrowthLook(0).Mesh));
 
-			const FFarmTileLook Look = ::FarmTileLooks::GetLook(PlantedTile(*Crop, 0), Settings);
+			const FFarmTileLook Look = ::FarmTileLooks::GetLook(PlantedTile(*Crop, 0), Settings, MaxWater);
 
 			ASSERT_THAT(IsTrue(Look.Crop.IsSet()));
 			ASSERT_THAT(IsTrue(Look.Crop->Mesh == Crop->GetGrowthLook(0).Mesh));
@@ -145,10 +215,10 @@ namespace FarmTileLooksTests
 
 			for (int32 Days = 0; Days < 4; ++Days)
 			{
-				const FFarmTileLook Growing = ::FarmTileLooks::GetLook(PlantedTile(Crop, Days), Settings);
+				const FFarmTileLook Growing = ::FarmTileLooks::GetLook(PlantedTile(Crop, Days), Settings, MaxWater);
 				ASSERT_THAT(IsTrue(Growing.Crop.IsSet() && Growing.Crop->Mesh != RipeMesh));
 			}
-			const FFarmTileLook Ripe = ::FarmTileLooks::GetLook(PlantedTile(Crop, 4), Settings);
+			const FFarmTileLook Ripe = ::FarmTileLooks::GetLook(PlantedTile(Crop, 4), Settings, MaxWater);
 			ASSERT_THAT(IsTrue(Ripe.Crop.IsSet() && Ripe.Crop->Mesh == RipeMesh));
 		}
 
@@ -160,7 +230,7 @@ namespace FarmTileLooksTests
 				UFarmCropData& Crop = Spawner.SpawnObject<UFarmCropData>();
 				Crop.SetDaysToMatureForTests(Days);
 
-				const FFarmTileLook Ripe = ::FarmTileLooks::GetLook(PlantedTile(Crop, Days), Settings);
+				const FFarmTileLook Ripe = ::FarmTileLooks::GetLook(PlantedTile(Crop, Days), Settings, MaxWater);
 
 				ASSERT_THAT(IsTrue(Ripe.Crop.IsSet()));
 				if (RipeHeight < 0.f)
@@ -179,7 +249,7 @@ namespace FarmTileLooksTests
 			const FFarmCropGrowthLook GrowthLook = Crop.GetGrowthLook(1);
 			ASSERT_THAT(IsTrue(GrowthLook.Scale < 1.f));
 
-			const FFarmTileLook Look = ::FarmTileLooks::GetLook(PlantedTile(Crop, 1), Settings);
+			const FFarmTileLook Look = ::FarmTileLooks::GetLook(PlantedTile(Crop, 1), Settings, MaxWater);
 
 			ASSERT_THAT(IsTrue(Look.Crop.IsSet()));
 			ASSERT_THAT(IsTrue(Look.Crop->Transform.GetScale3D().Equals(FVector(GrowthLook.Scale))));

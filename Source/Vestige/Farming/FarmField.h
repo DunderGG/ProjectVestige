@@ -24,8 +24,14 @@ class UFarmField : public UObject
 	GENERATED_BODY()
 
 public:
-	/** Sets the field up as InSize grass tiles. Called once, by UFarmFieldSubsystem when it makes the field. */
-	void Initialize(FName InFieldId, const FIntPoint& InSize);
+	/**
+	 * Sets the field up as InSize grass tiles that follow InWaterRules (each number lifted to at least 1). Called once, by
+	 * UFarmFieldSubsystem when it makes the field.
+	 */
+	void Initialize(FName InFieldId, const FIntPoint& InSize, const FFarmWaterRules& InWaterRules);
+
+	/** The water rules every tile of this field follows. */
+	const FFarmWaterRules& GetWaterRules() const { return WaterRules; }
 
 	FName GetFieldId() const { return FieldId; }
 
@@ -41,10 +47,14 @@ public:
 	// coordinates are outside the field), and broadcasts OnTileChanged when it changes the tile.
 	bool Till(const FIntPoint& Coordinates);
 	bool Plant(const FIntPoint& Coordinates, const UFarmCropData* Crop);
+	/** Adds the rules' StepsPerWatering to the tile's water, up to the rules' MaxLevel. */
 	bool Water(const FIntPoint& Coordinates);
 	bool Harvest(const FIntPoint& Coordinates);
 
-	/** Starts a new day on every tile: watered crops grow one stage, then the soil dries out. Broadcasts OnTilesChanged. */
+	/**
+	 * Starts a new day on every tile: crops on watered tiles grow one stage, then every tile loses the nightly fall.
+	 * Broadcasts OnTilesChanged.
+	 */
 	void AdvanceDay();
 
 	/**
@@ -83,6 +93,10 @@ private:
 
 	UPROPERTY(VisibleInstanceOnly, Category = "Farming")
 	FIntPoint Size = FIntPoint::ZeroValue;
+
+	/** The numbers of the water rules, copied from the settings when the field was made, so tests can use their own. */
+	UPROPERTY(VisibleInstanceOnly, Category = "Farming")
+	FFarmWaterRules WaterRules;
 
 	/** Size.X * Size.Y tiles, row by row. A property, so the crops planted in them stay loaded with the field. */
 	UPROPERTY(VisibleInstanceOnly, Category = "Farming")

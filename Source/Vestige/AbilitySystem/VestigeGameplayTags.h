@@ -71,8 +71,11 @@ namespace VestigeGameplayTags
 	/** The plant ability, instead of Farm.TooLate when no days are left before the deadline season. The same values. */
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Feedback_Farm_TooLate_LastDay);
 
-	/** The water ability, on the press: nothing on the tile can be watered. */
+	/** The water ability, on the press: nothing to water on the tile, which is grass. */
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Feedback_Farm_CantWater);
+
+	/** The water ability, on the press: the tile already holds all the water it can. */
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Feedback_Farm_Soaked);
 
 	/** The harvest ability, on the press: no ripe crop on the tile. */
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Feedback_Farm_NothingRipe);

@@ -13,6 +13,7 @@
 #include "Farming/FarmGrid.h"
 #include "Farming/FarmTileLooks.h"
 #include "Materials/Material.h"
+#include "Materials/MaterialExpressionPerInstanceCustomData.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "UObject/UObjectIterator.h"
 
@@ -47,8 +48,8 @@ namespace FarmFieldMeshesTests
 
 		static bool HasColor(const TArray<float>& CustomData, const FLinearColor& Color)
 		{
-			return CustomData.Num() == FarmTileLooks::NumCustomDataFloats && CustomData[0] == Color.R && CustomData[1] == Color.G
-				&& CustomData[2] == Color.B;
+			return CustomData.Num() == FarmTileLooks::NumCustomDataFloats && FMath::IsNearlyEqual(CustomData[0], Color.R)
+				&& FMath::IsNearlyEqual(CustomData[1], Color.G) && FMath::IsNearlyEqual(CustomData[2], Color.B);
 		}
 
 		/** Tills, plants Crop in and waters the tile at Coordinates. */
@@ -97,9 +98,39 @@ namespace FarmFieldMeshesTests
 			ASSERT_THAT(IsTrue(HasColor(Meshes->GetSoilCustomData(FIntPoint(1, 2)), FarmTileLooks::TilledColor)));
 
 			Field->Water(FIntPoint(1, 2));
+			Field->Water(FIntPoint(1, 2));
 			ASSERT_THAT(IsTrue(HasColor(Meshes->GetSoilCustomData(FIntPoint(1, 2)), FarmTileLooks::WateredColor)));
 			ASSERT_THAT(IsTrue(HasColor(Meshes->GetSoilCustomData(FIntPoint(0, 0)), FarmTileLooks::GrassColor)));
 			ASSERT_THAT(IsTrue(Meshes->GetTotalInstanceCount() == 64));
+		}
+
+		TEST_METHOD(WateringChangesOnlyTheSoilsWaterCustomDataAndKeepsItsSet)
+		{
+			const FIntPoint Tile(1, 2);
+			Field->Till(Tile);
+			const int32 SoilBefore = PlaceholderCount(Looks().PlaceholderSoilMesh);
+			ASSERT_THAT(IsTrue(Meshes->GetSoilCustomData(Tile)[FarmTileLooks::WaterCustomDataIndex] == 0.f));
+
+			Field->Water(Tile);
+			ASSERT_THAT(IsTrue(Meshes->GetSoilCustomData(Tile)[FarmTileLooks::WaterCustomDataIndex] == 0.5f));
+			Field->Water(Tile);
+			ASSERT_THAT(IsTrue(Meshes->GetSoilCustomData(Tile)[FarmTileLooks::WaterCustomDataIndex] == 1.f));
+
+			ASSERT_THAT(IsTrue(PlaceholderCount(Looks().PlaceholderSoilMesh) == SoilBefore));
+			ASSERT_THAT(IsTrue(Meshes->GetTotalInstanceCount() == 64));
+			ASSERT_THAT(IsTrue(Meshes->GetSoilCustomData(FIntPoint(0, 0))[FarmTileLooks::WaterCustomDataIndex] == 0.f));
+		}
+
+		TEST_METHOD(ANightLowersTheSoilsWaterCustomData)
+		{
+			const FIntPoint Tile(1, 2);
+			Field->Till(Tile);
+			Field->Water(Tile);
+			Field->Water(Tile);
+
+			Field->AdvanceDay();
+
+			ASSERT_THAT(IsTrue(Meshes->GetSoilCustomData(Tile)[FarmTileLooks::WaterCustomDataIndex] == 0.5f));
 		}
 
 		TEST_METHOD(PlantingAddsACropInstanceAndHarvestingRemovesIt)
@@ -169,13 +200,44 @@ namespace FarmFieldMeshesTests
 			const AFarmGrid* GridDefaults = GetDefault<AFarmGrid>(GridClass);
 			const FFarmTileLookSettings& BlueprintLooks = GridDefaults->GetMeshes()->GetLookSettings();
 			ASSERT_THAT(IsNotNull(BlueprintLooks.TilledSoilMesh.Get()));
-			ASSERT_THAT(IsNotNull(BlueprintLooks.WateredSoilMaterial.Get()));
 			ASSERT_THAT(IsNotNull(BlueprintLooks.PlaceholderMaterial.Get()));
 
 			UMaterial* BaseMaterial = BlueprintLooks.PlaceholderMaterial->GetMaterial();
 			ASSERT_THAT(IsNotNull(BaseMaterial));
 			ASSERT_THAT(IsTrue(BlueprintLooks.PlaceholderMaterial->GetUsageByFlag(MATUSAGE_InstancedStaticMeshes)));
 			ASSERT_THAT(IsFalse(BaseMaterial->IsUsageFlagDirty(MATUSAGE_InstancedStaticMeshes)));
+		}
+
+		/**
+		 * The soil's material is an instance of M_FarmSoil, which reads the tile's water from custom data index
+		 * WaterCustomDataIndex, and every material on the mesh has the instanced mesh usage saved.
+		 */
+		TEST_METHOD(TheTilledSoilMaterialReadsTheWaterFromTheCustomData)
+		{
+			UClass* GridClass = LoadClass<AFarmGrid>(nullptr, TEXT("/Game/Vestige/Blueprints/BP_FarmGrid.BP_FarmGrid_C"));
+			ASSERT_THAT(IsNotNull(GridClass));
+			const UStaticMesh* SoilMesh = GetDefault<AFarmGrid>(GridClass)->GetMeshes()->GetLookSettings().TilledSoilMesh.Get();
+			ASSERT_THAT(IsNotNull(SoilMesh));
+			ASSERT_THAT(IsFalse(SoilMesh->GetStaticMaterials().IsEmpty()));
+
+			for (const FStaticMaterial& Slot : SoilMesh->GetStaticMaterials())
+			{
+				const UMaterialInterface* Material = Slot.MaterialInterface;
+				ASSERT_THAT(IsNotNull(Material));
+				ASSERT_THAT(IsTrue(Material->GetUsageByFlag(MATUSAGE_InstancedStaticMeshes)));
+				const UMaterial* BaseMaterial = Material->GetMaterial();
+				ASSERT_THAT(IsNotNull(BaseMaterial));
+				ASSERT_THAT(IsTrue(BaseMaterial->GetName() == TEXT("M_FarmSoil")));
+#if WITH_EDITORONLY_DATA
+				bool bReadsWater = false;
+				for (const UMaterialExpression* Expression : BaseMaterial->GetExpressions())
+				{
+					const UMaterialExpressionPerInstanceCustomData* CustomData = Cast<UMaterialExpressionPerInstanceCustomData>(Expression);
+					bReadsWater |= CustomData && CustomData->DataIndex == FarmTileLooks::WaterCustomDataIndex;
+				}
+				ASSERT_THAT(IsTrue(bReadsWater));
+#endif
+			}
 		}
 	};
 }

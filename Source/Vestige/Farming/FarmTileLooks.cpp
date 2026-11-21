@@ -24,13 +24,19 @@ namespace FarmTileLooks
 {
 	namespace Detail
 	{
-		FFarmTilePartLook GetSoilLook(const FFarmTileState& Tile, const FFarmTileLookSettings& Settings)
+		/** The tile's water level as a fraction of the field's cap, from 0 to 1. */
+		float GetWaterFraction(const FFarmTileState& Tile, int32 MaxWaterLevel)
+		{
+			return FMath::Clamp(static_cast<float>(Tile.GetWaterLevel()) / static_cast<float>(FMath::Max(MaxWaterLevel, 1)), 0.f, 1.f);
+		}
+
+		FFarmTilePartLook GetSoilLook(const FFarmTileState& Tile, const FFarmTileLookSettings& Settings, float WaterFraction)
 		{
 			FFarmTilePartLook Soil;
+			Soil.Water = WaterFraction;
 			if (Tile.GetState() != EFarmTileState::Grass && Settings.TilledSoilMesh)
 			{
 				Soil.Mesh = Settings.TilledSoilMesh;
-				Soil.Material = Tile.IsWatered() ? Settings.WateredSoilMaterial.Get() : nullptr;
 				return Soil;
 			}
 
@@ -43,7 +49,7 @@ namespace FarmTileLooks
 			}
 			else
 			{
-				Soil.Color = Tile.IsWatered() ? WateredColor : TilledColor;
+				Soil.Color = FMath::Lerp(TilledColor, WateredColor, WaterFraction);
 			}
 			return Soil;
 		}
@@ -64,11 +70,12 @@ namespace FarmTileLooks
 			return FMath::Clamp(static_cast<float>(Tile.GetGrowthDays()) / DaysToMature, 0.f, 1.f);
 		}
 
-		FFarmTilePartLook GetCropLook(const FFarmTileState& Tile, const FFarmTileLookSettings& Settings)
+		FFarmTilePartLook GetCropLook(const FFarmTileState& Tile, const FFarmTileLookSettings& Settings, float WaterFraction)
 		{
 			using namespace FarmTilePlaceholder;
 
 			FFarmTilePartLook Crop;
+			Crop.Water = WaterFraction;
 			const float SurfaceZ = Settings.TilledSoilMesh ? Settings.SoilSurfaceHeight : SoilTop;
 			const UFarmCropData* CropData = Tile.GetCrop();
 			const FFarmCropGrowthLook GrowthLook = CropData ? CropData->GetGrowthLook(Tile.GetGrowthDays()) : FFarmCropGrowthLook();
@@ -90,13 +97,14 @@ namespace FarmTileLooks
 		}
 	}
 
-	FFarmTileLook GetLook(const FFarmTileState& Tile, const FFarmTileLookSettings& Settings)
+	FFarmTileLook GetLook(const FFarmTileState& Tile, const FFarmTileLookSettings& Settings, int32 MaxWaterLevel)
 	{
+		const float WaterFraction = Detail::GetWaterFraction(Tile, MaxWaterLevel);
 		FFarmTileLook Look;
-		Look.Soil = Detail::GetSoilLook(Tile, Settings);
+		Look.Soil = Detail::GetSoilLook(Tile, Settings, WaterFraction);
 		if (Tile.GetState() == EFarmTileState::Planted)
 		{
-			Look.Crop = Detail::GetCropLook(Tile, Settings);
+			Look.Crop = Detail::GetCropLook(Tile, Settings, WaterFraction);
 		}
 		return Look;
 	}
