@@ -117,15 +117,6 @@ The key hints and the prompt name the keys of the device you used last, keyboard
 - [ ] **Touch screen** (Dunder-YOGA): touch the game view while playing: the keyboard hints stay (the game has no touch controls).
 - [ ] **Packaged build**: a packaged Development build switches the hints the same way.
 
-### Water level on each tile, 2026-11-20
-
-Each tile now holds up to two water steps instead of being wet or dry: every press of the watering can adds one, a crop grows on any night its tile has water, and each night takes one step. Holding E waters each tile once; a tile at two steps says "The soil is already soaked." and costs nothing (commit "Track a water level on each farm tile"). The rules, the save (old saves load dry) and the look's data are covered by tests; these checks are for how it looks and plays.
-
-- [ ] **The soil steps by day** (why a person: first look of a new material): in Play in `L_Farm`, till a tile and water it once, then again (release E between presses). Dry, one step and two steps are each clearly different: darker and a little glossier with each step, in daylight. The third press shows "The soil is already soaked." and the stamina doesn't change.
-- [ ] **The soil steps at night** (why a person: the art review wants it readable in the dark): type `SkipToTime 2200` in the console, then compare dry, one step and two steps on tilled tiles, with a planted tile too. The three still read apart (moonlight only; a torch is not needed).
-- [ ] **Holding E along a row** (why a person: feel; at the smoke test): till three tiles in a row, hold E and walk along them. Each gets one step, none gets two while you stand on it, and releasing and pressing again adds the second step.
-- [ ] **Does a second watering feel worth it?** (why a person: fun; at the smoke test): water a crop once and sleep: it grows and the soil is dry in the morning. Water it twice and sleep: it grows, the soil is still a step wet in the morning, and it grows a second night too. Note whether the second press feels like a choice or a chore, and whether "The soil is already soaked." reads clearly.
-
 ### Editor chores
 
 Changes only the editor can make safely. The steps are in [Roadmap.md, Housekeeping](Roadmap.md#3-housekeeping): re-saving the template Blueprints and `L_Farm`, moving `BP_FarmTile` and the materials with redirectors fixed, and regenerating the Android File Server token if it was ever used. After each one, run the [smoke test](#3-smoke-test).
