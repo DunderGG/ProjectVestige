@@ -5,6 +5,7 @@
 
 #include "Core/VestigeFeedbackSubsystem.h"
 #include "GameplayTagsManager.h"
+#include "Sound/SoundBase.h"
 
 #if WITH_EDITOR
 #include "Misc/DataValidation.h"
@@ -31,6 +32,13 @@ EDataValidationResult UVestigeFeedbackResponses::IsDataValid(FDataValidationCont
 			Context.AddError(FText::Format(
 				LOCTEXT("UnknownTag", "A row's tag '{0}' isn't a known gameplay tag. Pick a Vestige.Feedback tag or remove the row."),
 				FText::FromName(Row.Key.GetTagName())));
+			Result = EDataValidationResult::Invalid;
+		}
+		if (Row.Value.Sound && Row.Value.Sound->IsLooping())
+		{
+			Context.AddError(FText::Format(
+				LOCTEXT("LoopingSound", "The row for '{0}' plays '{1}', which loops. A feedback sound can't be stopped, so it must not loop."),
+				FText::FromName(Row.Key.GetTagName()), FText::FromString(GetNameSafe(Row.Value.Sound))));
 			Result = EDataValidationResult::Invalid;
 		}
 	}

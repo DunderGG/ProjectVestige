@@ -25,6 +25,7 @@
 #include "GameplayTagContainer.h"
 #include "Interaction/VestigeInteractionComponent.h"
 #include "Inventory/VestigeInventoryComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "Player/VestigePlayerCharacter.h"
 #include "Time/VestigeClockSubsystem.h"
 #include "TimerManager.h"
@@ -465,6 +466,14 @@ void AVestigeHUD::ShowFeedback(const FVestigeFeedbackReport& Report)
 		VESTIGE_LOG(this, LogVestigeFeedback, Warning, "{Responses} has no response to {Tag}, so the player sees nothing for it.",
 			GetNameSafe(FeedbackResponses), Report.Tag.ToString());
 		return;
+	}
+
+	if (Response->Sound)
+	{
+		// A game sound, not a UI sound: it pauses with the game (Systems.md, section 14).
+		constexpr bool bIsUISound = false;
+		VESTIGE_LOG(this, LogVestigeFeedback, Verbose, "Playing {Sound} for {Tag}.", GetNameSafe(Response->Sound), Report.Tag.ToString());
+		UGameplayStatics::PlaySound2D(this, Response->Sound, 1.f, 1.f, 0.f, nullptr, nullptr, bIsUISound);
 	}
 
 	// An empty message is a deliberate choice to show nothing for that report.

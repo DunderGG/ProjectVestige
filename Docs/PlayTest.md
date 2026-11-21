@@ -117,6 +117,15 @@ The key hints and the prompt name the keys of the device you used last, keyboard
 - [ ] **Touch screen** (Dunder-YOGA): touch the game view while playing: the keyboard hints stay (the game has no touch controls).
 - [ ] **Packaged build**: a packaged Development build switches the hints the same way.
 
+### The splash at the well, 2026-11-21
+
+Filling the watering can at the well now plays a splash (the first sound in the game, a script-made one: [Systems.md, section 14](Systems.md#14-audio)), along with the "Can filled." message. The rules (which rows play it, a short mono one-shot, sound classes, nothing looping) are automated tests; the path from the HUD to the sound playing is not automated or seen in a run, so the first check also confirms it plays at all. The commit is the one titled "Play a splash when the can fills at the well".
+
+- [ ] **The splash sounds like water into a can** (why a person: hearing, a new sound for the first time): in Play in Editor with speakers or headphones on, half empty the can and press F at the well. The splash plays at once (if you hear nothing, check the Output Log with `log LogVestigeFeedback Verbose` for "Playing S_Water_FillCan" and say which it was), about two thirds of a second, and sounds like water poured into a tin can (a slosh, small bubbles, a faint ring), with no click at the start or the end. If it sounds like a synthesizer, say so: the fallback is a recording.
+- [ ] **The level is right** (why a person: loudness, hardware): it is clearly audible at your normal volume, not startling, and not buried. There is no other sound yet, so judge it against silence.
+- [ ] **Both fills** (why a person: hearing): use the well up until it runs dry part-way through filling the can (the message says it ran dry): the splash plays with that message too. A full can ("The can is full") and a dry well make no sound.
+- [ ] **Pause** (why a person: feel; only if the game can be paused): pause during the splash: it pauses with the game and goes on when you resume.
+
 ### Editor chores
 
 Changes only the editor can make safely. The steps are in [Roadmap.md, Housekeeping](Roadmap.md#3-housekeeping): re-saving the template Blueprints and `L_Farm`, moving `BP_FarmTile` and the materials with redirectors fixed, and regenerating the Android File Server token if it was ever used. After each one, run the [smoke test](#3-smoke-test).
@@ -146,7 +155,7 @@ About five minutes in `L_Farm`, in Play in Editor at High. Run it before pushing
 8. **Season:** in the console `SetDay 27`, then sleep in the bed: the next morning reads "You slept. Spring, day 28 begins. It's the last day of spring.". Sleep again: the status line reads "Summer, Day 1" and one message says "You slept. Spring is over, and summer has begun. 27 days left.". Stop the game and play again: the date comes back the same ("Welcome back. Summer, day 1. 27 days left." among the messages).
 9. **Seeds and the season:** with seeds in hand the status line shows their days to ripen ("Cabbage Seeds (10 days to ripen)"). `SetDay 20`: pressing E with cabbage seeds on tilled soil warns once and plants nothing; pressing again plants. `SetDay 29`: seeds are refused ("These seeds don't grow in summer. Plant them in spring.").
 10. **Withering:** `SetDay 28`, with watered crops of every kind planted and one ripe crop, then sleep in the bed: the next morning says summer began and then that the crops withered. The spring crops stand as dead plants ("F Clear" on them), the ripe one is still harvestable, and "F Clear" leaves empty tilled soil.
-11. **Water:** with the can half empty, walk to the well in the service yard and press F: the can fills ("Can filled.", "Watering Can (8/8)") and the prompt counts the well's water down from 24. Use the well up ("The well is dry. It refills overnight."), sleep, and it is full again.
+11. **Water:** with the can half empty, walk to the well in the service yard and press F: the can fills with a splash ("Can filled.", "Watering Can (8/8)") and the prompt counts the well's water down from 24. Use the well up ("The well is dry. It refills overnight."), sleep, and it is full again.
 
 Put the save folder back afterwards if you want your farm as it was.
 

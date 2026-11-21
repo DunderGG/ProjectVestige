@@ -28,7 +28,7 @@ struct FVestigeFeedbackReport;
  * The farming HUD's data side for its player: the date and time from the game's UVestigeClockSubsystem, the item in hand
  * and the items from the inventory and the stamina from the ability system on the player state, the farmer's key hints,
  * the prompt for the interactable the pawn's UVestigeInteractionComponent focuses, and the message FeedbackResponses gives
- * each report UVestigeFeedbackSubsystem carries. It only displays.
+ * each report UVestigeFeedbackSubsystem carries, with the report's sound. It only presents: texts and sounds.
  * It creates its HudWidgetClass widget (WBP_Hud, set on BP_HUD) for a local player at BeginPlay, builds each text when an
  * event says what it shows has changed, and pushes it to the widget; the messages are the one thing it keeps, and only
  * until they fade. New HUD parts find their own data rather than growing this class (Systems.md, section 6).
@@ -140,7 +140,8 @@ private:
 	void HandleInputMethodChanged(ECommonInputType InputType);
 
 	/**
-	 * Shows the message FeedbackResponses gives Report, if it isn't empty; logs a warning for a report with no response.
+	 * Shows the message FeedbackResponses gives Report, if it isn't empty, and plays its sound, if it has one; logs a warning for
+	 * a report with no response.
 	 * Bound to UVestigeFeedbackSubsystem.
 	 */
 	void ShowFeedback(const FVestigeFeedbackReport& Report);

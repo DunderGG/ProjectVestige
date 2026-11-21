@@ -5,7 +5,8 @@ This folder contains the editable source files and export pipeline for the proje
 ## Folders
 
 - [`Blender/`](Blender/) contains the scripts that build the models, `FarmAssets.blend` (saved by `make_farm_assets.py`) and the `.blend` file of any mesh made by hand.
-- [`Export/`](Export/) contains the FBX files the scripts export, ready to import into Unreal.
+- [`Audio/`](Audio/) contains the plain Python scripts that synthesize the game's sounds (`make_water_fill_can.py` so far), one per sound, standard library only; see [Systems.md, section 14](../Docs/Systems/14-Audio.md).
+- [`Export/`](Export/) contains the FBX files the Blender scripts export and the WAV files the audio scripts write, ready to import into Unreal.
 
 The models are built by Python scripts, not by hand in Blender, so that anyone can rerun and change them. **The script is the source.** The files in `Export/` and a script's `.blend` are generated: change the script and run it again, don't edit them. A scripted mesh needs no `.blend` in the repository; commit one only for a mesh made by hand, where the `.blend` is the source. The export settings, scale, pivots and naming are in the [contributing art guide](../CONTRIBUTING.md#5-contributing-art), and how to run a script is in [Docs/Setup.md, section 11](../Docs/Setup.md#11-blender-art-only).
 

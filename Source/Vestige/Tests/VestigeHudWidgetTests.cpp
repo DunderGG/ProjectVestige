@@ -15,11 +15,16 @@
 #include "Content/VestigeCalendar.h"
 #include "CQTest.h"
 #include "GameFramework/GameModeBase.h"
+#include "Sound/SoundWave.h"
 #include "UI/VestigeHUD.h"
 #include "UI/VestigeFeedbackResponses.h"
 #include "UI/VestigeHudMessageWidget.h"
 #include "UI/VestigeHudMessages.h"
 #include "UI/VestigeHudWidget.h"
+
+#if WITH_EDITOR
+#include "Misc/DataValidation.h"
+#endif
 
 #define LOCTEXT_NAMESPACE "VestigeHudWidgetTests"
 
@@ -303,6 +308,27 @@ namespace VestigeHudWidgetTests
 			ASSERT_THAT(AreEqual(Format(1), FString(TEXT("1 crop withered. It doesn't grow in summer."))));
 			ASSERT_THAT(AreEqual(Format(3), FString(TEXT("3 crops withered. They don't grow in summer."))));
 		}
+
+#if WITH_EDITOR
+		TEST_METHOD(TheFeedbackResponsesRefuseALoopingSound)
+		{
+			const auto Validate = [](bool bLooping)
+			{
+				USoundWave* Sound = NewObject<USoundWave>();
+				Sound->bLooping = bLooping;
+				FVestigeFeedbackResponse Row;
+				Row.Message = LOCTEXT("TestMessage", "Test.");
+				Row.Sound = Sound;
+				UVestigeFeedbackResponses* Responses = NewObject<UVestigeFeedbackResponses>();
+				Responses->SetResponsesForTests({{VestigeGameplayTags::Feedback_Water_CanFilled, Row}});
+				FDataValidationContext Context;
+				return Responses->IsDataValid(Context);
+			};
+
+			ASSERT_THAT(IsTrue(Validate(true) == EDataValidationResult::Invalid));
+			ASSERT_THAT(IsTrue(Validate(false) != EDataValidationResult::Invalid));
+		}
+#endif
 
 		TEST_METHOD(EveryFeedbackTagHasAResponse)
 		{

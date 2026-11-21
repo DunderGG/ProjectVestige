@@ -9,9 +9,10 @@
 #include "VestigeFeedbackResponses.generated.h"
 
 struct FVestigeFeedbackReport;
+class USoundBase;
 
 /**
- * How the game responds to one feedback report. A struct, so the report's sound joins the same row when audio arrives.
+ * How the game responds to one feedback report: a message and a sound, each optional. A struct, so a row holds both.
  * BlueprintType only so editor scripts can make and set rows; Blueprints don't read it.
  */
 USTRUCT(BlueprintType)
@@ -25,6 +26,13 @@ struct FVestigeFeedbackResponse
 	 */
 	UPROPERTY(EditDefaultsOnly, Category = "Feedback")
 	FText Message;
+
+	/**
+	 * The sound the HUD plays for the report, or none for silence. Played as a 2D game sound (it pauses with the game) and
+	 * never looping, since nothing could stop it (Systems.md, section 14). It belongs to a sound class under SCL_Overall.
+	 */
+	UPROPERTY(EditDefaultsOnly, Category = "Feedback")
+	TObjectPtr<USoundBase> Sound;
 };
 
 /**
@@ -48,7 +56,7 @@ public:
 	const TMap<FGameplayTag, FVestigeFeedbackResponse>& GetResponses() const { return Responses; }
 
 #if WITH_EDITOR
-	/** Reports a row whose tag is empty or isn't a tag the tag manager knows. */
+	/** Reports a row whose tag is empty or isn't a tag the tag manager knows, and a row whose sound loops. */
 	virtual EDataValidationResult IsDataValid(FDataValidationContext& Context) const override;
 #endif
 
