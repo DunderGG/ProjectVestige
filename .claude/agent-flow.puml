@@ -105,6 +105,20 @@ fork again
   repeat while (**Art review** by the art reviewer
 renders, mesh, scripts, licensing) is (changes needed)
   ->approved;
+
+fork again
+  repeat
+    #E3F1F7:**Audio designer** (when sound is needed, in any lane)
+    Audio plan, sound script or licensed
+    recording, import, measurements;
+    note right
+      Can't hear: every new sound
+      gets a listening check
+      in PlayTest.md
+    end note
+  repeat while (**Sound review** by the reviewer
+scripts, import, data, licensing) is (changes needed)
+  ->approved;
 end fork
 
 :**Commit** (main session)
@@ -119,7 +133,8 @@ legend bottom left
   Bug fix: the test author writes a failing test first, then the implementer fixes it, then the code review.
   Working for a contributor: nothing stands in for the maintainer's review of the pull request.
   Art: the artist and the art review run alongside the code steps of any lane that needs art.
-  Editor and build steps never run at the same time, even across the code and art branches.
+  Sound: the audio designer and its review run the same way; a new sound class or way of playing sounds goes to the architect.
+  Editor and build steps never run at the same time, even across the code, art and sound branches.
   Typo fixes: no flow.
 endlegend
 @enduml

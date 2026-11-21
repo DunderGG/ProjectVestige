@@ -129,7 +129,8 @@ Keep things light so big farms stay fast: a crop or small prop in the hundreds o
 ## 6. Contributing audio
 
 - Deliver **WAV**, 16-bit or 24-bit, 44.1 or 48 kHz. Mono for sounds placed in the world, stereo for music and ambience.
-- Name sound waves `S_<Name>` and sound cues `SC_<Name>`, and put them in `Content/Vestige/Audio/`.
+- Name sound waves `S_<Name>` and MetaSound sources `MSS_<Name>` (no sound cues), and put them in `Content/Vestige/Audio/<Area>/`. The other audio prefixes are in [CodingGuidelines.md, section 14.2](Docs/CodingGuidelines.md#142-content-and-asset-naming), and the rules (sound classes, loading, what plays a sound) in [Systems/14-Audio.md](Docs/Systems/14-Audio.md).
+- Only sounds you made or recorded yourself, or library sounds under a license in [section 11](#11-licensing-and-credit) (CC0 where there is a choice). Give each one's source, author and license link in the pull request. Sounds, music or voices made with an AI generator need the maintainer's yes first.
 - Keep the source project files (DAW sessions, raw recordings) out of the repo unless they're needed to edit the sound later. Ask first if they are large.
 
 ## 7. Adding content the data-driven way
@@ -202,7 +203,7 @@ Before opening a pull request, check:
 
 ## 10. Working with AI tools
 
-You're welcome to use AI coding assistants. [AGENTS.md](AGENTS.md) (and `CLAUDE.md`, which loads it) gives them the project's rules, and its section "How work is done" splits the work into roles: a game designer, an architect, a reviewer, an implementer, a test author, an artist and an art reviewer. With Claude Code these roles are ready-made subagents in `.claude/agents/`; [.claude/README.md](.claude/README.md) shows how they work together. Their review is not the maintainer's: it happens before your pull request, which is still reviewed as usual. You are still responsible for what you submit: read and understand every change, build it and test it before opening a pull request.
+You're welcome to use AI coding assistants. [AGENTS.md](AGENTS.md) (and `CLAUDE.md`, which loads it) gives them the project's rules, and its section "How work is done" splits the work into roles: a game designer, an architect, a reviewer, an implementer, a test author, an artist, an art reviewer, an audio designer and a writer. With Claude Code these roles are ready-made subagents in `.claude/agents/`; [.claude/README.md](.claude/README.md) shows how they work together. Their review is not the maintainer's: it happens before your pull request, which is still reviewed as usual. You are still responsible for what you submit: read and understand every change, build it and test it before opening a pull request.
 
 ## 11. Licensing and credit
 

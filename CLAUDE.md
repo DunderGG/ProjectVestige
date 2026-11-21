@@ -20,6 +20,7 @@ The roles in "How work is done" in `AGENTS.md` are subagents in `.claude/agents/
 | Implementer | `vestige-implementer` |
 | Test author | `vestige-test-author` |
 | Artist | `vestige-artist` |
+| Audio designer | `vestige-audio-designer` (plans and makes sounds; reviewed by `vestige-reviewer`; can't hear, so every sound gets a listening check) |
 | Writer | `vestige-writer` (lore, story, dialogue, names and every text with a voice, in `Docs/Spoilers/`; outside the code flow; asks the user only about big canon) |
 
 - **The main session runs the flow.** Current Claude Code versions let a subagent start subagents of its own (three layers deep by default), but this flow doesn't use that: a subagent can't ask the user questions, so the main session would still have to relay them, and a layer more is one more context to pay for. So you start each step, pass results between them, decide when a review round is done, relay only game feel and game design questions to the user, and commit.
