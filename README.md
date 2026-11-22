@@ -30,7 +30,7 @@ Then double-click `Vestige.uproject`, let Unreal build the C++ modules, open `Co
 |---|---|
 | [Documentation index](Docs/README.md) | Index of the project's guides, plans, reviews, and tests |
 | [Game design](Docs/GameDesign.md) | The premise, intended experience, and planned gameplay |
-| [Roadmap](Docs/Roadmap.md) | What is implemented and what development plans next |
+| [Roadmap](Docs/Roadmap.md) | What development plans next; finished items are in [the roadmap archive](Docs/RoadmapArchive.md) |
 | [Setup guide](Docs/Setup.md) | Complete Windows setup, build, test, and troubleshooting instructions |
 | [Contributing guide](CONTRIBUTING.md) | Ways to help, repository workflow, and requirements for contributions |
 | [Architecture](Docs/Architecture.md) | How the code is organized and which classes own each responsibility |

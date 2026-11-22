@@ -16,7 +16,7 @@ Instructions for AI coding agents working in this repository. Humans can read it
 - **[Docs/CodingGuidelines.md](Docs/CodingGuidelines.md)** is the coding standard: how code looks. It is based on Epic's C++ Coding Standard and clean code principles.
 - **[Docs/Architecture.md](Docs/Architecture.md)** is the design: principles, where things go in Unreal's framework, who owns what, how systems talk. Its decision log is **[Docs/DecisionLog.md](Docs/DecisionLog.md)**: every design choice with its reasons.
 - **[Docs/Systems.md](Docs/Systems.md)**: the index of the system guides, best practice per game system (saving, content, input, UI, the Gameplay Ability System, AI, inventory...) from Epic's documentation and the Lyra sample, one file per system in `Docs/Systems/`. Read the guide for every system a change touches.
-- **[Docs/Roadmap.md](Docs/Roadmap.md)**: what's done and what's next. Tick items in the same commit that finishes them.
+- **[Docs/Roadmap.md](Docs/Roadmap.md)**: what's next. In the commit that finishes an item, tick it and move it to **[Docs/RoadmapArchive.md](Docs/RoadmapArchive.md)**, the record of finished items, which you don't need to read.
 - **[Docs/PlayTest.md](Docs/PlayTest.md)**: what @DunderGG checks by hand in the editor: pending checks for recent changes and the smoke test.
 
 - **[LICENSING.md](LICENSING.md)**: code is GPL-3.0-or-later with an Unreal Engine linking permission, assets are CC BY-NC-SA 4.0, Epic template material is under the UE EULA. New source files start with the SPDX license header shown there. Never add third-party code or assets without checking they are under a license CONTRIBUTING.md accepts, and record their source and license in CREDITS.md and the path table in LICENSING.md.

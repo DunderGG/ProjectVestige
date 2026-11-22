@@ -3,7 +3,7 @@
 **Reviewed:** 2026-11-04  
 **Scope:** A critical review of the game's C++ code and architecture, done as a senior Unreal Engine game developer would review a new team's codebase. It judges the code against Unreal practice first, and against this project's own rules ([Architecture.md](Architecture.md), [CodingGuidelines.md](CodingGuidelines.md), [Systems.md](Systems.md)) second, and says where a project rule is itself the problem. Earlier reviews are in [ArchitectureAudit.md](ArchitectureAudit.md) and [CodingGuidelinesAudit.md](CodingGuidelinesAudit.md).
 
-Every fix is a roadmap item in [Roadmap.md, section 4.0](Roadmap.md#40-structure-from-the-code-review), and the changes to project rules are in [section 3](Roadmap.md#3-housekeeping). When a finding is fixed, add a "**Status: Resolved (date).**" line under it and tick its roadmap item.
+Every fix is a roadmap item in [Roadmap.md, section 4.0](Roadmap.md#40-structure-from-the-code-review) (finished ones in [RoadmapArchive.md](RoadmapArchive.md#40-structure-from-the-code-review)), and the changes to project rules are in [section 3](Roadmap.md#3-housekeeping). When a finding is fixed, add a "**Status: Resolved (date).**" line under it and tick its roadmap item.
 
 ## Summary
 

@@ -141,7 +141,7 @@ A shipping bin stands in `L_Farm`'s service yard beside the well: F with a crop 
 
 ### Editor chores
 
-Changes only the editor can make safely. The steps are in [Roadmap.md, Housekeeping](Roadmap.md#3-housekeeping): re-saving the template Blueprints and `L_Farm`, moving `BP_FarmTile` and the materials with redirectors fixed, and regenerating the Android File Server token if it was ever used. After each one, run the [smoke test](#3-smoke-test).
+Changes only the editor can make safely. The steps are in [RoadmapArchive.md, Housekeeping](RoadmapArchive.md#3-housekeeping): re-saving the template Blueprints and `L_Farm`, moving `BP_FarmTile` and the materials with redirectors fixed, and regenerating the Android File Server token if it was ever used. After each one, run the [smoke test](#3-smoke-test).
 
 ### Editor-only level survey, 2026-11-14
 

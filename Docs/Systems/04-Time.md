@@ -2,7 +2,7 @@
 
 One of the [system guides](../Systems.md); read [How to use this document](../Systems.md#how-to-use-this-document) first.
 
-**Status:** day and clock built (`UVestigeClockSubsystem`, a game-instance subsystem, with `UVestigeClockSettings`; 2026-11-04), and the lighting that follows it (`AVestigeSkyLighting`). The calendar (seasons of 28 days, the date and the days left, [Roadmap.md, 4.2](../Roadmap.md#42-farming-depth)) is built (2026-11-14, below). Weather is milestone 3.
+**Status:** day and clock built (`UVestigeClockSubsystem`, a game-instance subsystem, with `UVestigeClockSettings`; 2026-11-04), and the lighting that follows it (`AVestigeSkyLighting`). The calendar (seasons of 28 days, the date and the days left, [RoadmapArchive.md, 4.2](../RoadmapArchive.md#42-farming-depth)) is built (2026-11-14, below). Weather is milestone 3.
 
 **References:** no single Epic system; the rules here follow [Architecture.md, sections 15 and 18](../Architecture.md#15-the-day-flow). Lighting follows Epic's "Sky Atmosphere", "Exponential Height Fog" and "Lumen" pages. The calendar: Lyra has none (its source has no season or calendar); Epic's "Text Formatting" page for plural forms; Lyra's `ULyraGameData` for global data in one primary data asset, as `UVestigeGameData` already is.
 
@@ -31,7 +31,7 @@ One of the [system guides](../Systems.md); read [How to use this document](../Sy
 - A calendar of one season (the "keep spring" option of [GameDesign.md, section 15](../GameDesign.md)) starts that season again every N days, and a season message would read "Spring is over, and spring has begun.": `GetDayKind` gives `NewSeason` only when the day before was another season, so that morning gets the usual day message and no `OnSeasonStarted`.
 - Listeners of `OnSeasonStarted` run in no guaranteed order (a multicast delegate's), and neither do those of `OnNewDay`. A message that must follow another follows from the day's steps (the rule "The morning's messages" above), never from which listener subscribed first; two season rules that both report need an ordered step.
 
-**The calendar** (2026-11-14, [Roadmap.md, 4.2](../Roadmap.md#42-farming-depth); the player's side is [GameDesign.md, section 5](../GameDesign.md#5-time-days-and-seasons)).
+**The calendar** (2026-11-14, [RoadmapArchive.md, 4.2](../RoadmapArchive.md#42-farming-depth); the player's side is [GameDesign.md, section 5](../GameDesign.md#5-time-days-and-seasons)).
 
 *Take, skip, change:* take Lyra's one global data asset (ours is `UVestigeGameData`, already loaded once at startup and cooked as the primary asset type `VestigeGameData`, [section 9](09-AbilitySystem.md)) for the calendar's definition. Skip a calendar subsystem or a season actor: the day count is the clock's, and a second owner would keep a second count. Change [Architecture.md, section 18](../Architecture.md#18-expected-changes)'s "seasons belong to the game state": a game state dies with each map, the clock lives in the game instance.
 

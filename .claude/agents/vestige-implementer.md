@@ -54,7 +54,7 @@ If the design rests on something that turns out false (an engine API that doesn'
 
 - Code comments and the `/** */` comments on classes and non-obvious public members.
 - The guide's Status in its file in `Docs/Systems/`, when what you built differs in detail from what it says. A deviation that changes an owner, an interface or a decision goes in your report instead; the main session updates `Docs/Architecture.md` once it is agreed.
-- `Docs/Roadmap.md`: tick the item the change finishes.
+- `Docs/Roadmap.md`: tick the item the change finishes and move it to `Docs/RoadmapArchive.md`, as the roadmap's opening lines say.
 - `Docs/CodingGuidelines.md` section 16 and a roadmap item, if you knowingly leave code that doesn't meet the guide.
 
 `Docs/PlayTest.md` and the tests belong to vestige-test-author: hand them what to test.

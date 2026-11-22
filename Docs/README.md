@@ -12,7 +12,8 @@ This folder contains project documentation for setting up, designing, building, 
 | [`Systems.md`](Systems.md) | Index of the system guides, one file per system in [`Systems/`](Systems/): implementation guidance for the game's systems and the Unreal Engine features they use. |
 | [`CodingGuidelines.md`](CodingGuidelines.md) | Define C++ conventions, asset naming, testing, and code review expectations. |
 | [`GameDesign.md`](GameDesign.md) | Describe the game's premise, intended experience, and gameplay design. |
-| [`Roadmap.md`](Roadmap.md) | Track completed work and planned milestones. |
+| [`Roadmap.md`](Roadmap.md) | Track the open work and planned milestones. |
+| [`RoadmapArchive.md`](RoadmapArchive.md) | Keep the finished roadmap items, under the roadmap's headings. |
 | [`PlayTest.md`](PlayTest.md) | List pending in-editor checks and the project's manual smoke test. |
 | [`PlayTestArchive.md`](PlayTestArchive.md) | Keep the play-test checks that have all passed, as the record of what was checked by hand. |
 | [`PerformanceBaseline.md`](PerformanceBaseline.md) | Record the performance baseline: each run on the benchmark scene, how it is measured and what it found. |

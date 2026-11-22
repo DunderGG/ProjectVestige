@@ -335,7 +335,7 @@ Each is in the [decision log](Architecture.md#16-decision-log) with its reason.
 
 ### Still open
 
-- Editor steps, listed in [Roadmap.md, Housekeeping](Roadmap.md#3-housekeeping): re-save the template Blueprints and `L_Farm` off the old module names, move `BP_FarmTile` and the materials with redirectors fixed, and regenerate the Android File Server token if it was ever used.
+- Editor steps, listed in [RoadmapArchive.md, Housekeeping](RoadmapArchive.md#3-housekeeping): re-save the template Blueprints and `L_Farm` off the old module names, move `BP_FarmTile` and the materials with redirectors fixed, and regenerate the Android File Server token if it was ever used.
 - A project material for the tile highlight (`M_TileHighlight`): done 2026-10-31, after the engine material drew as the default grey material in Unreal Engine 5.8 ([Architecture.md, decision log, 2026-10-31](Architecture.md#16-decision-log)).
 - The first performance baseline on the target hardware ([Architecture.md, section 10](Architecture.md#10-performance-by-design)).
 - Whether to split `Source/Vestige` into feature folders now that there are 20 of our own headers ([CodingGuidelines.md, section 14.1](CodingGuidelines.md#141-source)). @DunderGG's call.

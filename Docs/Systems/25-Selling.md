@@ -2,7 +2,7 @@
 
 One of the [system guides](../Systems.md); read [How to use this document](../Systems.md#how-to-use-this-document) first.
 
-**Status:** designed 2026-11-22 for [Roadmap.md, 4.5](../Roadmap.md#45-automation-and-selling) ("A shipping bin: crops put in it are sold overnight", "The currency ... on the HUD", the purse of "Starting seeds and a small purse for a new game", and the prices of the season budget), from [GameDesign.md, section 9](../GameDesign.md#economy) ("Selling at the shipping bin" and the season budget) and the recommended options of section 15 (the bin's use, the starting purse, no taking back, seeds don't sell), assumed until @DunderGG answers them. Built 2026-11-22; `SetUpShippingBin.py` has run, and `WBP_Hud`'s `MoneyText` (step 5 below) is a hand step. The seed shop, which spends money, comes after it and adds spending to the wallet.
+**Status:** designed 2026-11-22 for [RoadmapArchive.md, 4.5](../RoadmapArchive.md#45-automation-and-selling) ("A shipping bin: crops put in it are sold overnight", "The currency ... on the HUD", the purse of "Starting seeds and a small purse for a new game", and the prices of the season budget), from [GameDesign.md, section 9](../GameDesign.md#economy) ("Selling at the shipping bin" and the season budget) and the recommended options of section 15 (the bin's use, the starting purse, no taking back, seeds don't sell), assumed until @DunderGG answers them. Built 2026-11-22; `SetUpShippingBin.py` has run, and `WBP_Hud`'s `MoneyText` (step 5 below) is a hand step. The seed shop, which spends money, comes after it and adds spending to the wallet.
 
 **References:**
 

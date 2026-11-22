@@ -34,7 +34,7 @@ Replaces the earlier messages check (c87081e), after @DunderGG's note that messa
 
 ### Unreal Engine 5.8.4 build, 2026-10-30
 
-The project now builds only with 5.8. The rest of the upgrade (assets, rendering, documents) is in [Roadmap.md, section 4.1, Engine](Roadmap.md#41-foundations).
+The project now builds only with 5.8. The rest of the upgrade (assets, rendering, documents) is in [RoadmapArchive.md, section 4.1, Engine](RoadmapArchive.md#41-foundations).
 
 - [x] **Editor start** (674adff): double-clicking `Vestige.uproject` opens the 5.8 editor straight away, with no "Target Upgrade Required" or "missing modules" prompt, and the Output Log at start has no `LogVestige` errors.
 - [x] **Walking** (de2e2c2): a tap of W, A, S or D still turns the farmer with barely a step, and holding a key walks as before.
