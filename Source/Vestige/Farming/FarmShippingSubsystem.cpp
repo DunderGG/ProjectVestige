@@ -57,7 +57,7 @@ FFarmShipResult UFarmShippingSubsystem::ShipFromSlot(UVestigeInventoryComponent&
 	}
 
 	// Removed first: a refused removal ships nothing, and nothing is counted twice.
-	if (!Inventory.TryRemoveItemFromSlot(Slot, Count))
+	if (!Inventory.RemoveItemFromSlot(Slot, Count))
 	{
 		return {};
 	}

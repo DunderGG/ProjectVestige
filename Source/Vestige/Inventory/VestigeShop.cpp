@@ -10,7 +10,7 @@
 
 namespace VestigeShop
 {
-	EVestigeBuyResult TryBuy(
+	EVestigeBuyResult Buy(
 		UVestigeInventoryComponent& Inventory, UVestigeWalletComponent& Wallet, const FVestigeShopOffer& Offer, int32 Count)
 	{
 		const FString ItemName = Offer.ItemId.ToString();
@@ -39,11 +39,11 @@ namespace VestigeShop
 
 		// The cost is at most the purse here, so it fits an int32.
 		const int32 Spent = static_cast<int32>(Cost);
-		if (!Wallet.TrySpendMoney(Spent))
+		if (!Wallet.SpendMoney(Spent))
 		{
 			return EVestigeBuyResult::NotEnoughMoney;
 		}
-		if (!Inventory.TryAddItem(Offer.ItemId, Count))
+		if (!Inventory.AddItem(Offer.ItemId, Count))
 		{
 			// Both were checked, so this is broken state; give the coins back so the player never pays for nothing.
 			Wallet.AddMoney(Spent);

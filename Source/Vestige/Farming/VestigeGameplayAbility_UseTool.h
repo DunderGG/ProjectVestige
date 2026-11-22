@@ -131,8 +131,8 @@ private:
 		WaitingForLanding
 	};
 
-	/** Tries the next use: the first after the press, or a repeat while the key is held. Ends the ability when there is none. */
-	void TryNextUse();
+	/** Starts the next use: the first after the press, or a repeat while the key is held. Ends the ability when there is none. */
+	void StartNextUse();
 
 	/** Waits for another target while the key is held, or ends the ability. */
 	void WaitForTargetOrEnd();

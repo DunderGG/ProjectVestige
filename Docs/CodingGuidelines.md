@@ -552,6 +552,7 @@ Before committing, check:
 - [ ] Design changes are reflected in [Architecture.md](Architecture.md) (ownership table) and [DecisionLog.md](DecisionLog.md).
 - [ ] The change follows the guide in [Systems.md](Systems.md) for each system it touches, and the guide is updated if the system changed.
 - [ ] Names follow the prefixes, the `Vestige` or `Farm` project prefix and PascalCase, and nothing shadows a base class member.
+- [ ] Function names follow [section 2.3](#23-case-and-wording): verbs for actions, questions for `bool` queries, no `Try` prefix on functions that can fail.
 - [ ] Changed files are formatted with clang-format.
 - [ ] New source files start with the copyright and SPDX license header.
 - [ ] Headers forward declare; `.cpp` files include what they use, own header first.

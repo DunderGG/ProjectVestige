@@ -25,7 +25,7 @@ bool FVestigeInventory::CanAdd(const UVestigeItemData& Item, int32 Count) const
 	return Count > 0 && GetRoomFor(Item) >= Count;
 }
 
-bool FVestigeInventory::TryAdd(const UVestigeItemData& Item, int32 Count)
+bool FVestigeInventory::Add(const UVestigeItemData& Item, int32 Count)
 {
 	if (!CanAdd(Item, Count))
 	{
@@ -55,7 +55,7 @@ bool FVestigeInventory::TryAdd(const UVestigeItemData& Item, int32 Count)
 	return true;
 }
 
-bool FVestigeInventory::TryRemove(const UVestigeItemData& Item, int32 Count)
+bool FVestigeInventory::Remove(const UVestigeItemData& Item, int32 Count)
 {
 	if (Count <= 0 || GetCount(Item) < Count)
 	{
@@ -81,7 +81,7 @@ bool FVestigeInventory::TryRemove(const UVestigeItemData& Item, int32 Count)
 	return true;
 }
 
-bool FVestigeInventory::TryRemoveFromSlot(int32 SlotIndex, int32 Count)
+bool FVestigeInventory::RemoveFromSlot(int32 SlotIndex, int32 Count)
 {
 	if (Count <= 0 || !Slots.IsValidIndex(SlotIndex) || Slots[SlotIndex].Count < Count)
 	{

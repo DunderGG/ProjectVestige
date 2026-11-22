@@ -46,7 +46,7 @@ bool UFarmGameplayAbility_Harvest::UseOn(const FIntPoint& Tile)
 	{
 		return false;
 	}
-	GetInventory()->TryAddItem(Crop->GetHarvestItemId(), Crop->GetYield());
+	GetInventory()->AddItem(Crop->GetHarvestItemId(), Crop->GetYield());
 	if (UFarmingComponent* FarmingComponent = GetFarming())
 	{
 		FarmingComponent->ReportCropHarvested(*Crop, Tile);

@@ -30,7 +30,7 @@ namespace FarmWateringCan
 		return Stat ? FMath::Clamp(*Stat, 0, Capacity) : Capacity;
 	}
 
-	bool TryPour(UVestigeInventoryComponent& Inventory, int32 Slot)
+	bool Pour(UVestigeInventoryComponent& Inventory, int32 Slot)
 	{
 		const int32 Water = GetWater(Inventory, Slot);
 		if (Water < WaterPerWatering)

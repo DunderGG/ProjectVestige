@@ -82,7 +82,7 @@ bool UFarmGameplayAbility_Plant::UseOn(const FIntPoint& Tile)
 	// From the stack in hand, so another stack of the same seed stays as it is. This can empty the hand, which takes this
 	// ability back once its use has finished.
 	UVestigeInventoryComponent* Inventory = GetInventory();
-	Inventory->TryRemoveItemFromSlot(Inventory->GetSelectedHotbarSlot(), 1);
+	Inventory->RemoveItemFromSlot(Inventory->GetSelectedHotbarSlot(), 1);
 	return true;
 }
 

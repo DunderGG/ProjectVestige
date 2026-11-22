@@ -69,7 +69,7 @@ bool UVestigeWalletComponent::AddMoney(int32 Amount)
 	return true;
 }
 
-bool UVestigeWalletComponent::TrySpendMoney(int32 Amount)
+bool UVestigeWalletComponent::SpendMoney(int32 Amount)
 {
 	if (Amount <= 0 || Amount > Money)
 	{

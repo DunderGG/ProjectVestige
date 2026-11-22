@@ -252,7 +252,7 @@ namespace VestigeSaveRegistryTests
 			UFarmingComponent* Farming = Before.Character->FindComponentByClass<UFarmingComponent>();
 			ASSERT_THAT(IsNotNull(Farming));
 			const FPrimaryAssetId SeedId(UVestigeItemData::AssetType, TEXT("Base.TurnipSeeds"));
-			ASSERT_THAT(IsTrue(Inventory->TryAddItem(SeedId, 3)));
+			ASSERT_THAT(IsTrue(Inventory->AddItem(SeedId, 3)));
 			const int32 Seeds = Inventory->GetItemCount(SeedId);
 			AbilitySystem->SetNumericAttributeBase(UVestigeStaminaSet::GetStaminaAttribute(), 37.f);
 			const TSubclassOf<UGameplayEffect> Exhausted = UVestigeGameData::Get().GetExhaustedEffect();

@@ -75,16 +75,16 @@ public:
 	 * Adds Count of Item, topping up its stacks in slot order before filling empty slots in order.
 	 * Returns false, changing nothing, if they don't all fit or Count is below 1.
 	 */
-	bool TryAdd(const UVestigeItemData& Item, int32 Count);
+	bool Add(const UVestigeItemData& Item, int32 Count);
 
 	/** Removes Count of Item, from its last stacks first. Returns false, changing nothing, if there are fewer or Count is below 1. */
-	bool TryRemove(const UVestigeItemData& Item, int32 Count);
+	bool Remove(const UVestigeItemData& Item, int32 Count);
 
 	/**
 	 * Removes Count from the slot at SlotIndex only, leaving other stacks of its item as they are. Returns false, changing
 	 * nothing, if the slot doesn't exist or holds fewer, or Count is below 1.
 	 */
-	bool TryRemoveFromSlot(int32 SlotIndex, int32 Count);
+	bool RemoveFromSlot(int32 SlotIndex, int32 Count);
 
 	/**
 	 * Puts up to Count of Item into the slot at SlotIndex, if that slot exists and is empty, never above the item's stack size.

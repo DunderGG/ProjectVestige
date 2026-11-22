@@ -244,7 +244,7 @@ namespace VestigeWalletTests
 					MoneyAtBroadcast = Wallet->GetMoney();
 				});
 
-			ASSERT_THAT(IsTrue(Wallet->TrySpendMoney(30)));
+			ASSERT_THAT(IsTrue(Wallet->SpendMoney(30)));
 
 			ASSERT_THAT(AreEqual(Wallet->GetMoney(), Before - 30));
 			ASSERT_THAT(AreEqual(Broadcasts, 1));
@@ -264,8 +264,8 @@ namespace VestigeWalletTests
 				});
 
 			// There is no debt, by one coin or by a lot.
-			ASSERT_THAT(IsFalse(Wallet->TrySpendMoney(Before + 1)));
-			ASSERT_THAT(IsFalse(Wallet->TrySpendMoney(MAX_int32)));
+			ASSERT_THAT(IsFalse(Wallet->SpendMoney(Before + 1)));
+			ASSERT_THAT(IsFalse(Wallet->SpendMoney(MAX_int32)));
 
 			ASSERT_THAT(AreEqual(Wallet->GetMoney(), Before));
 			ASSERT_THAT(AreEqual(Broadcasts, 0));
@@ -284,9 +284,9 @@ namespace VestigeWalletTests
 				});
 
 			// A negative spend would be a hidden add.
-			ASSERT_THAT(IsFalse(Wallet->TrySpendMoney(0)));
-			ASSERT_THAT(IsFalse(Wallet->TrySpendMoney(-20)));
-			ASSERT_THAT(IsFalse(Wallet->TrySpendMoney(MIN_int32)));
+			ASSERT_THAT(IsFalse(Wallet->SpendMoney(0)));
+			ASSERT_THAT(IsFalse(Wallet->SpendMoney(-20)));
+			ASSERT_THAT(IsFalse(Wallet->SpendMoney(MIN_int32)));
 
 			ASSERT_THAT(AreEqual(Wallet->GetMoney(), Before));
 			ASSERT_THAT(AreEqual(Broadcasts, 0));
@@ -297,11 +297,11 @@ namespace VestigeWalletTests
 			UVestigeWalletComponent* Wallet = SpawnPlayerState().GetWallet();
 			ASSERT_THAT(IsNotNull(Wallet));
 
-			ASSERT_THAT(IsTrue(Wallet->TrySpendMoney(Wallet->GetMoney())));
+			ASSERT_THAT(IsTrue(Wallet->SpendMoney(Wallet->GetMoney())));
 
 			ASSERT_THAT(AreEqual(Wallet->GetMoney(), 0));
 			// An empty purse can't spend even one coin.
-			ASSERT_THAT(IsFalse(Wallet->TrySpendMoney(1)));
+			ASSERT_THAT(IsFalse(Wallet->SpendMoney(1)));
 			ASSERT_THAT(AreEqual(Wallet->GetMoney(), 0));
 		}
 

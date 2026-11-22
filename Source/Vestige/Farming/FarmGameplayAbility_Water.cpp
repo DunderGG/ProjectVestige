@@ -51,7 +51,7 @@ bool UFarmGameplayAbility_Water::UseOn(const FIntPoint& Tile)
 
 	// Nothing runs between CanUseToolNow and here that should change the bag, so a failed pour is a bug; the watering stands.
 	UVestigeInventoryComponent* Inventory = GetInventory();
-	if (!Inventory || !FarmWateringCan::TryPour(*Inventory, Inventory->GetSelectedHotbarSlot()))
+	if (!Inventory || !FarmWateringCan::Pour(*Inventory, Inventory->GetSelectedHotbarSlot()))
 	{
 		VESTIGE_LOG(this, LogFarm, Warning, "Watered tile {Tile} but the can had no water to pour.", Tile.ToString());
 	}

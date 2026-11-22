@@ -21,7 +21,7 @@ namespace VestigeWallet
  * the inventory, so it outlives the pawn; it is not the inventory's, which is slots and their rules. Broadcasts
  * OnMoneyChanged after every change, including a new game and a restore. Saves its amount under Base.Wallet through
  * UVestigeSaveRegistry while it is in play; a game with no saved amount (new, or from before coins) starts with StartingMoney.
- * Spending is TrySpendMoney, called by the shop rule (VestigeShop::TryBuy). Systems.md, sections 25 and 26.
+ * Spending is SpendMoney, called by the shop rule (VestigeShop::Buy). Systems.md, sections 25 and 26.
  */
 UCLASS(ClassGroup = (Inventory), meta = (BlueprintSpawnableComponent))
 class UVestigeWalletComponent : public UActorComponent, public IVestigeSaveable
@@ -52,7 +52,7 @@ public:
 	 * Takes Amount and broadcasts OnMoneyChanged. Returns false, changing nothing, for 0 or less or more than the wallet holds:
 	 * there is no debt.
 	 */
-	bool TrySpendMoney(int32 Amount);
+	bool SpendMoney(int32 Amount);
 
 	/** Starts with the starting purse and broadcasts. */
 	virtual void StartNewGame() override;

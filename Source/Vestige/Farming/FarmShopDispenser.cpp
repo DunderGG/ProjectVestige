@@ -108,7 +108,7 @@ void AFarmShopDispenser::Interact_Implementation(AActor* Interactor, const FVest
 
 	const int32 Count = FarmShopDispenserInteraction::CountPerPress;
 	const int32 Cost = Offer.Price * Count;
-	switch (VestigeShop::TryBuy(*Inventory, *Wallet, Offer, Count))
+	switch (VestigeShop::Buy(*Inventory, *Wallet, Offer, Count))
 	{
 	case EVestigeBuyResult::Bought:
 	{

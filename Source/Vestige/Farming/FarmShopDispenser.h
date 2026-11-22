@@ -15,7 +15,7 @@ class UVestigeItemData;
 
 /**
  * A seed dispenser on the farm: the place the player buys one item of one shop, one per press. It offers "Buy Turnip Seeds (10)"
- * to anyone with a bag and a purse, buys through VestigeShop::TryBuy and tells the player how it went. It is not the stock,
+ * to anyone with a bag and a purse, buys through VestigeShop::Buy and tells the player how it went. It is not the stock,
  * which is the shop's data asset, nor the buying rule, and it has no state. BP_ShopDispenser (Content/Vestige/Blueprints) sets
  * the mesh and the shop, and its children BP_ShopDispenser_<Item> the item; this class names no content. Systems.md, section 26.
  */

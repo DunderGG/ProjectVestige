@@ -58,13 +58,13 @@ public:
 	bool CanAddItem(const FPrimaryAssetId& ItemId, int32 Count) const;
 
 	/** Adds Count of the item. Returns false, changing nothing, if they don't all fit or the ID names no item. */
-	bool TryAddItem(const FPrimaryAssetId& ItemId, int32 Count);
+	bool AddItem(const FPrimaryAssetId& ItemId, int32 Count);
 
-	/** Removes Count of the item. Returns false, changing nothing, if there are fewer. */
-	bool TryRemoveItem(const FPrimaryAssetId& ItemId, int32 Count);
+	/** Removes Count of the item. Returns false, changing nothing, if there are fewer, the ID names no item, or Count is below 1. */
+	bool RemoveItem(const FPrimaryAssetId& ItemId, int32 Count);
 
-	/** Removes Count from the slot at Slot only. Returns false, changing nothing, if that slot holds fewer. */
-	bool TryRemoveItemFromSlot(int32 Slot, int32 Count);
+	/** Removes Count from the slot at Slot only. Returns false, changing nothing, if the slot doesn't exist or holds fewer, or Count is below 1. */
+	bool RemoveItemFromSlot(int32 Slot, int32 Count);
 
 	/** The stat Tag of the item in Slot, or nothing if the slot is empty or has no such stat. An absent stat means the item is fresh. */
 	TOptional<int32> FindSlotStat(int32 Slot, const FGameplayTag& Tag) const;

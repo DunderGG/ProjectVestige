@@ -308,7 +308,7 @@ namespace FarmWaterTests
 			ASSERT_THAT(IsTrue(FarmWateringCan::GetCapacity(Inventory->GetSlots()[0].Item) == INDEX_NONE));
 			ASSERT_THAT(IsTrue(FarmWateringCan::GetWater(*Inventory, 0) == INDEX_NONE));
 			ASSERT_THAT(IsTrue(FarmWateringCan::GetWater(*Inventory, 1) == INDEX_NONE));
-			ASSERT_THAT(IsFalse(FarmWateringCan::TryPour(*Inventory, 0)));
+			ASSERT_THAT(IsFalse(FarmWateringCan::Pour(*Inventory, 0)));
 			ASSERT_THAT(IsTrue(FarmWateringCan::Fill(*Inventory, 0, 5) == 0));
 			ASSERT_THAT(IsTrue(FarmWateringCan::FindCanToFill(*Inventory) == INDEX_NONE));
 		}
@@ -319,11 +319,11 @@ namespace FarmWaterTests
 
 			for (int32 Left = CanCapacity - 1; Left >= 0; --Left)
 			{
-				ASSERT_THAT(IsTrue(FarmWateringCan::TryPour(*Inventory, 0)));
+				ASSERT_THAT(IsTrue(FarmWateringCan::Pour(*Inventory, 0)));
 				ASSERT_THAT(IsTrue(GetHeldWater() == Left));
 			}
 
-			ASSERT_THAT(IsFalse(FarmWateringCan::TryPour(*Inventory, 0)));
+			ASSERT_THAT(IsFalse(FarmWateringCan::Pour(*Inventory, 0)));
 			ASSERT_THAT(IsTrue(GetHeldWater() == 0));
 			// An empty can is a stat of 0, not an absent stat, which would be a full can.
 			ASSERT_THAT(IsTrue(Inventory->FindSlotStat(0, VestigeGameplayTags::ItemStat_Water_Clean) == 0));
@@ -634,11 +634,11 @@ namespace FarmWaterTests
 			{
 				Grid->GetField()->Till(FIntPoint(Column, 5));
 				ASSERT_THAT(IsTrue(Grid->GetField()->Water(FIntPoint(Column, 5))));
-				ASSERT_THAT(IsTrue(FarmWateringCan::TryPour(*Inventory, 0)));
+				ASSERT_THAT(IsTrue(FarmWateringCan::Pour(*Inventory, 0)));
 			}
 
 			ASSERT_THAT(IsTrue(GetHeldWater() == 0));
-			ASSERT_THAT(IsFalse(FarmWateringCan::TryPour(*Inventory, 0)));
+			ASSERT_THAT(IsFalse(FarmWateringCan::Pour(*Inventory, 0)));
 		}
 
 		/** Stands the farmer at Location aiming at the well and lets the interaction scan. */

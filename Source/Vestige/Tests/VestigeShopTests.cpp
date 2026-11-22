@@ -33,7 +33,7 @@ namespace VestigeShopTests
 	const TCHAR* const FarmerPath = TEXT("/Game/Vestige/Blueprints/BP_PlayerCharacter.BP_PlayerCharacter_C");
 	const TCHAR* const GameModePath = TEXT("/Game/Vestige/Blueprints/BP_GameMode.BP_GameMode_C");
 
-	/** The buying rule (VestigeShop::TryBuy) and the seed dispenser that uses it. */
+	/** The buying rule (VestigeShop::Buy) and the seed dispenser that uses it. */
 	TEST_CLASS(Shop, "Vestige")
 	{
 		FActorTestSpawner Spawner;
@@ -104,7 +104,7 @@ namespace VestigeShopTests
 		UVestigeInventoryComponent& MakeFullBag()
 		{
 			UVestigeInventoryComponent& Bag = MakeBag(1);
-			verify(Bag.TryAddItem(MakeItem(TEXT("Test.Keepsake"), 1).GetPrimaryAssetId(), 1));
+			verify(Bag.AddItem(MakeItem(TEXT("Test.Keepsake"), 1).GetPrimaryAssetId(), 1));
 			return Bag;
 		}
 
@@ -128,7 +128,7 @@ namespace VestigeShopTests
 			int32 Broadcasts = 0;
 			CountBroadcasts(Purse, Broadcasts);
 
-			ASSERT_THAT(IsTrue(VestigeShop::TryBuy(Bag, Purse, MakeOffer(Seeds, 10), 1) == EVestigeBuyResult::Bought));
+			ASSERT_THAT(IsTrue(VestigeShop::Buy(Bag, Purse, MakeOffer(Seeds, 10), 1) == EVestigeBuyResult::Bought));
 
 			ASSERT_THAT(AreEqual(Bag.GetItemCount(Seeds.GetPrimaryAssetId()), 1));
 			ASSERT_THAT(AreEqual(Purse.GetMoney(), 90));
@@ -141,7 +141,7 @@ namespace VestigeShopTests
 			UVestigeInventoryComponent& Bag = MakeBag();
 			UVestigeWalletComponent& Purse = MakeWallet(100);
 
-			ASSERT_THAT(IsTrue(VestigeShop::TryBuy(Bag, Purse, MakeOffer(Seeds, 20), 3) == EVestigeBuyResult::Bought));
+			ASSERT_THAT(IsTrue(VestigeShop::Buy(Bag, Purse, MakeOffer(Seeds, 20), 3) == EVestigeBuyResult::Bought));
 
 			ASSERT_THAT(AreEqual(Bag.GetItemCount(Seeds.GetPrimaryAssetId()), 3));
 			ASSERT_THAT(AreEqual(Purse.GetMoney(), 40));
@@ -155,7 +155,7 @@ namespace VestigeShopTests
 			UVestigeWalletComponent& Purse = MakeWallet(VestigeWallet::MaxMoney);
 
 			ASSERT_THAT(
-				IsTrue(VestigeShop::TryBuy(Bag, Purse, MakeOffer(Gem, VestigeWallet::MaxMoney), 2) == EVestigeBuyResult::NotEnoughMoney));
+				IsTrue(VestigeShop::Buy(Bag, Purse, MakeOffer(Gem, VestigeWallet::MaxMoney), 2) == EVestigeBuyResult::NotEnoughMoney));
 
 			ASSERT_THAT(AreEqual(Purse.GetMoney(), VestigeWallet::MaxMoney));
 			ASSERT_THAT(AreEqual(Bag.GetItemCount(Gem.GetPrimaryAssetId()), 0));
@@ -169,7 +169,7 @@ namespace VestigeShopTests
 			int32 Broadcasts = 0;
 			CountBroadcasts(Purse, Broadcasts);
 
-			ASSERT_THAT(IsTrue(VestigeShop::TryBuy(Bag, Purse, MakeOffer(Seeds, 10), 1) == EVestigeBuyResult::NoRoom));
+			ASSERT_THAT(IsTrue(VestigeShop::Buy(Bag, Purse, MakeOffer(Seeds, 10), 1) == EVestigeBuyResult::NoRoom));
 
 			ASSERT_THAT(AreEqual(Purse.GetMoney(), 100));
 			ASSERT_THAT(AreEqual(Broadcasts, 0));
@@ -184,7 +184,7 @@ namespace VestigeShopTests
 			int32 Broadcasts = 0;
 			CountBroadcasts(Purse, Broadcasts);
 
-			ASSERT_THAT(IsTrue(VestigeShop::TryBuy(Bag, Purse, MakeOffer(Seeds, 10), 1) == EVestigeBuyResult::NotEnoughMoney));
+			ASSERT_THAT(IsTrue(VestigeShop::Buy(Bag, Purse, MakeOffer(Seeds, 10), 1) == EVestigeBuyResult::NotEnoughMoney));
 
 			ASSERT_THAT(AreEqual(Purse.GetMoney(), 9));
 			ASSERT_THAT(AreEqual(Broadcasts, 0));
@@ -197,7 +197,7 @@ namespace VestigeShopTests
 			UVestigeInventoryComponent& Bag = MakeFullBag();
 			UVestigeWalletComponent& Purse = MakeWallet(0);
 
-			ASSERT_THAT(IsTrue(VestigeShop::TryBuy(Bag, Purse, MakeOffer(Seeds, 10), 1) == EVestigeBuyResult::NoRoom));
+			ASSERT_THAT(IsTrue(VestigeShop::Buy(Bag, Purse, MakeOffer(Seeds, 10), 1) == EVestigeBuyResult::NoRoom));
 		}
 
 		TEST_METHOD(BuyingWithExactlyThePriceLeavesZero)
@@ -206,7 +206,7 @@ namespace VestigeShopTests
 			UVestigeInventoryComponent& Bag = MakeBag();
 			UVestigeWalletComponent& Purse = MakeWallet(40);
 
-			ASSERT_THAT(IsTrue(VestigeShop::TryBuy(Bag, Purse, MakeOffer(Seeds, 40), 1) == EVestigeBuyResult::Bought));
+			ASSERT_THAT(IsTrue(VestigeShop::Buy(Bag, Purse, MakeOffer(Seeds, 40), 1) == EVestigeBuyResult::Bought));
 
 			ASSERT_THAT(AreEqual(Purse.GetMoney(), 0));
 			ASSERT_THAT(AreEqual(Bag.GetItemCount(Seeds.GetPrimaryAssetId()), 1));
@@ -220,11 +220,11 @@ namespace VestigeShopTests
 			int32 Broadcasts = 0;
 			CountBroadcasts(Purse, Broadcasts);
 
-			ASSERT_THAT(IsTrue(VestigeShop::TryBuy(Bag, Purse, MakeOffer(Seeds, 10), 0) == EVestigeBuyResult::InvalidOffer));
-			ASSERT_THAT(IsTrue(VestigeShop::TryBuy(Bag, Purse, MakeOffer(Seeds, 10), -2) == EVestigeBuyResult::InvalidOffer));
+			ASSERT_THAT(IsTrue(VestigeShop::Buy(Bag, Purse, MakeOffer(Seeds, 10), 0) == EVestigeBuyResult::InvalidOffer));
+			ASSERT_THAT(IsTrue(VestigeShop::Buy(Bag, Purse, MakeOffer(Seeds, 10), -2) == EVestigeBuyResult::InvalidOffer));
 			// A missing price is never "free".
-			ASSERT_THAT(IsTrue(VestigeShop::TryBuy(Bag, Purse, MakeOffer(Seeds, 0), 1) == EVestigeBuyResult::InvalidOffer));
-			ASSERT_THAT(IsTrue(VestigeShop::TryBuy(Bag, Purse, MakeOffer(Seeds, -5), 1) == EVestigeBuyResult::InvalidOffer));
+			ASSERT_THAT(IsTrue(VestigeShop::Buy(Bag, Purse, MakeOffer(Seeds, 0), 1) == EVestigeBuyResult::InvalidOffer));
+			ASSERT_THAT(IsTrue(VestigeShop::Buy(Bag, Purse, MakeOffer(Seeds, -5), 1) == EVestigeBuyResult::InvalidOffer));
 
 			ASSERT_THAT(AreEqual(Purse.GetMoney(), 100));
 			ASSERT_THAT(AreEqual(Broadcasts, 0));
@@ -235,10 +235,10 @@ namespace VestigeShopTests
 		{
 			const UVestigeItemData& Seeds = MakeItem(TEXT("Test.Seeds"), 10);
 			UVestigeInventoryComponent& Bag = MakeBag();
-			ASSERT_THAT(IsTrue(Bag.TryAddItem(Seeds.GetPrimaryAssetId(), 3)));
+			ASSERT_THAT(IsTrue(Bag.AddItem(Seeds.GetPrimaryAssetId(), 3)));
 			UVestigeWalletComponent& Purse = MakeWallet(100);
 
-			ASSERT_THAT(IsTrue(VestigeShop::TryBuy(Bag, Purse, MakeOffer(Seeds, 10), 2) == EVestigeBuyResult::Bought));
+			ASSERT_THAT(IsTrue(VestigeShop::Buy(Bag, Purse, MakeOffer(Seeds, 10), 2) == EVestigeBuyResult::Bought));
 
 			const TArray<FVestigeInventorySlot>& Slots = Bag.GetSlots();
 			ASSERT_THAT(IsTrue(Slots[0].Item == &Seeds));
@@ -255,7 +255,7 @@ namespace VestigeShopTests
 			Offer.Price = 10;
 			TestRunner->AddExpectedMessagePlain(TEXT("No item has the ID"), ELogVerbosity::Warning);
 
-			ASSERT_THAT(IsTrue(VestigeShop::TryBuy(Bag, Purse, Offer, 1) == EVestigeBuyResult::NoRoom));
+			ASSERT_THAT(IsTrue(VestigeShop::Buy(Bag, Purse, Offer, 1) == EVestigeBuyResult::NoRoom));
 
 			ASSERT_THAT(AreEqual(Purse.GetMoney(), 100));
 		}
@@ -338,7 +338,7 @@ namespace VestigeShopTests
 		{
 			if (Wallet->GetMoney() > 0)
 			{
-				verify(Wallet->TrySpendMoney(Wallet->GetMoney()));
+				verify(Wallet->SpendMoney(Wallet->GetMoney()));
 			}
 			if (Money > 0)
 			{

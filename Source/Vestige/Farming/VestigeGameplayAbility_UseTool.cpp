@@ -64,7 +64,7 @@ void UVestigeGameplayAbility_UseTool::ActivateAbility(const FGameplayAbilitySpec
 		TargetingComponent->OnTargetTileChanged.AddUObject(this, &UVestigeGameplayAbility_UseTool::ContinueAfterTargetChange);
 	bFirstTry = true;
 	bToolRefusalReported = false;
-	TryNextUse();
+	StartNextUse();
 }
 
 void UVestigeGameplayAbility_UseTool::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
@@ -126,7 +126,7 @@ void UVestigeGameplayAbility_UseTool::ApplyCost(const FGameplayAbilitySpecHandle
 	ApplyGameplayEffectSpecToOwner(Handle, ActorInfo, ActivationInfo, Spec);
 }
 
-void UVestigeGameplayAbility_UseTool::TryNextUse()
+void UVestigeGameplayAbility_UseTool::StartNextUse()
 {
 	const bool bFirst = bFirstTry;
 	bFirstTry = false;
@@ -266,14 +266,14 @@ void UVestigeGameplayAbility_UseTool::FinishUse()
 		EndUse();
 		return;
 	}
-	TryNextUse();
+	StartNextUse();
 }
 
 void UVestigeGameplayAbility_UseTool::ContinueAfterLanding(EMovementMode NewMovementMode)
 {
 	if (Step == EUseStep::WaitingForLanding)
 	{
-		TryNextUse();
+		StartNextUse();
 	}
 }
 
@@ -282,7 +282,7 @@ void UVestigeGameplayAbility_UseTool::ContinueAfterTargetChange(const TOptional<
 	// Only while waiting for one: during a use the next try reads the target anyway.
 	if (Step == EUseStep::WaitingForTarget)
 	{
-		TryNextUse();
+		StartNextUse();
 	}
 }
 

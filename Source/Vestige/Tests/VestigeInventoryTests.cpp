@@ -60,10 +60,10 @@ namespace VestigeInventoryTests
 			const UVestigeItemData& Stone = MakeItem(TEXT("Base.Stone"), 10);
 			FVestigeInventory Bag;
 			Bag.Reset(3);
-			ASSERT_THAT(IsTrue(Bag.TryAdd(Seeds, 4)));
-			ASSERT_THAT(IsTrue(Bag.TryAdd(Stone, 1)));
+			ASSERT_THAT(IsTrue(Bag.Add(Seeds, 4)));
+			ASSERT_THAT(IsTrue(Bag.Add(Stone, 1)));
 
-			ASSERT_THAT(IsTrue(Bag.TryAdd(Seeds, 9)));
+			ASSERT_THAT(IsTrue(Bag.Add(Seeds, 9)));
 
 			ASSERT_THAT(IsTrue(Bag.GetSlots()[0].Count == 10));
 			ASSERT_THAT(IsTrue(Bag.GetSlots()[1].Item == &Stone));
@@ -78,7 +78,7 @@ namespace VestigeInventoryTests
 			FVestigeInventory Bag;
 			Bag.Reset(3);
 
-			ASSERT_THAT(IsTrue(Bag.TryAdd(Can, 2)));
+			ASSERT_THAT(IsTrue(Bag.Add(Can, 2)));
 
 			ASSERT_THAT(IsTrue(Bag.GetSlots()[0].Count == 1));
 			ASSERT_THAT(IsTrue(Bag.GetSlots()[1].Count == 1));
@@ -90,10 +90,10 @@ namespace VestigeInventoryTests
 			const UVestigeItemData& Seeds = MakeItem(TEXT("Base.Seeds"), 10);
 			FVestigeInventory Bag;
 			Bag.Reset(2);
-			ASSERT_THAT(IsTrue(Bag.TryAdd(Seeds, 15)));
+			ASSERT_THAT(IsTrue(Bag.Add(Seeds, 15)));
 
 			ASSERT_THAT(IsFalse(Bag.CanAdd(Seeds, 6)));
-			ASSERT_THAT(IsFalse(Bag.TryAdd(Seeds, 6)));
+			ASSERT_THAT(IsFalse(Bag.Add(Seeds, 6)));
 			ASSERT_THAT(IsTrue(Bag.GetCount(Seeds) == 15));
 			ASSERT_THAT(IsTrue(Bag.GetRoomFor(Seeds) == 5));
 		}
@@ -103,9 +103,9 @@ namespace VestigeInventoryTests
 			const UVestigeItemData& Seeds = MakeItem(TEXT("Base.Seeds"), 10);
 			FVestigeInventory Bag;
 			Bag.Reset(3);
-			ASSERT_THAT(IsTrue(Bag.TryAdd(Seeds, 14)));
+			ASSERT_THAT(IsTrue(Bag.Add(Seeds, 14)));
 
-			ASSERT_THAT(IsTrue(Bag.TryRemove(Seeds, 6)));
+			ASSERT_THAT(IsTrue(Bag.Remove(Seeds, 6)));
 
 			ASSERT_THAT(IsTrue(Bag.GetSlots()[0].Count == 8));
 			ASSERT_THAT(IsTrue(Bag.GetSlots()[1].IsEmpty()));
@@ -117,9 +117,9 @@ namespace VestigeInventoryTests
 			const UVestigeItemData& Seeds = MakeItem(TEXT("Base.Seeds"), 10);
 			FVestigeInventory Bag;
 			Bag.Reset(2);
-			ASSERT_THAT(IsTrue(Bag.TryAdd(Seeds, 3)));
+			ASSERT_THAT(IsTrue(Bag.Add(Seeds, 3)));
 
-			ASSERT_THAT(IsFalse(Bag.TryRemove(Seeds, 4)));
+			ASSERT_THAT(IsFalse(Bag.Remove(Seeds, 4)));
 			ASSERT_THAT(IsTrue(Bag.GetCount(Seeds) == 3));
 		}
 
@@ -129,9 +129,9 @@ namespace VestigeInventoryTests
 			FVestigeInventory Bag;
 			Bag.Reset(2);
 
-			ASSERT_THAT(IsFalse(Bag.TryAdd(Seeds, 0)));
-			ASSERT_THAT(IsFalse(Bag.TryAdd(Seeds, -3)));
-			ASSERT_THAT(IsFalse(Bag.TryRemove(Seeds, 0)));
+			ASSERT_THAT(IsFalse(Bag.Add(Seeds, 0)));
+			ASSERT_THAT(IsFalse(Bag.Add(Seeds, -3)));
+			ASSERT_THAT(IsFalse(Bag.Remove(Seeds, 0)));
 			ASSERT_THAT(IsTrue(Bag.GetSlots()[0].IsEmpty()));
 		}
 
@@ -141,7 +141,7 @@ namespace VestigeInventoryTests
 			const FPrimaryAssetId Unknown(UVestigeItemData::AssetType, TEXT("SomeMod.Pumpkin"));
 
 			ASSERT_THAT(IsFalse(Component.CanAddItem(Unknown, 1)));
-			ASSERT_THAT(IsFalse(Component.TryAddItem(Unknown, 1)));
+			ASSERT_THAT(IsFalse(Component.AddItem(Unknown, 1)));
 			ASSERT_THAT(IsTrue(Component.GetItemCount(Unknown) == 0));
 		}
 
@@ -153,8 +153,8 @@ namespace VestigeInventoryTests
 			UVestigeInventoryComponent& Bag = MakeComponent(4, {});
 			UVestigeInventoryComponent& Chest = MakeComponent(4, {});
 
-			ASSERT_THAT(IsTrue(Bag.TryAddItem(TurnipId, 1)));
-			ASSERT_THAT(IsTrue(Chest.TryAddItem(TurnipId, 1)));
+			ASSERT_THAT(IsTrue(Bag.AddItem(TurnipId, 1)));
+			ASSERT_THAT(IsTrue(Chest.AddItem(TurnipId, 1)));
 
 			ASSERT_THAT(IsTrue(Bag.GetSlots()[0].Item == Turnip));
 			ASSERT_THAT(IsTrue(Chest.GetSlots()[0].Item == Turnip));
@@ -170,7 +170,7 @@ namespace VestigeInventoryTests
 			const FPrimaryAssetId TurnipId(UVestigeItemData::AssetType, TEXT("Base.Turnip"));
 
 			ASSERT_THAT(IsNull(UVestigeContentCatalog::Get(&WorldWithoutAGame.GetWorld())));
-			ASSERT_THAT(IsFalse(Component->TryAddItem(TurnipId, 1)));
+			ASSERT_THAT(IsFalse(Component->AddItem(TurnipId, 1)));
 			ASSERT_THAT(IsTrue(Component->GetItemCount(TurnipId) == 0));
 		}
 
@@ -185,9 +185,9 @@ namespace VestigeInventoryTests
 					++Broadcasts;
 				});
 
-			ASSERT_THAT(IsTrue(Component.TryAddItem(Seeds.GetPrimaryAssetId(), 3)));
-			ASSERT_THAT(IsTrue(Component.TryRemoveItem(Seeds.GetPrimaryAssetId(), 1)));
-			ASSERT_THAT(IsFalse(Component.TryRemoveItem(Seeds.GetPrimaryAssetId(), 9)));
+			ASSERT_THAT(IsTrue(Component.AddItem(Seeds.GetPrimaryAssetId(), 3)));
+			ASSERT_THAT(IsTrue(Component.RemoveItem(Seeds.GetPrimaryAssetId(), 1)));
+			ASSERT_THAT(IsFalse(Component.RemoveItem(Seeds.GetPrimaryAssetId(), 9)));
 			Component.RestoreFromSaveData(FVestigeInventorySaveData());
 
 			ASSERT_THAT(IsTrue(Broadcasts == 3));
@@ -267,7 +267,7 @@ namespace VestigeInventoryTests
 			UVestigeInventoryComponent& Component = MakeComponent(12, {&Hoe});
 			ASSERT_THAT(IsTrue(Component.GetItemInHand() == nullptr));
 
-			ASSERT_THAT(IsTrue(Component.TryAddItem(Hoe.GetPrimaryAssetId(), 1)));
+			ASSERT_THAT(IsTrue(Component.AddItem(Hoe.GetPrimaryAssetId(), 1)));
 
 			ASSERT_THAT(IsTrue(Component.GetSelectedHotbarSlot() == 0));
 			ASSERT_THAT(IsTrue(Component.GetItemInHand() == &Hoe));
@@ -365,12 +365,12 @@ namespace VestigeInventoryTests
 					++Changes;
 				});
 
-			ASSERT_THAT(IsTrue(Component.TryAddItem(Seeds.GetPrimaryAssetId(), 3)));
+			ASSERT_THAT(IsTrue(Component.AddItem(Seeds.GetPrimaryAssetId(), 3)));
 			ASSERT_THAT(IsTrue(Changes == 1));
-			ASSERT_THAT(IsTrue(Component.TryAddItem(Seeds.GetPrimaryAssetId(), 2)));
-			ASSERT_THAT(IsTrue(Component.TryRemoveItemFromSlot(0, 1)));
+			ASSERT_THAT(IsTrue(Component.AddItem(Seeds.GetPrimaryAssetId(), 2)));
+			ASSERT_THAT(IsTrue(Component.RemoveItemFromSlot(0, 1)));
 			ASSERT_THAT(IsTrue(Changes == 1));
-			ASSERT_THAT(IsTrue(Component.TryRemoveItemFromSlot(0, 4)));
+			ASSERT_THAT(IsTrue(Component.RemoveItemFromSlot(0, 4)));
 			ASSERT_THAT(IsTrue(Changes == 2));
 			ASSERT_THAT(IsTrue(Component.GetItemInHand() == nullptr));
 			ASSERT_THAT(IsTrue(Component.SelectHotbarSlot(1)));
@@ -404,7 +404,7 @@ namespace VestigeInventoryTests
 					}
 				});
 
-			ASSERT_THAT(IsTrue(Component.TryRemoveItemFromSlot(0, 1)));
+			ASSERT_THAT(IsTrue(Component.RemoveItemFromSlot(0, 1)));
 
 			ASSERT_THAT(IsTrue(Component.GetItemInHand() == &Hoe));
 			ASSERT_THAT(IsTrue(SeenInHand == &Hoe));
@@ -417,11 +417,11 @@ namespace VestigeInventoryTests
 			UVestigeInventoryComponent& Component = MakeComponent(4, {&Seeds});
 			Component.RestoreFromSaveData(MakeSave({{0, Seeds.GetContentId(), 3}, {2, Seeds.GetContentId(), 3}}));
 
-			ASSERT_THAT(IsTrue(Component.TryRemoveItemFromSlot(0, 2)));
-			ASSERT_THAT(IsFalse(Component.TryRemoveItemFromSlot(0, 5)));
-			ASSERT_THAT(IsFalse(Component.TryRemoveItemFromSlot(1, 1)));
-			ASSERT_THAT(IsFalse(Component.TryRemoveItemFromSlot(0, 0)));
-			ASSERT_THAT(IsFalse(Component.TryRemoveItemFromSlot(9, 1)));
+			ASSERT_THAT(IsTrue(Component.RemoveItemFromSlot(0, 2)));
+			ASSERT_THAT(IsFalse(Component.RemoveItemFromSlot(0, 5)));
+			ASSERT_THAT(IsFalse(Component.RemoveItemFromSlot(1, 1)));
+			ASSERT_THAT(IsFalse(Component.RemoveItemFromSlot(0, 0)));
+			ASSERT_THAT(IsFalse(Component.RemoveItemFromSlot(9, 1)));
 
 			ASSERT_THAT(IsTrue(Component.GetSlots()[0].Count == 1));
 			ASSERT_THAT(IsTrue(Component.GetSlots()[2].Count == 3));
@@ -451,7 +451,7 @@ namespace VestigeInventoryTests
 		{
 			const UVestigeItemData& Can = MakeItem(TEXT("Base.Can"), 1);
 			UVestigeInventoryComponent& Component = MakeComponent(4, {&Can});
-			ASSERT_THAT(IsTrue(Component.TryAddItem(Can.GetPrimaryAssetId(), 1)));
+			ASSERT_THAT(IsTrue(Component.AddItem(Can.GetPrimaryAssetId(), 1)));
 			ASSERT_THAT(IsFalse(Component.FindSlotStat(0, StatTag()).IsSet()));
 			int32 Broadcasts = 0;
 			int32 HandBroadcasts = 0;
@@ -476,8 +476,8 @@ namespace VestigeInventoryTests
 			const UVestigeItemData& Can = MakeItem(TEXT("Base.Can"), 1);
 			const UVestigeItemData& Seeds = MakeItem(TEXT("Base.Seeds"), 10);
 			UVestigeInventoryComponent& Component = MakeComponent(4, {&Can, &Seeds});
-			ASSERT_THAT(IsTrue(Component.TryAddItem(Can.GetPrimaryAssetId(), 1)));
-			ASSERT_THAT(IsTrue(Component.TryAddItem(Seeds.GetPrimaryAssetId(), 3)));
+			ASSERT_THAT(IsTrue(Component.AddItem(Can.GetPrimaryAssetId(), 1)));
+			ASSERT_THAT(IsTrue(Component.AddItem(Seeds.GetPrimaryAssetId(), 3)));
 
 			ASSERT_THAT(IsFalse(Component.SetSlotStat(3, StatTag(), 1)));
 			ASSERT_THAT(IsFalse(Component.SetSlotStat(9, StatTag(), 1)));
@@ -490,11 +490,11 @@ namespace VestigeInventoryTests
 		{
 			const UVestigeItemData& Can = MakeItem(TEXT("Base.Can"), 1);
 			UVestigeInventoryComponent& Component = MakeComponent(4, {&Can});
-			ASSERT_THAT(IsTrue(Component.TryAddItem(Can.GetPrimaryAssetId(), 1)));
+			ASSERT_THAT(IsTrue(Component.AddItem(Can.GetPrimaryAssetId(), 1)));
 			Component.SetSlotStat(0, StatTag(), 2);
 
-			ASSERT_THAT(IsTrue(Component.TryRemoveItemFromSlot(0, 1)));
-			ASSERT_THAT(IsTrue(Component.TryAddItem(Can.GetPrimaryAssetId(), 1)));
+			ASSERT_THAT(IsTrue(Component.RemoveItemFromSlot(0, 1)));
+			ASSERT_THAT(IsTrue(Component.AddItem(Can.GetPrimaryAssetId(), 1)));
 
 			ASSERT_THAT(IsFalse(Component.FindSlotStat(0, StatTag()).IsSet()));
 		}

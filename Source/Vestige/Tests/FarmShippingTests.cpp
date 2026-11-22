@@ -160,7 +160,7 @@ namespace FarmShippingTests
 		FFarmShipResult Ship(const UVestigeItemData& Item, int32 Count)
 		{
 			UVestigeInventoryComponent& Bag = MakeBag();
-			verify(Bag.TryAddItem(Item.GetPrimaryAssetId(), Count));
+			verify(Bag.AddItem(Item.GetPrimaryAssetId(), Count));
 			return Shipment->ShipFromSlot(Bag, 0);
 		}
 
@@ -194,7 +194,7 @@ namespace FarmShippingTests
 		{
 			const UVestigeItemData& Beet = MakeItem(TEXT("Test.Beet"), 25);
 			UVestigeInventoryComponent& Bag = MakeBag();
-			ASSERT_THAT(IsTrue(Bag.TryAddItem(Beet.GetPrimaryAssetId(), 10)));
+			ASSERT_THAT(IsTrue(Bag.AddItem(Beet.GetPrimaryAssetId(), 10)));
 
 			const FFarmShipResult Result = Shipment->ShipFromSlot(Bag, 0);
 
@@ -210,7 +210,7 @@ namespace FarmShippingTests
 			// Stacks of 5: eight beets are a stack of 5 and a stack of 3, and one press ships one stack.
 			const UVestigeItemData& Beet = MakeItem(TEXT("Test.Beet"), 25, 5);
 			UVestigeInventoryComponent& Bag = MakeBag();
-			ASSERT_THAT(IsTrue(Bag.TryAddItem(Beet.GetPrimaryAssetId(), 8)));
+			ASSERT_THAT(IsTrue(Bag.AddItem(Beet.GetPrimaryAssetId(), 8)));
 
 			const FFarmShipResult Result = Shipment->ShipFromSlot(Bag, 0);
 
@@ -245,7 +245,7 @@ namespace FarmShippingTests
 		{
 			const UVestigeItemData& NotForSale = MakeItem(TEXT("Test.Keepsake"), 0);
 			UVestigeInventoryComponent& Bag = MakeBag();
-			ASSERT_THAT(IsTrue(Bag.TryAddItem(NotForSale.GetPrimaryAssetId(), 3)));
+			ASSERT_THAT(IsTrue(Bag.AddItem(NotForSale.GetPrimaryAssetId(), 3)));
 
 			// The price 0 means "not for sale", never "sell at a default".
 			ASSERT_THAT(IsNull(Shipment->ShipFromSlot(Bag, 0).Item));
@@ -266,7 +266,7 @@ namespace FarmShippingTests
 			{
 				const UVestigeItemData* Item = FindItem(Name);
 				ASSERT_THAT(IsNotNull(Item, FString(Name)));
-				ASSERT_THAT(IsTrue(Bag.TryAddItem(Item->GetPrimaryAssetId(), 1)));
+				ASSERT_THAT(IsTrue(Bag.AddItem(Item->GetPrimaryAssetId(), 1)));
 			}
 
 			for (int32 Slot = 0; Slot < 5; ++Slot)

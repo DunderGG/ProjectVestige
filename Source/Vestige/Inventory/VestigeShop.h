@@ -28,6 +28,6 @@ namespace VestigeShop
 	 * Buys Count of Offer's item: checks the bag first, then the purse, and only then spends the cost (Price times Count) and
 	 * adds the items. All or nothing: a refusal changes neither. Instant and free; needs no world.
 	 */
-	EVestigeBuyResult TryBuy(
+	EVestigeBuyResult Buy(
 		UVestigeInventoryComponent& Inventory, UVestigeWalletComponent& Wallet, const FVestigeShopOffer& Offer, int32 Count);
 }

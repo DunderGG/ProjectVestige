@@ -78,7 +78,7 @@ void UVestigeInventoryComponent::AddStartingItems()
 	for (const FVestigeItemStack& Stack : StartingItems)
 	{
 		const UVestigeItemData* Item = FindItem(Stack.ItemId);
-		if (Item && !Inventory.TryAdd(*Item, Stack.Count))
+		if (Item && !Inventory.Add(*Item, Stack.Count))
 		{
 			VESTIGE_LOG(
 				this, LogVestigeInventory, Warning, "No room for the {Count} starting {ItemId}.", Stack.Count, Stack.ItemId.ToString());
@@ -103,10 +103,10 @@ bool UVestigeInventoryComponent::CanAddItem(const FPrimaryAssetId& ItemId, int32
 	return Item && Inventory.CanAdd(*Item, Count);
 }
 
-bool UVestigeInventoryComponent::TryAddItem(const FPrimaryAssetId& ItemId, int32 Count)
+bool UVestigeInventoryComponent::AddItem(const FPrimaryAssetId& ItemId, int32 Count)
 {
 	const UVestigeItemData* Item = FindItem(ItemId);
-	if (!Item || !Inventory.TryAdd(*Item, Count))
+	if (!Item || !Inventory.Add(*Item, Count))
 	{
 		return false;
 	}
@@ -114,10 +114,10 @@ bool UVestigeInventoryComponent::TryAddItem(const FPrimaryAssetId& ItemId, int32
 	return true;
 }
 
-bool UVestigeInventoryComponent::TryRemoveItem(const FPrimaryAssetId& ItemId, int32 Count)
+bool UVestigeInventoryComponent::RemoveItem(const FPrimaryAssetId& ItemId, int32 Count)
 {
 	const UVestigeItemData* Item = FindItem(ItemId);
-	if (!Item || !Inventory.TryRemove(*Item, Count))
+	if (!Item || !Inventory.Remove(*Item, Count))
 	{
 		return false;
 	}
@@ -125,9 +125,9 @@ bool UVestigeInventoryComponent::TryRemoveItem(const FPrimaryAssetId& ItemId, in
 	return true;
 }
 
-bool UVestigeInventoryComponent::TryRemoveItemFromSlot(int32 Slot, int32 Count)
+bool UVestigeInventoryComponent::RemoveItemFromSlot(int32 Slot, int32 Count)
 {
-	if (!Inventory.TryRemoveFromSlot(Slot, Count))
+	if (!Inventory.RemoveFromSlot(Slot, Count))
 	{
 		return false;
 	}
@@ -209,7 +209,7 @@ int32 UVestigeInventoryComponent::RestoreFromSaveData(const FVestigeInventorySav
 		const int32 Added = FMath::Min(Leftover.Value, Inventory.GetRoomFor(*Leftover.Key));
 		if (Added > 0)
 		{
-			Inventory.TryAdd(*Leftover.Key, Added);
+			Inventory.Add(*Leftover.Key, Added);
 		}
 		if (Added < Leftover.Value)
 		{

@@ -25,7 +25,7 @@ namespace FarmWateringCan
 	int32 GetWater(const UVestigeInventoryComponent& Inventory, int32 Slot);
 
 	/** Takes one watering's water from the can in Slot. Returns false, changing nothing, if it holds less or isn't a can. */
-	bool TryPour(UVestigeInventoryComponent& Inventory, int32 Slot);
+	bool Pour(UVestigeInventoryComponent& Inventory, int32 Slot);
 
 	/**
 	 * The slot of the can to fill: the first, in slot order, that isn't full; else the first can there is (a full one); else
