@@ -8,6 +8,7 @@
 #include "Core/VestigeSaveRegistry.h"
 #include "CQTest.h"
 #include "GameFramework/GameModeBase.h"
+#include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerController.h"
 #include "Inventory/VestigeWalletComponent.h"
 #include "Inventory/VestigeWalletSaveData.h"
@@ -223,7 +224,102 @@ namespace VestigeWalletTests
 			Controller.PlayerState = &PlayerState;
 
 			ASSERT_THAT(IsTrue(UVestigeWalletComponent::FindForFirstPlayer(&Spawner.GetWorld()) == PlayerState.GetWallet()));
-			ASSERT_THAT(IsNull(UVestigeWalletComponent::FindForFirstPlayer(nullptr)));		}
+			ASSERT_THAT(IsNull(UVestigeWalletComponent::FindForFirstPlayer(nullptr)));
+		}
+
+		// ---- Spending ----
+
+		TEST_METHOD(SpendingTakesTheAmountAndBroadcasts)
+		{
+			UVestigeWalletComponent* Wallet = SpawnPlayerState().GetWallet();
+			ASSERT_THAT(IsNotNull(Wallet));
+			const int32 Before = Wallet->GetMoney();
+			ASSERT_THAT(IsTrue(Before > 30));
+			int32 Broadcasts = 0;
+			int32 MoneyAtBroadcast = INDEX_NONE;
+			Wallet->OnMoneyChanged.AddLambda(
+				[&]()
+				{
+					++Broadcasts;
+					MoneyAtBroadcast = Wallet->GetMoney();
+				});
+
+			ASSERT_THAT(IsTrue(Wallet->TrySpendMoney(30)));
+
+			ASSERT_THAT(AreEqual(Wallet->GetMoney(), Before - 30));
+			ASSERT_THAT(AreEqual(Broadcasts, 1));
+			ASSERT_THAT(AreEqual(MoneyAtBroadcast, Before - 30));
+		}
+
+		TEST_METHOD(SpendingMoreThanThePurseChangesNothing)
+		{
+			UVestigeWalletComponent* Wallet = SpawnPlayerState().GetWallet();
+			ASSERT_THAT(IsNotNull(Wallet));
+			const int32 Before = Wallet->GetMoney();
+			int32 Broadcasts = 0;
+			Wallet->OnMoneyChanged.AddLambda(
+				[&Broadcasts]()
+				{
+					++Broadcasts;
+				});
+
+			// There is no debt, by one coin or by a lot.
+			ASSERT_THAT(IsFalse(Wallet->TrySpendMoney(Before + 1)));
+			ASSERT_THAT(IsFalse(Wallet->TrySpendMoney(MAX_int32)));
+
+			ASSERT_THAT(AreEqual(Wallet->GetMoney(), Before));
+			ASSERT_THAT(AreEqual(Broadcasts, 0));
+		}
+
+		TEST_METHOD(ASpendOfZeroOrLessChangesNothing)
+		{
+			UVestigeWalletComponent* Wallet = SpawnPlayerState().GetWallet();
+			ASSERT_THAT(IsNotNull(Wallet));
+			const int32 Before = Wallet->GetMoney();
+			int32 Broadcasts = 0;
+			Wallet->OnMoneyChanged.AddLambda(
+				[&Broadcasts]()
+				{
+					++Broadcasts;
+				});
+
+			// A negative spend would be a hidden add.
+			ASSERT_THAT(IsFalse(Wallet->TrySpendMoney(0)));
+			ASSERT_THAT(IsFalse(Wallet->TrySpendMoney(-20)));
+			ASSERT_THAT(IsFalse(Wallet->TrySpendMoney(MIN_int32)));
+
+			ASSERT_THAT(AreEqual(Wallet->GetMoney(), Before));
+			ASSERT_THAT(AreEqual(Broadcasts, 0));
+		}
+
+		TEST_METHOD(SpendingTheWholePurseLeavesZero)
+		{
+			UVestigeWalletComponent* Wallet = SpawnPlayerState().GetWallet();
+			ASSERT_THAT(IsNotNull(Wallet));
+
+			ASSERT_THAT(IsTrue(Wallet->TrySpendMoney(Wallet->GetMoney())));
+
+			ASSERT_THAT(AreEqual(Wallet->GetMoney(), 0));
+			// An empty purse can't spend even one coin.
+			ASSERT_THAT(IsFalse(Wallet->TrySpendMoney(1)));
+			ASSERT_THAT(AreEqual(Wallet->GetMoney(), 0));
+		}
+
+		TEST_METHOD(FindForPawnFindsThePlayerStatesWallet)
+		{
+			AVestigePlayerState& PlayerState = SpawnPlayerState();
+			APlayerController& Controller = Spawner.SpawnActor<APlayerController>();
+			Controller.PlayerState = &PlayerState;
+			APawn& Pawn = Spawner.SpawnActor<APawn>();
+			ASSERT_THAT(IsNull(UVestigeWalletComponent::FindForPawn(&Pawn)));
+
+			Controller.Possess(&Pawn);
+
+			ASSERT_THAT(IsTrue(UVestigeWalletComponent::FindForPawn(&Pawn) == PlayerState.GetWallet()));
+			// Not a pawn, and no actor at all.
+			ASSERT_THAT(IsNull(UVestigeWalletComponent::FindForPawn(&PlayerState)));
+			ASSERT_THAT(IsNull(UVestigeWalletComponent::FindForPawn(nullptr)));
+		}
 	};
 }
 

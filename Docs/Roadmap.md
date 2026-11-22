@@ -156,7 +156,7 @@ The code changes that the slice's content depends on. Doing them first means add
 
 - [ ] Placing objects on the farm grid
 - [ ] A sprinkler that waters nearby tiles each morning from the farm's water store
-- [ ] A simple way to buy seeds, with one cheap basic seed always for sale
+- [ ] The seed dispensers' real mesh: the artist's `SM_ShopDispenser` (0.9 by 0.9 by 1.5 m, pivot on the floor at its centre, front towards +X) with hull `UCX_SM_ShopDispenser_00` and a window material per seed so the three tell apart at a glance; then rerun `EditorScripts/SetUpSeedShop.py` (it sets the mesh at scale 1 and location 0 in place of the stand-in cube) and re-check the interaction box numbers ([Systems.md, section 26](Systems/26-Shops.md))
 
 ### 4.6 Interface and input
 
@@ -216,6 +216,7 @@ Roughly in the order from [GameDesign.md section 13](GameDesign.md#13-scope-and-
 - [ ] Recruiting befriended robots to work on the farm
 - [ ] Town restoration, the main story: repair the water pump, power, clinic and market, each unlocking something new
 - [ ] Shops
+   - A proper store building to visit replaces the farm's seed dispensers from the vertical slice (@DunderGG, 2026-11-22, [GameDesign.md section 9](GameDesign.md#economy))
 
 ### Progression
 

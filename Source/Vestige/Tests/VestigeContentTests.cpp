@@ -11,8 +11,12 @@
 #include "Content/VestigeItemData.h"
 #include "Content/VestigeToolData.h"
 #include "Content/VestigeToolFragment.h"
+#include "Content/VestigeShopData.h"
+#include "Components/StaticMeshComponent.h"
 #include "CQTest.h"
 #include "Engine/AssetManager.h"
+#include "Engine/StaticMesh.h"
+#include "Farming/FarmShopDispenser.h"
 #include "Farming/VestigeGameplayAbility_UseTool.h"
 
 #if WITH_EDITOR
@@ -148,11 +152,106 @@ namespace VestigeContentTests
 			}
 		}
 
+		/** The slice's one shop sells the three seeds at GameDesign.md's prices, in the order a shop screen shows them. */
+		TEST_METHOD(TheFarmShopSellsTheThreeSeedsAtTheirPrices)
+		{
+			Spawner.InitializeGameSubsystems();
+			const UVestigeContentCatalog* Catalog = UVestigeContentCatalog::Get(&Spawner.GetWorld());
+			const UVestigeShopData* Shop =
+				Catalog->Find<UVestigeShopData>(FPrimaryAssetId(UVestigeShopData::AssetType, TEXT("Base.FarmShop")));
+			ASSERT_THAT(IsNotNull(Shop));
+
+			const TPair<const TCHAR*, int32> Expected[] = {
+				{TEXT("Base.TurnipSeeds"), 10}, {TEXT("Base.PotatoSeeds"), 20}, {TEXT("Base.CabbageSeeds"), 40}};
+			const TArray<FVestigeShopOffer>& Offers = Shop->GetOffers();
+			ASSERT_THAT(AreEqual(Offers.Num(), 3));
+			for (int32 Index = 0; Index < 3; ++Index)
+			{
+				const FPrimaryAssetId ItemId(UVestigeItemData::AssetType, Expected[Index].Key);
+				ASSERT_THAT(IsTrue(Offers[Index].ItemId == ItemId, Expected[Index].Key));
+				ASSERT_THAT(AreEqual(Offers[Index].Price, Expected[Index].Value, Expected[Index].Key));
+				ASSERT_THAT(IsNotNull(Catalog->Find<UVestigeItemData>(ItemId), Expected[Index].Key));
+				ASSERT_THAT(IsTrue(Shop->FindOffer(ItemId) == &Offers[Index], Expected[Index].Key));
+			}
+			// An item the shop doesn't sell has no offer, never a free one.
+			ASSERT_THAT(IsNull(Shop->FindOffer(FPrimaryAssetId(UVestigeItemData::AssetType, TEXT("Base.Turnip")))));
+		}
+
+		/** Each dispenser Blueprint names the farm shop and one seed, and has a mesh (the stand-in cube until the art). */
+		TEST_METHOD(TheDispenserBlueprintsOfferTheThreeSeeds)
+		{
+			const FPrimaryAssetId FarmShop(UVestigeShopData::AssetType, TEXT("Base.FarmShop"));
+			const TPair<const TCHAR*, const TCHAR*> Expected[] = {
+				{TEXT("/Game/Vestige/Blueprints/BP_ShopDispenser_TurnipSeeds.BP_ShopDispenser_TurnipSeeds_C"), TEXT("Base.TurnipSeeds")},
+				{TEXT("/Game/Vestige/Blueprints/BP_ShopDispenser_PotatoSeeds.BP_ShopDispenser_PotatoSeeds_C"), TEXT("Base.PotatoSeeds")},
+				{TEXT("/Game/Vestige/Blueprints/BP_ShopDispenser_CabbageSeeds.BP_ShopDispenser_CabbageSeeds_C"),
+					TEXT("Base.CabbageSeeds")}};
+			for (const TPair<const TCHAR*, const TCHAR*>& Entry : Expected)
+			{
+				const UClass* DispenserClass = LoadClass<AFarmShopDispenser>(nullptr, Entry.Key);
+				ASSERT_THAT(IsNotNull(DispenserClass, Entry.Key));
+				const AFarmShopDispenser* Dispenser = GetDefault<AFarmShopDispenser>(DispenserClass);
+
+				ASSERT_THAT(IsTrue(Dispenser->GetShopId() == FarmShop, Entry.Key));
+				ASSERT_THAT(IsTrue(Dispenser->GetItemId() == FPrimaryAssetId(UVestigeItemData::AssetType, Entry.Value), Entry.Key));
+				const UStaticMeshComponent* Mesh = Dispenser->FindComponentByClass<UStaticMeshComponent>();
+				ASSERT_THAT(IsNotNull(Mesh, Entry.Key));
+				ASSERT_THAT(IsNotNull(Mesh->GetStaticMesh().Get(), Entry.Key));
+			}
+		}
+
 #if WITH_EDITOR
-		/** What the editor's validation reports when content is saved: no crop or item may fail it. */
+		/** Only the first offer of an item is ever found, so a second one's price would silently do nothing. */
+		TEST_METHOD(AShopOfferingAnItemTwiceIsInvalid)
+		{
+			FVestigeShopOffer Offer;
+			Offer.ItemId = FPrimaryAssetId(UVestigeItemData::AssetType, TEXT("Base.TurnipSeeds"));
+			Offer.Price = 10;
+			UVestigeShopData& Shop = Spawner.SpawnObject<UVestigeShopData>();
+			Shop.SetContentIdForTests(TEXT("Test.Shop"));
+			Shop.AddOfferForTests(Offer);
+			FDataValidationContext Once;
+			ASSERT_THAT(IsTrue(Shop.IsDataValid(Once) != EDataValidationResult::Invalid));
+			ASSERT_THAT(AreEqual(Once.GetNumErrors(), 0));
+
+			Offer.Price = 12;
+			Shop.AddOfferForTests(Offer);
+			FDataValidationContext Twice;
+
+			ASSERT_THAT(IsTrue(Shop.IsDataValid(Twice) == EDataValidationResult::Invalid));
+			ASSERT_THAT(AreEqual(Twice.GetNumErrors(), 1));
+		}
+
+		TEST_METHOD(AShopOfferWithoutAKnownItemOrAPriceIsInvalid)
+		{
+			const FPrimaryAssetId Bad[] = {FPrimaryAssetId(), FPrimaryAssetId(UFarmCropData::AssetType, TEXT("Base.Turnip")),
+				FPrimaryAssetId(UVestigeItemData::AssetType, TEXT("Gone.Seeds"))};
+			for (const FPrimaryAssetId& ItemId : Bad)
+			{
+				UVestigeShopData& Shop = Spawner.SpawnObject<UVestigeShopData>();
+				Shop.SetContentIdForTests(TEXT("Test.Shop"));
+				FVestigeShopOffer Offer;
+				Offer.ItemId = ItemId;
+				Offer.Price = 10;
+				Shop.AddOfferForTests(Offer);
+				FDataValidationContext Context;
+				ASSERT_THAT(IsTrue(Shop.IsDataValid(Context) == EDataValidationResult::Invalid, ItemId.ToString()));
+			}
+
+			UVestigeShopData& Free = Spawner.SpawnObject<UVestigeShopData>();
+			Free.SetContentIdForTests(TEXT("Test.Shop"));
+			FVestigeShopOffer FreeOffer;
+			FreeOffer.ItemId = FPrimaryAssetId(UVestigeItemData::AssetType, TEXT("Base.TurnipSeeds"));
+			FreeOffer.Price = 0;
+			Free.AddOfferForTests(FreeOffer);
+			FDataValidationContext Context;
+			ASSERT_THAT(IsTrue(Free.IsDataValid(Context) == EDataValidationResult::Invalid));
+		}
+
+		/** What the editor's validation reports when content is saved: no crop, item or shop may fail it. */
 		TEST_METHOD(EveryCropAndItemPassesValidation)
 		{
-			for (const FPrimaryAssetType& Type : {UFarmCropData::AssetType, UVestigeItemData::AssetType})
+			for (const FPrimaryAssetType& Type : {UFarmCropData::AssetType, UVestigeItemData::AssetType, UVestigeShopData::AssetType})
 			{
 				TArray<FPrimaryAssetId> Ids;
 				UAssetManager::Get().GetPrimaryAssetIdList(Type, Ids);

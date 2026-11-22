@@ -40,7 +40,7 @@ namespace VestigeGameplayTags
 		"Feedback: a withered crop must be cleared before tilling or planting.");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Feedback_Farm_NothingRipe, "Vestige.Feedback.Farm.NothingRipe", "Feedback: no ripe crop to harvest.");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(
-		Feedback_Inventory_Full, "Vestige.Feedback.Inventory.Full", "Feedback: no room in the inventory, so the harvest stays.");
+		Feedback_Inventory_Full, "Vestige.Feedback.Inventory.Full", "Feedback: no room in the inventory, so nothing is added.");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Feedback_Water_CanEmpty, "Vestige.Feedback.Water.CanEmpty", "Feedback: the watering can is empty.");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Feedback_Water_CanFull, "Vestige.Feedback.Water.CanFull", "Feedback: the watering can is already full.");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Feedback_Water_CanFilled, "Vestige.Feedback.Water.CanFilled", "Feedback: the watering can was filled.");
@@ -53,6 +53,10 @@ namespace VestigeGameplayTags
 		Feedback_Shipping_NothingToShip, "Vestige.Feedback.Shipping.NothingToShip", "Feedback: nothing sellable is in hand at the shipping bin.");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Feedback_Shipping_Paid, "Vestige.Feedback.Shipping.Paid",
 		"Feedback: the Paid clause of the game mode's day reports, when the night's sale paid. Value: Amount. Never reported alone.");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(
+		Feedback_Shop_Bought, "Vestige.Feedback.Shop.Bought", "Feedback: a purchase at a shop went through. Values: Item, Count, Price.");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Feedback_Shop_NotEnoughMoney, "Vestige.Feedback.Shop.NotEnoughMoney",
+		"Feedback: the purse holds less than the cost, so nothing is bought. Value: Price.");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(
 		ItemStat_Water_Clean, "Vestige.ItemStat.Water.Clean", "Item stat: clean water in a container, in waterings. Saved by name.");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Feedback_Stamina_Empty, "Vestige.Feedback.Stamina.Empty", "Feedback: stamina has just run out.");

@@ -128,20 +128,17 @@ Filling the watering can at the well now plays a splash (the first sound in the 
 - [x] **Both fills** (why a person: hearing): use the well up until it runs dry part-way through filling the can (the message says it ran dry): the splash plays with that message too. A full can ("The can is full") and a dry well make no sound.
 - [x] **Pause** (why a person: feel; only if the game can be paused): pause during the splash: it pauses with the game and goes on when you resume.
 
+### The seed shop, 2026-11-22
+
+Three seed dispensers stand in a row beside the shipping bin in the service yard (stand-in cubes until the real mesh comes): F buys one packet of seeds per press with the coins from the bin ([Systems.md, section 26](Systems/26-Shops.md), [GameDesign.md, section 9](GameDesign.md#economy)). The commit is the one titled "Buy seeds from a seed shop". The buying rule, the prompts, the messages, the refusals and which dispenser a farmer facing the row focuses are automated tests; an off-screen run saw "F Buy Turnip Seeds (10)" in front of the turnip dispenser and no prompt in the gap between two. Telling the three seeds apart at a glance is the real mesh's check, later.
+
+- [ ] **Walking the row** (why a person: feel; at the smoke test): walk from the bin to the row, along the front of the three cabinets and back. The farmer doesn't catch on the cabinets or the bin, and the row reads as one shop beside the bin. Facing each cabinet shows its own "F Buy ... (price)"; between two there is no prompt until you step in front of one. Say if that gap feels wrong.
+- [ ] **Buying on day 1 and after a sale** (why a person: how the messages read in play; at the smoke test): on day 1 buy a few turnip seeds (100 coins buy ten), then ship a harvest, sleep and buy cabbage seeds. The Coins and Bag lines change at once, and "Bought: ..." reads well next to the morning's messages; with too few coins the message says what the seeds cost.
+- [ ] **One seed per press** (why a person: feel; one per press is decided in [GameDesign.md, section 9](GameDesign.md#economy), with hold-to-repeat as the fallback): replant a usual 2 to 10 tiles by buying their seeds. Say whether pressing F once per seed feels fine or tedious; holding F to repeat is the fallback.
+
 ### Editor chores
 
 Changes only the editor can make safely. The steps are in [RoadmapArchive.md, Housekeeping](RoadmapArchive.md#3-housekeeping): re-saving the template Blueprints and `L_Farm`, moving `BP_FarmTile` and the materials with redirectors fixed, and regenerating the Android File Server token if it was ever used. After each one, run the [smoke test](#3-smoke-test).
-
-### Editor-only level survey, 2026-11-14
-
-The one-shot `EditorScripts/SurveyLevel.py` tool surveys only the currently open Editor world and writes Markdown, versioned JSON and a completion manifest under `Saved/LevelReports/`. Its embedded-Editor behavior still needs validation. The commit is titled "Add the first read-only level survey".
-
-- [x] **Enable the Editor Python plugin** (why a person: editor-only setup): if it is not already enabled, open Edit > Plugins, search for **Python Editor Script Plugin**, enable it and restart the Editor. Review any `Vestige.uproject` change the Editor makes; the script implementation itself does not change project configuration.
-- [x] **Run on two maps and inspect reports** (why a person: editor-only integration, first look): with the Editor open on `/Game/Maps/L_Farm`, choose Tools > Execute Python Script and select `EditorScripts/SurveyLevel.py`. Repeat on an empty or structurally different map. In `Saved/LevelReports/`, confirm each run has a Markdown report, JSON report and `.complete.json` sidecar; each report names the full map package path and describes the actors the Outliner API returned. Check that the bounds are useful for level work, remembering they are axis-aligned component bounds, not a walkable footprint or level boundary.
-   - It's actually in "Tools > Execute Python Script"
-   - ~~In the output log it says "LogPython: [SurveyLevel] Failed: SurveyError: Unreal Paths did not return an absolute project Saved directory."~~
-- [x] **Leave editor state alone** (why a person: editor-only state): before running, note the selected actor and whether the map is already marked unsaved. Run the survey and confirm selection and the map's dirty/unsaved state are unchanged. If the test map has an actor with a blank label, confirm it remains blank in the Outliner and is reported as unavailable; do not rename or save the actor to make the check pass.
-- [x] **Same short name, separate output** (why a person: editor-only integration): open two maps from different folders that share the same asset name, running the script on each. Confirm their reports are in separate hash-suffixed folders under `Saved/LevelReports/` and neither run overwrites the other's files.
 
 ## 3. Smoke test
 
@@ -159,6 +156,7 @@ About five minutes in `L_Farm`, in Play in Editor at High. Run it before pushing
 10. **Withering:** `SetDay 28`, with watered crops of every kind planted and one ripe crop, then sleep in the bed: the next morning says summer began and then that the crops withered. The spring crops stand as dead plants ("F Clear" on them), the ripe one is still harvestable, and "F Clear" leaves empty tilled soil.
 11. **Water:** with the can half empty, walk to the well in the service yard and press F: the can fills with a splash ("Can filled.", "Watering Can (8/8)") and the prompt counts the well's water down from 24. Use the well up ("The well is dry. It refills overnight."), sleep, and it is full again.
 12. **Selling:** with turnips in hand press F at the shipping bin beside the well ("Shipped: Turnip ×10. The bin pays in the morning."), sleep: the morning message ends "The bin paid 250." and the HUD's "Coins" line rises by 250. A morning without a sale has no such clause.
+13. **Buying:** at the row of seed dispensers beside the bin, face the turnip one ("F Buy Turnip Seeds (10)") and press F: "Bought: Turnip Seeds ×1 for 10.", the Coins line drops by 10 and Turnip Seeds in the bag rise by 1. With fewer than 40 coins the cabbage one says "Not enough coins. These seeds cost 40." and takes nothing.
 
 Put the save folder back afterwards if you want your farm as it was.
 

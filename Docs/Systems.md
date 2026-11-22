@@ -116,3 +116,7 @@ The guides, one file each in [`Systems/`](Systems/). The numbered headings below
 ## 25. Selling and money
 
 [Systems/25-Selling.md](Systems/25-Selling.md)
+
+## 26. Buying and shops
+
+[Systems/26-Shops.md](Systems/26-Shops.md)

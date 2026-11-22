@@ -5,6 +5,7 @@
 
 #include "Core/VestigeSaveRegistry.h"
 #include "Engine/World.h"
+#include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/PlayerState.h"
 #include "Inventory/VestigeInventoryLog.h"
@@ -19,6 +20,13 @@ UVestigeWalletComponent* UVestigeWalletComponent::FindForFirstPlayer(const UWorl
 {
 	const APlayerController* Controller = World ? World->GetFirstPlayerController() : nullptr;
 	const APlayerState* PlayerState = Controller ? Controller->PlayerState.Get() : nullptr;
+	return PlayerState ? PlayerState->FindComponentByClass<UVestigeWalletComponent>() : nullptr;
+}
+
+UVestigeWalletComponent* UVestigeWalletComponent::FindForPawn(const AActor* Pawn)
+{
+	const APawn* AsPawn = Cast<APawn>(Pawn);
+	const APlayerState* PlayerState = AsPawn ? AsPawn->GetPlayerState() : nullptr;
 	return PlayerState ? PlayerState->FindComponentByClass<UVestigeWalletComponent>() : nullptr;
 }
 
@@ -57,6 +65,19 @@ bool UVestigeWalletComponent::AddMoney(int32 Amount)
 	}
 	Money = static_cast<int32>(FMath::Min<int64>(Sum, VestigeWallet::MaxMoney));
 	VESTIGE_LOG(this, LogVestigeInventory, Verbose, "Added {Amount}, so the wallet holds {Money}.", Amount, Money);
+	OnMoneyChanged.Broadcast();
+	return true;
+}
+
+bool UVestigeWalletComponent::TrySpendMoney(int32 Amount)
+{
+	if (Amount <= 0 || Amount > Money)
+	{
+		return false;
+	}
+
+	Money -= Amount;
+	VESTIGE_LOG(this, LogVestigeInventory, Verbose, "Spent {Amount}, so the wallet holds {Money}.", Amount, Money);
 	OnMoneyChanged.Broadcast();
 	return true;
 }

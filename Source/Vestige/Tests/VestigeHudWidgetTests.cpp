@@ -435,6 +435,8 @@ namespace VestigeHudWidgetTests
 				TEXT("Day"), TEXT("Season"), TEXT("SeasonInSentence"), TEXT("DayOfSeason"), TEXT("DaysLeft"), TEXT("Count")};
 			const TArray<FString> ItemAndCountValues = {TEXT("Item"), TEXT("Count")};
 			const TArray<FString> AmountValues = {TEXT("Amount")};
+			const TArray<FString> BoughtValues = {TEXT("Item"), TEXT("Count"), TEXT("Price")};
+			const TArray<FString> PriceValues = {TEXT("Price")};
 			// The day reports end with the Paid clause (what the shipping bin paid in the night).
 			TArray<FString> DayReportValues = DateValues;
 			DayReportValues.Add(TEXT("Paid"));
@@ -463,6 +465,8 @@ namespace VestigeHudWidgetTests
 				{VestigeGameplayTags::Feedback_Shipping_Shipped, ItemAndCountValues},
 				{VestigeGameplayTags::Feedback_Shipping_NothingToShip, NoValues},
 				{VestigeGameplayTags::Feedback_Shipping_Paid, AmountValues},
+				{VestigeGameplayTags::Feedback_Shop_Bought, BoughtValues},
+				{VestigeGameplayTags::Feedback_Shop_NotEnoughMoney, PriceValues},
 				{VestigeGameplayTags::Feedback_Stamina_Empty, NoValues},
 				{VestigeGameplayTags::Feedback_Rest_GettingLate, NoValues},
 				{VestigeGameplayTags::Feedback_Rest_PastMidnight, NoValues},

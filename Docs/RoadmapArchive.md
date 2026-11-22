@@ -321,6 +321,8 @@ When working nearby:
   - Done 2026-11-22: 100 coins, tunable on `BP_PlayerState`
 - [x] A simple budget for an ordinary and a poor season before prices are set
   - Done 2026-11-22: [GameDesign.md, section 9](GameDesign.md#economy)
+- [x] A simple way to buy seeds, with one cheap basic seed always for sale
+  - Done 2026-11-22: three seed dispensers beside the shipping bin sell turnip, potato and cabbage seeds (10, 20, 40), one per press, from `DA_Shop_Farm` ([section 26](Systems/26-Shops.md)); stand-in cubes until the real mesh
 
 ### 4.6 Interface and input
 

@@ -86,7 +86,10 @@ namespace VestigeGameplayTags
 	/** The till and plant abilities, on the press: a withered crop stands on the tile and must be cleared first. */
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Feedback_Farm_ClearFirst);
 
-	/** The harvest ability, on the press: the inventory has no room for the harvest, which stays in the ground. */
+	/**
+	 * The inventory has no room, so nothing is added: the harvest ability, on the press (the harvest stays in the ground), and a
+	 * seed dispenser (nothing is bought).
+	 */
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Feedback_Inventory_Full);
 
 	/** The watering can: it holds no water, so nothing is watered. */
@@ -112,6 +115,12 @@ namespace VestigeGameplayTags
 
 	/** The Paid clause of the game mode's day reports, when the night's sale paid. Value Amount (the total). Never reported alone. */
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Feedback_Shipping_Paid);
+
+	/** A seed dispenser: the purchase went through. Values Item (the display name), Count and Price (the cost). */
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Feedback_Shop_Bought);
+
+	/** A seed dispenser: the purse holds less than the cost, so nothing is bought. Value Price (the cost). */
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Feedback_Shop_NotEnoughMoney);
 
 	/**
 	 * The stat of an item slot that holds clean water: the watering can's water, in waterings. A stat tag, not a feedback tag:
