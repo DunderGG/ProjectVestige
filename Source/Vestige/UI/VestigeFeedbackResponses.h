@@ -8,6 +8,7 @@
 #include "GameplayTagContainer.h"
 #include "VestigeFeedbackResponses.generated.h"
 
+struct FVestigeFeedbackClause;
 struct FVestigeFeedbackReport;
 class USoundBase;
 
@@ -50,8 +51,12 @@ public:
 	/** The response to Tag, or nullptr when the asset has no row for it. */
 	const FVestigeFeedbackResponse* FindResponse(const FGameplayTag& Tag) const { return Responses.Find(Tag); }
 
-	/** Response's message with Report's values filled in. */
-	static FText FormatMessage(const FVestigeFeedbackResponse& Response, const FVestigeFeedbackReport& Report);
+	/**
+	 * Response's message with FeedbackReport's values filled in. Each of its clauses first becomes the text argument it names,
+	 * the text of the row of the clause's tag (empty for an invalid tag, or for a tag with no text, with a warning), and the
+	 * message is trimmed at the end, so a row ending in an empty clause's argument ends where it did.
+	 */
+	FText FormatMessage(const FVestigeFeedbackResponse& Response, const FVestigeFeedbackReport& FeedbackReport) const;
 
 	const TMap<FGameplayTag, FVestigeFeedbackResponse>& GetResponses() const { return Responses; }
 
@@ -66,6 +71,9 @@ public:
 #endif
 
 private:
+	/** The text of Clause: its row's message with the clause's values, or empty. */
+	FText FormatClause(const FVestigeFeedbackClause& Clause) const;
+
 	/** One row per feedback tag. A report without a row shows nothing and logs a warning. */
 	UPROPERTY(
 		EditDefaultsOnly, Category = "Feedback", meta = (AllowPrivateAccess = "true", Categories = "Vestige.Feedback", ForceInlineRow))

@@ -21,11 +21,37 @@ namespace VestigeFeedback
 		}
 		return FString::Join(Parts, TEXT(" "));
 	}
+
+	/**
+	 * The report's values and clauses for the log: its values, then each clause as "Paid=[Vestige.Feedback.Shipping.Paid
+	 * Amount=250]", or "Paid=[]" for an empty one.
+	 */
+	FString DescribeReport(const FVestigeFeedbackReport& FeedbackReport)
+	{
+		TArray<FString> Parts;
+		Parts.Reserve(1 + FeedbackReport.Clauses.Num());
+		Parts.Add(DescribeArguments(FeedbackReport.Arguments));
+		for (const FVestigeFeedbackClause& Clause : FeedbackReport.Clauses)
+		{
+			FString Content;
+			if (Clause.Tag.IsValid())
+			{
+				Content = (Clause.Tag.ToString() + TEXT(" ") + DescribeArguments(Clause.Arguments)).TrimEnd();
+			}
+			Parts.Add(Clause.Argument.ToString() + TEXT("=[") + Content + TEXT("]"));
+		}
+		return FString::Join(Parts, TEXT(" ")).TrimStart();
+	}
 }
 
 void UVestigeFeedbackSubsystem::Report(const UWorld* World, const FGameplayTag& Tag, FFormatNamedArguments Arguments)
 {
-	if (!Tag.IsValid())
+	Report(World, FVestigeFeedbackReport{Tag, MoveTemp(Arguments), {}});
+}
+
+void UVestigeFeedbackSubsystem::Report(const UWorld* World, FVestigeFeedbackReport FeedbackReport)
+{
+	if (!FeedbackReport.Tag.IsValid())
 	{
 		VESTIGE_LOG(World, LogVestigeFeedback, Warning, "A report without a valid tag was ignored.");
 		return;
@@ -33,10 +59,11 @@ void UVestigeFeedbackSubsystem::Report(const UWorld* World, const FGameplayTag& 
 
 	// The HUD lets messages fade and shows nothing for some reports, so the log keeps the full history (Output Log, filtered
 	// to LogVestigeFeedback).
-	VESTIGE_LOG(World, LogVestigeFeedback, Log, "{Tag} {Arguments}", Tag.ToString(), VestigeFeedback::DescribeArguments(Arguments));
+	VESTIGE_LOG(World, LogVestigeFeedback, Log, "{Tag} {Arguments}", FeedbackReport.Tag.ToString(),
+		VestigeFeedback::DescribeReport(FeedbackReport));
 
 	if (UVestigeFeedbackSubsystem* Feedback = UWorld::GetSubsystem<UVestigeFeedbackSubsystem>(World))
 	{
-		Feedback->OnFeedback.Broadcast(FVestigeFeedbackReport{Tag, MoveTemp(Arguments)});
+		Feedback->OnFeedback.Broadcast(FeedbackReport);
 	}
 }

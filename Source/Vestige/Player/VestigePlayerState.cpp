@@ -11,10 +11,12 @@
 #include "Farming/VestigeRestComponent.h"
 #include "GameFramework/Pawn.h"
 #include "Inventory/VestigeInventoryComponent.h"
+#include "Inventory/VestigeWalletComponent.h"
 
 AVestigePlayerState::AVestigePlayerState()
 {
 	Inventory = CreateDefaultSubobject<UVestigeInventoryComponent>(TEXT("Inventory"));
+	Wallet = CreateDefaultSubobject<UVestigeWalletComponent>(TEXT("Wallet"));
 
 	// Single-player: nothing is predicted or sent to other machines, so the leanest replication mode is enough.
 	AbilitySystem = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("AbilitySystem"));

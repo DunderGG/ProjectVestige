@@ -37,6 +37,9 @@ public:
 	 */
 	void SetStamina(const FText& Text, int32 Stamina, int32 MaxStamina, bool bOutOfStamina, bool bExhausted);
 
+	/** "Coins 250", under the stamina. Does nothing while the widget has no MoneyText. */
+	void SetMoneyText(const FText& Text);
+
 	/** "Bag: Turnip Seeds 9   Turnip 2". */
 	void SetBagText(const FText& Text);
 
@@ -70,6 +73,13 @@ private:
 
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UTextBlock> StaminaText;
+
+	/**
+	 * The money line under the stamina. The one optional part: it was added to the C++ after WBP_Hud's layout, so the widget
+	 * compiles before a person adds it in the designer. Without it the HUD shows no money line.
+	 */
+	UPROPERTY(meta = (BindWidgetOptional))
+	TObjectPtr<UTextBlock> MoneyText;
 
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UTextBlock> BagText;

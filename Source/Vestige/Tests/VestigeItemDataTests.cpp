@@ -104,6 +104,56 @@ namespace VestigeItemDataTests
 			ASSERT_THAT(IsNull(Turnip->FindFragment<UFarmSeedFragment>()));
 		}
 
+		TEST_METHOD(TheHarvestsSellAtTheirPrices)
+		{
+			// The slice's prices (GameDesign.md, section 6), which the season budget rests on.
+			const TPair<const TCHAR*, int32> Prices[] = {{TEXT("Base.Turnip"), 25}, {TEXT("Base.Potato"), 18}, {TEXT("Base.Cabbage"), 110}};
+			for (const TPair<const TCHAR*, int32>& Price : Prices)
+			{
+				const UVestigeItemData* Item = LoadContent<UVestigeItemData>(FPrimaryAssetId(UVestigeItemData::AssetType, Price.Key));
+				ASSERT_THAT(IsNotNull(Item, Price.Key));
+				ASSERT_THAT(AreEqual(Item->GetSellPrice(), Price.Value));
+				ASSERT_THAT(IsTrue(Item->CanBeSold(), Price.Key));
+			}
+		}
+
+		TEST_METHOD(SeedsAndToolsDontSell)
+		{
+			const TCHAR* const Names[] = {
+				TEXT("Base.TurnipSeeds"), TEXT("Base.PotatoSeeds"), TEXT("Base.CabbageSeeds"), TEXT("Base.Hoe"), TEXT("Base.WateringCan")};
+			for (const TCHAR* Name : Names)
+			{
+				const UVestigeItemData* Item = LoadContent<UVestigeItemData>(FPrimaryAssetId(UVestigeItemData::AssetType, Name));
+				ASSERT_THAT(IsNotNull(Item, Name));
+				ASSERT_THAT(AreEqual(Item->GetSellPrice(), 0));
+				ASSERT_THAT(IsFalse(Item->CanBeSold(), Name));
+			}
+		}
+
+		TEST_METHOD(AnItemWithoutAPriceCantBeSold)
+		{
+			// A new item has no price, and 0 means "not for sale", never "sell at a default".
+			ASSERT_THAT(IsFalse(MakeItem().CanBeSold()));
+		}
+
+		TEST_METHOD(ABasicCropSellsForAtLeastTwiceItsSeedPrice)
+		{
+			// GameDesign.md, section 9: counted per seed planted, so the crop's yield times the harvest's price against the seed
+			// price the shop will charge (10, 20 and 40, which are not item data yet).
+			const TTuple<const TCHAR*, const TCHAR*, int32> Crops[] = {
+				{TEXT("Base.Turnip"), TEXT("Base.Turnip"), 10}, {TEXT("Base.Potato"), TEXT("Base.Potato"), 20},
+				{TEXT("Base.Cabbage"), TEXT("Base.Cabbage"), 40}};
+			for (const TTuple<const TCHAR*, const TCHAR*, int32>& Entry : Crops)
+			{
+				const UVestigeItemData* Item =
+					LoadContent<UVestigeItemData>(FPrimaryAssetId(UVestigeItemData::AssetType, Entry.Get<0>()));
+				const UFarmCropData* Crop = LoadContent<UFarmCropData>(FPrimaryAssetId(UFarmCropData::AssetType, Entry.Get<1>()));
+				ASSERT_THAT(IsNotNull(Item, Entry.Get<0>()));
+				ASSERT_THAT(IsNotNull(Crop, Entry.Get<1>()));
+				ASSERT_THAT(IsTrue(Crop->GetYield() * Item->GetSellPrice() >= 2 * Entry.Get<2>(), Entry.Get<0>()));
+			}
+		}
+
 		TEST_METHOD(ThePotatoAndCabbageSeedsPlantTheirCrops)
 		{
 			const TPair<const TCHAR*, const TCHAR*> Seeds[] = {

@@ -128,6 +128,17 @@ Filling the watering can at the well now plays a splash (the first sound in the 
 - [x] **Both fills** (why a person: hearing): use the well up until it runs dry part-way through filling the can (the message says it ran dry): the splash plays with that message too. A full can ("The can is full") and a dry well make no sound.
 - [x] **Pause** (why a person: feel; only if the game can be paused): pause during the splash: it pauses with the game and goes on when you resume.
 
+### Selling the harvest from a shipping bin, 2026-11-22
+
+A shipping bin stands in `L_Farm`'s service yard beside the well: F with a crop in hand ships the whole stack, and at every new day the bin pays at each crop's price into the coins on the HUD ([Systems.md, section 25](Systems.md#25-selling-and-money)). The prices, the purse, the sale, the saving and the morning message's text are automated tests; these are what a person judges. The commit is the one titled "Sell the harvest from a shipping bin".
+
+- [ ] **Money line in the HUD** (why a person: the first look; @DunderGG added `MoneyText` to `WBP_Hud` on 2026-11-22): in Play, "Coins 100" shows on its own line under the stamina, reads well at 1920 by 1080 and doesn't crowd the status panel.
+- [ ] **The bin's look and place** (why a person: first look): open `L_Farm`. The shipping bin stands in the service yard beside the well, with its gear plate facing the field; it reads as a bin and as part of the machines' kit (teal paint, brass), and you can walk between it and the well without catching.
+- [ ] **Facing it from each side** (why a person: feel): walk up to the bin from each of its four sides. Facing it shows "F Ship" and turning away hides it; next to the well, facing each one shows its own prompt. Against a corner you can't focus it (the aim steps in four directions, so the ray passes beside the hopper); step along a side and it works. Say if the corner feels wrong in play.
+- [ ] **Shipping** (why a person: feel and reading): with turnips in hand press F at the bin: "Shipped: Turnip ×10. The bin pays in the morning." and the stack leaves the bag. With a tool, seeds or an empty hand F says "Hold a crop to ship it." and nothing changes. Holding F ships once.
+- [ ] **The morning line** (why a person: how it reads and whether it fits the box): ship a stack and sleep. The day message ends "... days left. The bin paid 250." as one sentence, fits its box, and the lines that follow (the withering line on a season's first day, waking, "Game Saved!") are readable in the time they show. A morning without a sale reads as before. Staying up until 06:00 pays the same way.
+- [ ] **A season against the budget** (why a person: game design; at the smoke test): play the first days with the starting purse and seeds, shipping what you harvest. By day 14 you should have about 1,000 to 1,500 coins ([GameDesign.md, section 9](GameDesign.md#economy)). Say if it feels too slow or too easy.
+
 ### Editor chores
 
 Changes only the editor can make safely. The steps are in [Roadmap.md, Housekeeping](Roadmap.md#3-housekeeping): re-saving the template Blueprints and `L_Farm`, moving `BP_FarmTile` and the materials with redirectors fixed, and regenerating the Android File Server token if it was ever used. After each one, run the [smoke test](#3-smoke-test).
@@ -158,6 +169,7 @@ About five minutes in `L_Farm`, in Play in Editor at High. Run it before pushing
 9. **Seeds and the season:** with seeds in hand the status line shows their days to ripen ("Cabbage Seeds (10 days to ripen)"). `SetDay 20`: pressing E with cabbage seeds on tilled soil warns once and plants nothing; pressing again plants. `SetDay 29`: seeds are refused ("These seeds don't grow in summer. Plant them in spring.").
 10. **Withering:** `SetDay 28`, with watered crops of every kind planted and one ripe crop, then sleep in the bed: the next morning says summer began and then that the crops withered. The spring crops stand as dead plants ("F Clear" on them), the ripe one is still harvestable, and "F Clear" leaves empty tilled soil.
 11. **Water:** with the can half empty, walk to the well in the service yard and press F: the can fills with a splash ("Can filled.", "Watering Can (8/8)") and the prompt counts the well's water down from 24. Use the well up ("The well is dry. It refills overnight."), sleep, and it is full again.
+12. **Selling:** with turnips in hand press F at the shipping bin beside the well ("Shipped: Turnip ×10. The bin pays in the morning."), sleep: the morning message ends "The bin paid 250." and the HUD's "Coins" line rises by 250. A morning without a sale has no such clause.
 
 Put the save folder back afterwards if you want your farm as it was.
 

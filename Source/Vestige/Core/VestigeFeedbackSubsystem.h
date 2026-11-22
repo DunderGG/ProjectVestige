@@ -9,13 +9,26 @@
 #include "VestigeFeedbackSubsystem.generated.h"
 
 /**
+ * A part of a report's message that another row words (Systems.md, section 15, clauses): the text argument it fills (such as
+ * Paid), the feedback tag whose row words it, and that row's values. An invalid tag is an empty clause: the argument is empty.
+ */
+struct FVestigeFeedbackClause
+{
+	FName Argument;
+	FGameplayTag Tag;
+	FFormatNamedArguments Arguments;
+};
+
+/**
  * Something the player may need to know about, as gameplay reports it: what happened (a Vestige.Feedback tag) and the values
- * a text about it may use (such as Day). Presentation picks the text, sound or effect for the tag; gameplay never writes it.
+ * a text about it may use (such as Day), and the clauses that fill the text's other arguments. Presentation picks the text,
+ * sound or effect for the tag; gameplay never writes it.
  */
 struct FVestigeFeedbackReport
 {
 	FGameplayTag Tag;
 	FFormatNamedArguments Arguments;
+	TArray<FVestigeFeedbackClause> Clauses;
 };
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnVestigeFeedback, const FVestigeFeedbackReport& /* Report */);
@@ -36,6 +49,9 @@ public:
 	 * subsystem exists. An invalid tag logs a warning and isn't broadcast.
 	 */
 	static void Report(const UWorld* World, const FGameplayTag& Tag, FFormatNamedArguments Arguments = {});
+
+	/** Reports FeedbackReport, a report that may carry clauses, as the other overload does. */
+	static void Report(const UWorld* World, FVestigeFeedbackReport FeedbackReport);
 
 	/** Broadcast with each report as it is made. Presentation listens; game code doesn't. */
 	FOnVestigeFeedback OnFeedback;

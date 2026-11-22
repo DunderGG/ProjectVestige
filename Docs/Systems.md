@@ -112,3 +112,7 @@ The guides, one file each in [`Systems/`](Systems/). The numbered headings below
 ## 24. Water sources and the watering can
 
 [Systems/24-Water.md](Systems/24-Water.md)
+
+## 25. Selling and money
+
+[Systems/25-Selling.md](Systems/25-Selling.md)

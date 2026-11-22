@@ -25,6 +25,7 @@
 #include "GameplayTagContainer.h"
 #include "Interaction/VestigeInteractionComponent.h"
 #include "Inventory/VestigeInventoryComponent.h"
+#include "Inventory/VestigeWalletComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Player/VestigePlayerCharacter.h"
 #include "Time/VestigeClockSubsystem.h"
@@ -116,6 +117,7 @@ void AVestigeHUD::BeginPlay()
 	PlayerOwner->OnPossessedPawnChanged.AddDynamic(this, &AVestigeHUD::FollowPawn);
 	FollowPawn(nullptr, PlayerOwner->GetPawn());
 	FollowInventory();
+	FollowWallet();
 	FollowAbilitySystem();
 	if (!FeedbackResponses)
 	{
@@ -139,6 +141,10 @@ void AVestigeHUD::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	{
 		CurrentInventory->OnInventoryChanged.RemoveAll(this);
 		CurrentInventory->OnItemInHandChanged.RemoveAll(this);
+	}
+	if (UVestigeWalletComponent* CurrentWallet = Wallet.Get())
+	{
+		CurrentWallet->OnMoneyChanged.RemoveAll(this);
 	}
 	if (UAbilitySystemComponent* CurrentAbilitySystem = AbilitySystem.Get())
 	{
@@ -304,6 +310,33 @@ void AVestigeHUD::FollowInventory()
 	}
 	RefreshInventoryTexts();
 	RefreshItemInHandText();
+}
+
+FText AVestigeHUD::FormatMoney(int32 Money)
+{
+	return FText::FormatNamed(LOCTEXT("Money", "Coins {Money}"), TEXT("Money"), FText::AsNumber(Money));
+}
+
+void AVestigeHUD::FollowWallet()
+{
+	const APlayerState* PlayerState = PlayerOwner ? PlayerOwner->PlayerState.Get() : nullptr;
+	Wallet = PlayerState ? PlayerState->FindComponentByClass<UVestigeWalletComponent>() : nullptr;
+	if (UVestigeWalletComponent* CurrentWallet = Wallet.Get())
+	{
+		CurrentWallet->OnMoneyChanged.AddUObject(this, &AVestigeHUD::RefreshMoneyText);
+	}
+	RefreshMoneyText();
+}
+
+void AVestigeHUD::RefreshMoneyText()
+{
+	if (!HudWidget)
+	{
+		return;
+	}
+
+	const UVestigeWalletComponent* CurrentWallet = Wallet.Get();
+	HudWidget->SetMoneyText(CurrentWallet ? FormatMoney(CurrentWallet->GetMoney()) : FText::GetEmpty());
 }
 
 void AVestigeHUD::FollowAbilitySystem()
@@ -479,7 +512,7 @@ void AVestigeHUD::ShowFeedback(const FVestigeFeedbackReport& Report)
 	// An empty message is a deliberate choice to show nothing for that report.
 	if (!Response->Message.IsEmpty())
 	{
-		ShowMessage(UVestigeFeedbackResponses::FormatMessage(*Response, Report));
+		ShowMessage(FeedbackResponses->FormatMessage(*Response, Report));
 	}
 }
 

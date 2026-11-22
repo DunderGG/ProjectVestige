@@ -219,7 +219,7 @@ Before more tools and [4.6](#46-interface-and-input):
 
 When working nearby:
 
-- [ ] Remove the data fields nothing reads (`ContaminationTolerance` on crops, `SellPrice` on items) until their feature is designed ([L2](CodeReview.md#low)). The crops' `Seasons` stays: its tags are the calendar's seasons (2026-11-14), planting reads it (2026-11-19), and the withering item in 4.2 reads it next. `WaterNeed` went with tile water (2026-11-20): a crop needs any water
+- [ ] Remove the data field nothing reads (`ContaminationTolerance` on crops) until its feature is designed ([L2](CodeReview.md#low)). `SellPrice` on items stays: the shipping bin reads it now (2026-11-22, [section 25](Systems/25-Selling.md)). The crops' `Seasons` stays: its tags are the calendar's seasons (2026-11-14), planting reads it (2026-11-19), and the withering item in 4.2 reads it next. `WaterNeed` went with tile water (2026-11-20): a crop needs any water
 - [x] Standard ability tasks (wait delay, montages) instead of timers in abilities ([L3](CodeReview.md#low))
    - Done 2026-11-07 with H1: the tool abilities wait with `WaitDelay` and `WaitMovementModeChange`; no other ability used a timer. Montages come with tool animations
 - [ ] Blueprint tool abilities, H1's modding half: make `CanUseOn` and `UseOn` Blueprint-implementable, make the field's rules callable from Blueprints, and turn the tool's `Ability` into a soft class reference in its bundle, when mod support is designed ([Systems.md, section 9](Systems.md#9-abilities-attributes-and-effects-gameplay-ability-system), tools as abilities)
@@ -300,7 +300,7 @@ The code changes that the slice's content depends on. Doing them first means add
 **Player data**
 
 - [x] Inventory and money move into an inventory component on the player state, so they outlive the character
-   - Done 2026-10-31 without money: `UVestigeInventoryComponent` on `AVestigePlayerState` ([Systems.md section 8](Systems.md#8-inventory-and-items)). Seeds and harvests are items, and old saves upgrade. Nothing earns or spends money yet, so it comes with the shipping bin ([section 4.5](#45-automation-and-selling))
+   - Done 2026-10-31 without money: `UVestigeInventoryComponent` on `AVestigePlayerState` ([Systems.md section 8](Systems.md#8-inventory-and-items)). Seeds and harvests are items, and old saves upgrade. Money came with the shipping bin on 2026-11-22 ([section 4.5](#45-automation-and-selling))
 - [x] Rename the general `Farm` types to the `Vestige` prefix (decision log, 2026-10-31): the HUD and its widget, settings and messages, the save subsystem and save game, the feedback subsystem, the day cycle, the content base, asset manager, tool and item data and the item fragments, the rest and movement components, the farmer character, and their save structs and delegates. Farm types (tile, grid, crops, the farming component, targeting, the toolbar) keep `Farm`. In its own commits, with `[CoreRedirects]` for every class and struct that assets or save files name, a save test that loads a save naming the old classes, and the documents updated
    - Done 2026-11-01 (decision log). The test showed that a redirect doesn't load an old save's class, so the old save game name stays as an empty `UFarmSaveGame` subclass. The seed fragment, `EFarmToolAction` and the old `EFarmTool` keep `Farm` as farm types
 - [x] Whether the data names change too, while no mods exist: the `FarmTool` and `FarmItem` asset types, the `Farm.` tag root (before the stamina tags in [Systems.md section 9](Systems.md#9-abilities-attributes-and-effects-gameplay-ability-system) are made) and `Content/Farm/`
@@ -428,11 +428,15 @@ The code changes that the slice's content depends on. Doing them first means add
 
 - [ ] Placing objects on the farm grid
 - [ ] A sprinkler that waters nearby tiles each morning from the farm's water store
-- [ ] A shipping bin: crops put in it are sold overnight
-- [ ] The currency (brass gear coins, name still open) on the HUD
+- [x] A shipping bin: crops put in it are sold overnight
+  - Done 2026-11-22: [section 25](Systems/25-Selling.md)
+- [x] The currency (brass gear coins, name still open) on the HUD
+  - Done 2026-11-22: [section 25](Systems/25-Selling.md); @DunderGG added the `MoneyText` line to `WBP_Hud`
 - [ ] A simple way to buy seeds, with one cheap basic seed always for sale
-- [ ] Starting seeds and a small purse for a new game
-- [ ] A simple budget for an ordinary and a poor season before prices are set
+- [x] Starting seeds and a small purse for a new game
+  - Done 2026-11-22: 100 coins, tunable on `BP_PlayerState`
+- [x] A simple budget for an ordinary and a poor season before prices are set
+  - Done 2026-11-22: [GameDesign.md, section 9](GameDesign.md#economy)
 
 ### 4.6 Interface and input
 

@@ -12,15 +12,16 @@ class UAbilitySystemComponent;
 class UVestigeAbilitySet;
 class UVestigeInventoryComponent;
 class UVestigeRestComponent;
+class UVestigeWalletComponent;
 
 /**
- * The player's data that outlives the pawn: the inventory, the ability system with its abilities and stamina, and the
+ * The player's data that outlives the pawn: the inventory, the wallet, the ability system with its abilities and stamina, and the
  * rest component, whose night refills the stamina and sets exhaustion with or without a body.
  * BP_PlayerState sets its values (the starting items, the ability sets), and the game mode names it. Code below the
- * player layer doesn't know this class: it finds the inventory and the rest component by class on the player's APlayerState,
- * and the ability system through the pawn's IAbilitySystemInterface.
+ * player layer doesn't know this class: it finds the inventory, the wallet and the rest component by class on the player's
+ * APlayerState, and the ability system through the pawn's IAbilitySystemInterface.
  * Registers the ability system's saved attribute sets (the stamina) with UVestigeSaveRegistry while it is in play, since
- * the sets have no BeginPlay or EndPlay of their own; the inventory registers itself.
+ * the sets have no BeginPlay or EndPlay of their own; the inventory and the wallet register themselves.
  */
 UCLASS()
 class AVestigePlayerState : public APlayerState, public IAbilitySystemInterface
@@ -31,6 +32,8 @@ public:
 	AVestigePlayerState();
 
 	UVestigeInventoryComponent* GetInventory() const { return Inventory; }
+
+	UVestigeWalletComponent* GetWallet() const { return Wallet; }
 
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override { return AbilitySystem; }
 
@@ -51,6 +54,9 @@ private:
 
 	UPROPERTY(VisibleAnywhere, Category = "Inventory", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UVestigeInventoryComponent> Inventory;
+
+	UPROPERTY(VisibleAnywhere, Category = "Wallet", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UVestigeWalletComponent> Wallet;
 
 	UPROPERTY(VisibleAnywhere, Category = "Abilities", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UAbilitySystemComponent> AbilitySystem;

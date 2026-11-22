@@ -183,7 +183,7 @@ namespace VestigeHudWidgetTests
 			const FVestigeFeedbackResponse* Response = Responses->FindResponse(VestigeGameplayTags::Feedback_Day_Slept);
 			ASSERT_THAT(IsNotNull(Response));
 			const FVestigeFeedbackReport Report{VestigeGameplayTags::Feedback_Day_Slept, {{TEXT("Day"), 4}}};
-			ASSERT_THAT(IsTrue(UVestigeFeedbackResponses::FormatMessage(*Response, Report).ToString() == TEXT("Day 4 begins.")));
+			ASSERT_THAT(IsTrue(Responses->FormatMessage(*Response, Report).ToString() == TEXT("Day 4 begins.")));
 			ASSERT_THAT(IsNull(Responses->FindResponse(VestigeGameplayTags::Feedback_Day_StayedUp)));
 		}
 
@@ -330,6 +330,87 @@ namespace VestigeHudWidgetTests
 		}
 #endif
 
+		TEST_METHOD(TheMoneyLineShowsCoinsAndTheAmount)
+		{
+			ASSERT_THAT(AreEqual(AVestigeHUD::FormatMoney(100).ToString(), FString(TEXT("Coins 100"))));
+			ASSERT_THAT(AreEqual(AVestigeHUD::FormatMoney(0).ToString(), FString(TEXT("Coins 0"))));
+			// The number is written as the current culture writes it ("1,500" in English, "1 500" in Swedish), so the test
+			// doesn't hard-code a culture.
+			ASSERT_THAT(AreEqual(
+				AVestigeHUD::FormatMoney(1500).ToString(), FString(TEXT("Coins ")) + FText::AsNumber(1500).ToString()));
+			ASSERT_THAT(AreEqual(
+				AVestigeHUD::FormatMoney(1234567).ToString(), FString(TEXT("Coins ")) + FText::AsNumber(1234567).ToString()));
+		}
+
+		// Fails until MoneyText is added to WBP_Hud in the widget designer by hand (Docs/Systems/25-Selling.md, editor step 5).
+		TEST_METHOD(TheHudWidgetHasTheMoneyLine)
+		{
+			UTextBlock* MoneyText = Cast<UTextBlock>(Hud->GetWidgetFromName(TEXT("MoneyText")));
+			ASSERT_THAT(IsNotNull(MoneyText));
+
+			Hud->SetMoneyText(AVestigeHUD::FormatMoney(250));
+
+			ASSERT_THAT(AreEqual(MoneyText->GetText().ToString(), FString(TEXT("Coins 250"))));
+		}
+
+		/** A responses asset with a day row that ends in the Paid clause and the Paid row, as the game's has. */
+		static UVestigeFeedbackResponses* MakeClauseResponses(bool bWithPaidRow)
+		{
+			FVestigeFeedbackResponse DayRow;
+			DayRow.Message = LOCTEXT("ClauseDayRow", "Day {Day} begins. {Paid}");
+			FVestigeFeedbackResponse PaidRow;
+			PaidRow.Message = LOCTEXT("ClausePaidRow", "The bin paid {Amount}.");
+			TMap<FGameplayTag, FVestigeFeedbackResponse> Rows = {{VestigeGameplayTags::Feedback_Day_Slept, DayRow}};
+			if (bWithPaidRow)
+			{
+				Rows.Add(VestigeGameplayTags::Feedback_Shipping_Paid, PaidRow);
+			}
+			UVestigeFeedbackResponses* Responses = NewObject<UVestigeFeedbackResponses>();
+			Responses->SetResponsesForTests(MoveTemp(Rows));
+			return Responses;
+		}
+
+		static FVestigeFeedbackReport MakeDayReport(const FGameplayTag& PaidTag)
+		{
+			FVestigeFeedbackReport Report{VestigeGameplayTags::Feedback_Day_Slept, {{TEXT("Day"), 4}}};
+			Report.Clauses.Add(FVestigeFeedbackClause{TEXT("Paid"), PaidTag, {{TEXT("Amount"), 250}}});
+			return Report;
+		}
+
+		TEST_METHOD(AClauseFillsItsArgumentWithItsRowsText)
+		{
+			const UVestigeFeedbackResponses* Responses = MakeClauseResponses(true);
+			const FVestigeFeedbackResponse* Row = Responses->FindResponse(VestigeGameplayTags::Feedback_Day_Slept);
+			ASSERT_THAT(IsNotNull(Row));
+
+			const FText Message = Responses->FormatMessage(*Row, MakeDayReport(VestigeGameplayTags::Feedback_Shipping_Paid));
+
+			ASSERT_THAT(AreEqual(Message.ToString(), FString(TEXT("Day 4 begins. The bin paid 250."))));
+		}
+
+		TEST_METHOD(AClauseWithoutATagIsEmptyAndLeavesNoTrailingSpace)
+		{
+			const UVestigeFeedbackResponses* Responses = MakeClauseResponses(true);
+			const FVestigeFeedbackResponse* Row = Responses->FindResponse(VestigeGameplayTags::Feedback_Day_Slept);
+			ASSERT_THAT(IsNotNull(Row));
+
+			const FText Message = Responses->FormatMessage(*Row, MakeDayReport(FGameplayTag()));
+
+			ASSERT_THAT(AreEqual(Message.ToString(), FString(TEXT("Day 4 begins."))));
+		}
+
+		TEST_METHOD(AClauseWithoutARowIsEmptyAndWarns)
+		{
+			const UVestigeFeedbackResponses* Responses = MakeClauseResponses(false);
+			const FVestigeFeedbackResponse* Row = Responses->FindResponse(VestigeGameplayTags::Feedback_Day_Slept);
+			ASSERT_THAT(IsNotNull(Row));
+			TestRunner->AddExpectedMessagePlain(TEXT("has no text for the clause Paid"), ELogVerbosity::Warning);
+
+			const FText Message = Responses->FormatMessage(*Row, MakeDayReport(VestigeGameplayTags::Feedback_Shipping_Paid));
+
+			ASSERT_THAT(AreEqual(Message.ToString(), FString(TEXT("Day 4 begins."))));
+		}
+
 		TEST_METHOD(EveryFeedbackTagHasAResponse)
 		{
 			const UClass* GameModeClass = LoadClass<AGameModeBase>(nullptr, GameModePath);
@@ -352,6 +433,13 @@ namespace VestigeHudWidgetTests
 				TEXT("DaysLeft"), TEXT("DaysToRipe"), TEXT("DaysToDeadline"), TEXT("DeadlineSeason"), TEXT("DeadlineSeasonInSentence")};
 			const TArray<FString> WitheredValues = {
 				TEXT("Day"), TEXT("Season"), TEXT("SeasonInSentence"), TEXT("DayOfSeason"), TEXT("DaysLeft"), TEXT("Count")};
+			const TArray<FString> ItemAndCountValues = {TEXT("Item"), TEXT("Count")};
+			const TArray<FString> AmountValues = {TEXT("Amount")};
+			// The day reports end with the Paid clause (what the shipping bin paid in the night).
+			TArray<FString> DayReportValues = DateValues;
+			DayReportValues.Add(TEXT("Paid"));
+			TArray<FString> NewSeasonDayReportValues = SeasonStartValues;
+			NewSeasonDayReportValues.Add(TEXT("Paid"));
 			const TMap<FGameplayTag, TArray<FString>> Expected = {
 				{VestigeGameplayTags::Feedback_Tool_NoTarget, NoValues},
 				{VestigeGameplayTags::Feedback_Tool_NothingInHand, NoValues},
@@ -372,17 +460,20 @@ namespace VestigeHudWidgetTests
 				{VestigeGameplayTags::Feedback_Water_CanFilled, NoValues},
 				{VestigeGameplayTags::Feedback_Water_WellDry, NoValues},
 				{VestigeGameplayTags::Feedback_Water_WellRanDry, NoValues},
+				{VestigeGameplayTags::Feedback_Shipping_Shipped, ItemAndCountValues},
+				{VestigeGameplayTags::Feedback_Shipping_NothingToShip, NoValues},
+				{VestigeGameplayTags::Feedback_Shipping_Paid, AmountValues},
 				{VestigeGameplayTags::Feedback_Stamina_Empty, NoValues},
 				{VestigeGameplayTags::Feedback_Rest_GettingLate, NoValues},
 				{VestigeGameplayTags::Feedback_Rest_PastMidnight, NoValues},
 				{VestigeGameplayTags::Feedback_Rest_WokeExhausted, NoValues},
 				{VestigeGameplayTags::Feedback_Rest_WokeRested, NoValues},
-				{VestigeGameplayTags::Feedback_Day_Slept, DateValues},
-				{VestigeGameplayTags::Feedback_Day_Slept_NewSeason, SeasonStartValues},
-				{VestigeGameplayTags::Feedback_Day_Slept_LastDay, DateValues},
-				{VestigeGameplayTags::Feedback_Day_StayedUp, DateValues},
-				{VestigeGameplayTags::Feedback_Day_StayedUp_NewSeason, SeasonStartValues},
-				{VestigeGameplayTags::Feedback_Day_StayedUp_LastDay, DateValues},
+				{VestigeGameplayTags::Feedback_Day_Slept, DayReportValues},
+				{VestigeGameplayTags::Feedback_Day_Slept_NewSeason, NewSeasonDayReportValues},
+				{VestigeGameplayTags::Feedback_Day_Slept_LastDay, DayReportValues},
+				{VestigeGameplayTags::Feedback_Day_StayedUp, DayReportValues},
+				{VestigeGameplayTags::Feedback_Day_StayedUp_NewSeason, NewSeasonDayReportValues},
+				{VestigeGameplayTags::Feedback_Day_StayedUp_LastDay, DayReportValues},
 				{VestigeGameplayTags::Feedback_Save_Loaded, DateValues},
 				{VestigeGameplayTags::Feedback_Save_Loaded_LastDay, DateValues},
 				{VestigeGameplayTags::Feedback_Save_Saved, NoValues},

@@ -20,6 +20,7 @@ class UVestigeFeedbackResponses;
 class UVestigeHudWidget;
 class UVestigeInteractionComponent;
 class UVestigeInventoryComponent;
+class UVestigeWalletComponent;
 struct FGameplayTag;
 struct FVestigeDate;
 struct FVestigeFeedbackReport;
@@ -71,6 +72,9 @@ public:
 	 */
 	static FText FormatItemInHand(const FText& ItemName, const UFarmCropData* Crop, int32 Water = INDEX_NONE, int32 Capacity = INDEX_NONE);
 
+	/** The money line: "Coins 250", with the culture's digit grouping ("Coins 1,500"). "Coins" is the currency's working name. */
+	static FText FormatMoney(int32 Money);
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
@@ -112,6 +116,12 @@ private:
 	void RefreshInventoryTexts();
 
 	void RefreshBagText();
+
+	/** Follows the wallet on the player state, which outlives the pawn, so this happens once, at BeginPlay. */
+	void FollowWallet();
+
+	/** Rebuilds the money line, only when the wallet says its money changed. Bound to the wallet's OnMoneyChanged. */
+	void RefreshMoneyText();
 
 	/** The water in the can in the selected hotbar slot, or INDEX_NONE if the hand holds no can. */
 	int32 GetHandWater() const;
@@ -162,6 +172,7 @@ private:
 	TWeakObjectPtr<const UVestigeClockSubsystem> Clock;
 	TWeakObjectPtr<UVestigeInteractionComponent> Interaction;
 	TWeakObjectPtr<UVestigeInventoryComponent> Inventory;
+	TWeakObjectPtr<UVestigeWalletComponent> Wallet;
 	TWeakObjectPtr<UAbilitySystemComponent> AbilitySystem;
 	TWeakObjectPtr<const AVestigePlayerCharacter> Farmer;
 	TWeakObjectPtr<UCommonInputSubsystem> InputMethod;

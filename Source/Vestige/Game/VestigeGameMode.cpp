@@ -7,7 +7,10 @@
 #include "Content/VestigeCalendar.h"
 #include "Core/VestigeFeedbackSubsystem.h"
 #include "Engine/World.h"
+#include "Farming/FarmLog.h"
+#include "Farming/FarmShippingSubsystem.h"
 #include "Game/VestigePlayerController.h"
+#include "Inventory/VestigeWalletComponent.h"
 #include "Player/VestigePlayerState.h"
 #include "Time/VestigeClockSubsystem.h"
 #include "UI/VestigeHUD.h"
@@ -28,6 +31,19 @@ namespace VestigeGameModeReports
 			break;
 		}
 		return bSlept ? VestigeGameplayTags::Feedback_Day_Slept : VestigeGameplayTags::Feedback_Day_StayedUp;
+	}
+
+	/** The day report's Paid clause: what the night's sale paid, or an empty one (no tag) when it paid nothing. */
+	FVestigeFeedbackClause MakePaidClause(int32 Paid)
+	{
+		FVestigeFeedbackClause Clause;
+		Clause.Argument = TEXT("Paid");
+		if (Paid > 0)
+		{
+			Clause.Tag = VestigeGameplayTags::Feedback_Shipping_Paid;
+			Clause.Arguments.Add(TEXT("Amount"), Paid);
+		}
+		return Clause;
 	}
 }
 
@@ -67,6 +83,9 @@ void AVestigeGameMode::StartNextDay(const FVestigeDayEnd& DayEnd)
 		return;
 	}
 
+	// The night's sale comes first, so the day report can tell what the bin paid and the coins are in the morning's save.
+	const int32 Paid = SellShipment();
+
 	// One report per morning: a new season is told inside it, not in a second message. Reported first, so the reports of
 	// everything reacting to the new day, like waking exhausted and saving, follow it.
 	const FVestigeCalendar& Calendar = GameClock->GetCalendar();
@@ -74,6 +93,29 @@ void AVestigeGameMode::StartNextDay(const FVestigeDayEnd& DayEnd)
 	const EVestigeDayKind Kind = Calendar.GetDayKind(NextDay);
 	FFormatNamedArguments Values =
 		Kind == EVestigeDayKind::NewSeason ? Calendar.GetSeasonStartValues(NextDay) : Calendar.GetReportValues(NextDay);
-	UVestigeFeedbackSubsystem::Report(GetWorld(), VestigeGameModeReports::GetDayTag(DayEnd, Kind), MoveTemp(Values));
+	FVestigeFeedbackReport DayReport{VestigeGameModeReports::GetDayTag(DayEnd, Kind), MoveTemp(Values), {}};
+	DayReport.Clauses.Add(VestigeGameModeReports::MakePaidClause(Paid));
+	UVestigeFeedbackSubsystem::Report(GetWorld(), MoveTemp(DayReport));
 	GameClock->StartNextDay();
+}
+
+int32 AVestigeGameMode::SellShipment() const
+{
+	UFarmShippingSubsystem* Shipping = UFarmShippingSubsystem::Get(GetWorld());
+	if (!Shipping)
+	{
+		return 0;
+	}
+
+	// Without a wallet (no player state, a test world) the shipment waits for the next night rather than selling to nobody.
+	UVestigeWalletComponent* Wallet = UVestigeWalletComponent::FindForFirstPlayer(GetWorld());
+	if (!Wallet)
+	{
+		if (!Shipping->GetShippedStacks().IsEmpty())
+		{
+			VESTIGE_LOG(this, LogFarm, Warning, "There is no wallet to pay, so the shipment waits for the next night.");
+		}
+		return 0;
+	}
+	return Shipping->SellShipment(*Wallet);
 }

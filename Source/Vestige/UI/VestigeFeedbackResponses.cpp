@@ -4,6 +4,7 @@
 #include "UI/VestigeFeedbackResponses.h"
 
 #include "Core/VestigeFeedbackSubsystem.h"
+#include "Core/VestigeLog.h"
 #include "GameplayTagsManager.h"
 #include "Sound/SoundBase.h"
 
@@ -13,9 +14,33 @@
 
 #define LOCTEXT_NAMESPACE "VestigeFeedbackResponses"
 
-FText UVestigeFeedbackResponses::FormatMessage(const FVestigeFeedbackResponse& Response, const FVestigeFeedbackReport& Report)
+FText UVestigeFeedbackResponses::FormatClause(const FVestigeFeedbackClause& Clause) const
 {
-	return FText::Format(Response.Message, Report.Arguments);
+	if (!Clause.Tag.IsValid())
+	{
+		return FText::GetEmpty();
+	}
+
+	const FVestigeFeedbackResponse* ClauseResponse = FindResponse(Clause.Tag);
+	if (!ClauseResponse || ClauseResponse->Message.IsEmpty())
+	{
+		VESTIGE_LOG(this, LogVestigeFeedback, Warning, "{Responses} has no text for the clause {Argument} ({Tag}), so it is left empty.",
+			GetNameSafe(this), Clause.Argument.ToString(), Clause.Tag.ToString());
+		return FText::GetEmpty();
+	}
+	return FText::Format(ClauseResponse->Message, Clause.Arguments);
+}
+
+FText UVestigeFeedbackResponses::FormatMessage(const FVestigeFeedbackResponse& Response, const FVestigeFeedbackReport& FeedbackReport) const
+{
+	FFormatNamedArguments Arguments = FeedbackReport.Arguments;
+	for (const FVestigeFeedbackClause& Clause : FeedbackReport.Clauses)
+	{
+		Arguments.Add(Clause.Argument.ToString(), FormatClause(Clause));
+	}
+
+	// A row ends with its clause's argument (" {Paid}"), so an empty clause leaves a space to trim.
+	return FText::TrimTrailing(FText::Format(Response.Message, Arguments));
 }
 
 #if WITH_EDITOR

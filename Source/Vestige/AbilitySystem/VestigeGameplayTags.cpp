@@ -47,6 +47,12 @@ namespace VestigeGameplayTags
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Feedback_Water_WellDry, "Vestige.Feedback.Water.WellDry", "Feedback: the well has no water left today.");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(
 		Feedback_Water_WellRanDry, "Vestige.Feedback.Water.WellRanDry", "Feedback: the well ran dry before the can was full.");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Feedback_Shipping_Shipped, "Vestige.Feedback.Shipping.Shipped",
+		"Feedback: the shipping bin took the stack in hand. Values: Item, Count.");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(
+		Feedback_Shipping_NothingToShip, "Vestige.Feedback.Shipping.NothingToShip", "Feedback: nothing sellable is in hand at the shipping bin.");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Feedback_Shipping_Paid, "Vestige.Feedback.Shipping.Paid",
+		"Feedback: the Paid clause of the game mode's day reports, when the night's sale paid. Value: Amount. Never reported alone.");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(
 		ItemStat_Water_Clean, "Vestige.ItemStat.Water.Clean", "Item stat: clean water in a container, in waterings. Saved by name.");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Feedback_Stamina_Empty, "Vestige.Feedback.Stamina.Empty", "Feedback: stamina has just run out.");

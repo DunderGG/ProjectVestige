@@ -29,6 +29,14 @@ void UVestigeHudWidget::SetStamina(const FText& Text, int32 Stamina, int32 MaxSt
 	OnStaminaChanged(Stamina, MaxStamina, bOutOfStamina, bExhausted);
 }
 
+void UVestigeHudWidget::SetMoneyText(const FText& Text)
+{
+	if (MoneyText)
+	{
+		MoneyText->SetText(Text);
+	}
+}
+
 void UVestigeHudWidget::SetBagText(const FText& Text)
 {
 	BagText->SetText(Text);

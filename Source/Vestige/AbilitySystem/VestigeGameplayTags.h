@@ -104,6 +104,15 @@ namespace VestigeGameplayTags
 	/** The well: it gave the last of today's water before the can was full. */
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Feedback_Water_WellRanDry);
 
+	/** The shipping bin: the stack in hand went in. Values Item (the display name) and Count. */
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Feedback_Shipping_Shipped);
+
+	/** The shipping bin: nothing sellable is in hand. */
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Feedback_Shipping_NothingToShip);
+
+	/** The Paid clause of the game mode's day reports, when the night's sale paid. Value Amount (the total). Never reported alone. */
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Feedback_Shipping_Paid);
+
 	/**
 	 * The stat of an item slot that holds clean water: the watering can's water, in waterings. A stat tag, not a feedback tag:
 	 * its name is written into saves (Systems.md, section 8, slot stats, and section 24), so it is never renamed.

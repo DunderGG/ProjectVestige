@@ -36,6 +36,9 @@ public:
 	int32 GetMaxStackSize() const { return MaxStackSize; }
 	int32 GetSellPrice() const { return SellPrice; }
 
+	/** Whether the shipping bin takes this item: its sell price is above 0 (0 means "not for sale", never "sell at a default"). */
+	bool CanBeSold() const { return SellPrice > 0; }
+
 	/** The item's fragment of class FragmentClass or a subclass of it, or nullptr if it has none. */
 	const UVestigeItemFragment* FindFragmentByClass(TSubclassOf<UVestigeItemFragment> FragmentClass) const;
 
@@ -61,7 +64,7 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Item", meta = (AllowPrivateAccess = "true", ClampMin = 1))
 	int32 MaxStackSize = 99;
 
-	/** What selling one of this item pays. Not used yet: there is no currency. */
+	/** What the shipping bin pays for one of this item, in coins. 0 for an item the bin won't take. */
 	UPROPERTY(EditDefaultsOnly, Category = "Economy", meta = (AllowPrivateAccess = "true", ClampMin = 0))
 	int32 SellPrice = 0;
 

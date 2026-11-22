@@ -35,11 +35,18 @@ protected:
 
 private:
 	/**
-	 * Tells the player how the day ended and which day begins, in one day report whose tag says whether the new day starts a
-	 * season or is a season's last (FVestigeCalendar::GetDayKind), and starts the next one. Bound to
+	 * Sells the shipping bin's contents, tells the player how the day ended and which day begins, in one day report whose tag says
+	 * whether the new day starts a season or is a season's last (FVestigeCalendar::GetDayKind) and whose Paid clause says what the
+	 * bin paid, and starts the next day. Bound to
 	 * UVestigeClockSubsystem::OnDayEnded; does nothing when DayEnd is no longer the clock's current, stopped day.
 	 */
 	void StartNextDay(const FVestigeDayEnd& DayEnd);
+
+	/**
+	 * Sells the shipping bin's contents into the player's wallet and returns what it paid: 0 for an empty bin. Without a
+	 * wallet the shipment waits and nothing is paid.
+	 */
+	int32 SellShipment() const;
 
 	/** The game's clock, found at BeginPlay. It lives in the game instance, so this world doesn't own it. */
 	TWeakObjectPtr<UVestigeClockSubsystem> Clock;
