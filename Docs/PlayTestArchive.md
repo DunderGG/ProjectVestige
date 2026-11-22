@@ -425,3 +425,15 @@ The watering can now holds 8 waterings and the new well in the service yard fill
 - [x] **Saving the water (at the smoke test)** (why a person: real save files): half-empty the can, draw some from the well, sleep ("Game saved."), stop and play again: the can and the well's count come back.
 
 Passed 2026-11-21: @DunderGG play-tested all six checks and reported they work.
+
+### Selling the harvest from a shipping bin, 2026-11-22
+
+A shipping bin stands in `L_Farm`'s service yard beside the well: F with a crop in hand ships the whole stack, and at every new day the bin pays at each crop's price into the coins on the HUD ([Systems.md, section 25](Systems.md#25-selling-and-money)). The prices, the purse, the sale, the saving and the morning message's text are automated tests; these are what a person judges. The commit is the one titled "Sell the harvest from a shipping bin".
+
+- [x] **Money line in the HUD** (why a person: the first look; @DunderGG added `MoneyText` to `WBP_Hud` on 2026-11-22): in Play, "Coins 100" shows on its own line under the stamina, reads well at 1920 by 1080 and doesn't crowd the status panel.
+- [x] **The bin's look and place** (why a person: first look): open `L_Farm`. The shipping bin stands in the service yard beside the well, with its gear plate facing the field; it reads as a bin and as part of the machines' kit (teal paint, brass), and you can walk between it and the well without catching.
+- [x] **Facing it from each side** (why a person: feel): walk up to the bin from each of its four sides. Facing it shows "F Ship" and turning away hides it; next to the well, facing each one shows its own prompt. Against a corner you can't focus it (the aim steps in four directions, so the ray passes beside the hopper); step along a side and it works. Say if the corner feels wrong in play.
+- [x] **Shipping** (why a person: feel and reading): with turnips in hand press F at the bin: "Shipped: Turnip ×10. The bin pays in the morning." and the stack leaves the bag. With a tool, seeds or an empty hand F says "Hold a crop to ship it." and nothing changes. Holding F ships once.
+- [x] **The morning line** (why a person: how it reads and whether it fits the box): ship a stack and sleep. The day message ends "... days left. The bin paid 250." as one sentence, fits its box, and the lines that follow (the withering line on a season's first day, waking, "Game Saved!") are readable in the time they show. A morning without a sale reads as before. Staying up until 06:00 pays the same way.
+- [x] **A season against the budget** (why a person: game design; at the smoke test): play the first days with the starting purse and seeds, shipping what you harvest. By day 14 you should have about 1,000 to 1,500 coins ([GameDesign.md, section 9](GameDesign.md#economy)). Say if it feels too slow or too easy.
+   - Play-tested by @DunderGG on 2026-11-22: all works.
