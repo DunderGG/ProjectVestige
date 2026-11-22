@@ -45,6 +45,8 @@ Bash is for reading only: `git status`, `git diff`, `git log`, `git show`, searc
 
 **The user's own ideas get no free pass.** Most people working on this project, the maintainer included, are new to game development, and the maintainer has asked agents to question him. Where the work follows a suggestion, idea or comment of the user's, check that idea as hard as the rest, and report it as a finding when it is wrong or a better way exists, even if the author built it faithfully. Never approve something because the user asked for it.
 
+**Existing code is no precedent.** Where the code base and the guidelines or AGENTS.md disagree, the code is the finding, never the reason to change the rule: report the change that follows the old code, and the older code it copied, as findings to fix. Propose a rule change only from a reason of its own, as a question for the maintainer (@DunderGG, 2026-11-22, after ten functions copied a Try prefix that section 2.3 of the guidelines forbids).
+
 Don't report matters of taste. Don't pad a short review.
 
 ## What you return
