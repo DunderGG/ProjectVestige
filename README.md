@@ -22,7 +22,7 @@ git lfs install
 git clone https://github.com/DunderGG/ProjectVestige.git
 ```
 
-Then double-click `Vestige.uproject`, let Unreal build the C++ modules, open `Content/Maps/L_Farm` in the editor and press **Play**. The **[the setup guide](Docs/Setup.md)** walks through every step on a fresh PC, with troubleshooting; the controls are in [Docs/Controls.md](Docs/Controls.md).
+Then double-click `Vestige.uproject`, let Unreal build the C++ modules, open `Content/Maps/L_Farm` in the editor and press **Play**. The **[the setup guide](Docs/Setup.md)** walks through every step on a fresh PC, with troubleshooting; the controls are in **[Controls](Docs/Controls.md)**.
 
 ## 📚 Documentation
 
