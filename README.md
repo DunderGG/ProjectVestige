@@ -9,6 +9,13 @@ You wake from decades of cryosleep under an overgrown homestead. Humans have alm
 
 You bring the farm back to life, help the town next door, and slowly push out into the wasteland.</h3>
 
+<p align="center">
+  <a href="https://www.unrealengine.com/"><img src="https://img.shields.io/badge/Unreal_Engine-5.8-0E1128?logo=unrealengine&logoColor=white" alt="Unreal Engine 5.8"></a>
+  <img src="https://img.shields.io/badge/status-in%20development-gold" alt="In development">
+  <a href="LICENSING.md"><img src="https://img.shields.io/badge/code-GPL--3.0--or--later-2f6f9f" alt="Code license: GPL-3.0-or-later"></a>
+  <a href="LICENSING.md"><img src="https://img.shields.io/badge/assets-CC%20BY--NC--SA%204.0-lightgrey" alt="Asset license: CC BY-NC-SA 4.0"></a>
+</p>
+
 ## 📥 Download
 
 Project Vestige is in early-development. Release builds and playable demos are coming for Windows.
