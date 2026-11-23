@@ -22,7 +22,7 @@ git lfs install
 git clone https://github.com/DunderGG/ProjectVestige.git
 ```
 
-Then double-click `Vestige.uproject`, let Unreal build the C++ modules, open `Content/Maps/L_Farm` in the editor and press **Play**. The **[the setup guide](Docs/Setup.md)** walks through every step on a fresh PC, with troubleshooting; the controls are in [CONTRIBUTING.md](CONTRIBUTING.md#controls).
+Then double-click `Vestige.uproject`, let Unreal build the C++ modules, open `Content/Maps/L_Farm` in the editor and press **Play**. The **[the setup guide](Docs/Setup.md)** walks through every step on a fresh PC, with troubleshooting; the controls are in [Docs/Controls.md](Docs/Controls.md).
 
 ## 📚 Documentation
 
@@ -30,6 +30,7 @@ Then double-click `Vestige.uproject`, let Unreal build the C++ modules, open `Co
 |---|---|
 | [Documentation index](Docs/README.md) | Index of the project's guides, plans, reviews, and tests |
 | [Game design](Docs/GameDesign.md) | The premise, intended experience, and planned gameplay |
+| [Controls](Docs/Controls.md) | The game's keyboard and mouse controls |
 | [Roadmap](Docs/Roadmap.md) | What development plans next; finished items are in [the roadmap archive](Docs/RoadmapArchive.md) |
 | [Setup guide](Docs/Setup.md) | Complete Windows setup, build, test, and troubleshooting instructions |
 | [Contributing guide](CONTRIBUTING.md) | Ways to help, repository workflow, and requirements for contributions |

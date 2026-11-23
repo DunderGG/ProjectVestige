@@ -46,17 +46,7 @@ Not sure where you fit? Open an issue and say what you'd like to do.
 
 In short, you need Windows 10 or 11, Git with **Git LFS**, Unreal Engine **5.8** (never convert the project to another version), and Visual Studio 2026 with the components in `.vsconfig`. Visual Studio is needed even for content work, because the editor compiles the project's C++ module the first time it opens it.
 
-### Controls
-
-| Key | Action |
-|---|---|
-| WASD, mouse | Move, look |
-| Space | Jump |
-| 1 / 2 / 3 / 4 | Hoe / seeds / watering can / hand |
-| E | Use the current tool on the tile in front of you |
-| F | Use what is in front of you (the bed sleeps to the next day, and the game saves) |
-
-Till the grass, plant seeds, water them each day, sleep, and harvest when the crop is ripe.
+The in-game controls are listed in **[Docs/Controls.md](Docs/Controls.md)**.
 
 ## 3. Finding your way around
 

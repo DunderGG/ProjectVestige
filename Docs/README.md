@@ -11,6 +11,7 @@ This folder contains project documentation for setting up, designing, building, 
 | [`DecisionLog.md`](DecisionLog.md) | Record every design decision with its reasons, newest first. |
 | [`Systems.md`](Systems.md) | Index of the system guides, one file per system in [`Systems/`](Systems/): implementation guidance for the game's systems and the Unreal Engine features they use. |
 | [`CodingGuidelines.md`](CodingGuidelines.md) | Define C++ conventions, asset naming, testing, and code review expectations. |
+| [`Controls.md`](Controls.md) | List the game's keyboard and mouse controls. |
 | [`GameDesign.md`](GameDesign.md) | Describe the game's premise, intended experience, and gameplay design. |
 | [`Roadmap.md`](Roadmap.md) | Track the open work and planned milestones. |
 | [`RoadmapArchive.md`](RoadmapArchive.md) | Keep the finished roadmap items, under the roadmap's headings. |

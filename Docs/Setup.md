@@ -218,7 +218,7 @@ How to write tests is in [CodingGuidelines.md, section 13](CodingGuidelines.md#1
 
 1. In the editor's *Content Browser*, open `Content/Maps` and double-click **`L_Farm`**.
 2. Press **Play** (Alt+P).
-3. The controls are in [CONTRIBUTING.md, Controls](../CONTRIBUTING.md#controls). Till the grass, plant seeds, water them, sleep and harvest.
+3. The controls are in [Controls.md](Controls.md). Till the grass, plant seeds, water them, sleep and harvest.
 
 [PlayTest.md](PlayTest.md) is the reference for checking the game by hand: how to test, where saves and logs are, and a five-minute smoke test of every system. Running that smoke test once is a good way to see that everything works and to learn the game.
 
