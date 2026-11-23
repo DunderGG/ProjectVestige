@@ -46,6 +46,7 @@ Then double-click `Vestige.uproject`, let Unreal build the C++ modules, open `Co
 
 - [Unreal Engine 5.8](https://www.unrealengine.com/): cross-platform game engine
 - [Blender](https://www.blender.org/): 3D modeling, animation and rendering
+- [Robots](.claude/agent-flow.png): much of the project is built with AI agents and automation 
 
 ## 🤝 Contributing
 
