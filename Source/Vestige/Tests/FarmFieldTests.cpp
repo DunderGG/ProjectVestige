@@ -32,14 +32,14 @@ namespace FarmFieldTests
 		UFarmField& MakeField(const FIntPoint& Size = FIntPoint(4, 3))
 		{
 			UFarmField& NewField = Spawner.SpawnObject<UFarmField>();
-			NewField.Initialize(TEXT("Base.Test"), Size, FFarmWaterRules());
+			NewField.Initialize(TEXT("Base.Test"), Size, FFarmWaterRules(), FFarmContaminationRules());
 			return NewField;
 		}
 
 		UFarmField& MakeFieldWithRules(const FFarmWaterRules& Rules)
 		{
 			UFarmField& NewField = Spawner.SpawnObject<UFarmField>();
-			NewField.Initialize(TEXT("Base.Test"), FIntPoint(4, 3), Rules);
+			NewField.Initialize(TEXT("Base.Test"), FIntPoint(4, 3), Rules, FFarmContaminationRules());
 			return NewField;
 		}
 
@@ -58,7 +58,7 @@ namespace FarmFieldTests
 			for (int32 Day = 0; Day < Days; ++Day)
 			{
 				Field.Water(Tile);
-				Field.AdvanceDay();
+				Field.AdvanceDay(1, 0);
 			}
 		}
 
@@ -146,7 +146,7 @@ namespace FarmFieldTests
 					++Broadcasts;
 				});
 
-			Field.AdvanceDay();
+			Field.AdvanceDay(1, 0);
 
 			ASSERT_THAT(IsFalse(Field.GetTile(Tile)->IsWatered()));
 			ASSERT_THAT(IsTrue(Broadcasts == 1));
@@ -180,7 +180,7 @@ namespace FarmFieldTests
 			ASSERT_THAT(IsTrue(Field.GetTile(Tile)->GetWaterLevel() == 3));
 			ASSERT_THAT(IsFalse(Field.Water(Tile)));
 
-			Field.AdvanceDay();
+			Field.AdvanceDay(1, 0);
 
 			ASSERT_THAT(IsTrue(Field.GetTile(Tile)->GetGrowthDays() == 1));
 			ASSERT_THAT(IsTrue(Field.GetTile(Tile)->GetWaterLevel() == 2));
@@ -241,7 +241,7 @@ namespace FarmFieldTests
 			Field.Water(FIntPoint(1, 0));
 			Field.Water(FIntPoint(1, 0));
 
-			Field.AdvanceDay();
+			Field.AdvanceDay(1, 0);
 
 			ASSERT_THAT(IsTrue(Field.GetTile(FIntPoint(0, 0))->GetWaterLevel() == 0));
 			ASSERT_THAT(IsTrue(Field.GetTile(FIntPoint(1, 0))->GetWaterLevel() == 1));
@@ -359,7 +359,7 @@ namespace FarmFieldTests
 			const UFarmCropData& Crop = MakeSeasonCrop({SpringTag});
 			UFarmField& Field = MakeField();
 			Plant(Field, Tile, Crop);
-			Field.AdvanceDay();
+			Field.AdvanceDay(1, 0);
 			Field.Water(Tile);
 
 			Field.WitherCropsOutOfSeason(SeasonTag(SummerTag), MakeCalendar());
@@ -429,6 +429,206 @@ namespace FarmFieldTests
 			ASSERT_THAT(IsTrue(Changed == TArray<FIntPoint>{Tile}));
 			ASSERT_THAT(IsTrue(Field.GetTile(Tile)->GetState() == EFarmTileState::Tilled));
 			ASSERT_THAT(IsTrue(Field.GetTile(Tile)->GetWaterLevel() == 1));
+		}
+
+		// Contamination (Systems/27-Contamination.md).
+		static FFarmContaminationRules MakeContaminationRules(int32 MaxLevel, TArray<float> Chances)
+		{
+			FFarmContaminationRules Rules;
+			Rules.MaxLevel = MaxLevel;
+			Rules.MutationChanceByLevel = MoveTemp(Chances);
+			return Rules;
+		}
+
+		/** Tiles from Min to Max, both included, starting at Level. */
+		static FFarmContaminationArea MakeArea(const FIntPoint& Min, const FIntPoint& Max, int32 Level)
+		{
+			FFarmContaminationArea Area;
+			Area.Min = Min;
+			Area.Max = Max;
+			Area.Level = Level;
+			return Area;
+		}
+
+		UFarmField& MakeFieldWithContaminationRules(const FFarmContaminationRules& Rules)
+		{
+			UFarmField& NewField = Spawner.SpawnObject<UFarmField>();
+			NewField.Initialize(TEXT("Base.Test"), FIntPoint(4, 3), FFarmWaterRules(), Rules);
+			return NewField;
+		}
+
+		/** A crop of Days that can mutate, with a content ID so saves can name it. */
+		UFarmCropData& MakeMutableCrop(int32 Days, FName ContentId = TEXT("Test.Mutable"))
+		{
+			UFarmCropData& Crop = Spawner.SpawnObject<UFarmCropData>();
+			Crop.SetContentIdForTests(ContentId);
+			Crop.SetDaysToMatureForTests(Days);
+			Crop.SetMutationForTests(FPrimaryAssetId(TEXT("VestigeItem"), TEXT("Test.Mutated")), TSoftObjectPtr<UStaticMesh>());
+			return Crop;
+		}
+
+		/** Waters every planted tile of the field. */
+		static void WaterAll(UFarmField& Field)
+		{
+			for (int32 Y = 0; Y < Field.GetSize().Y; ++Y)
+			{
+				for (int32 X = 0; X < Field.GetSize().X; ++X)
+				{
+					Field.Water(FIntPoint(X, Y));
+				}
+			}
+		}
+
+		TEST_METHOD(ACertainChanceMutatesOnlyACropThatRipenedTonightOnSoilWithAChance)
+		{
+			// Mutation is certain on light soil and impossible on clean soil.
+			UFarmField& Field = MakeFieldWithContaminationRules(MakeContaminationRules(2, {0.f, 1.f, 0.f}));
+			const UFarmCropData& Mutable = MakeMutableCrop(1);
+			UFarmCropData& Plain = Spawner.SpawnObject<UFarmCropData>();
+			Plain.SetDaysToMatureForTests(1);
+			const FIntPoint RipensTonight(0, 0);
+			const FIntPoint AlreadyRipe(1, 0);
+			const FIntPoint CleanSoil(2, 0);
+			const FIntPoint CantMutate(3, 0);
+			Plant(Field, RipensTonight, Mutable);
+			Plant(Field, AlreadyRipe, Mutable);
+			Plant(Field, CleanSoil, Mutable);
+			Plant(Field, CantMutate, Plain);
+			for (const FIntPoint& Light : {RipensTonight, AlreadyRipe, CantMutate})
+			{
+				ASSERT_THAT(IsTrue(Field.SetContamination(Light, 1)));
+			}
+			// Ripe already: it ripened on clean soil, before its tile was contaminated.
+			Field.SetContamination(AlreadyRipe, 0);
+			Field.AdvanceDay(1, 0);
+			ASSERT_THAT(IsTrue(Field.GetTile(AlreadyRipe)->IsRipe()));
+			ASSERT_THAT(IsTrue(Field.GetTile(CleanSoil)->IsRipe()));
+			Field.SetContamination(AlreadyRipe, 1);
+
+			// The second watered night on light soil ripens the others.
+			WaterAll(Field);
+			Field.AdvanceDay(2, 0);
+
+			ASSERT_THAT(IsTrue(Field.GetTile(RipensTonight)->IsRipe() && Field.GetTile(RipensTonight)->IsMutated()));
+			ASSERT_THAT(IsFalse(Field.GetTile(AlreadyRipe)->IsMutated()));
+			ASSERT_THAT(IsFalse(Field.GetTile(CleanSoil)->IsMutated()));
+			ASSERT_THAT(IsTrue(Field.GetTile(CantMutate)->IsRipe()));
+			ASSERT_THAT(IsFalse(Field.GetTile(CantMutate)->IsMutated()));
+
+			// A ripe crop left in the ground gets no new chance.
+			WaterAll(Field);
+			Field.AdvanceDay(3, 0);
+			ASSERT_THAT(IsFalse(Field.GetTile(AlreadyRipe)->IsMutated()));
+		}
+
+		TEST_METHOD(StartingAreasApplyWithLaterOnesOverEarlierClampedAndCut)
+		{
+			UFarmField& Field = MakeField();
+			int32 ManyBroadcasts = 0;
+			Field.OnTilesChanged.AddLambda(
+				[&ManyBroadcasts]()
+				{
+					++ManyBroadcasts;
+				});
+			const TArray<FFarmContaminationArea> Areas = {MakeArea(FIntPoint(0, 0), FIntPoint(3, 2), 1),
+				MakeArea(FIntPoint(2, 1), FIntPoint(9, 9), 2), MakeArea(FIntPoint(1, 0), FIntPoint(1, 0), 7)};
+
+			Field.ApplyContaminationAreas(Areas);
+
+			ASSERT_THAT(IsTrue(ManyBroadcasts == 1));
+			for (int32 Y = 0; Y < 3; ++Y)
+			{
+				for (int32 X = 0; X < 4; ++X)
+				{
+					const bool bHeavy = (X >= 2 && Y >= 1) || (X == 1 && Y == 0);
+					ASSERT_THAT(
+						IsTrue(Field.GetTile(FIntPoint(X, Y))->GetContamination() == (bHeavy ? 2 : 1), *FIntPoint(X, Y).ToString()));
+				}
+			}
+		}
+
+		TEST_METHOD(AnAreaWithNoTileInTheFieldIsSkippedWithAWarning)
+		{
+			UFarmField& Field = MakeField();
+			TestRunner->AddExpectedMessagePlain(
+				TEXT("has no tile in field"), ELogVerbosity::Warning, EAutomationExpectedMessageFlags::Contains, 2);
+
+			const TArray<FFarmContaminationArea> Areas = {
+				MakeArea(FIntPoint(5, 5), FIntPoint(6, 6), 2), MakeArea(FIntPoint(2, 2), FIntPoint(1, 1), 2)};
+
+			Field.ApplyContaminationAreas(Areas);
+
+			for (int32 Y = 0; Y < 3; ++Y)
+			{
+				for (int32 X = 0; X < 4; ++X)
+				{
+					ASSERT_THAT(IsFalse(Field.GetTile(FIntPoint(X, Y))->IsContaminated()));
+				}
+			}
+		}
+
+		TEST_METHOD(SettingALevelBroadcastsOneTileChangeOnlyWhenItChanges)
+		{
+			UFarmField& Field = MakeField();
+			TArray<FIntPoint> Changed;
+			Field.OnTileChanged.AddLambda(
+				[&Changed](const FIntPoint& Coordinates)
+				{
+					Changed.Add(Coordinates);
+				});
+
+			ASSERT_THAT(IsTrue(Field.SetContamination(Tile, 5)));
+			ASSERT_THAT(IsFalse(Field.SetContamination(Tile, 2)));
+			ASSERT_THAT(IsFalse(Field.SetContamination(FIntPoint(9, 9), 1)));
+
+			ASSERT_THAT(IsTrue(Changed == TArray<FIntPoint>{Tile}));
+			ASSERT_THAT(IsTrue(Field.GetTile(Tile)->GetContamination() == Field.GetContaminationRules().MaxLevel));
+		}
+
+		TEST_METHOD(ResizingKeepsTheContaminationRulesAndLevels)
+		{
+			UFarmField& Field = MakeFieldWithContaminationRules(MakeContaminationRules(3, {0.f, 0.5f}));
+			Field.SetContamination(Tile, 3);
+
+			Field.Resize(FIntPoint(5, 4));
+
+			ASSERT_THAT(IsTrue(Field.GetContaminationRules().MaxLevel == 3));
+			ASSERT_THAT(IsTrue(Field.GetContaminationRules().GetMutationChance(1) == 0.5f));
+			ASSERT_THAT(IsTrue(Field.GetTile(Tile)->GetContamination() == 3));
+			ASSERT_THAT(IsTrue(Field.SetContamination(FIntPoint(4, 3), 3)));
+		}
+
+		TEST_METHOD(TheSaveDataKeepsContaminationWateredNightsAndTheMutation)
+		{
+			UFarmField& Field = MakeFieldWithContaminationRules(MakeContaminationRules(2, {0.f, 1.f, 0.f}));
+			const UFarmCropData& Slow = MakeMutableCrop(5, TEXT("Test.Slow"));
+			const UFarmCropData& Quick = MakeMutableCrop(1, TEXT("Test.Quick"));
+			const FIntPoint Grass(0, 0);
+			const FIntPoint Growing(1, 0);
+			const FIntPoint Mutated(2, 0);
+			Field.SetContamination(Grass, 2);
+			Plant(Field, Growing, Slow);
+			Plant(Field, Mutated, Quick);
+			Field.SetContamination(Growing, 1);
+			Field.SetContamination(Mutated, 1);
+			Field.AdvanceDay(1, 0);
+			WaterAll(Field);
+			Field.AdvanceDay(2, 0);
+			Field.Water(Growing);
+			Field.AdvanceDay(3, 0);
+			ASSERT_THAT(IsTrue(Field.GetTile(Growing)->GetWateredNights() == 1));
+			ASSERT_THAT(IsTrue(Field.GetTile(Mutated)->IsMutated()));
+
+			UFarmField& Other = MakeFieldWithContaminationRules(MakeContaminationRules(2, {0.f, 1.f, 0.f}));
+			Other.RestoreTilesFromSaveData(Field.GetTilesSaveData(), {{TEXT("Test.Slow"), &Slow}, {TEXT("Test.Quick"), &Quick}});
+
+			ASSERT_THAT(IsTrue(Other.GetTile(Grass)->GetContamination() == 2));
+			ASSERT_THAT(IsTrue(Other.GetTile(Grass)->GetState() == EFarmTileState::Grass));
+			ASSERT_THAT(IsTrue(Other.GetTile(Growing)->GetContamination() == 1));
+			ASSERT_THAT(IsTrue(Other.GetTile(Growing)->GetWateredNights() == 1));
+			ASSERT_THAT(IsTrue(Other.GetTile(Growing)->GetGrowthDays() == Field.GetTile(Growing)->GetGrowthDays()));
+			ASSERT_THAT(IsTrue(Other.GetTile(Mutated)->IsMutated()));
+			ASSERT_THAT(IsFalse(Other.GetTile(FIntPoint(3, 0))->IsContaminated()));
 		}
 	};
 
@@ -665,6 +865,12 @@ namespace FarmFieldTests
 			ASSERT_THAT(IsTrue(Tile->GetCrop() && Tile->GetCrop()->GetContentId() == TEXT("Base.Parsnip")));
 			ASSERT_THAT(IsTrue(Tile->GetWaterLevel() == 0));
 			ASSERT_THAT(IsTrue(LeftOut == 0));
+
+			// From before contamination too: clean, no counted nights, no mutation, and the seed 0.
+			ASSERT_THAT(IsFalse(Tile->IsContaminated()));
+			ASSERT_THAT(IsTrue(Tile->GetWateredNights() == 0));
+			ASSERT_THAT(IsFalse(Tile->IsMutated()));
+			ASSERT_THAT(IsTrue(Fields->GetMutationSeed() == 0));
 		}
 
 		TEST_METHOD(ANewGameDropsEveryField)
@@ -723,7 +929,7 @@ namespace FarmFieldTests
 			PlantTurnip(Farm, FIntPoint(0, 0));
 			for (int32 Night = 1; Night < Turnip().GetDaysToMature(); ++Night)
 			{
-				Farm.AdvanceDay();
+				Farm.AdvanceDay(1, 0);
 				Farm.Water(FIntPoint(0, 0));
 			}
 			ASSERT_THAT(IsTrue(Farm.GetTile(FIntPoint(0, 0))->GetGrowthDays() == Turnip().GetDaysToMature() - 1));
@@ -741,7 +947,7 @@ namespace FarmFieldTests
 			PlantTurnip(Farm, FIntPoint(0, 0));
 			for (int32 Night = 0; Night < Turnip().GetDaysToMature(); ++Night)
 			{
-				Farm.AdvanceDay();
+				Farm.AdvanceDay(1, 0);
 				Farm.Water(FIntPoint(0, 0));
 			}
 			ASSERT_THAT(IsTrue(Farm.GetTile(FIntPoint(0, 0))->IsRipe()));
@@ -792,7 +998,7 @@ namespace FarmFieldTests
 		{
 			UFarmField& Farm = Fields->FindOrAddField(FarmId, FIntPoint(8, 8));
 			PlantTurnip(Farm, FIntPoint(2, 3));
-			Farm.AdvanceDay();
+			Farm.AdvanceDay(1, 0);
 			Farm.Water(FIntPoint(2, 3));
 			Farm.WitherCropsOutOfSeason(Clock->GetCalendar().GetSeasons()[1].Tag, Clock->GetCalendar());
 			const FVestigeSaveRecord Record = Fields->WriteSaveRecord();
@@ -809,6 +1015,128 @@ namespace FarmFieldTests
 			ASSERT_THAT(IsTrue(Tile->GetGrowthDays() == 1));
 			ASSERT_THAT(IsTrue(Tile->GetWaterLevel() == 1));
 			ASSERT_THAT(IsTrue(LeftOut == 0));
+		}
+
+		// Contamination (Systems/27-Contamination.md).
+		static FFarmContaminationArea MakeArea(const FIntPoint& Min, const FIntPoint& Max, int32 Level)
+		{
+			FFarmContaminationArea Area;
+			Area.Min = Min;
+			Area.Max = Max;
+			Area.Level = Level;
+			return Area;
+		}
+
+		/** The far two columns of an 8 x 8 field heavily contaminated. */
+		static TArray<FFarmContaminationArea> HeavyFarEdge() { return {MakeArea(FIntPoint(6, 0), FIntPoint(7, 7), 2)}; }
+
+		TEST_METHOD(AFieldTheSubsystemMakesFollowsTheContaminationSettingsAndStartsWithItsAreas)
+		{
+			const FFarmContaminationRules Expected = UFarmFieldSettings::Get().GetContaminationRules();
+
+			const UFarmField& Field = Fields->FindOrAddField(FarmId, FIntPoint(8, 8), HeavyFarEdge());
+
+			ASSERT_THAT(IsTrue(Field.GetContaminationRules().MaxLevel == Expected.MaxLevel));
+			ASSERT_THAT(IsTrue(Field.GetContaminationRules().MutationChanceByLevel == Expected.MutationChanceByLevel));
+			ASSERT_THAT(IsTrue(Field.GetTile(FIntPoint(6, 3))->GetContamination() == FMath::Min(2, Expected.MaxLevel)));
+			ASSERT_THAT(IsFalse(Field.GetTile(FIntPoint(5, 3))->IsContaminated()));
+		}
+
+		TEST_METHOD(AFieldAskedForAgainKeepsItsCleanedTiles)
+		{
+			UFarmField& Field = Fields->FindOrAddField(FarmId, FIntPoint(8, 8), HeavyFarEdge());
+			ASSERT_THAT(IsTrue(Field.SetContamination(FIntPoint(6, 3), 0)));
+
+			const UFarmField& Again = Fields->FindOrAddField(FarmId, FIntPoint(8, 8), HeavyFarEdge());
+
+			ASSERT_THAT(IsTrue(&Again == &Field));
+			ASSERT_THAT(IsFalse(Again.GetTile(FIntPoint(6, 3))->IsContaminated()));
+			ASSERT_THAT(IsTrue(Again.GetTile(FIntPoint(7, 3))->IsContaminated()));
+		}
+
+		TEST_METHOD(AFieldFromASaveKeepsItsTilesWhateverTheAreas)
+		{
+			FFarmFieldsSaveData Data;
+			Data.Fields.Add({FarmId, FIntPoint(8, 8), {}});
+			int32 LeftOut = 0;
+			ASSERT_THAT(IsTrue(Fields->ReadSaveRecord(FVestigeSaveRecord::Write(Data), LeftOut)));
+
+			const UFarmField& Field = Fields->FindOrAddField(FarmId, FIntPoint(8, 8), HeavyFarEdge());
+
+			ASSERT_THAT(IsFalse(Field.GetTile(FIntPoint(6, 3))->IsContaminated()));
+		}
+
+		TEST_METHOD(TheSaveKeepsEachTilesContaminationAndTheMutationSeed)
+		{
+			UFarmField& Field = Fields->FindOrAddField(FarmId, FIntPoint(8, 8));
+			Field.SetContamination(FIntPoint(1, 1), 1);
+			Field.SetContamination(FIntPoint(2, 1), 2);
+			Fields->SetMutationSeedForTests(4242);
+			const FVestigeSaveRecord Record = Fields->WriteSaveRecord();
+			Fields->StartNewGame();
+			int32 LeftOut = 0;
+
+			ASSERT_THAT(IsTrue(Fields->ReadSaveRecord(Record, LeftOut)));
+
+			const UFarmField* Restored = Fields->FindField(FarmId);
+			ASSERT_THAT(IsNotNull(Restored));
+			ASSERT_THAT(IsTrue(Restored->GetTile(FIntPoint(1, 1))->GetContamination() == 1));
+			ASSERT_THAT(IsTrue(Restored->GetTile(FIntPoint(2, 1))->GetContamination() == 2));
+			ASSERT_THAT(IsFalse(Restored->GetTile(FIntPoint(3, 1))->IsContaminated()));
+			ASSERT_THAT(IsTrue(Fields->GetMutationSeed() == 4242));
+		}
+
+		TEST_METHOD(ANewGamePicksANewMutationSeed)
+		{
+			Fields->SetMutationSeedForTests(4242);
+
+			Fields->StartNewGame();
+			const int32 First = Fields->GetMutationSeed();
+			Fields->StartNewGame();
+
+			ASSERT_THAT(IsTrue(First != 4242));
+			ASSERT_THAT(IsTrue(Fields->GetMutationSeed() != First));
+		}
+
+		TEST_METHOD(TheNightRollsWithTheGamesSeedAndTheNewDay)
+		{
+			const FFarmContaminationRules Rules = UFarmFieldSettings::Get().GetContaminationRules();
+			const float Chance = Rules.GetMutationChance(1);
+			UFarmCropData& Crop = Spawner.SpawnObject<UFarmCropData>();
+			Crop.SetDaysToMatureForTests(1);
+			Crop.SetMutationForTests(FPrimaryAssetId(TEXT("VestigeItem"), TEXT("Test.Mutated")), TSoftObjectPtr<UStaticMesh>());
+			UFarmField& Field = Fields->FindOrAddField(FarmId, FIntPoint(8, 8));
+			Fields->SetMutationSeedForTests(31337);
+			for (int32 Index = 0; Index < 64; ++Index)
+			{
+				const FIntPoint Coordinates(Index % 8, Index / 8);
+				Field.Till(Coordinates);
+				Field.Plant(Coordinates, &Crop);
+				Field.Water(Coordinates);
+				Field.SetContamination(Coordinates, 1);
+			}
+
+			// Light soil: the second watered night ripens every crop.
+			Clock->StartNextDay();
+			for (int32 Index = 0; Index < 64; ++Index)
+			{
+				Field.Water(FIntPoint(Index % 8, Index / 8));
+			}
+			Clock->StartNextDay();
+
+			const int32 Day = Clock->GetCurrentDay();
+			int32 MutatedCount = 0;
+			for (int32 Index = 0; Index < 64; ++Index)
+			{
+				const FIntPoint Coordinates(Index % 8, Index / 8);
+				const FFarmTileState* Tile = Field.GetTile(Coordinates);
+				ASSERT_THAT(IsTrue(Tile->IsRipe()));
+				const bool bExpected = FarmContamination::RollsMutation(31337, FarmId, Coordinates, Day, Chance);
+				ASSERT_THAT(IsTrue(Tile->IsMutated() == bExpected, *Coordinates.ToString()));
+				MutatedCount += Tile->IsMutated();
+			}
+			// At the settings' chance some crops of 64 ripen mutated and some don't, unless the chance is 0 or 1.
+			ASSERT_THAT(IsTrue(Chance <= 0.f || Chance >= 1.f || (MutatedCount > 0 && MutatedCount < 64)));
 		}
 	};
 }

@@ -244,7 +244,7 @@ Only needed to make or change 3D models.
 
 1. Install the current release of **[Blender](https://www.blender.org/download/)**. The scripts are tested on Blender 5.0, which the maintainer uses; other 4.x and 5.x releases may work but haven't been tried.
 2. Open the sources in `Art/Blender/`. The export settings, scale, pivots and naming are in [CONTRIBUTING.md, Contributing art](../CONTRIBUTING.md#5-contributing-art), and `Art/README.md` shows how to add an asset.
-3. The models are built by scripts, so a change to a model is a change to its script. `Art/Blender/make_farm_assets.py` builds the current crop and tool meshes (the soil tile, every crop stage and the watering can); one run rewrites all of its 16 FBX files and `FarmAssets.blend`, so run it only when you changed one of those assets. Newer assets each have their own script, such as `Art/Blender/make_bed.py`, built on the shared helpers in `Art/Blender/vestige_art/`; a run writes only that asset's files. From the project folder:
+3. The models are built by scripts, so a change to a model is a change to its script. `Art/Blender/make_farm_assets.py` builds the current crop and tool meshes (the soil tile, every spring crop's stages and the watering can); one run rewrites all of its 16 FBX files and `FarmAssets.blend`, so run it only when you changed one of those assets. Newer assets each have their own script, such as `Art/Blender/make_bed.py`, built on the shared helpers in `Art/Blender/vestige_art/`; a run writes only that asset's files. From the project folder:
 
    ```
    blender --background --python-exit-code 1 --python Art/Blender/make_bed.py

@@ -30,10 +30,19 @@ namespace FarmTileLooks
 			return FMath::Clamp(static_cast<float>(Tile.GetWaterLevel()) / static_cast<float>(FMath::Max(MaxWaterLevel, 1)), 0.f, 1.f);
 		}
 
-		FFarmTilePartLook GetSoilLook(const FFarmTileState& Tile, const FFarmTileLookSettings& Settings, float WaterFraction)
+		/** The tile's contamination level as a fraction of the field's highest level, from 0 to 1. */
+		float GetContaminationFraction(const FFarmTileState& Tile, int32 MaxContaminationLevel)
+		{
+			return FMath::Clamp(
+				static_cast<float>(Tile.GetContamination()) / static_cast<float>(FMath::Max(MaxContaminationLevel, 1)), 0.f, 1.f);
+		}
+
+		FFarmTilePartLook GetSoilLook(
+			const FFarmTileState& Tile, const FFarmTileLookSettings& Settings, float WaterFraction, float ContaminationFraction)
 		{
 			FFarmTilePartLook Soil;
 			Soil.Water = WaterFraction;
+			Soil.Contamination = ContaminationFraction;
 			if (Tile.GetState() != EFarmTileState::Grass && Settings.TilledSoilMesh)
 			{
 				Soil.Mesh = Settings.TilledSoilMesh;
@@ -70,6 +79,20 @@ namespace FarmTileLooks
 			return FMath::Clamp(static_cast<float>(Tile.GetGrowthDays()) / DaysToMature, 0.f, 1.f);
 		}
 
+		/** The placeholder cylinder's color for a planted or withered tile's crop. */
+		FLinearColor GetPlaceholderCropColor(const FFarmTileState& Tile)
+		{
+			if (Tile.IsWithered())
+			{
+				return WitheredColor;
+			}
+			if (Tile.IsMutated())
+			{
+				return MutatedColor;
+			}
+			return Tile.IsRipe() ? RipeColor : GrowingColor;
+		}
+
 		FFarmTilePartLook GetCropLook(const FFarmTileState& Tile, const FFarmTileLookSettings& Settings, float WaterFraction)
 		{
 			using namespace FarmTilePlaceholder;
@@ -79,8 +102,14 @@ namespace FarmTileLooks
 			const bool bWithered = Tile.IsWithered();
 			const float WitheredHeight = FMath::Clamp(Settings.WitheredCropHeightScale, 0.1f, 1.f);
 			const float SurfaceZ = Settings.TilledSoilMesh ? Settings.SoilSurfaceHeight : SoilTop;
+			const bool bMutated = Tile.IsMutated();
 			const UFarmCropData* CropData = Tile.GetCrop();
-			const FFarmCropGrowthLook GrowthLook = CropData ? CropData->GetGrowthLook(Tile.GetGrowthDays()) : FFarmCropGrowthLook();
+			FFarmCropGrowthLook GrowthLook = CropData ? CropData->GetGrowthLook(Tile.GetGrowthDays()) : FFarmCropGrowthLook();
+			if (bMutated && CropData)
+			{
+				// A mutated crop is always ripe, shown at full size like the ripe mesh it replaces.
+				GrowthLook = {CropData->GetMutatedRipeMesh(), 1.f};
+			}
 			if (GrowthLook.Mesh)
 			{
 				Crop.Mesh = GrowthLook.Mesh;
@@ -90,27 +119,32 @@ namespace FarmTileLooks
 					Crop.Material = Settings.WitheredCropMaterial;
 					Scale.Z *= WitheredHeight;
 				}
+				else if (bMutated)
+				{
+					Crop.Material = Settings.MutatedCropMaterial;
+				}
 				Crop.Transform = FTransform(FQuat::Identity, FVector(0.f, 0.f, SurfaceZ), Scale);
 				return Crop;
 			}
 
 			// The placeholder ignores the stage scale: its height already follows the whole growth.
-			const float HeightScale = FMath::Lerp(CropSeedlingHeightScale, CropRipeHeightScale, GetGrowthFraction(Tile))
-				* (bWithered ? WitheredHeight : 1.f);
+			const float HeightScale =
+				FMath::Lerp(CropSeedlingHeightScale, CropRipeHeightScale, GetGrowthFraction(Tile)) * (bWithered ? WitheredHeight : 1.f);
 			Crop.Mesh = Settings.PlaceholderCropMesh;
 			Crop.Material = Settings.PlaceholderMaterial;
 			Crop.Transform = FTransform(FQuat::Identity, FVector(0.f, 0.f, SurfaceZ + HeightScale * CylinderHalfHeight),
 				FVector(CropWidthScale, CropWidthScale, HeightScale));
-			Crop.Color = bWithered ? WitheredColor : Tile.IsRipe() ? RipeColor : GrowingColor;
+			Crop.Color = GetPlaceholderCropColor(Tile);
 			return Crop;
 		}
 	}
 
-	FFarmTileLook GetLook(const FFarmTileState& Tile, const FFarmTileLookSettings& Settings, int32 MaxWaterLevel)
+	FFarmTileLook GetLook(
+		const FFarmTileState& Tile, const FFarmTileLookSettings& Settings, int32 MaxWaterLevel, int32 MaxContaminationLevel)
 	{
 		const float WaterFraction = Detail::GetWaterFraction(Tile, MaxWaterLevel);
 		FFarmTileLook Look;
-		Look.Soil = Detail::GetSoilLook(Tile, Settings, WaterFraction);
+		Look.Soil = Detail::GetSoilLook(Tile, Settings, WaterFraction, Detail::GetContaminationFraction(Tile, MaxContaminationLevel));
 		if (Tile.GetState() == EFarmTileState::Planted || Tile.IsWithered())
 		{
 			Look.Crop = Detail::GetCropLook(Tile, Settings, WaterFraction);

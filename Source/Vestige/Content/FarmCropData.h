@@ -32,7 +32,7 @@ struct FFarmSeasonFit
 {
 	EFarmSeasonFit Fit = EFarmSeasonFit::Fits;
 
-	/** The watered days the crop needs to ripen: its DaysToMature. */
+	/** The watered nights the crop needs to ripen: its DaysToMature times the tile's watered nights per growth day. */
 	int32 DaysToRipe = 0;
 
 	/**
@@ -108,6 +108,27 @@ public:
 	/** The item a harvest gives (VestigeItem:Base.Turnip). */
 	const FPrimaryAssetId& GetHarvestItemId() const { return HarvestItemId; }
 
+	/**
+	 * How many watered nights make one growth day on a tile at contamination Level, 0 when the crop doesn't grow there. A level
+	 * past the end of WateredNightsPerGrowthDay uses its last entry; an empty list gives 1, so broken data grows as on clean soil.
+	 */
+	int32 GetWateredNightsPerGrowthDay(int32 Level) const;
+
+	/** The lowest contamination level its seeds may be planted on. */
+	int32 GetMinPlantingContamination() const { return MinPlantingContamination; }
+
+	/** The contamination levels one harvest of the crop takes off its tile, not below clean. */
+	int32 GetContaminationCleanedPerHarvest() const { return ContaminationCleanedPerHarvest; }
+
+	/** The item a mutated harvest gives, Yield times, or an invalid ID for a crop that never mutates. */
+	const FPrimaryAssetId& GetMutatedHarvestItemId() const { return MutatedHarvestItemId; }
+
+	/** Whether the crop can ripen mutated: it has a mutated harvest item. */
+	bool CanMutate() const { return MutatedHarvestItemId.IsValid(); }
+
+	/** The mesh of the mutated ripe crop: MutatedRipeMesh, or the ripe mesh without one. Nullptr while not loaded; never loads. */
+	UStaticMesh* GetMutatedRipeMesh() const;
+
 	/** Whether a crop that has grown for GrowthDays watered days can be harvested. A DaysToMature below 1 is always ripe. */
 	bool IsRipeAt(int32 GrowthDays) const { return GrowthDays >= DaysToMature; }
 
@@ -132,16 +153,19 @@ public:
 	/**
 	 * Whether planting the crop on day count Day fits its seasons in Calendar: out of season when it doesn't grow in the day's
 	 * season, too late when it needs more days to ripen than it has before a coming season it doesn't grow in. Every crop fits
-	 * in a calendar without seasons. Assumes a watering every night. Pure: reads no clock or world.
+	 * in a calendar without seasons. Assumes a watering every night, and that NightsPerGrowthDay of them make one growth
+	 * day (the tile's contamination, GetWateredNightsPerGrowthDay; at least 1). Pure: reads no clock or world.
 	 */
-	FFarmSeasonFit GetSeasonFit(const FVestigeCalendar& Calendar, int32 Day) const;
+	FFarmSeasonFit GetSeasonFit(const FVestigeCalendar& Calendar, int32 Day, int32 NightsPerGrowthDay = 1) const;
 
 #if WITH_EDITOR
 	/**
 	 * Reports a HarvestItemId that is empty, of another content type, or names no item; no Seasons, and a season the game
 	 * data's calendar doesn't have (skipped when that calendar has no seasons); a DaysToMature below 1, a StageStartScale outside
 	 * (0, 1], a missing ripe mesh, no growth stages, a stage without a mesh, a first StartDay other than 0, start days that don't
-	 * strictly increase or reach DaysToMature, and the ripe mesh used by a stage.
+	 * strictly increase or reach DaysToMature, and the ripe mesh used by a stage. For contamination: an empty or negative
+	 * WateredNightsPerGrowthDay, a crop that grows on no level from MinPlantingContamination up, a MutatedHarvestItemId of another
+	 * type or naming no item, and a MutatedRipeMesh used by a growth stage.
 	 */
 	virtual EDataValidationResult IsDataValid(FDataValidationContext& Context) const override;
 #endif
@@ -165,6 +189,22 @@ public:
 
 	/** For tests only. Crops get their seasons in the editor. */
 	void SetSeasonsForTests(const FGameplayTagContainer& InSeasons) { Seasons = InSeasons; }
+
+	/** For tests only. Crops get their response to contamination in the editor. */
+	void SetContaminationResponseForTests(
+		const TArray<int32>& InWateredNightsPerGrowthDay, int32 InMinPlantingContamination, int32 InContaminationCleanedPerHarvest)
+	{
+		WateredNightsPerGrowthDay = InWateredNightsPerGrowthDay;
+		MinPlantingContamination = InMinPlantingContamination;
+		ContaminationCleanedPerHarvest = InContaminationCleanedPerHarvest;
+	}
+
+	/** For tests only. Crops get their mutated form in the editor. */
+	void SetMutationForTests(const FPrimaryAssetId& InMutatedHarvestItemId, const TSoftObjectPtr<UStaticMesh>& InMutatedRipeMesh)
+	{
+		MutatedHarvestItemId = InMutatedHarvestItemId;
+		MutatedRipeMesh = InMutatedRipeMesh;
+	}
 #endif
 
 protected:
@@ -173,6 +213,11 @@ protected:
 private:
 	/** Whether Seasons lists any of Calendar's seasons exactly. A crop that lists none grows in every season. */
 	bool ListsAnySeasonOf(const FVestigeCalendar& Calendar) const;
+
+#if WITH_EDITOR
+	/** IsDataValid's checks of the contamination response and the mutated form, each error passed to ReportError. */
+	void ReportContaminationErrors(TFunctionRef<void(const FText&)> ReportError) const;
+#endif
 
 	/**
 	 * Seasons the crop grows in, tags of the calendar's seasons (DA_GameData), matched exactly. Seeds are planted only in these,
@@ -184,10 +229,6 @@ private:
 	/** Watered days the crop needs before it can be harvested. The last growth stage lasts until then. */
 	UPROPERTY(EditDefaultsOnly, Category = "Farming|Growth", meta = (AllowPrivateAccess = "true", ClampMin = 1))
 	int32 DaysToMature = 3;
-
-	/** Highest tile contamination, from 0 (clean) to 1, the crop still grows in. Not used yet: tiles have no contamination. */
-	UPROPERTY(EditDefaultsOnly, Category = "Farming|Growth", meta = (AllowPrivateAccess = "true", ClampMin = 0, ClampMax = 1))
-	float ContaminationTolerance = 1.f;
 
 	/**
 	 * The stages the crop shows while it grows, seedling first, without the ripe mesh: each from its StartDay until the next one
@@ -216,4 +257,30 @@ private:
 	/** How many of the harvest item one harvest gives. */
 	UPROPERTY(EditDefaultsOnly, Category = "Farming|Harvest", meta = (AllowPrivateAccess = "true", ClampMin = 1))
 	int32 Yield = 1;
+
+	/**
+	 * How many watered nights make one growth day on each contamination level (index = level: clean, light, heavy), 0 where the
+	 * crop doesn't grow (it doesn't die either). A level past the end uses the last entry (Systems.md, section 27).
+	 */
+	UPROPERTY(EditDefaultsOnly, Category = "Farming|Contamination", meta = (AllowPrivateAccess = "true", ClampMin = 0))
+	TArray<int32> WateredNightsPerGrowthDay = {1, 2, 0};
+
+	/** The lowest contamination level the crop's seeds may be planted on; below it they are refused. */
+	UPROPERTY(EditDefaultsOnly, Category = "Farming|Contamination", meta = (AllowPrivateAccess = "true", ClampMin = 0))
+	int32 MinPlantingContamination = 0;
+
+	/** The contamination levels one harvest takes off the crop's tile, not below clean. 0 for a crop that doesn't clean. */
+	UPROPERTY(EditDefaultsOnly, Category = "Farming|Contamination", meta = (AllowPrivateAccess = "true", ClampMin = 0))
+	int32 ContaminationCleanedPerHarvest = 0;
+
+	/**
+	 * The item a mutated harvest gives, Yield times. Empty means the crop never mutates. Whether a crop ripens mutated is the
+	 * field settings' chance on its tile's level.
+	 */
+	UPROPERTY(EditDefaultsOnly, Category = "Farming|Contamination", meta = (AllowPrivateAccess = "true", AllowedTypes = "VestigeItem"))
+	FPrimaryAssetId MutatedHarvestItemId;
+
+	/** The mesh a mutated ripe crop shows, with the mutated material. Empty uses the ripe mesh. Origin as for the ripe mesh. */
+	UPROPERTY(EditDefaultsOnly, Category = "Farming|Contamination", meta = (AllowPrivateAccess = "true", AssetBundles = "Visuals"))
+	TSoftObjectPtr<UStaticMesh> MutatedRipeMesh;
 };

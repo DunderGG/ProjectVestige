@@ -13,7 +13,9 @@
 #include "Farming/FarmGrid.h"
 #include "Farming/FarmTileLooks.h"
 #include "Materials/Material.h"
+#include "Materials/MaterialExpressionMaterialFunctionCall.h"
 #include "Materials/MaterialExpressionPerInstanceCustomData.h"
+#include "Materials/MaterialFunctionInterface.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Time/VestigeClockSubsystem.h"
 #include "UObject/UObjectIterator.h"
@@ -129,7 +131,7 @@ namespace FarmFieldMeshesTests
 			Field->Water(Tile);
 			Field->Water(Tile);
 
-			Field->AdvanceDay();
+			Field->AdvanceDay(1, 0);
 
 			ASSERT_THAT(IsTrue(Meshes->GetSoilCustomData(Tile)[FarmTileLooks::WaterCustomDataIndex] == 0.5f));
 		}
@@ -144,7 +146,7 @@ namespace FarmFieldMeshesTests
 			for (int32 Day = 0; Day < Crop.GetDaysToMature(); ++Day)
 			{
 				Field->Water(Tile);
-				Field->AdvanceDay();
+				Field->AdvanceDay(1, 0);
 			}
 			ASSERT_THAT(IsTrue(Field->Harvest(Tile)));
 
@@ -163,7 +165,7 @@ namespace FarmFieldMeshesTests
 			PlantAndWater(FIntPoint(2, 3), *Turnip);
 			ASSERT_THAT(IsTrue(Meshes->GetInstanceCount(Seedling) == 1));
 
-			Field->AdvanceDay();
+			Field->AdvanceDay(1, 0);
 
 			ASSERT_THAT(IsTrue(Meshes->GetInstanceCount(Seedling) == 0));
 			ASSERT_THAT(IsTrue(Meshes->GetInstanceCount(NextStage) == 1));
@@ -241,7 +243,7 @@ namespace FarmFieldMeshesTests
 
 			PlantAndWater(FIntPoint(0, 0), Crop);
 			Field->Till(FIntPoint(1, 0));
-			Field->AdvanceDay();
+			Field->AdvanceDay(1, 0);
 
 			ASSERT_THAT(IsTrue(CountDynamicMaterials() == MaterialsBefore));
 		}
@@ -296,6 +298,104 @@ namespace FarmFieldMeshesTests
 				ASSERT_THAT(IsTrue(bReadsWater));
 #endif
 			}
+		}
+
+		// Contamination (Systems/27-Contamination.md).
+		TEST_METHOD(ALevelChangeUpdatesTheSoilsContaminationCustomDataInPlace)
+		{
+			const FIntPoint Tile(1, 2);
+			Field->Till(Tile);
+			const int32 SoilBefore = PlaceholderCount(Looks().PlaceholderSoilMesh);
+			ASSERT_THAT(IsTrue(Meshes->GetSoilCustomData(Tile).Num() == 5));
+			ASSERT_THAT(IsTrue(Meshes->GetSoilCustomData(Tile)[FarmTileLooks::ContaminationCustomDataIndex] == 0.f));
+
+			Field->SetContamination(Tile, 1);
+			ASSERT_THAT(IsTrue(Meshes->GetSoilCustomData(Tile)[FarmTileLooks::ContaminationCustomDataIndex] == 0.5f));
+			Field->SetContamination(Tile, 2);
+			ASSERT_THAT(IsTrue(Meshes->GetSoilCustomData(Tile)[FarmTileLooks::ContaminationCustomDataIndex] == 1.f));
+			Field->SetContamination(FIntPoint(0, 0), 1);
+			ASSERT_THAT(IsTrue(Meshes->GetSoilCustomData(FIntPoint(0, 0))[FarmTileLooks::ContaminationCustomDataIndex] == 0.5f));
+
+			ASSERT_THAT(IsTrue(PlaceholderCount(Looks().PlaceholderSoilMesh) == SoilBefore));
+			ASSERT_THAT(IsTrue(Meshes->GetTotalInstanceCount() == 64));
+			ASSERT_THAT(IsTrue(Meshes->GetSoilCustomData(FIntPoint(3, 3))[FarmTileLooks::ContaminationCustomDataIndex] == 0.f));
+			ASSERT_THAT(IsTrue(HasColor(Meshes->GetSoilCustomData(Tile), FarmTileLooks::TilledColor)));
+		}
+
+		TEST_METHOD(StartingAreasRedrawTheWholeField)
+		{
+			FFarmContaminationArea Area;
+			Area.Min = FIntPoint(6, 0);
+			Area.Max = FIntPoint(7, 7);
+			Area.Level = 2;
+
+			Field->ApplyContaminationAreas(TArray<FFarmContaminationArea>{Area});
+
+			ASSERT_THAT(IsTrue(Meshes->GetSoilCustomData(FIntPoint(7, 7))[FarmTileLooks::ContaminationCustomDataIndex] == 1.f));
+			ASSERT_THAT(IsTrue(Meshes->GetSoilCustomData(FIntPoint(5, 7))[FarmTileLooks::ContaminationCustomDataIndex] == 0.f));
+			ASSERT_THAT(IsTrue(Meshes->GetTotalInstanceCount() == 64));
+		}
+
+		/** Whether Expressions, or a material function they call, read per-instance custom data Index. */
+		static bool ReadsCustomData(TConstArrayView<TObjectPtr<UMaterialExpression>> Expressions, int32 Index, int32 Depth = 0)
+		{
+#if WITH_EDITORONLY_DATA
+			for (const UMaterialExpression* Expression : Expressions)
+			{
+				const UMaterialExpressionPerInstanceCustomData* CustomData = Cast<UMaterialExpressionPerInstanceCustomData>(Expression);
+				if (CustomData && CustomData->DataIndex == static_cast<uint32>(Index))
+				{
+					return true;
+				}
+				const UMaterialExpressionMaterialFunctionCall* Call = Cast<UMaterialExpressionMaterialFunctionCall>(Expression);
+				if (Call && Call->MaterialFunction && Depth < 4
+					&& ReadsCustomData(Call->MaterialFunction->GetExpressions(), Index, Depth + 1))
+				{
+					return true;
+				}
+			}
+#endif
+			return false;
+		}
+
+		/** The soil's and the placeholder's base materials read the contamination, directly or through MF_ContaminationCracks. */
+		TEST_METHOD(TheSoilAndPlaceholderMaterialsReadTheContaminationFromTheCustomData)
+		{
+			UClass* GridClass = LoadClass<AFarmGrid>(nullptr, TEXT("/Game/Vestige/Blueprints/BP_FarmGrid.BP_FarmGrid_C"));
+			ASSERT_THAT(IsNotNull(GridClass));
+			const FFarmTileLookSettings& BlueprintLooks = GetDefault<AFarmGrid>(GridClass)->GetMeshes()->GetLookSettings();
+			ASSERT_THAT(IsNotNull(BlueprintLooks.TilledSoilMesh.Get()));
+			ASSERT_THAT(IsNotNull(BlueprintLooks.PlaceholderMaterial.Get()));
+
+			TArray<const UMaterial*> Materials = {BlueprintLooks.PlaceholderMaterial->GetMaterial()};
+			for (const FStaticMaterial& Slot : BlueprintLooks.TilledSoilMesh->GetStaticMaterials())
+			{
+				Materials.Add(Slot.MaterialInterface ? Slot.MaterialInterface->GetMaterial() : nullptr);
+			}
+			for (const UMaterial* BaseMaterial : Materials)
+			{
+				ASSERT_THAT(IsNotNull(BaseMaterial));
+#if WITH_EDITORONLY_DATA
+				ASSERT_THAT(IsTrue(ReadsCustomData(BaseMaterial->GetExpressions(), FarmTileLooks::ContaminationCustomDataIndex),
+					*BaseMaterial->GetName()));
+#endif
+			}
+		}
+
+		/** Fails until MI_Crop_Mutated is imported and set on BP_FarmGrid (the artist's part 3, waiting for the mutated meshes). */
+		TEST_METHOD(TheGridBlueprintsMutatedMaterialIsAnInstanceOfTheCropMaterialForInstancedMeshes)
+		{
+			UClass* GridClass = LoadClass<AFarmGrid>(nullptr, TEXT("/Game/Vestige/Blueprints/BP_FarmGrid.BP_FarmGrid_C"));
+			ASSERT_THAT(IsNotNull(GridClass));
+			UMaterialInterface* Mutated = GetDefault<AFarmGrid>(GridClass)->GetMeshes()->GetLookSettings().MutatedCropMaterial;
+			ASSERT_THAT(IsNotNull(Mutated));
+
+			ASSERT_THAT(IsTrue(Mutated->GetUsageByFlag(MATUSAGE_InstancedStaticMeshes)));
+			UMaterial* BaseMaterial = Mutated->GetMaterial();
+			ASSERT_THAT(IsNotNull(BaseMaterial));
+			ASSERT_THAT(IsTrue(BaseMaterial->GetName() == TEXT("M_Crop")));
+			ASSERT_THAT(IsFalse(BaseMaterial->IsUsageFlagDirty(MATUSAGE_InstancedStaticMeshes)));
+			ASSERT_THAT(IsTrue(Mutated != GetDefault<AFarmGrid>(GridClass)->GetMeshes()->GetLookSettings().WitheredCropMaterial));
 		}
 	};
 }

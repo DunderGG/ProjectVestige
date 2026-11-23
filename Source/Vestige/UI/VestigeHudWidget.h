@@ -49,6 +49,9 @@ public:
 	/** The key hints line. */
 	void SetKeyHintsText(const FText& Text);
 
+	/** "Lightly contaminated" for the faced tile, or empty. Does nothing while the widget has no TileText. */
+	void SetTileText(const FText& Text);
+
 	/**
 	 * Shows each message in its own box, oldest first, fading over Lifetime seconds, and collapses the boxes beyond the
 	 * list. Boxes are made only when the list is longer than any before and are never removed.
@@ -75,7 +78,7 @@ private:
 	TObjectPtr<UTextBlock> StaminaText;
 
 	/**
-	 * The money line under the stamina. The one optional part: it was added to the C++ after WBP_Hud's layout, so the widget
+	 * The money line under the stamina. Optional, as TileText is: it was added to the C++ after WBP_Hud's layout, so the widget
 	 * compiles before a person adds it in the designer. Without it the HUD shows no money line.
 	 */
 	UPROPERTY(meta = (BindWidgetOptional))
@@ -86,6 +89,13 @@ private:
 
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UTextBlock> PromptText;
+
+	/**
+	 * The faced tile's contamination line, under the prompt for now. Optional for the same reason as MoneyText: a person adds
+	 * it to WBP_Hud in the designer. Without it the HUD shows no tile line.
+	 */
+	UPROPERTY(meta = (BindWidgetOptional))
+	TObjectPtr<UTextBlock> TileText;
 
 	/** The backdrop around PromptText, collapsed while the prompt is empty. */
 	UPROPERTY(meta = (BindWidget))

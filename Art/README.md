@@ -12,7 +12,8 @@ The models are built by Python scripts, not by hand in Blender, so that anyone c
 
 ## The scripts
 
-- `Blender/make_farm_assets.py` is the first script. One run builds the soil tile, every crop stage and the watering can, and rewrites all their FBX files and `FarmAssets.blend`.
+- `Blender/make_farm_assets.py` is the first script. One run builds the soil tile, every spring crop's stages and the watering can, and rewrites all their FBX files and `FarmAssets.blend`.
+- `Blender/make_cleanup_crop.py` builds the cleaning crop's three stages and ripe mesh with the plant helpers of `make_farm_assets.py` (imported, not run), and writes only its own four FBX files. `Blender/make_contamination_cracks.py` computes the crack mask `Export/T_ContaminationCracks.png` that the soil materials read ([Systems.md, section 27](../Docs/Systems/27-Contamination.md)); its previews stand in for the Unreal material.
 - `Blender/make_<asset>.py` is one script per asset: `make_bed.py`, `make_shipping_bin.py`, `make_well.py` and `make_sprinkler.py` so far. It builds the asset, checks it, writes only its own `Art/Export/<AssetName>.fbx` and, when asked, its own `.blend` (`--save-blend`). These scripts share the helpers in `Blender/vestige_art/`, and `Blender/check_vestige_art.py` is the test of those helpers and of the check (see "Checking the shared module" below).
 
 ## Adding an asset

@@ -18,6 +18,10 @@
 #include "Core/VestigeLog.h"
 #include "Engine/GameViewportClient.h"
 #include "Engine/World.h"
+#include "Farming/FarmField.h"
+#include "Farming/FarmGrid.h"
+#include "Farming/FarmTargetingComponent.h"
+#include "Farming/FarmTileState.h"
 #include "Farming/FarmWateringCan.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerController.h"
@@ -77,6 +81,9 @@ AVestigeHUD::AVestigeHUD()
 	// hours, Roadmap.md), so Tick compares two numbers and rebuilds the status line only when the shown minute changes.
 	// The tick is turned off when there is no widget or no clock to show.
 	PrimaryActorTick.bCanEverTick = true;
+
+	ContaminationLevelNames = {
+		FText::GetEmpty(), LOCTEXT("LightlyContaminated", "Lightly contaminated"), LOCTEXT("HeavilyContaminated", "Heavily contaminated")};
 }
 
 void AVestigeHUD::BeginPlay()
@@ -271,6 +278,13 @@ void AVestigeHUD::FollowPawn(APawn* OldPawn, APawn* NewPawn)
 		NewInteraction->OnFocusChanged.AddUObject(this, &AVestigeHUD::RefreshPromptText);
 	}
 	RefreshPromptText();
+
+	Targeting = NewPawn ? NewPawn->FindComponentByClass<UFarmTargetingComponent>() : nullptr;
+	if (UFarmTargetingComponent* NewTargeting = Targeting.Get())
+	{
+		NewTargeting->OnTargetTileChanged.AddUObject(this, &AVestigeHUD::FollowTargetFieldOf);
+	}
+	FollowTargetField();
 }
 
 void AVestigeHUD::StopFollowingPawn()
@@ -279,6 +293,118 @@ void AVestigeHUD::StopFollowingPawn()
 	{
 		OldInteraction->OnFocusChanged.RemoveAll(this);
 	}
+	if (UFarmTargetingComponent* OldTargeting = Targeting.Get())
+	{
+		OldTargeting->OnTargetTileChanged.RemoveAll(this);
+	}
+	Targeting.Reset();
+	StopFollowingTargetField();
+}
+
+void AVestigeHUD::FollowTargetField()
+{
+	// The target's grid can change its field (a field found later, a new game), so this runs on every target change.
+	UFarmTargetingComponent* CurrentTargeting = Targeting.Get();
+	AFarmGrid* Grid = CurrentTargeting ? CurrentTargeting->GetGrid() : nullptr;
+	if (Grid && !Grid->IsFieldReady())
+	{
+		WaitForField(*Grid);
+	}
+	UFarmField* NewField = Grid && Grid->IsFieldReady() ? Grid->GetField() : nullptr;
+	if (NewField != TileField.Get())
+	{
+		StopFollowingTileField();
+		TileField = NewField;
+		if (NewField)
+		{
+			NewField->OnTileChanged.AddUObject(this, &AVestigeHUD::RefreshTileTextIfTarget);
+			NewField->OnTilesChanged.AddUObject(this, &AVestigeHUD::RefreshTileText);
+		}
+	}
+	RefreshTileText();
+}
+
+void AVestigeHUD::WaitForField(AFarmGrid& Grid)
+{
+	if (FieldReadyGrid.Get() == &Grid)
+	{
+		return;
+	}
+	if (AFarmGrid* OldGrid = FieldReadyGrid.Get())
+	{
+		OldGrid->OnFieldReady.RemoveAll(this);
+	}
+	FieldReadyGrid = &Grid;
+	Grid.OnFieldReady.AddUObject(this, &AVestigeHUD::FollowReadyField);
+}
+
+void AVestigeHUD::FollowReadyField()
+{
+	// The grid's event fires only once, so the HUD stops waiting for it.
+	if (AFarmGrid* Grid = FieldReadyGrid.Get())
+	{
+		Grid->OnFieldReady.RemoveAll(this);
+	}
+	FieldReadyGrid.Reset();
+	FollowTargetField();
+}
+
+void AVestigeHUD::StopFollowingTileField()
+{
+	if (UFarmField* OldField = TileField.Get())
+	{
+		OldField->OnTileChanged.RemoveAll(this);
+		OldField->OnTilesChanged.RemoveAll(this);
+	}
+	TileField.Reset();
+}
+
+void AVestigeHUD::StopFollowingTargetField()
+{
+	StopFollowingTileField();
+	if (AFarmGrid* Grid = FieldReadyGrid.Get())
+	{
+		Grid->OnFieldReady.RemoveAll(this);
+	}
+	FieldReadyGrid.Reset();
+}
+
+void AVestigeHUD::FollowTargetFieldOf(const TOptional<FIntPoint>& Tile)
+{
+	FollowTargetField();
+}
+
+void AVestigeHUD::RefreshTileTextIfTarget(const FIntPoint& Coordinates)
+{
+	const UFarmTargetingComponent* CurrentTargeting = Targeting.Get();
+	const TOptional<FIntPoint> Target = CurrentTargeting ? CurrentTargeting->GetTargetTile() : TOptional<FIntPoint>();
+	if (Target.IsSet() && Target.GetValue() == Coordinates)
+	{
+		RefreshTileText();
+	}
+}
+
+void AVestigeHUD::RefreshTileText()
+{
+	if (!HudWidget)
+	{
+		return;
+	}
+
+	const UFarmTargetingComponent* CurrentTargeting = Targeting.Get();
+	const UFarmField* CurrentField = TileField.Get();
+	const TOptional<FIntPoint>& Target = CurrentTargeting ? CurrentTargeting->GetTargetTile() : TOptional<FIntPoint>();
+	const FFarmTileState* Tile = CurrentField && Target.IsSet() ? CurrentField->GetTile(Target.GetValue()) : nullptr;
+	HudWidget->SetTileText(Tile ? GetTileText(Tile->GetContamination()) : FText::GetEmpty());
+}
+
+FText AVestigeHUD::GetTileText(int32 Level) const
+{
+	if (Level <= 0 || ContaminationLevelNames.IsEmpty())
+	{
+		return FText::GetEmpty();
+	}
+	return ContaminationLevelNames[FMath::Min(Level, ContaminationLevelNames.Num() - 1)];
 }
 
 void AVestigeHUD::RefreshPromptText()

@@ -16,7 +16,8 @@ class UFarmCropData;
  *
  * Seeds go in only in their crop's seasons (UFarmCropData::GetSeasonFit, with today's date from the clock). A planting too late
  * for the crop to ripen before the season ends is refused once a day per crop with a warning, which the farming component
- * remembers; a later press that day plants it (Systems.md, section 22).
+ * remembers; a later press that day plants it (Systems.md, section 22). Seeds are refused on a tile whose contamination their
+ * crop can't be planted or grow on, and the too-late check counts the tile's slower growth (Systems.md, section 27).
  */
 UCLASS()
 class UFarmGameplayAbility_Plant : public UVestigeGameplayAbility_UseTool
@@ -28,8 +29,9 @@ protected:
 		const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled) override;
 
 	/**
-	 * Reports, the first that applies: no seed in hand, out of season, no tile, a tile that can't take seeds, then too late
-	 * unless the player was warned on an earlier press today.
+	 * Reports, the first that applies: no seed in hand, out of season, no tile, a withered crop, a tile that can't take seeds,
+	 * a tile below the crop's MinPlantingContamination, a tile whose contamination the crop doesn't grow on, then too late at
+	 * the tile's growth rate unless the player was warned on an earlier press today.
 	 */
 	virtual bool CanUseOn(const FIntPoint& Tile, FVestigeFeedbackReport* OutFailure) const override;
 

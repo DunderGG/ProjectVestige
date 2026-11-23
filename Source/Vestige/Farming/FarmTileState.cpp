@@ -33,6 +33,8 @@ bool FFarmTileState::Plant(const UFarmCropData* InCrop)
 	State = EFarmTileState::Planted;
 	Crop = InCrop;
 	GrowthDays = 0;
+	WateredNights = 0;
+	bMutated = false;
 	return true;
 }
 
@@ -52,9 +54,12 @@ bool FFarmTileState::Harvest()
 	{
 		return false;
 	}
+	Contamination = FMath::Max(Contamination - Crop->GetContaminationCleanedPerHarvest(), 0);
 	State = EFarmTileState::Tilled;
 	Crop = nullptr;
 	GrowthDays = 0;
+	WateredNights = 0;
+	bMutated = false;
 	return true;
 }
 
@@ -65,6 +70,7 @@ bool FFarmTileState::Wither()
 		return false;
 	}
 	State = EFarmTileState::Withered;
+	WateredNights = 0;
 	return true;
 }
 
@@ -77,6 +83,8 @@ bool FFarmTileState::ClearWithered()
 	State = EFarmTileState::Tilled;
 	Crop = nullptr;
 	GrowthDays = 0;
+	WateredNights = 0;
+	bMutated = false;
 	return true;
 }
 
@@ -85,23 +93,69 @@ bool FFarmTileState::IsRipe() const
 	return State == EFarmTileState::Planted && Crop && Crop->IsRipeAt(GrowthDays);
 }
 
-void FFarmTileState::AdvanceDay(int32 NightlyFall)
+bool FFarmTileState::AdvanceDay(int32 NightlyFall)
 {
+	bool bRipenedTonight = false;
 	if (State == EFarmTileState::Planted && IsWatered() && !IsRipe())
 	{
-		++GrowthDays;
+		// A dry night counts nothing, so a slowed crop grows on every Nth watered night, not every Nth night.
+		const int32 NightsPerGrowthDay = Crop->GetWateredNightsPerGrowthDay(Contamination);
+		if (NightsPerGrowthDay > 0 && ++WateredNights >= NightsPerGrowthDay)
+		{
+			++GrowthDays;
+			WateredNights = 0;
+			bRipenedTonight = IsRipe();
+		}
 	}
 	WaterLevel = FMath::Max(WaterLevel - NightlyFall, 0);
+	return bRipenedTonight;
+}
+
+bool FFarmTileState::SetContamination(int32 Level, int32 MaxLevel)
+{
+	const int32 NewLevel = FMath::Clamp(Level, 0, FMath::Max(MaxLevel, 0));
+	if (NewLevel == Contamination)
+	{
+		return false;
+	}
+	Contamination = NewLevel;
+	return true;
+}
+
+bool FFarmTileState::Mutate()
+{
+	if (!IsRipe() || bMutated || !Crop->CanMutate())
+	{
+		return false;
+	}
+	bMutated = true;
+	return true;
+}
+
+FPrimaryAssetId FFarmTileState::GetHarvestItemId() const
+{
+	if (!Crop)
+	{
+		return FPrimaryAssetId();
+	}
+	return bMutated ? Crop->GetMutatedHarvestItemId() : Crop->GetHarvestItemId();
 }
 
 void FFarmTileState::Restore(
-	EFarmTileState SavedState, int32 SavedWaterLevel, int32 SavedGrowthDays, const UFarmCropData* SavedCrop, int32 MaxLevel)
+	const FFarmTileSaveData& Saved, const UFarmCropData* SavedCrop, int32 MaxWaterLevel, int32 MaxContaminationLevel)
 {
 	// A planted or withered tile can't exist without its crop, so a missing crop leaves empty tilled soil.
-	const bool bHasCropState = SavedState == EFarmTileState::Planted || SavedState == EFarmTileState::Withered;
+	const bool bHasCropState = Saved.State == EFarmTileState::Planted || Saved.State == EFarmTileState::Withered;
 	const bool bKeepsCrop = bHasCropState && SavedCrop;
-	State = bHasCropState && !bKeepsCrop ? EFarmTileState::Tilled : SavedState;
+	State = bHasCropState && !bKeepsCrop ? EFarmTileState::Tilled : Saved.State;
 	Crop = bKeepsCrop ? SavedCrop : nullptr;
-	WaterLevel = State == EFarmTileState::Grass ? 0 : FMath::Clamp(SavedWaterLevel, 0, FMath::Max(MaxLevel, 0));
-	GrowthDays = Crop ? FMath::Clamp(SavedGrowthDays, 0, Crop->GetDaysToMature()) : 0;
+	WaterLevel = State == EFarmTileState::Grass ? 0 : FMath::Clamp(Saved.WaterLevel, 0, FMath::Max(MaxWaterLevel, 0));
+	GrowthDays = Crop ? FMath::Clamp(Saved.GrowthDays, 0, Crop->GetDaysToMature()) : 0;
+
+	// The level first: the watered nights a growing crop may have counted depend on it.
+	Contamination = FMath::Clamp(Saved.Contamination, 0, FMath::Max(MaxContaminationLevel, 0));
+	const bool bGrowing = State == EFarmTileState::Planted && !IsRipe();
+	const int32 MaxWateredNights = bGrowing ? FMath::Max(Crop->GetWateredNightsPerGrowthDay(Contamination) - 1, 0) : 0;
+	WateredNights = FMath::Clamp(Saved.WateredNights, 0, MaxWateredNights);
+	bMutated = Saved.bMutated && IsRipe() && Crop->CanMutate();
 }

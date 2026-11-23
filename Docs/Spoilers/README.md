@@ -14,6 +14,7 @@ The documents in this folder reveal the story, its secrets and the characters' b
 - [Characters/Alice.md](Characters/Alice.md): Alice's pre-war character concept and potential human romance arc in the planned release roster.
 - [Characters/Reed.md](Characters/Reed.md): a provisional human romance character who blends into robot society through social presentation.
 - [Characters/AuthorityIntermediary.md](Characters/AuthorityIntermediary.md): Morrow, a human-origin covert recruiter with a fully mechanical interior and a convincing human exterior.
+- [Items/Contamination.md](Items/Contamination.md): names and descriptions for the cleaning crop and the mutated crops, and the lore of the farm's contaminated rows.
 - [Dialogue/README.md](Dialogue/README.md): voice-ready draft scenes organized by story phase.
 - [Factions/IronCreed.md](Factions/IronCreed.md): the Iron Creed's beliefs, symbol and story direction.
 - [Factions/Index.md](Factions/Index.md): the Index's beliefs, symbol and story direction.

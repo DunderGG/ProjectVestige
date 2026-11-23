@@ -5,6 +5,7 @@
 
 #include "AbilitySystem/VestigeGameplayTags.h"
 #include "Content/FarmCropData.h"
+#include "Core/VestigeFeedbackSubsystem.h"
 #include "Farming/FarmField.h"
 #include "Farming/FarmingComponent.h"
 #include "Farming/FarmTileState.h"
@@ -26,7 +27,8 @@ bool UFarmGameplayAbility_Harvest::CanUseOn(const FIntPoint& Tile, FVestigeFeedb
 	{
 		return FailBecause(OutFailure, VestigeGameplayTags::Feedback_Farm_NothingRipe);
 	}
-	return HasRoomForHarvest(*State->GetCrop()) || FailBecause(OutFailure, VestigeGameplayTags::Feedback_Inventory_Full);
+	return HasRoomForHarvest(State->GetHarvestItemId(), *State->GetCrop())
+		|| FailBecause(OutFailure, VestigeGameplayTags::Feedback_Inventory_Full);
 }
 
 bool UFarmGameplayAbility_Harvest::UseOn(const FIntPoint& Tile)
@@ -41,12 +43,22 @@ bool UFarmGameplayAbility_Harvest::UseOn(const FIntPoint& Tile)
 		return Field->ClearWithered(Tile);
 	}
 
-	// Room is asked before harvesting, so a full bag leaves the crop in the ground instead of destroying it.
-	if (!Crop || !State->IsRipe() || !HasRoomForHarvest(*Crop) || !Field->Harvest(Tile))
+	if (!Crop || !State->IsRipe())
 	{
 		return false;
 	}
-	GetInventory()->AddItem(Crop->GetHarvestItemId(), Crop->GetYield());
+
+	// Copied before the harvest, which clears the mutation and lowers the level of this same tile.
+	const FPrimaryAssetId HarvestItemId = State->GetHarvestItemId();
+	const int32 LevelBefore = State->GetContamination();
+
+	// Room is asked before harvesting, so a full bag leaves the crop in the ground instead of destroying it.
+	if (!HasRoomForHarvest(HarvestItemId, *Crop) || !Field->Harvest(Tile))
+	{
+		return false;
+	}
+	GetInventory()->AddItem(HarvestItemId, Crop->GetYield());
+	ReportCleaning(LevelBefore, State->GetContamination());
 	if (UFarmingComponent* FarmingComponent = GetFarming())
 	{
 		FarmingComponent->ReportCropHarvested(*Crop, Tile);
@@ -54,8 +66,19 @@ bool UFarmGameplayAbility_Harvest::UseOn(const FIntPoint& Tile)
 	return true;
 }
 
-bool UFarmGameplayAbility_Harvest::HasRoomForHarvest(const UFarmCropData& Crop) const
+bool UFarmGameplayAbility_Harvest::HasRoomForHarvest(const FPrimaryAssetId& HarvestItemId, const UFarmCropData& Crop) const
 {
 	const UVestigeInventoryComponent* Inventory = GetInventory();
-	return Inventory && Inventory->CanAddItem(Crop.GetHarvestItemId(), Crop.GetYield());
+	return Inventory && Inventory->CanAddItem(HarvestItemId, Crop.GetYield());
+}
+
+void UFarmGameplayAbility_Harvest::ReportCleaning(int32 LevelBefore, int32 LevelAfter) const
+{
+	if (LevelAfter >= LevelBefore)
+	{
+		return;
+	}
+	const FGameplayTag Reason =
+		LevelAfter == 0 ? VestigeGameplayTags::Feedback_Farm_Cleaned_Clean : VestigeGameplayTags::Feedback_Farm_Cleaned;
+	UVestigeFeedbackSubsystem::Report(GetWorld(), Reason);
 }

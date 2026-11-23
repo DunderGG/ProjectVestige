@@ -83,7 +83,7 @@ void AFarmGrid::BeginPlay()
 
 	if (UFarmFieldSubsystem* FarmFields = UFarmFieldSubsystem::Get(GetWorld()))
 	{
-		Field = &FarmFields->FindOrAddField(FieldId, FIntPoint(Width, Height));
+		Field = &FarmFields->FindOrAddField(FieldId, FIntPoint(Width, Height), StartingContamination);
 		Meshes->ShowField(*Field, TileSize);
 	}
 	else

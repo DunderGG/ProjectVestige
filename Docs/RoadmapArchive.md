@@ -164,6 +164,9 @@ When working nearby:
 - [x] Standard ability tasks (wait delay, montages) instead of timers in abilities ([L3](CodeReview.md#low))
    - Done 2026-11-07 with H1: the tool abilities wait with `WaitDelay` and `WaitMovementModeChange`; no other ability used a timer. Montages come with tool animations
 
+- [x] Remove the data field nothing reads (`ContaminationTolerance` on crops) until its feature is designed ([L2](CodeReview.md#low))
+   - Done 2026-11-22 with contamination: each crop states how it grows on each contamination level instead ([Systems/27-Contamination.md](Systems/27-Contamination.md))
+
 ### 4.1 Foundations
 
 **Engine** (added 2026-10-30: @DunderGG is installing Unreal Engine 5.8.4)
@@ -281,6 +284,12 @@ When working nearby:
    - Done 2026-11-19 with refusing out-of-season seeds, after design and code review by a senior Unreal C++ reviewer agent, whose approval counts as @DunderGG's ([Systems/22-FarmFields.md](Systems/22-FarmFields.md), "Seeds go in only in their seasons"; decision log): `UFarmCropData::GetSeasonFit` decides fits, out of season or too late from the calendar; seeds out of season are refused; the first too-late press of a crop each day plants nothing and warns, and the next press plants (`UFarmingComponent` keeps the day's warnings, not saved); the hand label reads "Cabbage Seeds (10 days to ripen)". `CanUseOn` now gives a feedback report with values. The three crops list `Vestige.Season.Spring`. Refusing and the press-again warning are still open for @DunderGG ([GameDesign.md, section 15](GameDesign.md#15-open-questions)). Tests `Vestige.FarmCrop.*` season fit and validation, `Vestige.Farming.OutOfSeasonSeedsAreRefused`, `TheFirstLatePressWarnsAndPlantsNothing` and the other planting tests, `Vestige.UI.SeedsInHandShowTheirDaysToRipen`. Play-test in [PlayTest.md](PlayTest.md), "Out-of-season seeds and the late-planting warning"
 - [x] Out-of-season crops wither at 06:00 on the first day of the next season
    - Done 2026-11-20 after design and code review by a senior Unreal C++ reviewer agent, whose approval counts as @DunderGG's, and an art review ([Systems/22-FarmFields.md](Systems/22-FarmFields.md), "Out-of-season crops wither when a season starts"; decision log): on `OnSeasonStarted`, `UFarmFieldSubsystem` withers every unripe crop whose data doesn't list the new season (`UFarmCropData::GrowsIn`), before that night's growth and never on a load or `SetDay` jump. The tile's new `EFarmTileState::Withered` keeps the crop and water; F offers "Clear" (the hand ability, 1 stamina) back to tilled soil, and the hoe and seeds say "Clear the withered crop first." The dead plant keeps its stage mesh with `MI_Crop_Withered`, slumped to 0.75 height. One line follows the season message, its order set by the day's steps ([Systems/04-Time.md](Systems/04-Time.md)). Ripe crops are kept, a dead plant stays until cleared, and there is no reminder yet: @DunderGG chose these on 2026-11-20, and the dead plant's colour moved to straw-brown ([GameDesign.md, section 6](GameDesign.md#6-farming)). Tests `Vestige.TileState.*`, `Vestige.FarmField.*`, `Vestige.GameMode.*`, `Vestige.Farming.*`, `Vestige.FarmTileLooks.*` and `Vestige.FarmFieldMeshes.*` withering tests. Play-test in [PlayTest.md](PlayTest.md), "Out-of-season crops wither"
+
+- [x] One mutated crop that grows in irradiated soil
+- [x] Normal crops can mutate in irradiated soil
+- [x] Radiation level on each tile: slows or stops growth, and can be cleaned
+- [x] A way to clean radiation, such as a tool, fertilizer or a crop that absorbs it
+   - Done 2026-11-22 together, after design and code review by a senior Unreal C++ reviewer agent, whose approval counts as @DunderGG's, and an art review ([Systems/27-Contamination.md](Systems/27-Contamination.md)): three contamination levels on each tile (light halves growth, heavy stops it and refuses normal seeds), starting bands on `L_Farm`, Sinkwort, which grows only in contaminated soil and cleans its tile one level per harvest, and a 1 in 4 mutation of normal crops ripening on light soil, tinted with `MI_Crop_Mutated`. Built on the recommended answers of the open questions in [GameDesign.md, section 15](GameDesign.md#15-open-questions); every number is data
 
 ### 4.3 Stamina and late nights
 

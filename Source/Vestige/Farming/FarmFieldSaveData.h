@@ -40,4 +40,8 @@ struct FFarmFieldsSaveData
 
 	UPROPERTY()
 	TArray<FFarmFieldSaveData> Fields;
+
+	/** The game's mutation seed (UFarmFieldSubsystem). Absent in saves from before mutation, which load with 0, a valid seed. */
+	UPROPERTY()
+	int32 MutationSeed = 0;
 };

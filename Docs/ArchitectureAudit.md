@@ -218,7 +218,7 @@ The component's row in the ownership table already lists the toolbar, seeds and 
 - The dependency diagram in [section 14](Architecture.md#14-dependencies) has no arrows for the edges the gap list names (farming component and save subsystem to the HUD), for the character starting a new game through the save subsystem, or for the HUD finding the farming component on the pawn.
 - The tile gap says to separate rules from visuals "before writing tile tests"; tile tests now exist without that split.
 - The decision log's 2026-10-25 entry still reads "setup is pending" for CQTest. A newer entry records the setup, which is how the log should work, but nothing points from the old entry to the new one.
-- The roadmap's crop item lists "days per stage" and "radiation tolerance"; the code and the decision log have no per-stage days and call the field `ContaminationTolerance`.
+- The roadmap's crop item lists "days per stage" and "radiation tolerance"; the code and the decision log have no per-stage days and call the field `ContaminationTolerance`. *(Status 2026-11-22: the field is replaced by each crop's response per contamination level, [Systems/27-Contamination.md](Systems/27-Contamination.md); closed with that commit.)*
 - The roadmap's "Tile rule tests" item is unticked although five tile tests exist (see C-17). ("Tool data assets" was also unticked at review time; the assets and the tick landed in 3f16cfa the same day.)
 
 **Why it matters:** Part B is meant to be the map a returning developer trusts. A diagram that hides the known wrong-way edges makes them easy to forget.

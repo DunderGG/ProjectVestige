@@ -266,7 +266,7 @@ namespace FarmingTests
 			for (int32 Day = 0; Day < Crop->GetDaysToMature(); ++Day)
 			{
 				Field->Water(Coordinates);
-				Field->AdvanceDay();
+				Field->AdvanceDay(1, 0);
 			}
 			return Crop;
 		}
@@ -288,7 +288,7 @@ namespace FarmingTests
 				for (int32 Day = 0; Day < Crop->GetDaysToMature(); ++Day)
 				{
 					Grid->GetField()->Water(TargetCoordinates);
-					Grid->GetField()->AdvanceDay();
+					Grid->GetField()->AdvanceDay(1, 0);
 				}
 			}
 			return Crop;
@@ -406,7 +406,7 @@ namespace FarmingTests
 			{
 				ASSERT_THAT(IsFalse(TargetTile()->IsRipe()));
 				Grid->GetField()->Water(TargetCoordinates);
-				Grid->GetField()->AdvanceDay();
+				Grid->GetField()->AdvanceDay(1, 0);
 			}
 			ASSERT_THAT(IsTrue(TargetTile()->IsRipe()));
 			Hold(TEXT("Base.Hand"), 0);
@@ -538,7 +538,7 @@ namespace FarmingTests
 			for (int32 Day = 0; Day < Crop->GetDaysToMature(); ++Day)
 			{
 				Grid->GetField()->Water(TargetCoordinates);
-				Grid->GetField()->AdvanceDay();
+				Grid->GetField()->AdvanceDay(1, 0);
 			}
 			ASSERT_THAT(IsTrue(TargetTile()->IsRipe()));
 			Hold(TEXT("Base.Hand"), 0);
@@ -1681,6 +1681,233 @@ namespace FarmingTests
 			GetInteraction().Scan();
 
 			ASSERT_THAT(IsTrue(GetInteraction().GetFocusedActor() == Grid));
+		}
+
+		// Contamination (Systems/27-Contamination.md). The test grid's field starts clean; tiles get a level by SetContamination.
+		static inline const FName CleanupSeedsName = TEXT("Base.CleanupCropSeeds");
+
+		/** Sets the contamination of the tile at Coordinates, checking that the level changed. */
+		void Contaminate(const FIntPoint& Coordinates, int32 Level)
+		{
+			ASSERT_THAT(IsTrue(Grid->GetField()->SetContamination(Coordinates, Level)));
+		}
+
+		/** Puts a ripe CropId on the target tile at contamination Level, mutated or not, the way loading a save does. */
+		const UFarmCropData* RestoreRipeTarget(FName CropId, int32 Level, bool bMutated)
+		{
+			const UFarmCropData* Crop = Catalog().Find<UFarmCropData>(FPrimaryAssetId(UFarmCropData::AssetType, CropId));
+			if (!Crop)
+			{
+				return nullptr;
+			}
+			FFarmTileSaveData Saved;
+			Saved.Coordinates = TargetCoordinates;
+			Saved.State = EFarmTileState::Planted;
+			Saved.GrowthDays = Crop->GetDaysToMature();
+			Saved.CropId = CropId;
+			Saved.Contamination = Level;
+			Saved.bMutated = bMutated;
+			Grid->GetField()->RestoreTilesFromSaveData({Saved}, {{CropId, Crop}});
+			return Crop;
+		}
+
+		TEST_METHOD(CleaningSeedsAreRefusedOnCleanSoilAndPlantOnLightSoil)
+		{
+			ListenToFeedback();
+			Grid->GetField()->Till(TargetCoordinates);
+			HoldSeeds(CleanupSeedsName, 3);
+			const TStrongObjectPtr<UVestigeTestEventRecorder> Recorder = ListenToBlueprintEvents();
+
+			UseToolAndFinish();
+
+			ASSERT_THAT(IsTrue(Reports == TArray<FGameplayTag>{VestigeGameplayTags::Feedback_Farm_NeedsContamination}));
+			ASSERT_THAT(IsTrue(TargetTile()->GetState() == EFarmTileState::Tilled));
+			ASSERT_THAT(IsTrue(GetSeedsOf(CleanupSeedsName) == 3));
+			ASSERT_THAT(IsTrue(GetStamina() == GetMaxStamina()));
+			ASSERT_THAT(IsTrue(Recorder->GetEvents().IsEmpty()));
+
+			Contaminate(TargetCoordinates, 1);
+			UseToolAndFinish();
+
+			ASSERT_THAT(IsTrue(Reports.Num() == 1));
+			ASSERT_THAT(IsTrue(TargetTile()->GetState() == EFarmTileState::Planted));
+			ASSERT_THAT(IsTrue(TargetTile()->GetCrop() == GetCropOf(CleanupSeedsName)));
+			ASSERT_THAT(IsTrue(GetSeedsOf(CleanupSeedsName) == 2));
+		}
+
+		TEST_METHOD(NormalSeedsOnHeavySoilAreRefusedOnEveryPress)
+		{
+			ListenToFeedback();
+			Grid->GetField()->Till(TargetCoordinates);
+			Contaminate(TargetCoordinates, 2);
+			HoldSeeds(TurnipSeedsId.PrimaryAssetName, 3);
+			const TStrongObjectPtr<UVestigeTestEventRecorder> Recorder = ListenToBlueprintEvents();
+
+			UseToolAndFinish();
+			UseToolAndFinish();
+
+			ASSERT_THAT(IsTrue(Reports
+				== TArray<FGameplayTag>{
+					VestigeGameplayTags::Feedback_Farm_TooContaminated, VestigeGameplayTags::Feedback_Farm_TooContaminated}));
+			ASSERT_THAT(IsTrue(TargetTile()->GetState() == EFarmTileState::Tilled));
+			ASSERT_THAT(IsTrue(GetSeeds() == 3));
+			ASSERT_THAT(IsTrue(GetStamina() == GetMaxStamina()));
+			ASSERT_THAT(IsTrue(Recorder->GetEvents().IsEmpty()));
+		}
+
+		TEST_METHOD(TooContaminatedComesBeforeTooLate)
+		{
+			ListenToFeedback();
+			SetUpLatePlanting(CabbageSeedsName);
+			Contaminate(TargetCoordinates, 2);
+
+			UseToolAndFinish();
+			UseToolAndFinish();
+
+			ASSERT_THAT(IsTrue(Reports
+				== TArray<FGameplayTag>{
+					VestigeGameplayTags::Feedback_Farm_TooContaminated, VestigeGameplayTags::Feedback_Farm_TooContaminated}));
+			ASSERT_THAT(IsTrue(TargetTile()->GetState() == EFarmTileState::Tilled));
+			ASSERT_THAT(IsTrue(GetSeedsOf(CabbageSeedsName) == 3));
+		}
+
+		TEST_METHOD(OnLightSoilTooLateCountsTwiceTheDays)
+		{
+			const UFarmCropData* Turnip = GetCropOf(TurnipSeedsId.PrimaryAssetName);
+			ASSERT_THAT(IsNotNull(Turnip));
+			ASSERT_THAT(IsTrue(Turnip->GetWateredNightsPerGrowthDay(1) == 2));
+			// Exactly the turnip's days are left: clean soil ripens on the season's last day, light soil can't.
+			ASSERT_THAT(IsTrue(JumpToDaysLeft(Turnip->GetDaysToMature())));
+			Grid->GetField()->Till(TargetCoordinates);
+			Grid->GetField()->Till(FIntPoint(4, 0));
+			Contaminate(TargetCoordinates, 1);
+			HoldSeeds(TurnipSeedsId.PrimaryAssetName, 3);
+			ListenToFeedback();
+
+			StepToNextTile();
+			UseToolAndFinish();
+			ASSERT_THAT(IsTrue(Reports.IsEmpty()));
+			ASSERT_THAT(IsTrue(NextTile()->GetState() == EFarmTileState::Planted));
+
+			Farmer->SetActorLocation(FVector(250.f, 50.f, 0.f));
+			UseToolAndFinish();
+			ASSERT_THAT(IsTrue(Reports == TArray<FGameplayTag>{VestigeGameplayTags::Feedback_Farm_TooLate}));
+			ASSERT_THAT(IsTrue(NumberOf(LastArguments, TEXT("DaysToRipe")) == 2 * Turnip->GetDaysToMature()));
+			ASSERT_THAT(IsTrue(NumberOf(LastArguments, TEXT("DaysToDeadline")) == Turnip->GetDaysToMature()));
+			ASSERT_THAT(IsTrue(TargetTile()->GetState() == EFarmTileState::Tilled));
+			ASSERT_THAT(IsTrue(GetSeeds() == 2));
+		}
+
+		TEST_METHOD(TheTileReasonsComeBeforeTheContaminationReasons)
+		{
+			ListenToFeedback();
+			Contaminate(TargetCoordinates, 2);
+
+			// Grass: the cleaning seeds would need contamination and the turnip a cleaner tile, but the tile isn't tilled.
+			HoldSeeds(CleanupSeedsName, 3);
+			UseToolAndFinish();
+			Contaminate(FIntPoint(4, 0), 2);
+			StepToNextTile();
+			HoldSeeds(TurnipSeedsId.PrimaryAssetName, 3);
+			UseToolAndFinish();
+			ASSERT_THAT(IsTrue(Reports
+				== TArray<FGameplayTag>{VestigeGameplayTags::Feedback_Farm_CantPlant, VestigeGameplayTags::Feedback_Farm_CantPlant}));
+
+			// A withered crop on heavy soil is cleared first.
+			Farmer->SetActorLocation(FVector(250.f, 50.f, 0.f));
+			Reports.Reset();
+			WitherTargetCrop();
+			ASSERT_THAT(IsTrue(TargetTile()->GetContamination() == 2));
+			UseToolAndFinish();
+			ASSERT_THAT(IsTrue(Reports == TArray<FGameplayTag>{VestigeGameplayTags::Feedback_Farm_ClearFirst}));
+		}
+
+		TEST_METHOD(AMutatedCropGivesItsMutatedItem)
+		{
+			const UFarmCropData* Crop = RestoreRipeTarget(TEXT("Base.Turnip"), 1, true);
+			ASSERT_THAT(IsNotNull(Crop));
+			ASSERT_THAT(IsTrue(TargetTile()->IsMutated()));
+			Hold(TEXT("Base.Hand"), 0);
+
+			HarvestAndFinish();
+
+			ASSERT_THAT(IsTrue(TargetTile()->GetState() == EFarmTileState::Tilled));
+			ASSERT_THAT(IsTrue(Inventory->GetItemCount(Crop->GetMutatedHarvestItemId()) == Crop->GetYield()));
+			ASSERT_THAT(IsTrue(Inventory->GetItemCount(Crop->GetHarvestItemId()) == 0));
+		}
+
+		TEST_METHOD(TheRoomCheckAsksForTheMutatedItem)
+		{
+			const UFarmCropData* Crop = RestoreRipeTarget(TEXT("Base.Turnip"), 1, true);
+			ASSERT_THAT(IsNotNull(Crop));
+			Hold(TEXT("Base.Hand"), 0);
+			const UVestigeItemData* Seed = GetBaseItem(TurnipSeedsId.PrimaryAssetName);
+			const UVestigeItemData* Turnip = GetBaseItem(TEXT("Base.Turnip"));
+			const UVestigeItemData* Mutated = GetBaseItem(Crop->GetMutatedHarvestItemId().PrimaryAssetName);
+			ASSERT_THAT(IsTrue(Seed && Turnip && Mutated));
+
+			// Room for a normal harvest only: the mutated one stays in the ground.
+			const auto FillBagLeavingRoomFor = [&](const UVestigeItemData& Item)
+			{
+				TArray<FVestigeInventorySlotSaveData> Bag;
+				Bag.Add({0, Item.GetContentId(), Item.GetMaxStackSize() - Crop->GetYield()});
+				for (int32 Slot = 1; Slot < Inventory->GetSlots().Num(); ++Slot)
+				{
+					Bag.Add({Slot, Seed->GetContentId(), Seed->GetMaxStackSize()});
+				}
+				SetBag(MoveTemp(Bag));
+			};
+			FillBagLeavingRoomFor(*Turnip);
+			ListenToFeedback();
+
+			HarvestAndFinish();
+			ASSERT_THAT(IsTrue(Reports == TArray<FGameplayTag>{VestigeGameplayTags::Feedback_Inventory_Full}));
+			ASSERT_THAT(IsTrue(TargetTile()->IsMutated()));
+
+			// Room for the mutated harvest: it goes in.
+			FillBagLeavingRoomFor(*Mutated);
+			HarvestAndFinish();
+			ASSERT_THAT(IsTrue(TargetTile()->GetState() == EFarmTileState::Tilled));
+			ASSERT_THAT(IsTrue(Inventory->GetItemCount(Mutated->GetPrimaryAssetId()) == Mutated->GetMaxStackSize()));
+		}
+
+		TEST_METHOD(ACleaningHarvestSaysTheSoilIsCleaner)
+		{
+			ASSERT_THAT(IsNotNull(RestoreRipeTarget(TEXT("Base.CleanupCrop"), 2, false)));
+			Hold(TEXT("Base.Hand"), 0);
+			ListenToFeedback();
+
+			HarvestAndFinish();
+
+			ASSERT_THAT(IsTrue(Reports == TArray<FGameplayTag>{VestigeGameplayTags::Feedback_Farm_Cleaned}));
+			ASSERT_THAT(IsTrue(TargetTile()->GetContamination() == 1));
+		}
+
+		TEST_METHOD(ACleaningHarvestThatLeavesTheSoilCleanSaysSo)
+		{
+			const UFarmCropData* Crop = RestoreRipeTarget(TEXT("Base.CleanupCrop"), 1, false);
+			ASSERT_THAT(IsNotNull(Crop));
+			Hold(TEXT("Base.Hand"), 0);
+			ListenToFeedback();
+
+			HarvestAndFinish();
+
+			ASSERT_THAT(IsTrue(Reports == TArray<FGameplayTag>{VestigeGameplayTags::Feedback_Farm_Cleaned_Clean}));
+			ASSERT_THAT(IsTrue(TargetTile()->GetContamination() == 0));
+			ASSERT_THAT(IsTrue(Inventory->GetItemCount(Crop->GetHarvestItemId()) == Crop->GetYield()));
+		}
+
+		TEST_METHOD(ANormalHarvestOnContaminatedSoilSaysNothingAndLeavesTheLevel)
+		{
+			ASSERT_THAT(IsNotNull(RestoreRipeTarget(TEXT("Base.Turnip"), 1, false)));
+			Hold(TEXT("Base.Hand"), 0);
+			ListenToFeedback();
+
+			HarvestAndFinish();
+
+			ASSERT_THAT(IsTrue(Reports.IsEmpty()));
+			ASSERT_THAT(IsTrue(TargetTile()->GetState() == EFarmTileState::Tilled));
+			ASSERT_THAT(IsTrue(TargetTile()->GetContamination() == 1));
 		}
 	};
 }

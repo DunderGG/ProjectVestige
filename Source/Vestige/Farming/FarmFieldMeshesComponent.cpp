@@ -14,10 +14,13 @@
 
 namespace FarmFieldMeshes
 {
-	/** A part's color and water as the per-instance custom data its material reads: the color, then the water at WaterCustomDataIndex. */
+	/**
+	 * A part's color, water and contamination as the per-instance custom data its material reads: the color, then the water at
+	 * WaterCustomDataIndex and the contamination at ContaminationCustomDataIndex.
+	 */
 	TArray<float, TFixedAllocator<FarmTileLooks::NumCustomDataFloats>> ToCustomData(const FFarmTilePartLook& Look)
 	{
-		return {Look.Color.R, Look.Color.G, Look.Color.B, Look.Water};
+		return {Look.Color.R, Look.Color.G, Look.Color.B, Look.Water, Look.Contamination};
 	}
 }
 
@@ -122,6 +125,7 @@ void UFarmFieldMeshesComponent::RedrawField()
 	}
 
 	const int32 MaxWaterLevel = CurrentField->GetWaterRules().MaxLevel;
+	const int32 MaxContaminationLevel = CurrentField->GetContaminationRules().MaxLevel;
 
 	// Queued per set first, so each set takes all its instances in one call.
 	TArray<FPendingSet> Pending;
@@ -130,7 +134,8 @@ void UFarmFieldMeshesComponent::RedrawField()
 		for (int32 X = 0; X < Size.X; ++X)
 		{
 			const FIntPoint Coordinates(X, Y);
-			const FFarmTileLook Look = FarmTileLooks::GetLook(*CurrentField->GetTile(Coordinates), Looks, MaxWaterLevel);
+			const FFarmTileLook Look =
+				FarmTileLooks::GetLook(*CurrentField->GetTile(Coordinates), Looks, MaxWaterLevel, MaxContaminationLevel);
 			const FTransform TileTransform = GetTileTransform(Coordinates);
 			const int32 Index = Y * Size.X + X;
 			QueuePart(Pending, SoilInstances[Index], Look.Soil, TileTransform);
@@ -186,7 +191,8 @@ void UFarmFieldMeshesComponent::RedrawTile(const FIntPoint& Coordinates)
 		return;
 	}
 
-	const FFarmTileLook Look = FarmTileLooks::GetLook(*Tile, Looks, CurrentField->GetWaterRules().MaxLevel);
+	const FFarmTileLook Look =
+		FarmTileLooks::GetLook(*Tile, Looks, CurrentField->GetWaterRules().MaxLevel, CurrentField->GetContaminationRules().MaxLevel);
 	const FTransform TileTransform = GetTileTransform(Coordinates);
 	ShowPart(SoilInstances[Index], &Look.Soil, TileTransform);
 	ShowPart(CropInstances[Index], Look.Crop.GetPtrOrNull(), TileTransform);

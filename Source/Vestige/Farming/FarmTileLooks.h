@@ -38,6 +38,13 @@ struct FFarmTileLookSettings
 	UPROPERTY(EditAnywhere, Category = "Farming")
 	TObjectPtr<UMaterialInterface> WitheredCropMaterial;
 
+	/**
+	 * Put on every slot of a mutated ripe crop's mesh (MI_Crop_Mutated, an instance of M_Crop with Used with Instanced Static
+	 * Meshes saved). Empty keeps the mesh's own materials.
+	 */
+	UPROPERTY(EditAnywhere, Category = "Farming")
+	TObjectPtr<UMaterialInterface> MutatedCropMaterial;
+
 	/** How much of its height a withered crop keeps: a slumped dead plant. Also applies to the placeholder. */
 	UPROPERTY(EditAnywhere, Category = "Farming", meta = (ClampMin = 0.1, ClampMax = 1))
 	float WitheredCropHeightScale = 0.75f;
@@ -75,6 +82,12 @@ struct FFarmTilePartLook
 
 	/** How wet the tile is, from 0 (dry) to 1 (soaked): per-instance custom data 3, read by the soil's material. */
 	float Water = 0.f;
+
+	/**
+	 * How contaminated the tile is, from 0 (clean) to 1 (the highest level): per-instance custom data 4, read by the soil's and
+	 * the placeholder's material. Set on the soil only; 0 on the crop, which shares the placeholder material.
+	 */
+	float Contamination = 0.f;
 };
 
 /** How a whole tile is drawn. */
@@ -89,11 +102,17 @@ struct FFarmTileLook
 /** What a tile looks like, from its state alone. Presentation rules, kept apart from drawing so they are tested without a world. */
 namespace FarmTileLooks
 {
-	/** How many floats of per-instance custom data each tile instance has: the color's red, green and blue, then the water. */
-	constexpr int32 NumCustomDataFloats = 4;
+	/**
+	 * How many floats of per-instance custom data each tile instance has: the color's red, green and blue, then the water, then
+	 * the contamination.
+	 */
+	constexpr int32 NumCustomDataFloats = 5;
 
 	/** The index of the water fraction in the custom data. */
 	constexpr int32 WaterCustomDataIndex = 3;
+
+	/** The index of the contamination fraction in the custom data. */
+	constexpr int32 ContaminationCustomDataIndex = 4;
 
 	// Placeholder colors until there is art for everything.
 	inline const FLinearColor GrassColor(0.15f, 0.45f, 0.10f);
@@ -103,10 +122,16 @@ namespace FarmTileLooks
 	inline const FLinearColor RipeColor(1.00f, 0.60f, 0.05f);
 	inline const FLinearColor WitheredColor(0.25f, 0.18f, 0.08f);
 
+	/** The contamination cue's magenta, for a mutated ripe crop's placeholder. */
+	inline const FLinearColor MutatedColor(0.80f, 0.05f, 0.60f);
+
 	/**
 	 * How Tile is drawn with Settings: the tilled soil mesh once the tile isn't grass, and the mesh and scale its crop's data gives
 	 * for its growth days (UFarmCropData::GetGrowthLook), standing on the soil surface; a withered crop with the withered material
-	 * and a lower scale. The water of the soil and the crop is the tile's level as a fraction of MaxWaterLevel, the field's cap.
+	 * and a lower scale; a mutated ripe crop with its mutated mesh and the mutated material. The water of the soil and the crop is
+	 * the tile's level as a fraction of MaxWaterLevel, the field's cap; the soil's contamination is the tile's level as a fraction
+	 * of MaxContaminationLevel.
 	 */
-	FFarmTileLook GetLook(const FFarmTileState& Tile, const FFarmTileLookSettings& Settings, int32 MaxWaterLevel);
+	FFarmTileLook GetLook(
+		const FFarmTileState& Tile, const FFarmTileLookSettings& Settings, int32 MaxWaterLevel, int32 MaxContaminationLevel);
 }

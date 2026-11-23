@@ -10,8 +10,10 @@
 #include "Engine/World.h"
 #include "Farming/FarmField.h"
 #include "Farming/FarmGrid.h"
+#include "Farming/FarmTargetingComponent.h"
 #include "Farming/FarmTileState.h"
 #include "Farming/VestigeRestComponent.h"
+#include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/PlayerState.h"
 #include "ProfilingDebugging/CpuProfilerTrace.h"
@@ -168,5 +170,32 @@ void UVestigeCheatManager::SetDay(int32 Day)
 	if (!Clock->JumpToDay(Day))
 	{
 		VESTIGE_LOG(this, LogVestige, Warning, "Give the day count from 1, for example SetDay 25, not {Day}.", Day);
+	}
+}
+
+void UVestigeCheatManager::SetTileContamination(int32 X, int32 Y, int32 Level)
+{
+	const APlayerController* Controller = GetPlayerController();
+	const APawn* Pawn = Controller ? Controller->GetPawn() : nullptr;
+	const UFarmTargetingComponent* Targeting = Pawn ? Pawn->FindComponentByClass<UFarmTargetingComponent>() : nullptr;
+	const AFarmGrid* Grid = Targeting ? Targeting->GetGrid() : nullptr;
+	UFarmField* Field = Grid ? Grid->GetField() : nullptr;
+	if (!Field)
+	{
+		VESTIGE_LOG(this, LogVestige, Warning, "The player has no farm grid with a field to set a tile of.");
+		return;
+	}
+
+	const FIntPoint Tile(X, Y);
+	if (!Field->Contains(Tile))
+	{
+		VESTIGE_LOG(this, LogVestige, Warning, "Tile {Tile} is outside field {FieldId}, which is {Size} tiles.", Tile.ToString(),
+			Field->GetFieldId(), Field->GetSize().ToString());
+		return;
+	}
+	if (!Field->SetContamination(Tile, Level))
+	{
+		VESTIGE_LOG(this, LogVestige, Log, "Tile {Tile} already has contamination {Level}.", Tile.ToString(),
+			Field->GetTile(Tile)->GetContamination());
 	}
 }

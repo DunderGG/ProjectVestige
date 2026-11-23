@@ -152,8 +152,11 @@ namespace VestigeContentTests
 			}
 		}
 
-		/** The slice's one shop sells the three seeds at GameDesign.md's prices, in the order a shop screen shows them. */
-		TEST_METHOD(TheFarmShopSellsTheThreeSeedsAtTheirPrices)
+		/**
+		 * The slice's one shop sells the three spring seeds and the cleaning crop's at GameDesign.md's prices, in the order a
+		 * shop screen shows them.
+		 */
+		TEST_METHOD(TheFarmShopSellsTheFourSeedsAtTheirPrices)
 		{
 			Spawner.InitializeGameSubsystems();
 			const UVestigeContentCatalog* Catalog = UVestigeContentCatalog::Get(&Spawner.GetWorld());
@@ -161,11 +164,12 @@ namespace VestigeContentTests
 				Catalog->Find<UVestigeShopData>(FPrimaryAssetId(UVestigeShopData::AssetType, TEXT("Base.FarmShop")));
 			ASSERT_THAT(IsNotNull(Shop));
 
-			const TPair<const TCHAR*, int32> Expected[] = {
-				{TEXT("Base.TurnipSeeds"), 10}, {TEXT("Base.PotatoSeeds"), 20}, {TEXT("Base.CabbageSeeds"), 40}};
+			const TPair<const TCHAR*, int32> Expected[] = {{TEXT("Base.TurnipSeeds"), 10}, {TEXT("Base.PotatoSeeds"), 20},
+				{TEXT("Base.CabbageSeeds"), 40}, {TEXT("Base.CleanupCropSeeds"), 15}};
+			const int32 ExpectedCount = UE_ARRAY_COUNT(Expected);
 			const TArray<FVestigeShopOffer>& Offers = Shop->GetOffers();
-			ASSERT_THAT(AreEqual(Offers.Num(), 3));
-			for (int32 Index = 0; Index < 3; ++Index)
+			ASSERT_THAT(AreEqual(Offers.Num(), ExpectedCount));
+			for (int32 Index = 0; Index < ExpectedCount; ++Index)
 			{
 				const FPrimaryAssetId ItemId(UVestigeItemData::AssetType, Expected[Index].Key);
 				ASSERT_THAT(IsTrue(Offers[Index].ItemId == ItemId, Expected[Index].Key));
@@ -178,14 +182,15 @@ namespace VestigeContentTests
 		}
 
 		/** Each dispenser Blueprint names the farm shop and one seed, and has a mesh (the stand-in cube until the art). */
-		TEST_METHOD(TheDispenserBlueprintsOfferTheThreeSeeds)
+		TEST_METHOD(TheDispenserBlueprintsOfferTheFourSeeds)
 		{
 			const FPrimaryAssetId FarmShop(UVestigeShopData::AssetType, TEXT("Base.FarmShop"));
 			const TPair<const TCHAR*, const TCHAR*> Expected[] = {
 				{TEXT("/Game/Vestige/Blueprints/BP_ShopDispenser_TurnipSeeds.BP_ShopDispenser_TurnipSeeds_C"), TEXT("Base.TurnipSeeds")},
 				{TEXT("/Game/Vestige/Blueprints/BP_ShopDispenser_PotatoSeeds.BP_ShopDispenser_PotatoSeeds_C"), TEXT("Base.PotatoSeeds")},
-				{TEXT("/Game/Vestige/Blueprints/BP_ShopDispenser_CabbageSeeds.BP_ShopDispenser_CabbageSeeds_C"),
-					TEXT("Base.CabbageSeeds")}};
+				{TEXT("/Game/Vestige/Blueprints/BP_ShopDispenser_CabbageSeeds.BP_ShopDispenser_CabbageSeeds_C"), TEXT("Base.CabbageSeeds")},
+				{TEXT("/Game/Vestige/Blueprints/BP_ShopDispenser_CleanupCropSeeds.BP_ShopDispenser_CleanupCropSeeds_C"),
+					TEXT("Base.CleanupCropSeeds")}};
 			for (const TPair<const TCHAR*, const TCHAR*>& Entry : Expected)
 			{
 				const UClass* DispenserClass = LoadClass<AFarmShopDispenser>(nullptr, Entry.Key);

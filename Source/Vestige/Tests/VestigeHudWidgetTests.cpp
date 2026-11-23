@@ -13,8 +13,15 @@
 #include "Core/VestigeFeedbackSubsystem.h"
 #include "Content/FarmCropData.h"
 #include "Content/VestigeCalendar.h"
+#include "Blueprint/WidgetTree.h"
 #include "CQTest.h"
+#include "Farming/FarmField.h"
+#include "Farming/FarmFieldSubsystem.h"
+#include "Farming/FarmGrid.h"
+#include "Farming/FarmTargetingComponent.h"
 #include "GameFramework/GameModeBase.h"
+#include "Player/VestigePlayerCharacter.h"
+#include "UObject/UnrealType.h"
 #include "Sound/SoundWave.h"
 #include "UI/VestigeHUD.h"
 #include "UI/VestigeFeedbackResponses.h"
@@ -336,10 +343,9 @@ namespace VestigeHudWidgetTests
 			ASSERT_THAT(AreEqual(AVestigeHUD::FormatMoney(0).ToString(), FString(TEXT("Coins 0"))));
 			// The number is written as the current culture writes it ("1,500" in English, "1 500" in Swedish), so the test
 			// doesn't hard-code a culture.
-			ASSERT_THAT(AreEqual(
-				AVestigeHUD::FormatMoney(1500).ToString(), FString(TEXT("Coins ")) + FText::AsNumber(1500).ToString()));
-			ASSERT_THAT(AreEqual(
-				AVestigeHUD::FormatMoney(1234567).ToString(), FString(TEXT("Coins ")) + FText::AsNumber(1234567).ToString()));
+			ASSERT_THAT(AreEqual(AVestigeHUD::FormatMoney(1500).ToString(), FString(TEXT("Coins ")) + FText::AsNumber(1500).ToString()));
+			ASSERT_THAT(
+				AreEqual(AVestigeHUD::FormatMoney(1234567).ToString(), FString(TEXT("Coins ")) + FText::AsNumber(1234567).ToString()));
 		}
 
 		// Fails until MoneyText is added to WBP_Hud in the widget designer by hand (Docs/Systems/25-Selling.md, editor step 5).
@@ -351,6 +357,233 @@ namespace VestigeHudWidgetTests
 			Hud->SetMoneyText(AVestigeHUD::FormatMoney(250));
 
 			ASSERT_THAT(AreEqual(MoneyText->GetText().ToString(), FString(TEXT("Coins 250"))));
+		}
+
+		/** The game's HUD Blueprint's defaults, through the game mode, as the game makes it. */
+		const AVestigeHUD* GetGameHudDefaults()
+		{
+			const UClass* GameModeClass = LoadClass<AGameModeBase>(nullptr, GameModePath);
+			const UClass* HudActorClass = GameModeClass ? GameModeClass->GetDefaultObject<AGameModeBase>()->HUDClass.Get() : nullptr;
+			return HudActorClass && HudActorClass->IsChildOf<AVestigeHUD>() ? HudActorClass->GetDefaultObject<AVestigeHUD>() : nullptr;
+		}
+
+		TEST_METHOD(TheTileLineNamesEachContaminationLevelAndNothingOnCleanSoil)
+		{
+			const AVestigeHUD* HudDefaults = GetGameHudDefaults();
+			ASSERT_THAT(IsNotNull(HudDefaults));
+
+			ASSERT_THAT(IsTrue(HudDefaults->GetTileText(0).IsEmpty()));
+			ASSERT_THAT(IsTrue(HudDefaults->GetTileText(-1).IsEmpty()));
+			ASSERT_THAT(AreEqual(HudDefaults->GetTileText(1).ToString(), FString(TEXT("Lightly contaminated"))));
+			ASSERT_THAT(AreEqual(HudDefaults->GetTileText(2).ToString(), FString(TEXT("Heavily contaminated"))));
+			// A level past the names, from a fourth level in the settings, keeps the last name.
+			ASSERT_THAT(AreEqual(HudDefaults->GetTileText(3).ToString(), FString(TEXT("Heavily contaminated"))));
+		}
+
+		// Fails until TileText is added to WBP_Hud in the widget designer by hand (Docs/Systems/27-Contamination.md, the HUD line).
+		TEST_METHOD(TheHudWidgetHasTheTileLine)
+		{
+			UTextBlock* TileText = Cast<UTextBlock>(Hud->GetWidgetFromName(TEXT("TileText")));
+			ASSERT_THAT(IsNotNull(TileText));
+
+			Hud->SetTileText(LOCTEXT("Light", "Lightly contaminated"));
+			ASSERT_THAT(AreEqual(TileText->GetText().ToString(), FString(TEXT("Lightly contaminated"))));
+			Hud->SetTileText(FText::GetEmpty());
+			ASSERT_THAT(IsTrue(TileText->GetText().IsEmpty()));
+		}
+
+		// The tile line's binding (Systems/27-Contamination.md, "Binding lifetime"). The HUD is spawned without a player, so
+		// it makes no widget of its own: the test gives it the WBP_Hud made above and a pawn to follow.
+
+		/**
+		 * The widget's TileText. Until it is added to WBP_Hud by hand, the widget gets one bound by reflection, as the
+		 * designer's binding would, so these tests can read the line either way.
+		 */
+		UTextBlock* TileTextBlock()
+		{
+			// The bound property, not the tree: a block made here isn't in the widget's hierarchy, so a name search misses it.
+			FObjectProperty* Property = FindFProperty<FObjectProperty>(UVestigeHudWidget::StaticClass(), TEXT("TileText"));
+			check(Property);
+			if (UTextBlock* Existing = Cast<UTextBlock>(Property->GetObjectPropertyValue_InContainer(Hud)))
+			{
+				return Existing;
+			}
+			UTextBlock* Text = Hud->WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("TileText"));
+			Property->SetObjectPropertyValue_InContainer(Hud, Text);
+			return Text;
+		}
+
+		FString TileLine() { return TileTextBlock()->GetText().ToString(); }
+
+		/** A grid of the default 8 x 8 field Base.Farm at the world's origin, begun play unless told not to. */
+		AFarmGrid& SpawnGrid(bool bBeginPlay = true)
+		{
+			AFarmGrid& Grid = Spawner.SpawnActor<AFarmGrid>();
+			if (bBeginPlay)
+			{
+				Grid.DispatchBeginPlay();
+			}
+			return Grid;
+		}
+
+		/** The game's farmer at Location facing +X, begun play, so its targeting component has found the world's grid. */
+		AVestigePlayerCharacter& SpawnFarmer(const FVector& Location = FVector(250.f, 50.f, 0.f))
+		{
+			UClass* FarmerClass =
+				LoadClass<AVestigePlayerCharacter>(nullptr, TEXT("/Game/Vestige/Blueprints/BP_PlayerCharacter.BP_PlayerCharacter_C"));
+			check(FarmerClass);
+			AVestigePlayerCharacter& Farmer = Spawner.SpawnActor<AVestigePlayerCharacter>(FActorSpawnParameters(), FarmerClass);
+			Farmer.DispatchBeginPlay();
+			Farmer.SetActorLocationAndRotation(Location, FRotator::ZeroRotator);
+			return Farmer;
+		}
+
+		/** A HUD that has begun play without a player, shows the fixture's widget and follows Pawn. */
+		AVestigeHUD& SpawnHudFollowing(APawn* Pawn)
+		{
+			TileTextBlock();
+			AVestigeHUD& HudActor = Spawner.SpawnActor<AVestigeHUD>();
+			HudActor.DispatchBeginPlay();
+			HudActor.SetHudWidgetForTests(Hud);
+			HudActor.FollowPawnForTests(Pawn);
+			return HudActor;
+		}
+
+		static UFarmTargetingComponent& TargetingOf(APawn& Pawn) { return *Pawn.FindComponentByClass<UFarmTargetingComponent>(); }
+
+		/** Whether HudActor listens to any of Field's tile events. */
+		static bool FollowsField(const UFarmField& Field, const AVestigeHUD& HudActor)
+		{
+			return Field.OnTileChanged.IsBoundToObject(&HudActor) || Field.OnTilesChanged.IsBoundToObject(&HudActor);
+		}
+
+		TEST_METHOD(WithoutAGridTheTileLineShowsNothing)
+		{
+			Spawner.InitializeGameSubsystems();
+			AVestigePlayerCharacter& Farmer = SpawnFarmer();
+			ASSERT_THAT(IsNull(TargetingOf(Farmer).GetGrid()));
+			Hud->SetTileText(LOCTEXT("Stale", "Stale"));
+
+			SpawnHudFollowing(&Farmer);
+
+			ASSERT_THAT(IsTrue(TileLine().IsEmpty()));
+		}
+
+		TEST_METHOD(TheTileLineWaitsForAGridsFieldThatIsReadyLater)
+		{
+			Spawner.InitializeGameSubsystems();
+			AFarmGrid& Grid = SpawnGrid(false);
+			AVestigePlayerCharacter& Farmer = SpawnFarmer();
+			ASSERT_THAT(IsTrue(TargetingOf(Farmer).GetGrid() == &Grid));
+			ASSERT_THAT(IsFalse(Grid.IsFieldReady()));
+
+			AVestigeHUD& HudActor = SpawnHudFollowing(&Farmer);
+			ASSERT_THAT(IsTrue(Grid.OnFieldReady.IsBoundToObject(&HudActor)));
+			ASSERT_THAT(IsTrue(TileLine().IsEmpty()));
+
+			Grid.DispatchBeginPlay();
+
+			UFarmField* Field = Grid.GetField();
+			ASSERT_THAT(IsNotNull(Field));
+			ASSERT_THAT(IsFalse(Grid.OnFieldReady.IsBoundToObject(&HudActor)));
+			ASSERT_THAT(IsTrue(FollowsField(*Field, HudActor)));
+			ASSERT_THAT(IsTrue(TargetingOf(Farmer).GetTargetTile() == TOptional<FIntPoint>(FIntPoint(3, 0))));
+			Field->SetContamination(FIntPoint(3, 0), 1);
+			ASSERT_THAT(AreEqual(TileLine(), FString(TEXT("Lightly contaminated"))));
+		}
+
+		TEST_METHOD(TheTileLineFollowsTheTargetAndItsTile)
+		{
+			Spawner.InitializeGameSubsystems();
+			AFarmGrid& Grid = SpawnGrid();
+			UFarmField& Field = *Grid.GetField();
+			Field.SetContamination(FIntPoint(3, 0), 1);
+			Field.SetContamination(FIntPoint(4, 0), 2);
+			AVestigePlayerCharacter& Farmer = SpawnFarmer();
+			SpawnHudFollowing(&Farmer);
+			ASSERT_THAT(AreEqual(TileLine(), FString(TEXT("Lightly contaminated"))));
+
+			// The target moves one tile on.
+			Farmer.SetActorLocation(FVector(350.f, 50.f, 0.f));
+			ASSERT_THAT(IsTrue(TargetingOf(Farmer).GetTargetTile() == TOptional<FIntPoint>(FIntPoint(4, 0))));
+			ASSERT_THAT(AreEqual(TileLine(), FString(TEXT("Heavily contaminated"))));
+
+			// Another tile's change leaves the line; the target tile's change redraws it.
+			Field.SetContamination(FIntPoint(3, 0), 0);
+			ASSERT_THAT(AreEqual(TileLine(), FString(TEXT("Heavily contaminated"))));
+			Field.SetContamination(FIntPoint(4, 0), 0);
+			ASSERT_THAT(IsTrue(TileLine().IsEmpty()));
+			Field.SetContamination(FIntPoint(4, 0), 1);
+			ASSERT_THAT(AreEqual(TileLine(), FString(TEXT("Lightly contaminated"))));
+
+			// Off the field, no target and no line.
+			Farmer.SetActorLocation(FVector(-500.f, -500.f, 0.f));
+			ASSERT_THAT(IsTrue(TileLine().IsEmpty()));
+		}
+
+		TEST_METHOD(ATargetOnAnotherGridsFieldLetsGoOfTheOldField)
+		{
+			Spawner.InitializeGameSubsystems();
+			AFarmGrid& OldGrid = SpawnGrid();
+			UFarmField* OldField = OldGrid.GetField();
+			AVestigePlayerCharacter& OldFarmer = SpawnFarmer();
+			AVestigeHUD& HudActor = SpawnHudFollowing(&OldFarmer);
+			ASSERT_THAT(IsTrue(FollowsField(*OldField, HudActor)));
+
+			// A new game drops the field; the map's next grid makes a new one, and the next pawn targets that grid.
+			UFarmFieldSubsystem::Get(&Spawner.GetWorld())->StartNewGame();
+			OldGrid.Destroy();
+			AFarmGrid& NewGrid = SpawnGrid();
+			UFarmField* NewField = NewGrid.GetField();
+			ASSERT_THAT(IsTrue(NewField && NewField != OldField));
+			AVestigePlayerCharacter& NewFarmer = SpawnFarmer();
+			ASSERT_THAT(IsTrue(TargetingOf(NewFarmer).GetGrid() == &NewGrid));
+
+			HudActor.FollowPawnForTests(&NewFarmer);
+
+			ASSERT_THAT(IsFalse(FollowsField(*OldField, HudActor)));
+			ASSERT_THAT(IsFalse(TargetingOf(OldFarmer).OnTargetTileChanged.IsBoundToObject(&HudActor)));
+			ASSERT_THAT(IsTrue(FollowsField(*NewField, HudActor)));
+			OldField->SetContamination(FIntPoint(3, 0), 2);
+			ASSERT_THAT(IsTrue(TileLine().IsEmpty()));
+			NewField->SetContamination(FIntPoint(3, 0), 2);
+			ASSERT_THAT(AreEqual(TileLine(), FString(TEXT("Heavily contaminated"))));
+		}
+
+		TEST_METHOD(NothingCallsTheHudAfterThePawnChangesOrTheHudEnds)
+		{
+			Spawner.InitializeGameSubsystems();
+			AFarmGrid& Grid = SpawnGrid(false);
+			AVestigePlayerCharacter& Farmer = SpawnFarmer();
+
+			// While it waits for the field: a pawn change lets go of the grid.
+			AVestigeHUD& HudActor = SpawnHudFollowing(&Farmer);
+			ASSERT_THAT(IsTrue(Grid.OnFieldReady.IsBoundToObject(&HudActor)));
+			HudActor.FollowPawnForTests(nullptr);
+			ASSERT_THAT(IsFalse(Grid.OnFieldReady.IsBoundToObject(&HudActor)));
+			ASSERT_THAT(IsFalse(TargetingOf(Farmer).OnTargetTileChanged.IsBoundToObject(&HudActor)));
+
+			// While it waits: the HUD's end lets go of the grid.
+			AVestigeHUD& WaitingHud = SpawnHudFollowing(&Farmer);
+			ASSERT_THAT(IsTrue(Grid.OnFieldReady.IsBoundToObject(&WaitingHud)));
+			WaitingHud.Destroy();
+			ASSERT_THAT(IsFalse(Grid.OnFieldReady.IsBoundToObject(&WaitingHud)));
+			ASSERT_THAT(IsFalse(TargetingOf(Farmer).OnTargetTileChanged.IsBoundToObject(&WaitingHud)));
+
+			// Following the field: a pawn change, then the HUD's end, let go of the field, which outlives them both.
+			Grid.DispatchBeginPlay();
+			UFarmField& Field = *Grid.GetField();
+			HudActor.FollowPawnForTests(&Farmer);
+			ASSERT_THAT(IsTrue(FollowsField(Field, HudActor)));
+			HudActor.FollowPawnForTests(nullptr);
+			ASSERT_THAT(IsFalse(FollowsField(Field, HudActor)));
+			ASSERT_THAT(IsTrue(TileLine().IsEmpty()));
+
+			HudActor.FollowPawnForTests(&Farmer);
+			ASSERT_THAT(IsTrue(FollowsField(Field, HudActor)));
+			HudActor.Destroy();
+			ASSERT_THAT(IsFalse(FollowsField(Field, HudActor)));
+			ASSERT_THAT(IsFalse(TargetingOf(Farmer).OnTargetTileChanged.IsBoundToObject(&HudActor)));
 		}
 
 		/** A responses asset with a day row that ends in the Paid clause and the Paid row, as the game's has. */
@@ -456,6 +689,10 @@ namespace VestigeHudWidgetTests
 				{VestigeGameplayTags::Feedback_Farm_NothingRipe, NoValues},
 				{VestigeGameplayTags::Feedback_Farm_Withered, WitheredValues},
 				{VestigeGameplayTags::Feedback_Farm_ClearFirst, NoValues},
+				{VestigeGameplayTags::Feedback_Farm_NeedsContamination, NoValues},
+				{VestigeGameplayTags::Feedback_Farm_TooContaminated, NoValues},
+				{VestigeGameplayTags::Feedback_Farm_Cleaned, NoValues},
+				{VestigeGameplayTags::Feedback_Farm_Cleaned_Clean, NoValues},
 				{VestigeGameplayTags::Feedback_Inventory_Full, NoValues},
 				{VestigeGameplayTags::Feedback_Water_CanEmpty, NoValues},
 				{VestigeGameplayTags::Feedback_Water_CanFull, NoValues},

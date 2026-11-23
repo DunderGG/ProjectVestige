@@ -5,6 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
+#include "Farming/FarmContamination.h"
 #include "Farming/FarmTileState.h"
 #include "UObject/Object.h"
 #include "FarmField.generated.h"
@@ -27,13 +28,17 @@ class UFarmField : public UObject
 
 public:
 	/**
-	 * Sets the field up as InSize grass tiles that follow InWaterRules (each number lifted to at least 1). Called once, by
-	 * UFarmFieldSubsystem when it makes the field.
+	 * Sets the field up as InSize clean grass tiles that follow InWaterRules (each number lifted to at least 1) and
+	 * InContaminationRules (clamped). Called once, by UFarmFieldSubsystem when it makes the field.
 	 */
-	void Initialize(FName InFieldId, const FIntPoint& InSize, const FFarmWaterRules& InWaterRules);
+	void Initialize(
+		FName InFieldId, const FIntPoint& InSize, const FFarmWaterRules& InWaterRules, const FFarmContaminationRules& InContaminationRules);
 
 	/** The water rules every tile of this field follows. */
 	const FFarmWaterRules& GetWaterRules() const { return WaterRules; }
+
+	/** The contamination rules every tile of this field follows: the highest level and the mutation chances. */
+	const FFarmContaminationRules& GetContaminationRules() const { return ContaminationRules; }
 
 	FName GetFieldId() const { return FieldId; }
 
@@ -62,10 +67,24 @@ public:
 	int32 WitherCropsOutOfSeason(const FGameplayTag& Season, const FVestigeCalendar& Calendar);
 
 	/**
-	 * Starts a new day on every tile: crops on watered tiles grow one stage, then every tile loses the nightly fall.
-	 * Broadcasts OnTilesChanged.
+	 * Starts day count Day on every tile: crops on watered tiles grow by their tile's contamination, then every tile loses the
+	 * nightly fall, then each crop that ripened tonight and can mutate rolls FarmContamination::RollsMutation with MutationSeed
+	 * and the chance on its tile's level. Broadcasts OnTilesChanged once.
 	 */
-	void AdvanceDay();
+	void AdvanceDay(int32 Day, int32 MutationSeed);
+
+	/**
+	 * Sets the tile's contamination to Level, clamped to the rules' MaxLevel, for developer tools. Returns false, changing
+	 * nothing, outside the field or when the level is already that; broadcasts OnTileChanged when it changed.
+	 */
+	bool SetContamination(const FIntPoint& Coordinates, int32 Level);
+
+	/**
+	 * Sets the starting contamination of a new game's field: each area's tiles to its level, clamped to the rules, later areas
+	 * over earlier ones. An area partly outside the field is cut to it, one wholly outside is skipped with a warning. Logs how
+	 * many tiles start contaminated and broadcasts OnTilesChanged once. Only UFarmFieldSubsystem calls it, when it makes a field.
+	 */
+	void ApplyContaminationAreas(TConstArrayView<FFarmContaminationArea> Areas);
 
 	/**
 	 * Makes the field NewSize (columns X, rows Y), each at least 1. Tiles inside both sizes keep their state, new ones are
@@ -94,6 +113,9 @@ private:
 	/** The index of Coordinates in Tiles, or INDEX_NONE outside the field. */
 	int32 ToIndex(const FIntPoint& Coordinates) const;
 
+	/** Mutates Tile, whose crop ripened tonight, when its crop can mutate and the roll for its level says so. */
+	void RollMutation(FFarmTileState& Tile, const FIntPoint& Coordinates, int32 Day, int32 MutationSeed);
+
 	/** Applies Action to the tile at Coordinates and broadcasts OnTileChanged if it returned true. */
 	bool ChangeTile(const FIntPoint& Coordinates, TFunctionRef<bool(FFarmTileState&)> Action);
 
@@ -107,6 +129,10 @@ private:
 	/** The numbers of the water rules, copied from the settings when the field was made, so tests can use their own. */
 	UPROPERTY(VisibleInstanceOnly, Category = "Farming")
 	FFarmWaterRules WaterRules;
+
+	/** The numbers of the contamination rules, copied from the settings when the field was made, so tests can use their own. */
+	UPROPERTY(VisibleInstanceOnly, Category = "Farming")
+	FFarmContaminationRules ContaminationRules;
 
 	/** Size.X * Size.Y tiles, row by row. A property, so the crops planted in them stay loaded with the field. */
 	UPROPERTY(VisibleInstanceOnly, Category = "Farming")

@@ -5,6 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "Core/VestigeSaveable.h"
+#include "Farming/FarmContamination.h"
 #include "Farming/FarmFieldSaveData.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "FarmFieldSubsystem.generated.h"
@@ -36,10 +37,11 @@ public:
 	virtual void Deinitialize() override;
 
 	/**
-	 * The field FieldId, made as Size grass tiles the first time it is asked for. A field of another size, such as one
-	 * from a save made before its grid changed, is resized to Size with a warning, keeping the tiles that fit.
+	 * The field FieldId, made as Size grass tiles the first time it is asked for, with StartingContamination applied only
+	 * then: a field that already exists, from a save or an earlier visit to its map, keeps its own tiles. A field of another
+	 * size, such as one from a save made before its grid changed, is resized to Size with a warning, keeping the tiles that fit.
 	 */
-	UFarmField& FindOrAddField(FName FieldId, const FIntPoint& Size);
+	UFarmField& FindOrAddField(FName FieldId, const FIntPoint& Size, TConstArrayView<FFarmContaminationArea> StartingContamination = {});
 
 	/** The field FieldId, or nullptr if no grid or save has made it yet. */
 	UFarmField* FindField(FName FieldId) const;
@@ -60,6 +62,14 @@ public:
 	 */
 	virtual void StartNewGame() override;
 
+	/** The seed of this game's mutation rolls: picked anew for each new game and saved, so a reloaded night rolls the same. */
+	int32 GetMutationSeed() const { return MutationSeed; }
+
+#if WITH_DEV_AUTOMATION_TESTS
+	/** For tests only. The seed is picked by a new game and restored by a save. */
+	void SetMutationSeedForTests(int32 InMutationSeed) { MutationSeed = InMutationSeed; }
+#endif
+
 	virtual FName GetSaveKey() const override;
 	virtual int32 GetSaveVersion() const override;
 	virtual FVestigeSaveRecord WriteSaveRecord() const override;
@@ -76,8 +86,14 @@ private:
 	/** Withers the out-of-season crops of every field and tells the player once. Bound to UVestigeClockSubsystem::OnSeasonStarted. */
 	void WitherOutOfSeasonCrops(const FVestigeDate& Date);
 
+	/** A new seed from a new GUID, which differs every time whether or not the global random generator was seeded. */
+	static int32 PickMutationSeed();
+
 	UPROPERTY()
 	TMap<FName, TObjectPtr<UFarmField>> Fields;
+
+	/** This game's mutation seed, passed with the day to every field's night. */
+	int32 MutationSeed = 0;
 
 	UPROPERTY()
 	TObjectPtr<UVestigeClockSubsystem> Clock;

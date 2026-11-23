@@ -31,10 +31,11 @@ bool UFarmGameplayAbility_Plant::CanUseOn(const FIntPoint& Tile, FVestigeFeedbac
 		return FailBecause(OutFailure, VestigeGameplayTags::Feedback_Farm_NothingToPlant);
 	}
 
-	// Without a clock (an editor world) every crop fits.
+	// Without a clock (an editor world) every crop fits. The season doesn't depend on the tile's growth rate, so it is asked
+	// without one here, before the tile is known.
 	const UVestigeClockSubsystem* Clock = UVestigeClockSubsystem::Get(GetWorld());
-	const FFarmSeasonFit Fit = Clock ? Crop->GetSeasonFit(Clock->GetCalendar(), Clock->GetCurrentDay()) : FFarmSeasonFit();
-	const auto FailBecauseOfSeason = [OutFailure, Clock, &Fit](const FGameplayTag& Reason)
+	const FFarmSeasonFit SeasonFit = Clock ? Crop->GetSeasonFit(Clock->GetCalendar(), Clock->GetCurrentDay()) : FFarmSeasonFit();
+	const auto FailBecauseOfSeason = [OutFailure, Clock](const FGameplayTag& Reason, const FFarmSeasonFit& Fit)
 	{
 		// Only the press, which reports them, builds the values; a repeat stays quiet.
 		return FailBecause(OutFailure, Reason,
@@ -42,9 +43,9 @@ bool UFarmGameplayAbility_Plant::CanUseOn(const FIntPoint& Tile, FVestigeFeedbac
 	};
 
 	// The season before the tile: no tile would take these seeds, so tilling first would be wasted work.
-	if (Fit.Fit == EFarmSeasonFit::OutOfSeason)
+	if (SeasonFit.Fit == EFarmSeasonFit::OutOfSeason)
 	{
-		return FailBecauseOfSeason(VestigeGameplayTags::Feedback_Farm_OutOfSeason);
+		return FailBecauseOfSeason(VestigeGameplayTags::Feedback_Farm_OutOfSeason, SeasonFit);
 	}
 	const UFarmField* Field = GetField();
 	const FFarmTileState* State = Field ? Field->GetTile(Tile) : nullptr;
@@ -61,11 +62,28 @@ bool UFarmGameplayAbility_Plant::CanUseOn(const FIntPoint& Tile, FVestigeFeedbac
 		return FailBecause(OutFailure, VestigeGameplayTags::Feedback_Farm_CantPlant);
 	}
 
-	// Too late comes last, so the warning shows only when a seed would really go in.
-	if (Fit.Fit == EFarmSeasonFit::TooLate && !IsTooLatePlantingConfirmed(*Crop, Clock->GetCurrentDay()))
+	// Both contamination reasons are refusals, not warnings: a crop that can't grow here would never ripen nor die.
+	if (State->GetContamination() < Crop->GetMinPlantingContamination())
+	{
+		return FailBecause(OutFailure, VestigeGameplayTags::Feedback_Farm_NeedsContamination);
+	}
+	const int32 NightsPerGrowthDay = Crop->GetWateredNightsPerGrowthDay(State->GetContamination());
+	if (NightsPerGrowthDay == 0)
+	{
+		return FailBecause(OutFailure, VestigeGameplayTags::Feedback_Farm_TooContaminated);
+	}
+
+	// Too late comes last, so the warning shows only when a seed would really go in. It counts the tile's slower growth.
+	if (!Clock)
+	{
+		return true;
+	}
+	const FFarmSeasonFit TileFit = Crop->GetSeasonFit(Clock->GetCalendar(), Clock->GetCurrentDay(), NightsPerGrowthDay);
+	if (TileFit.Fit == EFarmSeasonFit::TooLate && !IsTooLatePlantingConfirmed(*Crop, Clock->GetCurrentDay()))
 	{
 		return FailBecauseOfSeason(
-			Fit.DaysToDeadline == 0 ? VestigeGameplayTags::Feedback_Farm_TooLate_LastDay : VestigeGameplayTags::Feedback_Farm_TooLate);
+			TileFit.DaysToDeadline == 0 ? VestigeGameplayTags::Feedback_Farm_TooLate_LastDay : VestigeGameplayTags::Feedback_Farm_TooLate,
+			TileFit);
 	}
 	return true;
 }

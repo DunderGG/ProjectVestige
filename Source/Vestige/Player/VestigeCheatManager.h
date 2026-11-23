@@ -50,4 +50,12 @@ public:
 	 */
 	UFUNCTION(Exec)
 	void SetDay(int32 Day);
+
+	/**
+	 * Console: SetTileContamination <X> <Y> <Level>, for example SetTileContamination 3 4 2. Sets that tile of the player's grid's
+	 * field to a contamination level, clamped to the field's rules, as a starting layout does; it works on a field from an old
+	 * save too. With no grid or field, or a tile outside it, it logs why and changes nothing.
+	 */
+	UFUNCTION(Exec)
+	void SetTileContamination(int32 X, int32 Y, int32 Level);
 };

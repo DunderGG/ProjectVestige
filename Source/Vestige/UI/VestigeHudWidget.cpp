@@ -55,6 +55,14 @@ void UVestigeHudWidget::SetKeyHintsText(const FText& Text)
 	KeyHintsText->SetText(Text);
 }
 
+void UVestigeHudWidget::SetTileText(const FText& Text)
+{
+	if (TileText)
+	{
+		TileText->SetText(Text);
+	}
+}
+
 void UVestigeHudWidget::ShowMessages(const TArray<FVestigeHudMessage>& Messages, double Lifetime)
 {
 	AddMessageBoxes(Messages.Num());

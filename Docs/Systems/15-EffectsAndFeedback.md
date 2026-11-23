@@ -51,6 +51,10 @@ References: Lyra's `ULyraGameplayAbility::FailureTagToUserFacingMessages` (a `TM
    | `Vestige.Feedback.Farm.NothingRipe` | the harvest ability | | Nothing ripe here. |
    | `Vestige.Feedback.Inventory.Full` | the harvest ability | | No room in your bag. |
    | `Vestige.Feedback.Farm.ClearFirst` | the till and plant abilities, on a withered tile ([section 22](22-FarmFields.md)) | | Clear the withered crop first. |
+   | `Vestige.Feedback.Farm.NeedsContamination` | the plant ability, for seeds whose crop needs contaminated soil, on a tile below its `MinPlantingContamination` ([section 27](27-Contamination.md)) | | These seeds only grow in contaminated soil. |
+   | `Vestige.Feedback.Farm.TooContaminated` | the plant ability, refusing seeds on a level their crop doesn't grow on, before `Farm.TooLate` ([section 27](27-Contamination.md)) | | This soil is too contaminated for these seeds to grow. |
+   | `Vestige.Feedback.Farm.Cleaned` | the harvest ability, when a harvest lowered its tile's contamination | | The soil here is cleaner now. |
+   | `Vestige.Feedback.Farm.Cleaned.Clean` | the harvest ability, instead of `Farm.Cleaned` when the tile reached clean | | The soil here is clean now. |
    | `Vestige.Feedback.Farm.Withered` | the field subsystem, once on a season's first morning when crops withered, after the day message ([section 4](04-Time.md), the morning's messages) | `Day`, `Season`, `SeasonInSentence`, `DayOfSeason`, `DaysLeft` (the new day's), `Count` (withered crops on every field) | {Count} {Count}\|plural(one=crop,other=crops) withered. {Count}\|plural(one=It doesn't,other=They don't) grow in {SeasonInSentence}. |
    | `Vestige.Feedback.Shipping.Shipped` | the shipping bin, when it shipped the stack in hand ([section 25](25-Selling.md)) | `Item` (the item's display name), `Count` | Shipped: {Item} ×{Count}. The bin pays in the morning. |
    | `Vestige.Feedback.Shipping.NothingToShip` | the shipping bin, when nothing sellable is in hand | | Hold a crop to ship it. |

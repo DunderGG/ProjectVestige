@@ -4,9 +4,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "UObject/PrimaryAssetId.h"
 #include "FarmTileState.generated.h"
 
 class UFarmCropData;
+struct FFarmTileSaveData;
 
 /** What is on a farm tile. Water is separate, because tilled and planted soil can both be wet. */
 UENUM(BlueprintType)
@@ -68,7 +70,10 @@ public:
 	 */
 	bool AddWater(int32 Steps, int32 MaxLevel);
 
-	/** Removes a ripe crop, leaving tilled soil. Returns false, changing nothing, if nothing ripe grows here. */
+	/**
+	 * Removes a ripe crop, leaving tilled soil, and lowers the contamination by the crop's ContaminationCleanedPerHarvest, not
+	 * below 0. Returns false, changing nothing, if nothing ripe grows here.
+	 */
 	bool Harvest();
 
 	/** Turns an unripe planted crop into a withered one. Returns false, changing nothing, if CanWither is false. */
@@ -77,15 +82,29 @@ public:
 	/** Clears a withered crop, leaving empty tilled soil with its water. Returns false, changing nothing, if the tile isn't withered. */
 	bool ClearWithered();
 
-	/** Called once per in-game day. A crop on a tile with any water grows one stage, then the tile loses NightlyFall steps. */
-	void AdvanceDay(int32 NightlyFall);
+	/**
+	 * Called once per in-game day. An unripe crop on a tile with any water counts a watered night, and grows one growth day
+	 * when it has counted its crop's watered nights per growth day on the tile's contamination (none where that is 0); then the
+	 * tile loses NightlyFall steps. Returns true when the crop became ripe tonight.
+	 */
+	bool AdvanceDay(int32 NightlyFall);
 
 	/**
-	 * Puts the tile straight into a saved state, without replaying any action. A planted or withered state without a crop restores
-	 * as empty tilled soil, watered grass as dry grass, the water level is clamped to 0..MaxLevel and growth to what the
-	 * crop can reach.
+	 * Sets the contamination to Level, clamped to 0..MaxLevel, whatever is on the tile. Returns false, changing nothing, when the
+	 * clamped level is the tile's already. Only UFarmField calls it: a starting layout and developer tools.
 	 */
-	void Restore(EFarmTileState SavedState, int32 SavedWaterLevel, int32 SavedGrowthDays, const UFarmCropData* SavedCrop, int32 MaxLevel);
+	bool SetContamination(int32 Level, int32 MaxLevel);
+
+	/** Makes a ripe crop that can mutate a mutated one. Returns false, changing nothing, on any other tile or one already mutated. */
+	bool Mutate();
+
+	/**
+	 * Puts the tile straight into Saved's state, without replaying any action. A planted or withered state without SavedCrop
+	 * restores as empty tilled soil, watered grass as dry grass; the water level is clamped to 0..MaxWaterLevel, contamination
+	 * to 0..MaxContaminationLevel (grass included), growth to what the crop can reach, the watered nights to below the crop's
+	 * interval on the restored level (0 without a growing crop), and the mutation is kept only on a ripe crop that can mutate.
+	 */
+	void Restore(const FFarmTileSaveData& Saved, const UFarmCropData* SavedCrop, int32 MaxWaterLevel, int32 MaxContaminationLevel);
 
 	EFarmTileState GetState() const { return State; }
 
@@ -110,6 +129,19 @@ public:
 	/** The crop growing here, or nullptr if nothing is planted. */
 	const UFarmCropData* GetCrop() const { return Crop; }
 
+	/** The contamination level, from 0 (clean) to the field's MaxLevel. Kept whatever is on the tile. */
+	int32 GetContamination() const { return Contamination; }
+	bool IsContaminated() const { return Contamination > 0; }
+
+	/** The watered nights counted toward the crop's next growth day, 0 on a tile without a growing crop. */
+	int32 GetWateredNights() const { return WateredNights; }
+
+	/** Whether the ripe crop here ripened mutated. Only ever true on a ripe planted tile. */
+	bool IsMutated() const { return bMutated; }
+
+	/** The item a harvest here gives: the crop's mutated item when mutated, else its harvest item. Invalid without a crop. */
+	FPrimaryAssetId GetHarvestItemId() const;
+
 private:
 	UPROPERTY(VisibleInstanceOnly, Category = "Farming")
 	EFarmTileState State = EFarmTileState::Grass;
@@ -123,6 +155,15 @@ private:
 	/** Set exactly while the tile is planted or withered. Whoever loads the crop also loads its meshes. */
 	UPROPERTY(VisibleInstanceOnly, Category = "Farming")
 	TObjectPtr<const UFarmCropData> Crop;
+
+	UPROPERTY(VisibleInstanceOnly, Category = "Farming")
+	int32 Contamination = 0;
+
+	UPROPERTY(VisibleInstanceOnly, Category = "Farming")
+	int32 WateredNights = 0;
+
+	UPROPERTY(VisibleInstanceOnly, Category = "Farming")
+	bool bMutated = false;
 };
 
 /**
@@ -151,4 +192,16 @@ struct FFarmTileSaveData
 	/** ContentId of the crop growing here (Base.Turnip), or None. */
 	UPROPERTY()
 	FName CropId;
+
+	/** Absent in saves from before tiles held contamination, which load clean. */
+	UPROPERTY()
+	int32 Contamination = 0;
+
+	/** The watered nights toward the next growth day. Absent in older saves, which load with none. */
+	UPROPERTY()
+	int32 WateredNights = 0;
+
+	/** Whether the ripe crop ripened mutated. Absent in older saves, which load with no mutation. */
+	UPROPERTY()
+	bool bMutated = false;
 };

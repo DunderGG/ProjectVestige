@@ -534,6 +534,116 @@ namespace FarmCropDataTests
 			ASSERT_THAT(IsFalse(Fits.Contains(TEXT("DeadlineSeason"))));
 		}
 
+		// Contamination (Systems/27-Contamination.md).
+		TEST_METHOD(ASlowerTileRateMultipliesTheDaysToRipeAndCanMakeItTooLate)
+		{
+			const FVestigeCalendar Calendar = MakeCalendar();
+			const UFarmCropData& Crop = MakeSeasonCrop(3, {Spring});
+
+			// Day 7 has 3 days left in spring: clean soil ripens on the last day, light soil needs six.
+			const FFarmSeasonFit Clean = Crop.GetSeasonFit(Calendar, 7);
+			const FFarmSeasonFit RateOne = Crop.GetSeasonFit(Calendar, 7, 1);
+			const FFarmSeasonFit Light = Crop.GetSeasonFit(Calendar, 7, 2);
+
+			ASSERT_THAT(IsTrue(Clean.Fit == EFarmSeasonFit::Fits && Clean.DaysToRipe == 3));
+			ASSERT_THAT(IsTrue(RateOne.Fit == EFarmSeasonFit::Fits && RateOne.DaysToRipe == 3));
+			ASSERT_THAT(IsTrue(Light.Fit == EFarmSeasonFit::TooLate));
+			ASSERT_THAT(IsTrue(Light.DaysToRipe == 6));
+			ASSERT_THAT(IsTrue(Light.DaysToDeadline == 3));
+			ASSERT_THAT(IsTrue(Crop.GetSeasonFit(Calendar, 7, 0).DaysToRipe == 3));
+		}
+
+		TEST_METHOD(TheRateOfALevelPastTheListIsItsLastAndAnEmptyListGrowsEveryNight)
+		{
+			UFarmCropData& Crop = Spawner.SpawnObject<UFarmCropData>();
+			ASSERT_THAT(IsTrue(Crop.GetWateredNightsPerGrowthDay(0) == 1));
+			ASSERT_THAT(IsTrue(Crop.GetWateredNightsPerGrowthDay(1) == 2));
+			ASSERT_THAT(IsTrue(Crop.GetWateredNightsPerGrowthDay(2) == 0));
+
+			Crop.SetContaminationResponseForTests({1, 3}, 0, 0);
+			ASSERT_THAT(IsTrue(Crop.GetWateredNightsPerGrowthDay(1) == 3));
+			ASSERT_THAT(IsTrue(Crop.GetWateredNightsPerGrowthDay(5) == 3));
+			ASSERT_THAT(IsTrue(Crop.GetWateredNightsPerGrowthDay(-1) == 1));
+
+			Crop.SetContaminationResponseForTests({}, 0, 0);
+			for (const int32 Level : {0, 1, 2, 7})
+			{
+				ASSERT_THAT(IsTrue(Crop.GetWateredNightsPerGrowthDay(Level) == 1));
+			}
+		}
+
+		TEST_METHOD(OnlyACropWithAMutatedItemCanMutate)
+		{
+			UFarmCropData& Crop = Spawner.SpawnObject<UFarmCropData>();
+			ASSERT_THAT(IsFalse(Crop.CanMutate()));
+
+			Crop.SetMutationForTests(FPrimaryAssetId(UVestigeItemData::AssetType, TEXT("Test.Mutated")), SoftOne(nullptr));
+
+			ASSERT_THAT(IsTrue(Crop.CanMutate()));
+		}
+
+		TEST_METHOD(TheMutatedRipeMeshFallsBackToTheRipeMesh)
+		{
+			UFarmCropData& Crop = MakeCrop(4, {0, 2});
+			ASSERT_THAT(IsTrue(Crop.GetMutatedRipeMesh() == Ripe.Get()));
+
+			UStaticMesh& Mutated = Spawner.SpawnObject<UStaticMesh>();
+			Crop.SetMutationForTests(FPrimaryAssetId(UVestigeItemData::AssetType, TEXT("Test.Mutated")), SoftOne(&Mutated));
+
+			ASSERT_THAT(IsTrue(Crop.GetMutatedRipeMesh() == &Mutated));
+		}
+
+		/** A base content asset of this type by ContentId, from the catalogue. */
+		template <typename T> const T* FindBase(FName ContentId)
+		{
+			return UVestigeContentCatalog::Get(&Spawner.GetWorld())->Find<T>(FPrimaryAssetId(T::AssetType, ContentId));
+		}
+
+		TEST_METHOD(TheSpringCropsSlowOnLightSoilStopOnHeavyAndMutateIntoItemsWorthTwice)
+		{
+			Spawner.InitializeGameSubsystems();
+			for (const TCHAR* CropId : {TEXT("Base.Turnip"), TEXT("Base.Potato"), TEXT("Base.Cabbage")})
+			{
+				const UFarmCropData* Crop = FindBase<UFarmCropData>(CropId);
+				ASSERT_THAT(IsNotNull(Crop, CropId));
+				ASSERT_THAT(IsTrue(Crop->GetWateredNightsPerGrowthDay(0) == 1, CropId));
+				ASSERT_THAT(IsTrue(Crop->GetWateredNightsPerGrowthDay(1) == 2, CropId));
+				ASSERT_THAT(IsTrue(Crop->GetWateredNightsPerGrowthDay(2) == 0, CropId));
+				ASSERT_THAT(IsTrue(Crop->GetMinPlantingContamination() == 0, CropId));
+				ASSERT_THAT(IsTrue(Crop->GetContaminationCleanedPerHarvest() == 0, CropId));
+				ASSERT_THAT(IsTrue(Crop->CanMutate(), CropId));
+
+				const UVestigeItemData* Normal = FindBase<UVestigeItemData>(Crop->GetHarvestItemId().PrimaryAssetName);
+				const UVestigeItemData* Mutated = FindBase<UVestigeItemData>(Crop->GetMutatedHarvestItemId().PrimaryAssetName);
+				ASSERT_THAT(IsTrue(Crop->GetMutatedHarvestItemId().PrimaryAssetType == UVestigeItemData::AssetType, CropId));
+				ASSERT_THAT(IsNotNull(Normal, CropId));
+				ASSERT_THAT(IsNotNull(Mutated, CropId));
+				ASSERT_THAT(IsTrue(Mutated != Normal, CropId));
+				ASSERT_THAT(IsTrue(Normal->GetSellPrice() > 0, CropId));
+				ASSERT_THAT(IsTrue(Mutated->GetSellPrice() == 2 * Normal->GetSellPrice(), CropId));
+			}
+		}
+
+		TEST_METHOD(TheCleaningCropGrowsOnlyOnContaminatedSoilCleansOneLevelAndNeverMutates)
+		{
+			Spawner.InitializeGameSubsystems();
+			const UFarmCropData* Crop = FindBase<UFarmCropData>(TEXT("Base.CleanupCrop"));
+			ASSERT_THAT(IsNotNull(Crop));
+
+			ASSERT_THAT(IsTrue(Crop->GetWateredNightsPerGrowthDay(0) == 0));
+			ASSERT_THAT(IsTrue(Crop->GetWateredNightsPerGrowthDay(1) == 1));
+			ASSERT_THAT(IsTrue(Crop->GetWateredNightsPerGrowthDay(2) == 1));
+			ASSERT_THAT(IsTrue(Crop->GetMinPlantingContamination() == 1));
+			ASSERT_THAT(IsTrue(Crop->GetContaminationCleanedPerHarvest() == 1));
+			ASSERT_THAT(IsFalse(Crop->CanMutate()));
+			ASSERT_THAT(IsTrue(Crop->GetDaysToMature() == 5));
+			ASSERT_THAT(IsTrue(Crop->GetYield() == 1));
+			ASSERT_THAT(IsTrue(Crop->GetHarvestItemId() == FPrimaryAssetId(UVestigeItemData::AssetType, TEXT("Base.CleanupCrop"))));
+			const UVestigeItemData* Harvest = FindBase<UVestigeItemData>(TEXT("Base.CleanupCrop"));
+			ASSERT_THAT(IsNotNull(Harvest));
+			ASSERT_THAT(IsTrue(Harvest->GetSellPrice() == 30));
+		}
+
 #if WITH_EDITOR
 		static bool HasErrors(const UObject& Object)
 		{
@@ -637,6 +747,70 @@ namespace FarmCropDataTests
 			}
 			Crop.SetStageStartScaleForTests(1.f);
 			ASSERT_THAT(IsFalse(HasErrors(Crop)));
+		}
+
+		TEST_METHOD(AnEmptyOrNegativeContaminationResponseIsInvalid)
+		{
+			UFarmCropData& Crop = MakeValidCrop();
+			Crop.SetContaminationResponseForTests({}, 0, 0);
+			ASSERT_THAT(IsTrue(HasErrors(Crop)));
+
+			Crop.SetContaminationResponseForTests({1, -1, 0}, 0, 0);
+			ASSERT_THAT(IsTrue(HasErrors(Crop)));
+
+			Crop.SetContaminationResponseForTests({1, 2}, 0, 0);
+			ASSERT_THAT(IsFalse(HasErrors(Crop)));
+		}
+
+		TEST_METHOD(ACropThatGrowsNowhereItsSeedsMayGoIsInvalid)
+		{
+			UFarmCropData& Crop = MakeValidCrop();
+			// The spring crops' response with seeds only for heavy soil, and past the list, where the last entry repeats.
+			Crop.SetContaminationResponseForTests({1, 2, 0}, 2, 0);
+			ASSERT_THAT(IsTrue(HasErrors(Crop)));
+			Crop.SetContaminationResponseForTests({1, 2, 0}, 3, 0);
+			ASSERT_THAT(IsTrue(HasErrors(Crop)));
+			Crop.SetContaminationResponseForTests({0, 0, 0}, 0, 0);
+			ASSERT_THAT(IsTrue(HasErrors(Crop)));
+
+			// The cleaning crop's: only on contaminated soil, where it grows. A short list's last entry covers the levels after it.
+			Crop.SetContaminationResponseForTests({0, 1, 1}, 1, 1);
+			ASSERT_THAT(IsFalse(HasErrors(Crop)));
+			Crop.SetContaminationResponseForTests({0, 1}, 2, 1);
+			ASSERT_THAT(IsFalse(HasErrors(Crop)));
+		}
+
+		TEST_METHOD(AMutatedItemOfAnotherTypeOrNamingNoItemIsInvalid)
+		{
+			UFarmCropData& Crop = MakeValidCrop();
+			Crop.SetMutationForTests(FPrimaryAssetId(UFarmCropData::AssetType, TEXT("Base.Turnip")), SoftOne(nullptr));
+			ASSERT_THAT(IsTrue(HasErrors(Crop)));
+
+			Crop.SetMutationForTests(FPrimaryAssetId(UVestigeItemData::AssetType, TEXT("Test.NoSuchItem")), SoftOne(nullptr));
+			ASSERT_THAT(IsTrue(HasErrors(Crop)));
+
+			Crop.SetMutationForTests(FPrimaryAssetId(UVestigeItemData::AssetType, TEXT("Base.MutatedTurnip")), SoftOne(nullptr));
+			ASSERT_THAT(IsFalse(HasErrors(Crop)));
+		}
+
+		TEST_METHOD(AMutatedRipeMeshAmongTheGrowthStagesIsInvalid)
+		{
+			UFarmCropData& Crop = MakeValidCrop();
+			Crop.SetMutationForTests(FPrimaryAssetId(UVestigeItemData::AssetType, TEXT("Base.MutatedTurnip")), SoftOne(Stages[1].Get()));
+			ASSERT_THAT(IsTrue(HasErrors(Crop)));
+
+			UStaticMesh& Mutated = Spawner.SpawnObject<UStaticMesh>();
+			Crop.SetMutationForTests(FPrimaryAssetId(UVestigeItemData::AssetType, TEXT("Base.MutatedTurnip")), SoftOne(&Mutated));
+			ASSERT_THAT(IsFalse(HasErrors(Crop)));
+		}
+
+		TEST_METHOD(TheCleaningCropIsValid)
+		{
+			Spawner.InitializeGameSubsystems();
+			const UFarmCropData* Crop = FindBase<UFarmCropData>(TEXT("Base.CleanupCrop"));
+			ASSERT_THAT(IsNotNull(Crop));
+
+			ASSERT_THAT(IsFalse(HasErrors(*Crop)));
 		}
 #endif
 	};

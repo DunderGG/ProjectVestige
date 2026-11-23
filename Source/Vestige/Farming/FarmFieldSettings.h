@@ -5,11 +5,13 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DeveloperSettings.h"
+#include "Farming/FarmContamination.h"
 #include "Farming/FarmTileState.h"
 #include "FarmFieldSettings.generated.h"
 
 /**
- * The numbers of the farm fields' rules: for now how much water a tile holds, what watering adds and what a night takes.
+ * The numbers of the farm fields' rules: how much water a tile holds, what watering adds and what a night takes, and the
+ * contamination levels and the mutation chance on each.
  * The same for every field, whichever map it is on, so these are project settings rather than a level's. Project Settings >
  * Game > Vestige Farm Fields, stored in Config/DefaultGame.ini. UFarmFieldSubsystem reads them when it makes a field.
  */
@@ -24,7 +26,13 @@ public:
 	/** The water rules with every number at least 1. */
 	FFarmWaterRules GetWaterRules() const { return FFarmWaterRules::GetClamped(WaterRules); }
 
+	/** The contamination rules with MaxLevel at least 1 and every chance from 0 to 1. */
+	FFarmContaminationRules GetContaminationRules() const { return FFarmContaminationRules::GetClamped(ContaminationRules); }
+
 private:
 	UPROPERTY(Config, EditAnywhere, Category = "Water", meta = (AllowPrivateAccess = "true"))
 	FFarmWaterRules WaterRules;
+
+	UPROPERTY(Config, EditAnywhere, Category = "Contamination", meta = (AllowPrivateAccess = "true"))
+	FFarmContaminationRules ContaminationRules;
 };

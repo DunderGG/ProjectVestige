@@ -86,6 +86,18 @@ namespace VestigeGameplayTags
 	/** The till and plant abilities, on the press: a withered crop stands on the tile and must be cleared first. */
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Feedback_Farm_ClearFirst);
 
+	/** The plant ability, on the press: the seeds need more contamination than the tile has (MinPlantingContamination). */
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Feedback_Farm_NeedsContamination);
+
+	/** The plant ability, on the press: the seeds' crop doesn't grow on the tile's contamination level. */
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Feedback_Farm_TooContaminated);
+
+	/** The harvest ability: the harvest lowered its tile's contamination, which is still above clean. */
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Feedback_Farm_Cleaned);
+
+	/** The harvest ability, instead of Farm.Cleaned when the harvest left its tile clean. */
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Feedback_Farm_Cleaned_Clean);
+
 	/**
 	 * The inventory has no room, so nothing is added: the harvest ability, on the press (the harvest stays in the ground), and a
 	 * seed dispenser (nothing is bought).

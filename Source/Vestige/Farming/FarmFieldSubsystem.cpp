@@ -14,6 +14,7 @@
 #include "Farming/FarmFieldSaveData.h"
 #include "Farming/FarmFieldSettings.h"
 #include "Farming/FarmLog.h"
+#include "Misc/Guid.h"
 #include "ProfilingDebugging/CpuProfilerTrace.h"
 #include "Time/VestigeClockSubsystem.h"
 
@@ -59,6 +60,7 @@ UFarmFieldSubsystem* UFarmFieldSubsystem::Get(const UWorld* World)
 void UFarmFieldSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
+	MutationSeed = PickMutationSeed();
 
 	// Restoring a save finds its crops in the catalogue.
 	Catalog = Collection.InitializeDependency<UVestigeContentCatalog>();
@@ -89,12 +91,16 @@ void UFarmFieldSubsystem::Deinitialize()
 	Super::Deinitialize();
 }
 
-UFarmField& UFarmFieldSubsystem::FindOrAddField(FName FieldId, const FIntPoint& Size)
+UFarmField& UFarmFieldSubsystem::FindOrAddField(
+	FName FieldId, const FIntPoint& Size, TConstArrayView<FFarmContaminationArea> StartingContamination)
 {
 	UFarmField* Field = FindField(FieldId);
 	if (!Field)
 	{
-		return AddField(FieldId, Size);
+		// Only a field made now starts contaminated: a found one, restored or visited before, may have been cleaned.
+		UFarmField& NewField = AddField(FieldId, Size);
+		NewField.ApplyContaminationAreas(StartingContamination);
+		return NewField;
 	}
 
 	if (Field->GetSize() != Size)
@@ -115,7 +121,8 @@ UFarmField* UFarmFieldSubsystem::FindField(FName FieldId) const
 UFarmField& UFarmFieldSubsystem::AddField(FName FieldId, const FIntPoint& Size)
 {
 	UFarmField* Field = NewObject<UFarmField>(this);
-	Field->Initialize(FieldId, Size, UFarmFieldSettings::Get().GetWaterRules());
+	const UFarmFieldSettings& Settings = UFarmFieldSettings::Get();
+	Field->Initialize(FieldId, Size, Settings.GetWaterRules(), Settings.GetContaminationRules());
 	Fields.Add(FieldId, Field);
 	return *Field;
 }
@@ -153,6 +160,12 @@ int32 UFarmFieldSubsystem::RestoreFromSaveData(
 void UFarmFieldSubsystem::StartNewGame()
 {
 	Fields.Reset();
+	MutationSeed = PickMutationSeed();
+}
+
+int32 UFarmFieldSubsystem::PickMutationSeed()
+{
+	return static_cast<int32>(GetTypeHash(FGuid::NewGuid()));
 }
 
 FName UFarmFieldSubsystem::GetSaveKey() const
@@ -172,6 +185,7 @@ FVestigeSaveRecord UFarmFieldSubsystem::WriteSaveRecord() const
 
 	FFarmFieldsSaveData Data;
 	Data.Fields = GetSaveData();
+	Data.MutationSeed = MutationSeed;
 	return FVestigeSaveRecord::Write(Data);
 }
 
@@ -187,6 +201,9 @@ bool UFarmFieldSubsystem::ReadSaveRecord(const FVestigeSaveRecord& Record, int32
 
 	// The save holds every field, so fields it doesn't name belong to another game.
 	StartNewGame();
+
+	// After StartNewGame, which picks a fresh seed: the saved one must win.
+	MutationSeed = Data.MutationSeed;
 	OutLeftOutCount += RestoreFromSaveData(Data.Fields, FarmFieldSaves::FindSavedCrops(Catalog, Data.Fields));
 	return true;
 }
@@ -197,7 +214,7 @@ void UFarmFieldSubsystem::AdvanceFields(int32 NewDay)
 
 	for (const TPair<FName, TObjectPtr<UFarmField>>& Pair : Fields)
 	{
-		Pair.Value->AdvanceDay();
+		Pair.Value->AdvanceDay(NewDay, MutationSeed);
 	}
 }
 

@@ -45,6 +45,9 @@ public:
 	/** The level's farm grid, found at BeginPlay, or nullptr if the level has none. */
 	const AFarmGrid* GetGrid() const { return Grid; }
 
+	/** The level's farm grid, for binding to its events (OnFieldReady), or nullptr if the level has none. */
+	AFarmGrid* GetGrid() { return Grid; }
+
 	/** Broadcast when the target tile changes, unset when there stops being one. */
 	FOnFarmTargetTileChanged OnTargetTileChanged;
 

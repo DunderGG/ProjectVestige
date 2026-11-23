@@ -92,10 +92,24 @@ bool UFarmCropData::GrowsIn(const FGameplayTag& Season, const FVestigeCalendar& 
 	return Seasons.HasTagExact(Season) || !ListsAnySeasonOf(Calendar);
 }
 
-FFarmSeasonFit UFarmCropData::GetSeasonFit(const FVestigeCalendar& Calendar, int32 Day) const
+int32 UFarmCropData::GetWateredNightsPerGrowthDay(int32 Level) const
+{
+	if (WateredNightsPerGrowthDay.IsEmpty())
+	{
+		return 1;
+	}
+	return FMath::Max(WateredNightsPerGrowthDay[FMath::Clamp(Level, 0, WateredNightsPerGrowthDay.Num() - 1)], 0);
+}
+
+UStaticMesh* UFarmCropData::GetMutatedRipeMesh() const
+{
+	return MutatedRipeMesh.IsNull() ? RipeMesh.Get() : MutatedRipeMesh.Get();
+}
+
+FFarmSeasonFit UFarmCropData::GetSeasonFit(const FVestigeCalendar& Calendar, int32 Day, int32 NightsPerGrowthDay) const
 {
 	FFarmSeasonFit Fit;
-	Fit.DaysToRipe = DaysToMature;
+	Fit.DaysToRipe = DaysToMature * FMath::Max(NightsPerGrowthDay, 1);
 
 	// Every crop fits in a calendar without seasons. A crop of every season (GrowsIn) finds no deadline below and fits too.
 	const FVestigeDate Date = Calendar.GetDate(Day);
@@ -238,7 +252,62 @@ EDataValidationResult UFarmCropData::IsDataValid(FDataValidationContext& Context
 				Index, Stage.StartDay, DaysToMature));
 		}
 	}
+	ReportContaminationErrors(ReportError);
 	return Result;
+}
+
+void UFarmCropData::ReportContaminationErrors(TFunctionRef<void(const FText&)> ReportError) const
+{
+	if (WateredNightsPerGrowthDay.IsEmpty())
+	{
+		ReportError(LOCTEXT("NoWateredNights",
+			"Watered Nights Per Growth Day is empty. List the watered nights one growth day takes on each contamination level."));
+	}
+	for (int32 Level = 0; Level < WateredNightsPerGrowthDay.Num(); ++Level)
+	{
+		if (WateredNightsPerGrowthDay[Level] < 0)
+		{
+			ReportError(FText::Format(
+				LOCTEXT("NegativeWateredNights", "Watered Nights Per Growth Day on level {0} is {1}. Use 0 for no growth there."), Level,
+				WateredNightsPerGrowthDay[Level]));
+		}
+	}
+
+	// The last entry repeats past the end, so levels from the lowest planting level to the end of the list cover every level the
+	// seeds may go on.
+	bool bGrowsWherePlanted = WateredNightsPerGrowthDay.IsEmpty();
+	const int32 LastLevel = FMath::Max(MinPlantingContamination, WateredNightsPerGrowthDay.Num() - 1);
+	for (int32 Level = MinPlantingContamination; Level <= LastLevel && !bGrowsWherePlanted; ++Level)
+	{
+		bGrowsWherePlanted = GetWateredNightsPerGrowthDay(Level) > 0;
+	}
+	if (!bGrowsWherePlanted)
+	{
+		ReportError(
+			FText::Format(LOCTEXT("GrowsNowhere",
+							  "The crop grows on no contamination level from {0} up, where its seeds may be planted, so it never grows."),
+				MinPlantingContamination));
+	}
+
+	if (MutatedHarvestItemId != FPrimaryAssetId())
+	{
+		if (const TOptional<FText> Error = FindContentReferenceError(MutatedHarvestItemId, UVestigeItemData::AssetType))
+		{
+			ReportError(FText::Format(LOCTEXT("BadMutatedHarvestItemId", "Mutated Harvest Item Id {0}"), *Error));
+		}
+	}
+	if (!MutatedRipeMesh.IsNull())
+	{
+		for (int32 Index = 0; Index < GrowthStages.Num(); ++Index)
+		{
+			if (GrowthStages[Index].Mesh == MutatedRipeMesh)
+			{
+				ReportError(FText::Format(
+					LOCTEXT("MutatedMeshAmongStages", "Growth stage {0} uses the Mutated Ripe Mesh, so it shows before the crop is ripe."),
+					Index));
+			}
+		}
+	}
 }
 #endif
 

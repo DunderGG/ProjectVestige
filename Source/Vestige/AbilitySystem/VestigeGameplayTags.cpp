@@ -39,6 +39,14 @@ namespace VestigeGameplayTags
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Feedback_Farm_ClearFirst, "Vestige.Feedback.Farm.ClearFirst",
 		"Feedback: a withered crop must be cleared before tilling or planting.");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Feedback_Farm_NothingRipe, "Vestige.Feedback.Farm.NothingRipe", "Feedback: no ripe crop to harvest.");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Feedback_Farm_NeedsContamination, "Vestige.Feedback.Farm.NeedsContamination",
+		"Feedback: the seeds only grow in contaminated soil, and the tile is cleaner.");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Feedback_Farm_TooContaminated, "Vestige.Feedback.Farm.TooContaminated",
+		"Feedback: the tile is too contaminated for the seeds to grow.");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(
+		Feedback_Farm_Cleaned, "Vestige.Feedback.Farm.Cleaned", "Feedback: the harvest made its tile less contaminated.");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(
+		Feedback_Farm_Cleaned_Clean, "Vestige.Feedback.Farm.Cleaned.Clean", "Feedback: the harvest left its tile clean.");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(
 		Feedback_Inventory_Full, "Vestige.Feedback.Inventory.Full", "Feedback: no room in the inventory, so nothing is added.");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Feedback_Water_CanEmpty, "Vestige.Feedback.Water.CanEmpty", "Feedback: the watering can is empty.");
@@ -49,8 +57,8 @@ namespace VestigeGameplayTags
 		Feedback_Water_WellRanDry, "Vestige.Feedback.Water.WellRanDry", "Feedback: the well ran dry before the can was full.");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Feedback_Shipping_Shipped, "Vestige.Feedback.Shipping.Shipped",
 		"Feedback: the shipping bin took the stack in hand. Values: Item, Count.");
-	UE_DEFINE_GAMEPLAY_TAG_COMMENT(
-		Feedback_Shipping_NothingToShip, "Vestige.Feedback.Shipping.NothingToShip", "Feedback: nothing sellable is in hand at the shipping bin.");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Feedback_Shipping_NothingToShip, "Vestige.Feedback.Shipping.NothingToShip",
+		"Feedback: nothing sellable is in hand at the shipping bin.");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Feedback_Shipping_Paid, "Vestige.Feedback.Shipping.Paid",
 		"Feedback: the Paid clause of the game mode's day reports, when the night's sale paid. Value: Amount. Never reported alone.");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(

@@ -3,15 +3,18 @@
 
 #include "Farming/FarmField.h"
 
+#include "Algo/Count.h"
 #include "Content/FarmCropData.h"
 #include "Content/VestigeCalendar.h"
 #include "Farming/FarmLog.h"
 #include "ProfilingDebugging/CpuProfilerTrace.h"
 
-void UFarmField::Initialize(FName InFieldId, const FIntPoint& InSize, const FFarmWaterRules& InWaterRules)
+void UFarmField::Initialize(
+	FName InFieldId, const FIntPoint& InSize, const FFarmWaterRules& InWaterRules, const FFarmContaminationRules& InContaminationRules)
 {
 	FieldId = InFieldId;
 	WaterRules = FFarmWaterRules::GetClamped(InWaterRules);
+	ContaminationRules = FFarmContaminationRules::GetClamped(InContaminationRules);
 	Size = FIntPoint(FMath::Max(InSize.X, 1), FMath::Max(InSize.Y, 1));
 	Tiles.Reset();
 	Tiles.SetNum(Size.X * Size.Y);
@@ -92,8 +95,8 @@ int32 UFarmField::WitherCropsOutOfSeason(const FGameplayTag& Season, const FVest
 	}
 	if (WitheredCount > 0)
 	{
-		VESTIGE_LOG(this, LogFarm, Log, "{Count} crops withered on field {FieldId} as {Season} began.", WitheredCount, FieldId,
-			Season.ToString());
+		VESTIGE_LOG(
+			this, LogFarm, Log, "{Count} crops withered on field {FieldId} as {Season} began.", WitheredCount, FieldId, Season.ToString());
 		OnTilesChanged.Broadcast();
 	}
 	return WitheredCount;
@@ -110,14 +113,78 @@ bool UFarmField::ChangeTile(const FIntPoint& Coordinates, TFunctionRef<bool(FFar
 	return true;
 }
 
-void UFarmField::AdvanceDay()
+void UFarmField::AdvanceDay(int32 Day, int32 MutationSeed)
 {
 	TRACE_CPUPROFILER_EVENT_SCOPE(UFarmField::AdvanceDay);
 
-	for (FFarmTileState& Tile : Tiles)
+	for (int32 Index = 0; Index < Tiles.Num(); ++Index)
 	{
-		Tile.AdvanceDay(WaterRules.NightlyFall);
+		FFarmTileState& Tile = Tiles[Index];
+		if (Tile.AdvanceDay(WaterRules.NightlyFall))
+		{
+			RollMutation(Tile, FIntPoint(Index % Size.X, Index / Size.X), Day, MutationSeed);
+		}
 	}
+	OnTilesChanged.Broadcast();
+}
+
+void UFarmField::RollMutation(FFarmTileState& Tile, const FIntPoint& Coordinates, int32 Day, int32 MutationSeed)
+{
+	// A crop rolls once in its life, on the night it ripens, so a ripe crop left in the ground gets no new chances.
+	const float Chance = ContaminationRules.GetMutationChance(Tile.GetContamination());
+	if (!Tile.GetCrop() || !Tile.GetCrop()->CanMutate() || Chance <= 0.f
+		|| !FarmContamination::RollsMutation(MutationSeed, FieldId, Coordinates, Day, Chance) || !Tile.Mutate())
+	{
+		return;
+	}
+	VESTIGE_LOG(this, LogFarm, Verbose, "{CropId} at {Tile} on field {FieldId} ripened mutated.", Tile.GetCrop()->GetContentId(),
+		Coordinates.ToString(), FieldId);
+}
+
+bool UFarmField::SetContamination(const FIntPoint& Coordinates, int32 Level)
+{
+	return ChangeTile(Coordinates,
+		[this, Level](FFarmTileState& Tile)
+		{
+			return Tile.SetContamination(Level, ContaminationRules.MaxLevel);
+		});
+}
+
+void UFarmField::ApplyContaminationAreas(TConstArrayView<FFarmContaminationArea> Areas)
+{
+	TRACE_CPUPROFILER_EVENT_SCOPE(UFarmField::ApplyContaminationAreas);
+
+	if (Areas.IsEmpty())
+	{
+		return;
+	}
+	for (const FFarmContaminationArea& Area : Areas)
+	{
+		// Cut to the field; an area with nothing left inside it was set up wrong.
+		const FIntPoint First(FMath::Max(Area.Min.X, 0), FMath::Max(Area.Min.Y, 0));
+		const FIntPoint Last(FMath::Min(Area.Max.X, Size.X - 1), FMath::Min(Area.Max.Y, Size.Y - 1));
+		if (First.X > Last.X || First.Y > Last.Y)
+		{
+			VESTIGE_LOG(this, LogFarm, Warning,
+				"A starting contamination area from {Min} to {Max} has no tile in field {FieldId} of {Size} tiles, so it was skipped.",
+				Area.Min.ToString(), Area.Max.ToString(), FieldId, Size.ToString());
+			continue;
+		}
+		for (int32 Y = First.Y; Y <= Last.Y; ++Y)
+		{
+			for (int32 X = First.X; X <= Last.X; ++X)
+			{
+				Tiles[ToIndex(FIntPoint(X, Y))].SetContamination(Area.Level, ContaminationRules.MaxLevel);
+			}
+		}
+	}
+
+	const int32 ContaminatedCount = Algo::CountIf(Tiles,
+		[](const FFarmTileState& Tile)
+		{
+			return Tile.IsContaminated();
+		});
+	VESTIGE_LOG(this, LogFarm, Log, "{Count} tiles of field {FieldId} start contaminated.", ContaminatedCount, FieldId);
 	OnTilesChanged.Broadcast();
 }
 
@@ -127,7 +194,7 @@ void UFarmField::Resize(const FIntPoint& NewSize)
 
 	const FIntPoint OldSize = Size;
 	TArray<FFarmTileState> OldTiles = MoveTemp(Tiles);
-	Initialize(FieldId, NewSize, WaterRules);
+	Initialize(FieldId, NewSize, WaterRules, ContaminationRules);
 	for (int32 Y = 0; Y < FMath::Min(OldSize.Y, Size.Y); ++Y)
 	{
 		for (int32 X = 0; X < FMath::Min(OldSize.X, Size.X); ++X)
@@ -153,6 +220,9 @@ TArray<FFarmTileSaveData> UFarmField::GetTilesSaveData() const
 		Data.WaterLevel = Tile.GetWaterLevel();
 		Data.GrowthDays = Tile.GetGrowthDays();
 		Data.CropId = Tile.GetCrop() ? Tile.GetCrop()->GetContentId() : NAME_None;
+		Data.Contamination = Tile.GetContamination();
+		Data.WateredNights = Tile.GetWateredNights();
+		Data.bMutated = Tile.IsMutated();
 	}
 	return SavedTiles;
 }
@@ -181,7 +251,7 @@ int32 UFarmField::RestoreTilesFromSaveData(const TArray<FFarmTileSaveData>& Save
 				Data.Coordinates.ToString(), FieldId);
 			++SkippedCount;
 		}
-		Tiles[Index].Restore(Data.State, Data.WaterLevel, Data.GrowthDays, SavedCrop, WaterRules.MaxLevel);
+		Tiles[Index].Restore(Data, SavedCrop, WaterRules.MaxLevel, ContaminationRules.MaxLevel);
 	}
 	OnTilesChanged.Broadcast();
 	return SkippedCount;

@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Farming/FarmContamination.h"
 #include "GameFramework/Actor.h"
 #include "Interaction/VestigeInteractable.h"
 #include "FarmGrid.generated.h"
@@ -77,6 +78,9 @@ public:
 	/** Number of tiles along the actor's X axis. */
 	int32 GetWidth() const { return Width; }
 
+	/** The field's starting contamination in a new game, set on the level's instance. */
+	const TArray<FFarmContaminationArea>& GetStartingContamination() const { return StartingContamination; }
+
 	/** The field this grid shows, or nullptr before BeginPlay or in a world without a game instance. */
 	UFarmField* GetField() const { return Field; }
 
@@ -123,6 +127,14 @@ private:
 	/** Size of one tile in Unreal units (cm). */
 	UPROPERTY(EditAnywhere, Category = "Farming", meta = (AllowPrivateAccess = "true", ClampMin = 10))
 	float TileSize = 100.f;
+
+	/**
+	 * Where the field starts contaminated in a new game: rectangles of tiles and their levels, later ones over earlier ones
+	 * (Systems.md, section 27). Applied only when the field is made, never to a field from a save. Set on the level's
+	 * instance; BP_FarmGrid's default is empty, so a new grid starts clean.
+	 */
+	UPROPERTY(EditAnywhere, Category = "Farming", meta = (AllowPrivateAccess = "true"))
+	TArray<FFarmContaminationArea> StartingContamination;
 
 	/** Outlines the grid in the editor so it's easy to place. Hidden in game. */
 	UPROPERTY(VisibleAnywhere, Category = "Farming")

@@ -9,8 +9,11 @@
 #include "UI/VestigeHudMessages.h"
 #include "VestigeHUD.generated.h"
 
+class AFarmGrid;
 class AVestigePlayerCharacter;
 class APawn;
+class UFarmField;
+class UFarmTargetingComponent;
 class UAbilitySystemComponent;
 class UCommonInputSubsystem;
 class UFarmCropData;
@@ -28,7 +31,8 @@ struct FVestigeFeedbackReport;
 /**
  * The farming HUD's data side for its player: the date and time from the game's UVestigeClockSubsystem, the item in hand
  * and the items from the inventory and the stamina from the ability system on the player state, the farmer's key hints,
- * the prompt for the interactable the pawn's UVestigeInteractionComponent focuses, and the message FeedbackResponses gives
+ * the prompt for the interactable the pawn's UVestigeInteractionComponent focuses, the contamination of the tile its
+ * UFarmTargetingComponent targets (from the targeting component's and its grid's field's events), and the message FeedbackResponses gives
  * each report UVestigeFeedbackSubsystem carries, with the report's sound. It only presents: texts and sounds.
  * It creates its HudWidgetClass widget (WBP_Hud, set on BP_HUD) for a local player at BeginPlay, builds each text when an
  * event says what it shows has changed, and pushes it to the widget; the messages are the one thing it keeps, and only
@@ -75,6 +79,20 @@ public:
 	/** The money line: "Coins 250", with the culture's digit grouping ("Coins 1,500"). "Coins" is the currency's working name. */
 	static FText FormatMoney(int32 Money);
 
+	/**
+	 * The tile line for a faced tile at contamination Level: its entry in ContaminationLevelNames, the last one past the end.
+	 * Empty for a clean tile.
+	 */
+	FText GetTileText(int32 Level) const;
+
+#if WITH_DEV_AUTOMATION_TESTS
+	/** For tests only. BeginPlay makes the widget only with a local player and a viewport, which a test world lacks. */
+	void SetHudWidgetForTests(UVestigeHudWidget* InHudWidget) { HudWidget = InHudWidget; }
+
+	/** For tests only. Follows InPawn as a possession does, so the bindings to its components can be tested. */
+	void FollowPawnForTests(APawn* InPawn) { FollowPawn(nullptr, InPawn); }
+#endif
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
@@ -87,6 +105,13 @@ private:
 	/** What each feedback report shows. Without it the HUD logs an error and shows no messages. */
 	UPROPERTY(EditDefaultsOnly, Category = "HUD", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<const UVestigeFeedbackResponses> FeedbackResponses;
+
+	/**
+	 * What the tile line says for each contamination level of the faced tile (index = level), the last entry past the end. A
+	 * clean tile and an empty entry show nothing.
+	 */
+	UPROPERTY(EditDefaultsOnly, Category = "HUD", meta = (AllowPrivateAccess = "true"))
+	TArray<FText> ContaminationLevelNames;
 
 	UPROPERTY(Transient)
 	TObjectPtr<UVestigeHudWidget> HudWidget;
@@ -108,6 +133,34 @@ private:
 
 	/** Bound to the interaction component's OnFocusChanged. */
 	void RefreshPromptText();
+
+	/**
+	 * Follows the field the pawn's targeting component's grid shows, for the tile line: binds it once the grid has its field
+	 * (waiting for the grid's OnFieldReady when it hasn't yet), and binds another when the grid shows another field. Called
+	 * when the pawn changes and on every target change.
+	 */
+	void FollowTargetField();
+
+	/** Waits for Grid's field: binds its OnFieldReady, once, and lets go of the grid waited for before. */
+	void WaitForField(AFarmGrid& Grid);
+
+	/** Bound to the grid's OnFieldReady while waiting for it: stops waiting and follows its field. */
+	void FollowReadyField();
+
+	/** Lets go of the followed field and of the grid waited for, which outlive the HUD and the pawn. */
+	void StopFollowingTargetField();
+
+	/** Lets go of the followed field's tile events. */
+	void StopFollowingTileField();
+
+	/** Bound to the targeting component's OnTargetTileChanged. */
+	void FollowTargetFieldOf(const TOptional<FIntPoint>& Tile);
+
+	/** Bound to the followed field's OnTileChanged: rebuilds the tile line when the changed tile is the target. */
+	void RefreshTileTextIfTarget(const FIntPoint& Coordinates);
+
+	/** Rebuilds the tile line from the target tile's contamination. Also bound to the followed field's OnTilesChanged. */
+	void RefreshTileText();
 
 	/** Follows the inventory on the player state, which outlives the pawn, so this happens once, at BeginPlay. */
 	void FollowInventory();
@@ -171,6 +224,13 @@ private:
 
 	TWeakObjectPtr<const UVestigeClockSubsystem> Clock;
 	TWeakObjectPtr<UVestigeInteractionComponent> Interaction;
+	TWeakObjectPtr<UFarmTargetingComponent> Targeting;
+
+	/** The field whose tile events the tile line follows, the targeting grid's. */
+	TWeakObjectPtr<UFarmField> TileField;
+
+	/** The grid whose OnFieldReady the HUD is bound to while its field isn't ready, or none. */
+	TWeakObjectPtr<AFarmGrid> FieldReadyGrid;
 	TWeakObjectPtr<UVestigeInventoryComponent> Inventory;
 	TWeakObjectPtr<UVestigeWalletComponent> Wallet;
 	TWeakObjectPtr<UAbilitySystemComponent> AbilitySystem;
