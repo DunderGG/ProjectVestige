@@ -14,6 +14,7 @@ You bring the farm back to life, help the town next door, and slowly push out in
   <img src="https://img.shields.io/badge/status-in%20development-gold" alt="In development">
   <a href="LICENSING.md"><img src="https://img.shields.io/badge/code-GPL--3.0--or--later-2f6f9f" alt="Code license: GPL-3.0-or-later"></a>
   <a href="LICENSING.md"><img src="https://img.shields.io/badge/assets-CC%20BY--NC--SA%204.0-lightgrey" alt="Asset license: CC BY-NC-SA 4.0"></a>
+  <a href="https://github.com/DunderGG/ProjectVestige/actions/workflows/whitespace-checks.yml"><img src="https://github.com/DunderGG/ProjectVestige/actions/workflows/whitespace-checks.yml/badge.svg?branch=main" alt="Whitespace checks"></a>
 </p>
 
 ## 📥 Download
