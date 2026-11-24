@@ -24,11 +24,20 @@ Contents
 
 ## 1. Where we are
 
-- **Done:** milestone 1, the playable prototype, plus the project's documents and rules.
-- **Now:** the code follows the guidelines and the architecture (both audits' code reviews are closed, 2026-10-29). Next: play-test that clean-up, the editor housekeeping steps in [section 3](#3-housekeeping), then the rest of the milestone 2 foundations.
-- **Next up**, in order:
-  1. [Section 4.0](#40-structure-from-the-code-review): the structural fixes from the [code review](CodeReview.md) (2026-11-04), the quick wins first, then the world structure and the tiles before 4.2 builds on them.
-  2. The rest of [section 4.3](#43-stamina-and-late-nights): tuning stamina and the late-night numbers in play. The late-night rules, the red stamina line and holding E are done (2026-11-02); starting stamina from data and montage timing wait for their triggers. Logging, Blueprint events, the interaction interface and the bed are done (2026-11-01 and 2026-11-02); the rest of [section 4.1](#41-foundations) waits for a packaged build (the performance baseline) or for the need that starts it (the ID redirect list, more Blueprint extension points, a second interaction option).
+- **Done:** milestone 1, the playable prototype, and most of the farming core of milestone 2: crops and the season, planting rules, water and the well, withering, contamination with a mutated crop, selling and the seed shop.
+- **Now:** the rest of milestone 2, the one-season vertical slice. What is left is the caretaker robot, the sprinkler, dirty water, the screens a first-time player needs, and the slice play-test that ends the milestone.
+- **Next up**, in order (reviewed 2026-11-24, @DunderGG said yes):
+  1. The quick fixes at the top of [section 3](#3-housekeeping), then the open play-tests of contamination and the seed shop.
+  2. [4.4](#44-the-caretaker-robot): Hob in the game with data-driven dialogue, its dialogue box built with Common UI ([4.0](#40-structure-from-the-code-review)), and characters as data.
+  3. Hob's relationship track, and how the player sees his opinion change ([4.4](#44-the-caretaker-robot)).
+  4. [4.5](#45-automation-and-selling): placing objects on the farm grid, and the sprinkler, bought at the seed shop.
+  5. Dirty water and its source ([4.2](#42-farming-depth)).
+  6. What a first-time player needs to see: the hotbar and the bag on screen ([4.6](#46-interface-and-input)), a dry crop that looks thirsty and item descriptions ([4.2](#42-farming-depth)), then the HUD layout pass.
+  7. [4.7](#47-starting-and-testing-the-slice): the title screen and the day-1 save.
+  8. Hob's tutorial and his reminders of crops at risk ([4.4](#44-the-caretaker-robot), [4.2](#42-farming-depth)), which need Hob and dialogue.
+  9. The slice play-test with players who haven't seen the game ([4.7](#47-starting-and-testing-the-slice)).
+
+  Polish that isn't on this path (the sun and the moon, the per-minute clock, the ripe-crop glow, held meshes, automated play-tests, the performance agent) waits until after it unless it is cheap to do alongside.
 
 ## 2. Milestone 1: playable prototype (done)
 
@@ -38,20 +47,12 @@ All its items are done and listed in [RoadmapArchive.md](RoadmapArchive.md#2-mil
 
 ## 3. Housekeeping
 
-Small things to finish before milestone 2 starts.
+Work outside the milestones' features: the tools, the tests and the rules. The first three are quick fixes to do before the next roadmap item (roadmap review, 2026-11-24).
 
-- [ ] Rules from the [code review](CodeReview.md#project-rules-that-are-themselves-wrong) (2026-11-04), each *(decide)* by @DunderGG, then changed in its document:
-   - Replace the strict linear layer order with folders that depend on `Core/` and the features they declare, and plan a `VestigeCore` module once a boundary settles ([M3](CodeReview.md#m3--the-strict-linear-layer-order-is-the-wrong-shape))
-   - Cut `Architecture.md` to principles and a one-page system map, keep ownership in the class comments, and log only hard-to-undo decisions ([M8](CodeReview.md#m8--the-documents-outweigh-the-code), rule 5). Done 2026-11-11 and 2026-11-12, as @DunderGG chose it ("yes to all" to the recommended options): one ownership list, section 13 as a one-page map with what each class doesn't own (the detail lives in the class comments and the guides), and the same decision log scope with new entries of about 100 words. Logging only hard-to-undo decisions was rejected because it would take away the maintainer's way to overrule an agent's choice ([Architecture.md, decision log](Architecture.md#16-decision-log), 2026-11-11)
-   - Performance as a frame budget per system and a packaged-build profile at every milestone, with micro rules only for per-tile and per-frame code (rule 1)
-   - Drop "change structure only when a profile says so" for structural choices whose cost is known up front (rule 2). Done 2026-11-05 with C2: [Architecture.md, section 10](Architecture.md#design-rules) now says to decide structure up front when its cost is known
-   - Let a system be prototyped and played before its `Systems.md` guide; keep guide approval for adopting engine frameworks (rule 3)
-   - Build what is right for the game even when it needs an editor asset; @DunderGG makes the asset or the agent writes the steps (rule 6)
-   - One class prefix, `Vestige`, for new types, and no more renames of existing `Farm` classes ([L1](CodeReview.md#low))
 - [ ] Make `Tools/Verify-Vestige.ps1` find the engine instead of hard-coding `C:\Program Files\Epic Games\UE_5.8`: on @DunderGG's PC it is installed under `C:\Users\Dunder\Epic Games\UE_5.8`, so every session has to run a copy with the path changed. For example an `-EngineRoot` parameter, then the `UE_ROOT` environment variable, then the launcher's install list (found 2026-11-22)
-- [ ] Rename the two event handlers named for when they run, `UFarmingComponent::HandleItemInHandChanged` and `AVestigeHUD::HandleInputMethodChanged`, for what they do ([CodingGuidelines.md, section 2.3](CodingGuidelines.md#23-case-and-wording)), in a small commit of its own (code review of the contamination slice, 2026-11-22)
-- [ ] Fix the flaky `Vestige.Feedback.TheLogShowsAReportsClauses`: its `FReportLogCapture` is a buffered output device (it doesn't override `CanBeUsedOnMultipleThreads`), so its lines arrive only when the redirector flushes, and the test removes it without a flush. Call `GLog->Flush()` before `GLog->RemoveOutputDevice`, as `VestigeLogTests.cpp` does, or share one capture helper between the two files; in a commit of its own (code review, 2026-11-22)
+- [ ] Fix the flaky `Vestige.Feedback.TheLogShowsAReportsClauses`: its `FReportLogCapture` is a buffered output device (it doesn't override `CanBeUsedOnMultipleThreads`), so its lines arrive only when the redirector flushes, and the test removes it without a flush. Call `GLog->Flush()` before `GLog->RemoveOutputDevice`, as `VestigeLogTests.cpp` does, or share one capture helper between the two files; in a commit of its own (code review, 2026-11-22). A flaky test weakens the check that the whole suite passes before each commit
 - [ ] Check the open play-test checks against the code before the next play-test: 18 checks under nine headings in [PlayTest.md, section 2](PlayTest.md#2-pending-checks) are still open, the oldest from 2026-10-30, and some describe behaviour that later changes replaced ("Five messages and the message log" expects `UVestigeFeedbackSubsystem::Notify`, which `Report` replaced on 2026-11-08). Update or drop each stale one with the test author
+- [ ] Rename the two event handlers named for when they run, `UFarmingComponent::HandleItemInHandChanged` and `AVestigeHUD::HandleInputMethodChanged`, for what they do ([CodingGuidelines.md, section 2.3](CodingGuidelines.md#23-case-and-wording)), in a small commit of its own (code review of the contamination slice, 2026-11-22)
 - [ ] Check automatically that every file under `Art/` and `Content/Vestige/` matches a row of the path table in `LICENSING.md`, so no asset is left without a record of who or what made it (asked by @DunderGG, 2026-11-23, instead of a README per `Art/` folder, which would repeat the table in many places and drift). To decide through the architect and the reviewer: a `Vestige` automation test or a script in `Tools/`, and how the table's patterns are read
 - [ ] Check every static mesh in `Content/Vestige/` automatically against its triangle budget and for missing collision, so a mistake in an asset nobody re-checks by hand is caught (asked by @DunderGG, 2026-11-12). To decide through the architect and the reviewer: an editor data validator (the Data Validation plugin's `UEditorValidatorBase`, which runs when an asset is saved and on Validate Assets) or a `Vestige` automation test, where the budgets per kind of asset live (crop, tool, building, from [CONTRIBUTING.md, Budgets](../CONTRIBUTING.md#budgets)) and how a mesh's kind is known, how Nanite meshes are counted, and which meshes need no collision (crops). Cheap to add to the same check: textures over 1024, small props that cast shadows, and any asset or map that references the store-asset folders `.gitignore` keeps out of the repository (`Content/Fab/`, `Content/Megascans/`...), which would break in a fresh clone (art direction review, 2026-11-13). A validator needs an editor-only module or dependency, since `Vestige` is a runtime module; an automation test doesn't
 - [ ] Automate the play-tests, so the maintainer only judges feel and fun (asked by @DunderGG, 2026-11-13; the first step, the test author checking the game off-screen itself before writing a manual check, is in its instructions). To design through the architect and the reviewer: functional tests in a test map (Unreal's `AFunctionalTest`) that drive input, sleep and save and check the result; a script that runs the game off-screen (`-RenderOffScreen`) and takes screenshots at set moments for an agent to look at; Unreal's screenshot comparison against reference images approved once, which needs a run with a GPU (not `-nullrhi`) and stable lighting and time; an automatic performance run against the budget; and later Gauntlet for packaged builds. Then go through the open checks in `PlayTest.md` and move each one that can be automated
@@ -63,6 +64,14 @@ Small things to finish before milestone 2 starts.
    - Move replaced and old entries of `DecisionLog.md` (about 30,000 tokens) to an archive file if searching it gets slow or noisy
    - Keep `AGENTS.md` and `CLAUDE.md` short (about 5,500 tokens together): they load into every agent and the main session, so text that only one role needs belongs in that role's file
    - Watch the largest system guides (Inventory and the Gameplay Ability System are about 6,000 to 7,500 tokens) and split a guide that keeps growing
+- [ ] Rules from the [code review](CodeReview.md#project-rules-that-are-themselves-wrong) (2026-11-04), each *(decide)* by @DunderGG, then changed in its document. Five are still open: decide them in one sitting, listed in [section 7](#7-open-decisions) until then (roadmap review, 2026-11-24):
+   - Replace the strict linear layer order with folders that depend on `Core/` and the features they declare, and plan a `VestigeCore` module once a boundary settles ([M3](CodeReview.md#m3--the-strict-linear-layer-order-is-the-wrong-shape))
+   - Cut `Architecture.md` to principles and a one-page system map, keep ownership in the class comments, and log only hard-to-undo decisions ([M8](CodeReview.md#m8--the-documents-outweigh-the-code), rule 5). Done 2026-11-11 and 2026-11-12, as @DunderGG chose it ("yes to all" to the recommended options): one ownership list, section 13 as a one-page map with what each class doesn't own (the detail lives in the class comments and the guides), and the same decision log scope with new entries of about 100 words. Logging only hard-to-undo decisions was rejected because it would take away the maintainer's way to overrule an agent's choice ([Architecture.md, decision log](Architecture.md#16-decision-log), 2026-11-11)
+   - Performance as a frame budget per system and a packaged-build profile at every milestone, with micro rules only for per-tile and per-frame code (rule 1)
+   - Drop "change structure only when a profile says so" for structural choices whose cost is known up front (rule 2). Done 2026-11-05 with C2: [Architecture.md, section 10](Architecture.md#design-rules) now says to decide structure up front when its cost is known
+   - Let a system be prototyped and played before its `Systems.md` guide; keep guide approval for adopting engine frameworks (rule 3)
+   - Build what is right for the game even when it needs an editor asset; @DunderGG makes the asset or the agent writes the steps (rule 6)
+   - One class prefix, `Vestige`, for new types, and no more renames of existing `Farm` classes ([L1](CodeReview.md#low))
 
 ## 4. Milestone 2: vertical slice
 
@@ -76,7 +85,7 @@ The fixes from the [code review](CodeReview.md) of 2026-11-04, in the order to d
 
 Before more tools and [4.6](#46-interface-and-input):
 
-- [ ] Common UI with the first menu ([H7](CodeReview.md#h7--the-hud-is-raw-slate-written-in-c)): reparent the widget bases to `UCommonUserWidget`, set `UCommonGameViewportClient` as the game viewport client, remove the `CommonUI.Debug.CheckGameViewportClientValid` setting and its test `Vestige.Input.TheActionRouterCheckIsOff`, and log the decision ([Systems.md, section 6](Systems.md#6-user-interface)). The plugin and Common Input are already on since the gamepad key hints (2026-11-08)
+- [ ] Common UI with the first menu ([H7](CodeReview.md#h7--the-hud-is-raw-slate-written-in-c)): reparent the widget bases to `UCommonUserWidget`, set `UCommonGameViewportClient` as the game viewport client, remove the `CommonUI.Debug.CheckGameViewportClientValid` setting and its test `Vestige.Input.TheActionRouterCheckIsOff`, and log the decision ([Systems.md, section 6](Systems.md#6-user-interface)). The plugin and Common Input are already on since the gamepad key hints (2026-11-08). Due with Hob's dialogue box ([4.4](#44-the-caretaker-robot)) or the title screen ([4.7](#47-starting-and-testing-the-slice)), whichever comes first (roadmap review, 2026-11-24)
 
 When working nearby:
 
@@ -85,7 +94,6 @@ When working nearby:
 - [ ] Load only the crops of the seeds the player carries, if crops ever number in the dozens: the content catalogue loads every crop with its meshes once per game today (since 2026-11-08). Measure first (found with H2, 2026-11-07)
 - [ ] A held tool use resumes after a jump only when the farmer walks again: landing in water or in navigation walking doesn't resume it (releasing E still ends it). Revisit when the farmer can swim or robots use tools
 - [ ] Write saves with `AsyncSaveGameToSlot` once they grow ([L4](CodeReview.md#low)). First measure saving and loading on the 60 by 60 benchmark field: each tile is about five tagged properties with their names as text, so a large field is a large record. Saving only the tiles that differ from grass is the likely fix, since tiles carry their coordinates. `AsyncSaveGameToSlot` still builds the bytes on the game thread
-- [ ] Start a new game with a save: `NewGame` deletes both slots, so quitting before the first night leaves no save at all. Write a day-1 save once the new map has begun play instead (found in the save registry review, 2026-11-06)
 - [ ] The content catalogue sees content added while a game runs (a mod's game feature plugin turned on mid-game) by listening for new primary assets, when mod support is designed; until then it sees it at the next game (found with M5, 2026-11-08)
 - [ ] A script that builds and runs the tests before each commit ([L5](CodeReview.md#low))
 - [ ] Remove the template's touch controls when the character is reparented ([M6](CodeReview.md#m6--the-template-code-is-load-bearing)): nothing shows them since 2026-11-06, but `BP_PlayerCharacter` still implements `BPI_TouchInterface`, so `Content/Input/Touch/` stays until then
@@ -108,7 +116,7 @@ The code changes that the slice's content depends on. Doing them first means add
 
 **Communication and extension points**
 
-- [ ] Harvests by anything but the player's tools (robots, automation) reach `On Crop Harvested` too: when the first other harvester is built, move the event to the owner that sees every harvest (a change mod Blueprints would have to follow, so cheapest before mods exist)
+- [ ] Harvests by anything but the player's tools (robots, automation) reach `On Crop Harvested` too: when the first other harvester is built, move the event to the owner that sees every harvest (a change mod Blueprints would have to follow, so cheapest before mods exist). Likely due with Hob, who shows his trust by helping on his own initiative ([GameDesign.md, section 8](GameDesign.md#relationships))
 - [ ] Blueprint-callable main actions and Blueprint-readable state (a tile's state, the clock, inventory counts), as extension points, once a mod or content Blueprint first needs them ([Architecture.md, section 12](Architecture.md#12-designing-for-mods), rule 4)
 - [ ] A way to choose between an interactable's options (a menu, or a key per option), when the first object offers two actions at once; until then the interact key uses the first ([Systems.md, section 7](Systems.md#7-interaction))
 - [ ] A marker or outline on the focused interactable in the world, as a presentation component, if the HUD prompt alone doesn't make clear what F will use
@@ -124,10 +132,12 @@ The code changes that the slice's content depends on. Doing them first means add
 
 ### 4.2 Farming depth
 
-- [ ] A dry crop looks thirsty (paler, a little drooped) while its tile is dry, so the player notices a crop that won't grow ([GameDesign.md, section 6](GameDesign.md#tiles), decided by @DunderGG 2026-11-20)
+- [ ] A dry crop looks thirsty (paler, a little drooped) while its tile is dry, so the player notices a crop that won't grow. Needed for the slice play-test's first goal ([GameDesign.md, section 6](GameDesign.md#tiles), decided by @DunderGG 2026-11-20)
 - [ ] Rename the soil's Blender material `M_Soil` in `Art/Blender/make_farm_assets.py` (`SM_Soil_Tilled`'s slot still carries the deleted material's name) at the next re-export, and reimport with no materials made (art review, 2026-11-20)
 - Replacing the well splash: moved to [section 6](#6-before-a-public-release) with the rest of the sound work (@DunderGG, 2026-11-22)
-- [ ] Dirty water: easy to get, but raises tile radiation
+- [ ] Dirty water: easy to get, but raises tile radiation. It is the slice's clean versus dirty choice, one of the play-test goals ([GameDesign.md, section 13](GameDesign.md#next-vertical-slice))
+   - Decide the dirty water source with @DunderGG, open in [GameDesign.md, section 15](GameDesign.md#15-open-questions); assumed until then: unlimited, a prop of its own, its water in the contamination cue
+   - The source's mesh by the artist, and the prop in `L_Farm`
 - [ ] The caretaker reminds the player of crops at risk in the season's last days: "at risk" when the nights a crop still needs equal the days left, "lost" when they are more ([GameDesign.md, section 6](GameDesign.md#6-farming); game designer, 2026-11-20)
 - [ ] Rename `UFarmGameplayAbility_Harvest`, `HarvestToolId` and `UFarmingComponent::Harvest` now that the hand also clears withered crops, with `[CoreRedirects]` and a test, in a commit of its own (design review, 2026-11-20)
 - [ ] A description field on content items, a design for the architect (a data asset field, with where the player reads it): the writer's Ready descriptions for the cleaning crop's pod and seeds and the three mutated crops wait for it in [Spoilers/Items/Contamination.md](Spoilers/Items/Contamination.md), which hold the names only today (2026-11-22)
@@ -148,22 +158,30 @@ The code changes that the slice's content depends on. Doing them first means add
 
 - [ ] Hob *(working name)* in the game: placeholder body first, then a Blender model
 - [ ] Simple data-driven dialogue
+   - Its dialogue box is the first screen that takes the input focus, so it is built with Common UI ([4.0](#40-structure-from-the-code-review), H7) and designed with the game designer
 - [ ] Characters as data assets, so more robots and humans can be added the same way
 - [ ] One relationship track with Hob, who starts as a dutiful servant rather than a sceptic; trust grows through talking, gifts and working together, and the slice arc is in [Hob's character sheet](Spoilers/Characters/Hob.md#vertical-slice-arc)
+   - How the player sees his opinion change, one of the play-test goals: his lines change and he helps on his own initiative ([GameDesign.md, section 8](GameDesign.md#relationships)), with no number on screen unless the play-test shows it is needed. Designed with the game designer and the writer (roadmap review, 2026-11-24)
 - [ ] Hob guides the player through the first days as a tutorial
 
 ### 4.5 Automation and selling
 
 - [ ] Placing objects on the farm grid
 - [ ] A sprinkler that waters nearby tiles each morning from the farm's water store
+   - How the player gets it: recommended in [GameDesign.md, section 15](GameDesign.md#15-open-questions), bought at the seed shop for about 500 coins, repeatable, as a line in `DA_Shop_Farm`. Decide with @DunderGG, with its range (3 by 3 recommended)
 - [ ] The seed dispensers' real mesh: the artist's `SM_ShopDispenser` (0.9 by 0.9 by 1.5 m, pivot on the floor at its centre, front towards +X) with hull `UCX_SM_ShopDispenser_00` and a window material per seed so the three tell apart at a glance; then rerun `EditorScripts/SetUpSeedShop.py` (it sets the mesh at scale 1 and location 0 in place of the stand-in cube) and re-check the interaction box numbers ([Systems.md, section 26](Systems/26-Shops.md))
 
 ### 4.6 Interface and input
 
+Needed for the slice play-test, so a first-time player sees what they carry:
+
 - [ ] The hotbar and the bag on screen, built in UMG with C++ base classes: the hotbar as a row of slots with the selected one marked (its rules are built since 2026-11-07, [4.0](#40-structure-from-the-code-review), H2), and an inventory screen for moving items between slots
    - Item icons come with it: a soft texture on `UVestigeItemData` in an `Icons` bundle of its own, which the content catalogue never loads, preloaded by the row and the screen with a handle each owns while it shows them. Design there the empty or unknown list (no handle), icons already in memory (the callback still comes a frame later) and a callback for a replaced handle ([Systems.md, section 2](Systems.md#2-content-and-the-asset-manager), the content catalogue; M5, 2026-11-08)
-- [ ] Holding F to harvest along a row of ripe crops, as holding E repeats a tool (found with harvesting with F, 2026-11-07)
 - [ ] A layout pass on the HUD once the vertical slice's features are in: the status line now carries the date, the clock, the item in hand with a seed's days to ripen, and the stamina, and @DunderGG expects the interface to need a rework anyway (play-test note, 2026-11-20). Plan it with the hotbar and the bag on screen, and design it first with the game designer
+
+Polish, after the slice's features unless cheap alongside them:
+
+- [ ] Holding F to harvest along a row of ripe crops, as holding E repeats a tool (found with harvesting with F, 2026-11-07)
 - [ ] Tests for the HUD's other bindings (the prompt, the money and the stamina lines: binding on a new pawn, unbinding when the pawn changes and when the HUD ends), which have none; they can use the test hooks `AVestigeHUD::SetHudWidgetForTests` and `FollowPawnForTests` added for the tile line (code review, 2026-11-22)
 - [ ] A marker on what F would use (an outline on the bed, a highlight on the ripe tile), if the prompt and the tile frame aren't enough in play
 - [ ] A held mesh for items that aren't tools (a turnip in the hand), with the meshes for the new crops
@@ -179,6 +197,15 @@ The code changes that the slice's content depends on. Doing them first means add
 - [ ] The HUD clock shows every game minute instead of 10-minute steps (@DunderGG, 2026-11-07). At 40 real seconds per game hour the shown time changes about every 0.67 seconds
    - Cheap: the HUD reads the time each frame and rebuilds the status line only when the shown time changes, so the change is `VestigeHudClock::StepMinutes` in `VestigeHUD.cpp` set to 1, a short text rebuilt about 1.5 times a second. Since [M7](CodeReview.md#m7--game-time-events-run-on-real-time) (2026-11-11) the clock broadcasts `OnMinuteStarted`, so with this item the HUD sets the status line from that event and the day events instead of from `AVestigeHUD::Tick`, and stops ticking
    - The 10-minute step was chosen so the clock doesn't flicker every game minute, so check in play that the moving minutes don't distract. Update the clock line in [PlayTest.md](PlayTest.md)
+
+### 4.7 Starting and testing the slice
+
+What the slice's "done when" needs besides its features: a player who can start a game without the console, and the play-test that judges it (roadmap review, 2026-11-24).
+
+- [ ] A small title screen: Continue, New game (asking for confirmation before it replaces a save) and Quit, built with Common UI ([4.0](#40-structure-from-the-code-review), H7). Today a new game is only the `NewGame` console command. The settings and save slots stay in [section 6](#6-before-a-public-release)
+- [ ] Start a new game with a save: `NewGame` deletes both slots, so quitting before the first night leaves no save at all. Write a day-1 save once the new map has begun play instead (found in the save registry review, 2026-11-06)
+- [ ] The slice play-test, which ends the milestone: a packaged build, two or three people who haven't seen the game, a sheet with one line per goal in [GameDesign.md, section 13](GameDesign.md#next-vertical-slice) (what they did, where they got stuck, without help from the person watching), and a round of fixes from what it finds, each a roadmap item
+   - The end-of-season recap ([section 5](#seasons-and-weather)) stays later, as @DunderGG chose on 2026-11-14; it is cheap once the title screen and Common UI exist, if the play-test shows the season's end falls flat
 
 ## 5. Milestone 3 and later
 
@@ -276,7 +303,7 @@ Roughly in the order from [GameDesign.md section 13](GameDesign.md#13-scope-and-
 - [ ] Replace the Epic template code and content (character, animations, input) with our own
 - [ ] Measure the performance baseline on target-class hardware (an RTX 2060 or RX 5600 XT PC with a 6-core CPU and 16 GB, [Architecture.md, section 10](Architecture.md#budget)) when one is available; until then the target's numbers are estimates from @DunderGG's PC, which has about three times its GPU ([CodeReview.md, H8](CodeReview.md#h8--rendering-is-unreals-maximum-feature-set-unmeasured-on-the-target))
 - [ ] Scale the sun's step with the shadow quality: a console variable for the step, set per `ShadowQuality` level in `Config/DefaultScalability.ini` (0.05 at High and Epic, larger at Low and Medium, where small jumps are the price of cheaper shadows), with `SunStepDegrees` on the day cycle as the level's default. Part of the graphics settings, not an option of its own (@DunderGG's idea, 2026-11-05)
-- [ ] Main menu, settings and save slots. Its New game asks for confirmation before it replaces a save ([CodeReview.md, H5](CodeReview.md#h5--f9-deletes-both-saves-with-one-key-in-a-shipped-build))
+- [ ] Main menu, settings and save slots, growing from the slice's title screen ([4.7](#47-starting-and-testing-the-slice)). Its New game asks for confirmation before it replaces a save ([CodeReview.md, H5](CodeReview.md#h5--f9-deletes-both-saves-with-one-key-in-a-shipped-build))
    - Key rebinding in the settings, with Enhanced Input's user settings ([Systems.md, section 17](Systems.md#17-settings)): `bEnableUserSettings` on, the screen calls `SaveSettings()` after each remap, and the key hints ask Enhanced Input for the player's current key instead of the assets' default mappings and are rebuilt on a remap event ([Systems.md, section 5](Systems.md#5-input); found with H6, 2026-11-07)
 - [ ] Add a UI designer agent (`vestige-ui-designer`) with the first menu: it designs screens and the HUD for the player (layout, readability at a distance, gamepad navigation, accessibility, the pre-war interface style in [GameDesign.md, section 12](GameDesign.md#12-presentation)) before the architect designs them in UMG and Common UI. Made like the other agents, with @DunderGG's yes on its instructions (asked by @DunderGG, 2026-11-12)
 - Moving the test keys F9 and N into a cheat manager: moved to [4.0](#40-structure-from-the-code-review), because F9 deletes the saves (code review, 2026-11-04)
@@ -294,6 +321,7 @@ Roughly in the order from [GameDesign.md section 13](GameDesign.md#13-scope-and-
 
 Collected from the other documents. Each one is settled in its own document and decision log.
 
+- **Project rules from the code review:** the five open *(decide)* rules in [section 3](#3-housekeeping) (the layer order, the performance budget, prototyping before a guide, building with editor assets, one class prefix), to decide in one sitting. ([CodeReview.md](CodeReview.md#project-rules-that-are-themselves-wrong))
 - **Land health:** one value per map or varying across it, how fast it changes, and whether damage spreads. ([GameDesign.md](GameDesign.md#15-open-questions))
 - **Energy balance:** how much charge panels give and machines use. ([GameDesign.md](GameDesign.md#15-open-questions))
 - **Mutated crops:** which effects are good and which are risky, and how often normal crops mutate. ([GameDesign.md](GameDesign.md#15-open-questions))
