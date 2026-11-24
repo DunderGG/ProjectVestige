@@ -22,6 +22,11 @@ Which tests to run: Vestige for the whole suite, or Vestige.<Area> for one area.
 .PARAMETER BuildOnly
 Build without running the tests.
 
+.PARAMETER EngineRoot
+The Unreal Engine install folder (the one that contains Engine). When omitted, the script tries the
+UE_ROOT environment variable, then the Epic launcher's install list, then the registry (the engine list, then the install entry), then
+C:\Program Files\Epic Games\UE_<version>, where <version> is the project's EngineAssociation.
+
 .PARAMETER TestTimeoutMinutes
 Stops the test run after this many minutes and counts it as a failure.
 
@@ -38,16 +43,15 @@ param(
 
 	[switch]$BuildOnly,
 
+	[string]$EngineRoot,
+
 	[ValidateRange(1, 120)]
 	[int]$TestTimeoutMinutes = 30
 )
 
 $MaxLinesShown = 15
-$EngineRoot = 'C:\Program Files\Epic Games\UE_5.8'
 $ProjectRoot = Split-Path -Parent $PSScriptRoot
 $Uproject = Join-Path $ProjectRoot 'Vestige.uproject'
-$BuildBat = Join-Path $EngineRoot 'Engine\Build\BatchFiles\Build.bat'
-$EditorCmd = Join-Path $EngineRoot 'Engine\Binaries\Win64\UnrealEditor-Cmd.exe'
 $LogDir = Join-Path $ProjectRoot "Saved\AgentWork\$Task"
 $BuildLog = Join-Path $LogDir 'build.log'
 $TestLog = Join-Path $LogDir 'tests.log'
@@ -72,6 +76,71 @@ function Write-Lines([string]$Title, $Lines)
 		Write-Output "  ... and $($Lines.Count - $MaxLinesShown) more in the log"
 	}
 }
+
+function Test-EngineRoot([string]$Candidate)
+{
+	return (-not [string]::IsNullOrWhiteSpace($Candidate)) -and (Test-Path -LiteralPath (Join-Path $Candidate 'Engine\Build\BatchFiles\Build.bat'))
+}
+
+# Finds the engine: -EngineRoot, UE_ROOT, the launcher's install list, the registry, the default folder.
+function Resolve-EngineRoot([string]$Explicit)
+{
+	if ($Explicit)
+	{
+		if (Test-EngineRoot $Explicit)
+		{
+			return $Explicit
+		}
+		Stop-Verify "-EngineRoot '$Explicit' has no Engine\Build\BatchFiles\Build.bat. Pass the folder that contains Engine."
+	}
+
+	$Version = '5.8'
+	if (Test-Path -LiteralPath $Uproject)
+	{
+		$Association = (Get-Content -LiteralPath $Uproject -Raw | ConvertFrom-Json).EngineAssociation
+		if ($Association -match '^\d+\.\d+$')
+		{
+			$Version = $Association
+		}
+	}
+
+	$Tried = @()
+	$Candidates = [ordered]@{}
+	$Candidates['UE_ROOT environment variable'] = $env:UE_ROOT
+
+	$LauncherList = Join-Path $env:ProgramData 'Epic\UnrealEngineLauncher\LauncherInstalled.dat'
+	if (Test-Path -LiteralPath $LauncherList)
+	{
+		try
+		{
+			$Installed = (Get-Content -LiteralPath $LauncherList -Raw | ConvertFrom-Json).InstallationList | Where-Object { $_.AppName -eq "UE_$Version" } | Select-Object -First 1
+			$Candidates['Epic launcher install list'] = $Installed.InstallLocation
+		}
+		catch
+		{
+			$Tried += "the Epic launcher install list (unreadable: $LauncherList)"
+		}
+	}
+
+	# The engine list Windows uses to map an EngineAssociation like "5.8" to a folder (Docs/Setup.md, troubleshooting).
+	$Candidates['registry engine list'] = (Get-ItemProperty -Path 'HKCU:\SOFTWARE\Epic Games\Unreal Engine\Builds' -Name $Version -ErrorAction SilentlyContinue).$Version
+	$Candidates['registry install entry'] = (Get-ItemProperty -Path "HKLM:\SOFTWARE\EpicGames\Unreal Engine\$Version" -Name InstalledDirectory -ErrorAction SilentlyContinue).InstalledDirectory
+	$Candidates['default install folder'] = "C:\Program Files\Epic Games\UE_$Version"
+
+	foreach ($Source in $Candidates.Keys)
+	{
+		if (Test-EngineRoot $Candidates[$Source])
+		{
+			return $Candidates[$Source]
+		}
+		$Tried += "$Source ($(if ($Candidates[$Source]) { $Candidates[$Source] } else { 'not set' }))"
+	}
+	Stop-Verify "Unreal Engine $Version not found. Tried: $($Tried -join '; '). Pass -EngineRoot <folder that contains Engine> or set UE_ROOT."
+}
+
+$EngineRoot = Resolve-EngineRoot $EngineRoot
+$BuildBat = Join-Path $EngineRoot 'Engine\Build\BatchFiles\Build.bat'
+$EditorCmd = Join-Path $EngineRoot 'Engine\Binaries\Win64\UnrealEditor-Cmd.exe'
 
 foreach ($RequiredPath in @($Uproject, $BuildBat, $EditorCmd))
 {

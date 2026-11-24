@@ -96,6 +96,8 @@ Finished roadmap items, moved from [Roadmap.md](Roadmap.md) under the same headi
    - Done 2026-11-13, @DunderGG's yes: step 1 now says to use `MI_Crop_*` instances of `M_Crop` and remove the importer's collision
 - [x] Add a row to the path table in `LICENSING.md` for `EditorScripts/*.py` and `EditorScripts/Tests/*.py` (GPL-3.0-or-later WITH AdditionRef-Vestige-Unreal-Exception, naming the AI tool that wrote them), then tell `EditorScripts/README.md` to check that table for a new script, as `Tools/README.md` does; needs @DunderGG's yes, since it is a licensing record (found in the code review of the folder move, 2026-11-20)
    - Done 2026-11-20 with @DunderGG's yes: the row is in the path table, `EditorScripts/README.md` points to it, and the open question on AI-written material names `EditorScripts/` and `MI_Crop_Withered`
+- [x] Make `Tools/Verify-Vestige.ps1` find the engine instead of hard-coding `C:\Program Files\Epic Games\UE_5.8`: on @DunderGG's PC it is installed under `C:\Users\Dunder\Epic Games\UE_5.8`, so every session has to run a copy with the path changed. For example an `-EngineRoot` parameter, then the `UE_ROOT` environment variable, then the launcher's install list (found 2026-11-22)
+   - Done 2026-11-24: the script tries `-EngineRoot`, `UE_ROOT`, the launcher's install list, the engine list in the registry (`HKCU\SOFTWARE\Epic Games\Unreal Engine\Builds`, which is what finds it on @DunderGG's PC), the launcher's registry key, then the default folder, for the version in `Vestige.uproject`
 
 ## 4. Milestone 2: vertical slice
 

@@ -47,9 +47,8 @@ All its items are done and listed in [RoadmapArchive.md](RoadmapArchive.md#2-mil
 
 ## 3. Housekeeping
 
-Work outside the milestones' features: the tools, the tests and the rules. The first three are quick fixes to do before the next roadmap item (roadmap review, 2026-11-24).
+Work outside the milestones' features: the tools, the tests and the rules. The first two are quick fixes to do before the next roadmap item (roadmap review, 2026-11-24).
 
-- [ ] Make `Tools/Verify-Vestige.ps1` find the engine instead of hard-coding `C:\Program Files\Epic Games\UE_5.8`: on @DunderGG's PC it is installed under `C:\Users\Dunder\Epic Games\UE_5.8`, so every session has to run a copy with the path changed. For example an `-EngineRoot` parameter, then the `UE_ROOT` environment variable, then the launcher's install list (found 2026-11-22)
 - [ ] Fix the flaky `Vestige.Feedback.TheLogShowsAReportsClauses`: its `FReportLogCapture` is a buffered output device (it doesn't override `CanBeUsedOnMultipleThreads`), so its lines arrive only when the redirector flushes, and the test removes it without a flush. Call `GLog->Flush()` before `GLog->RemoveOutputDevice`, as `VestigeLogTests.cpp` does, or share one capture helper between the two files; in a commit of its own (code review, 2026-11-22). A flaky test weakens the check that the whole suite passes before each commit
 - [ ] Check the open play-test checks against the code before the next play-test: 18 checks under nine headings in [PlayTest.md, section 2](PlayTest.md#2-pending-checks) are still open, the oldest from 2026-10-30, and some describe behaviour that later changes replaced ("Five messages and the message log" expects `UVestigeFeedbackSubsystem::Notify`, which `Report` replaced on 2026-11-08). Update or drop each stale one with the test author
 - [ ] Rename the two event handlers named for when they run, `UFarmingComponent::HandleItemInHandChanged` and `AVestigeHUD::HandleInputMethodChanged`, for what they do ([CodingGuidelines.md, section 2.3](CodingGuidelines.md#23-case-and-wording)), in a small commit of its own (code review of the contamination slice, 2026-11-22)
