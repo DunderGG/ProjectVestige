@@ -313,7 +313,6 @@ Roughly in the order from [GameDesign.md section 13](GameDesign.md#13-scope-and-
 - [ ] Settle how many feedback messages the HUD shows at once (Project Settings > Game > Vestige HUD; five while the game is being built, 2026-10-30)
 - [ ] Final names for the game, the world, the town, the coin, the caretaker and the robot makers
 - [ ] A lawyer's check of the licensing setup
-- [ ] Make the GitHub repository public, so contributors can work on it as the licensing intends
 - [ ] Packaged builds and store pages
 - [ ] Add a release engineer agent (`vestige-release`) before the first public build: it packages and checks builds (cook warnings, Shipping-only problems, save compatibility, the licensing files that must ship with the build) and keeps the release checklist. Made like the other agents, with @DunderGG's yes on its instructions (asked by @DunderGG, 2026-11-12)
 

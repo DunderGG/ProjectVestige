@@ -360,3 +360,5 @@ When working nearby:
 ## 6. Before a public release
 
 - [x] License headers (an SPDX line) in our own source files
+- [x] Make the GitHub repository public, so contributors can work on it as the licensing intends
+   - Done in October 2026, when the repository went public ([section 2](#2-milestone-1-playable-prototype-done)); the open line stayed in the roadmap until 2026-11-24
