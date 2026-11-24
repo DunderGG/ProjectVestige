@@ -1,6 +1,6 @@
 # Project Vestige play-test archive
 
-Play-test headings whose checks have all passed, moved unchanged from [PlayTest.md, section 2](PlayTest.md#2-pending-checks), oldest first: the record of what was checked by hand and what was seen. Open checks stay in `PlayTest.md`.
+Play-test headings whose checks have all passed, moved unchanged from [PlayTest.md, section 2](PlayTest.md#2-pending-checks) (or with checks dropped because tests replaced them, as the heading's note says), oldest first: the record of what was checked by hand and what was seen. Open checks stay in `PlayTest.md`.
 
 ### Code clean-up, 2026-10-29
 
@@ -467,3 +467,25 @@ The one-shot `EditorScripts/SurveyLevel.py` tool surveys only the currently open
    - ~~In the output log it says "LogPython: [SurveyLevel] Failed: SurveyError: Unreal Paths did not return an absolute project Saved directory."~~
 - [x] **Leave editor state alone** (why a person: editor-only state): before running, note the selected actor and whether the map is already marked unsaved. Run the survey and confirm selection and the map's dirty/unsaved state are unchanged. If the test map has an actor with a blank label, confirm it remains blank in the Outliner and is reported as unavailable; do not rename or save the actor to make the check pass.
 - [x] **Same short name, separate output** (why a person: editor-only integration): open two maps from different folders that share the same asset name, running the script on each. Confirm their reports are in separate hash-suffixed folders under `Saved/LevelReports/` and neither run overwrites the other's files.
+
+### Item data assets, 2026-10-30
+
+Items exist as data but nothing in play uses them yet, so the game itself should behave exactly as before.
+
+- [x] **Validation** (46bf244): right-click `Content/Farm` > Validate Assets reports no errors, and the Output Log at editor start has no "is used by more than one asset" error.
+   - Checked in 5.8 on 2026-10-31 by the agent with the `DataValidation` commandlet: all 23 assets under `Content/Farm` are valid, and the editor logs have no duplicate content ID error.
+
+The three checks still open on 2026-11-24 (item assets, turnip crop, no change in play) were dropped without being played, because tests cover them: `Vestige.Item.TheTurnipSeedsPlantTheTurnip`, `Vestige.Item.TheTurnipCropYieldsTheTurnipItem`, `Vestige.Item.TheHarvestsSellAtTheirPrices`, `Vestige.Content.EveryCropAndItemPassesValidation`, and the Crop Id's `AllowedTypes = "FarmCrop"` in `FarmSeedFragment.h`; the smoke test covers planting and harvesting.
+
+### Instanced farm tiles, 2026-11-05
+
+The tile actors are gone: the grid's new meshes component draws the whole field with instanced meshes, and `L_Farm` now places `BP_FarmGrid` instead of the C++ grid with `BP_FarmTile` (commit "Draw the farm tiles with instanced meshes"). The rules and the instance counts are covered by tests; these checks are for how it looks.
+
+- [x] **Level**: regenerate the project files (right-click `Vestige.uproject` > Generate Visual Studio project files), since `FarmTile.h` is gone and `FarmFieldMeshesComponent.h` and `FarmTileLooks.h` are new. Open `L_Farm`. The Outliner shows the grid as a `BP_FarmGrid` in the same place, with **Field Id** `Base.Farm` and the same width and height under **Farming**, and the Output Log has no warning about `BP_FarmTile` or a missing `FarmTile` class.
+- [x] **The art**: open `BP_FarmGrid` (`Content/Vestige/Blueprints`), select its **Meshes** component: **Farming > Visuals** shows `SM_Soil_Tilled`, a soil surface height of 6 and `M_FarmPlaceholder` (the water look is now in the soil mesh's own material, `MI_FarmSoil_Tilled`; see "Water level on each tile").
+- [x] **Looks as before**: press Play. Grass tiles are green slabs with small gaps; the hoe shows the Blender soil, watering darkens it a step at a time, the seeds plant a turnip sprout standing on the soil, and it grows a stage each watered day until it is ripe. No tile or crop is grey (a grey tile means a material is missing **Used with Instanced Static Meshes**; the Output Log then says "missing usage flag"). Shadows look as they did.
+- [x] **Frame**: the yellow frame still sits on the tile in front of the farmer and follows him, and hides at the field's edge.
+- [x] **`On Tool Used` in `BP_PlayerCharacter`**: the Blueprint compiles. Its **On Tool Used** event's **Tile** pin is now an Int Point (the tile's coordinates) instead of a tile; if anything was wired to the old pin, the Blueprint shows an error there.
+- [x] **Big field**: in Play, `BenchmarkField 60 Base.Turnip` makes a 60 by 60 field of ripe turnips at once, without a long freeze.
+
+The optional placeholder colors check (clear **Tilled Soil Mesh** on the grid's Meshes component) was dropped on 2026-11-24 without being played, because `Vestige.FarmTileLooks.WithoutSoilArtThePlaceholderShowsTilledAndWateredColors` and `Vestige.FarmFieldMeshes.TheGridBlueprintSetsTheArtAndAPlaceholderMaterialForInstances` cover it.

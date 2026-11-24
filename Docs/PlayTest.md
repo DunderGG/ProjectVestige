@@ -32,49 +32,25 @@ Checks for recent changes that haven't been confirmed in the editor yet. Each na
 
 ### Tile targeting, 2026-10-30
 
-Replaces the tile highlight check above: the frame now sits on a neighbouring tile chosen by the movement direction (GameDesign.md, section 6). The tap, walking and feel checks moved to [Smooth turning](PlayTestArchive.md#smooth-turning-2026-10-30) below; the results that led to it are in commit 8932448.
+The frame sits on a neighbouring tile chosen by the movement direction (GameDesign.md, section 6). The tap, walking and feel checks moved to [Smooth turning](PlayTestArchive.md#smooth-turning-2026-10-30), now in the archive; the results that led to it are in commit 8932448.
 
 - [x] **Field edge** (ce1f1dc): standing on an edge tile and turning to face outwards hides the frame; turning back shows it again.
 - [x] **Tools** (ce1f1dc): the tools act on the framed tile, never on the one the farmer stands on.
 - [ ] **Gamepad** (ce1f1dc), if you have one: a flick of the left stick turns the farmer with barely a step, and holding it walks, the same as the keys.
    - Unable to test Gamepad support now. Save this for later, when we have a gamepad to test with.
 
-### Five messages and the message log, 2026-10-30
+### Message settings, 2026-10-30
 
-Raises the cap from the message boxes checks above.
+The message cap and time are project settings. The cap rule, its clamps and the log line of each report are automated (`Vestige.HudMessages`, `Vestige.HudSettings`, `Vestige.Feedback.TheLogShowsAReportsClauses`), and the stack of at most five boxes was checked under "The HUD in UMG" below.
 
-- [ ] **At most five** (77a2218): with five boxes showing, a sixth message pushes out the oldest. Since M4 (2026-11-08) tilling and planting show no message, so press E with the hoe on tilled soil, then on grass with the watering can, and so on (each press shows its reason). The boxes stay clear of the key hints and the status line.
-- [ ] **Settings** (77a2218): Edit > Project Settings > Game > Vestige HUD shows Max Messages (5) and Message Seconds (3). Changing them takes effect the next time you press Play, and is saved to `Config/DefaultGame.ini`; tell the agent the values you settle on.
-- [ ] **Log** (77a2218): every message also appears in the Output Log (Window > Output Log, filter on `LogVestigeFeedback`) as `[L_Farm] UVestigeFeedbackSubsystem::Notify: ...`, so you can read messages that have already faded. (Updated 2026-11-02 for the logging categories; the line read `LogVestige: Feedback: ...` before. Since M4, 2026-11-08, the line is `UVestigeFeedbackSubsystem::Report:` with the tag, checked under "Feedback reports" below.)
-
-### Item data assets, 2026-10-30
-
-Items exist as data but nothing in play uses them yet, so the game itself should behave exactly as before.
-
-- [x] **Validation** (46bf244): right-click `Content/Farm` > Validate Assets reports no errors, and the Output Log at editor start has no "is used by more than one asset" error.
-   - Checked in 5.8 on 2026-10-31 by the agent with the `DataValidation` commandlet: all 23 assets under `Content/Farm` are valid, and the editor logs have no duplicate content ID error.
-- [ ] **Item assets** (46bf244): `Content/Vestige/Items` has `DA_Item_Turnip` and `DA_Item_TurnipSeeds`. Opening the seeds shows one **Farm Seed Fragment** under Fragments, with Crop Id `FarmCrop:Base.Turnip`; its Crop Id picker lists only crops. Pressing + on Fragments offers the fragment classes to pick from.
-- [ ] **Turnip crop** (46bf244): `DA_Crop_Turnip` shows Harvest Item Id `VestigeItem:Base.Turnip` and Yield under Farming > Harvest, and no Seed Price or Sell Price.
-- [ ] **No change in play** (46bf244): planting, growing and harvesting a turnip work as in the [smoke test](#3-smoke-test).
+- [ ] **Settings** (77a2218; why a person: tuning by feel): Edit > Project Settings > Game > **Vestige HUD**, category **Messages**, shows Max Messages (5) and Message Seconds (3). Changing them takes effect the next time you press Play, and is saved to `Config/DefaultGame.ini`; tell the agent the values you settle on.
 
 ### Sky lighting, 2026-11-05
 
 The day cycle actor is renamed `VestigeSkyLighting` for its one job, the lighting. `L_Farm` still names the old class until it is saved, and a redirect in `Config/DefaultEngine.ini` loads it as the new one; a test checks the redirect. The commit is the one titled "Rename the day cycle to sky lighting".
 
-- [ ] **Level**: regenerate the project files (right-click `Vestige.uproject` > Generate Visual Studio project files) so the solution lists `Time/VestigeSkyLighting.h`. Open `L_Farm`. The Outliner still shows the actor as `FarmDayCycle` (its label), and selecting it shows class `VestigeSkyLighting` in the Details panel, with Sun Step Degrees and the other **Lighting** settings as before. The Output Log has no "can't find class" or "Failed to load" lines for it. Play: the sun, the night and the morning look as before. Save `L_Farm` (Ctrl+S) so it stores the new name, and commit the level.
-- [ ] **Sun hours in the clock settings** (commit "Move the sunrise and sunset hours to the clock"): Project Settings > Game > **Vestige Clock** shows **Sunrise Hour** (6) and **Sunset Hour** (20) under **Sun**, and the sky lighting actor in `L_Farm` no longer has a **Time** category. With `slomo 20`, the sun comes up just after 06:00, the light warms and fades out toward 20:00, and the moon takes over after it, as before. For a quick check, set Sunset Hour to 12 for a session: the evening light and the moon arrive at noon. Put it back to 20 and don't commit the change to `Config/DefaultGame.ini`.
-
-### Instanced farm tiles, 2026-11-05
-
-The tile actors are gone: the grid's new meshes component draws the whole field with instanced meshes, and `L_Farm` now places `BP_FarmGrid` instead of the C++ grid with `BP_FarmTile` (commit "Draw the farm tiles with instanced meshes"). The rules and the instance counts are covered by tests; these checks are for how it looks.
-
-- [x] **Level**: regenerate the project files (right-click `Vestige.uproject` > Generate Visual Studio project files), since `FarmTile.h` is gone and `FarmFieldMeshesComponent.h` and `FarmTileLooks.h` are new. Open `L_Farm`. The Outliner shows the grid as a `BP_FarmGrid` in the same place, with **Field Id** `Base.Farm` and the same width and height under **Farming**, and the Output Log has no warning about `BP_FarmTile` or a missing `FarmTile` class.
-- [x] **The art**: open `BP_FarmGrid` (`Content/Vestige/Blueprints`), select its **Meshes** component: **Farming > Visuals** shows `SM_Soil_Tilled`, a soil surface height of 6 and `M_FarmPlaceholder` (the water look is now in the soil mesh's own material, `MI_FarmSoil_Tilled`; see "Water level on each tile").
-- [x] **Looks as before**: press Play. Grass tiles are green slabs with small gaps; the hoe shows the Blender soil, watering darkens it a step at a time, the seeds plant a turnip sprout standing on the soil, and it grows a stage each watered day until it is ripe. No tile or crop is grey (a grey tile means a material is missing **Used with Instanced Static Meshes**; the Output Log then says "missing usage flag"). Shadows look as they did.
-- [x] **Frame**: the yellow frame still sits on the tile in front of the farmer and follows him, and hides at the field's edge.
-- [ ] **Placeholder colors** (optional): select the grid in `L_Farm`, then its **Meshes** component, and clear **Tilled Soil Mesh** on this instance. In Play, tilled soil is a brown slab and watered soil a dark one. Reset the property with its yellow arrow afterwards, and don't save the level with it cleared.
-- [x] **`On Tool Used` in `BP_PlayerCharacter`**: the Blueprint compiles. Its **On Tool Used** event's **Tile** pin is now an Int Point (the tile's coordinates) instead of a tile; if anything was wired to the old pin, the Blueprint shows an error there.
-- [x] **Big field**: in Play, `BenchmarkField 60 Base.Turnip` makes a 60 by 60 field of ripe turnips at once, without a long freeze.
+- [ ] **Level** (why a person: editor-only save; `L_Farm` still stores the old class name, `FarmDayCycle`): regenerate the project files (right-click `Vestige.uproject` > Generate Visual Studio project files) so the solution lists `Time/VestigeSkyLighting.h`. Open `L_Farm`. The Outliner still shows the actor as `FarmDayCycle` (its label), and selecting it shows class `VestigeSkyLighting` in the Details panel, with Sun Step Degrees and the other **Lighting** settings as before. The Output Log has no "can't find class" or "Failed to load" lines for it. Play: the sun, the night and the morning look as before. Save `L_Farm` (Ctrl+S) so it stores the new name, and commit the level.
+- [ ] **Sun hours in the clock settings** (commit "Move the sunrise and sunset hours to the clock"; why a person: how the light looks; the hours rule is `Vestige.SkyLighting.SunRisesAndSetsAtTheClocksHours`): Project Settings > Game > **Vestige Clock** shows **Sunrise Hour** (6) and **Sunset Hour** (20) under **Sun**, and the sky lighting actor in `L_Farm` no longer has a **Time** category. With `slomo 20`, the sun comes up just after 06:00, the light warms and fades out toward 20:00, and the moon takes over after it, as before. For a quick check, set Sunset Hour to 12 for a session: the evening light and the moon arrive at noon. Put it back to 20 and don't commit the change to `Config/DefaultGame.ini`.
 
 ### Input as assets, 2026-11-07
 
@@ -82,12 +58,12 @@ The farming keys are input assets now: `IA_` actions and `IMC_Farming` in `Conte
 
 - [x] **Keys as before**: E uses the item in hand (holding it repeats and slows the walk), F interacts and harvests, and 1 to 9 select hotbar slots, all as before.
 - [x] **Mouse wheel**: one notch down selects the next hotbar slot and one notch up the previous one, wrapping from the last slot to the first and back; empty slots count. One notch is one step. Scrolling fast may skip fewer slots than notches, which is acceptable.
-- [ ] **Gamepad**, if you have one: the right shoulder (RB) steps to the next slot and the left (LB) to the previous one, one press one step; X uses the item in hand (holding it repeats); B interacts; A still jumps; the left stick moves and the right stick looks.
+- [ ] **Gamepad** (why a person: input on real hardware; when a gamepad is at hand), if you have one: the right shoulder (RB) steps to the next slot and the left (LB) to the previous one, one press one step; X uses the item in hand (holding it repeats); B interacts; A still jumps; the left stick moves and the right stick looks.
 - [x] **Key hints unchanged**: the bottom line still names the hotbar keys with their items ("1 Hoe   2 Turnip Seeds ...") and "E Use tool", and the prompt reads "F Harvest" or "F Sleep". No gamepad key shows in any hint.
 - [x] **Move, look and jump**: with the keyboard (WASD, arrows, space) and the mouse, as before.
 - [x] **The assets**: open `Content/Vestige/Input`. Each `IA_` action is Boolean and has **Player Mappable Key Settings** with a Name such as `Vestige.Input.UseTool` and a display name; `IA_UseTool` and `IA_Interact` have the descriptions "Use tool" and "Interact". `IMC_Farming` lists each action with its keyboard or mouse key first and its gamepad key second (the slots have no gamepad key). `DA_InputConfig_Player` lists thirteen actions, each with its `Vestige.Input` tag, and right-click > Validate Assets on the folder reports no errors. `BP_PlayerCharacter`'s **Input** shows Input Config `DA_InputConfig_Player` and Mapping Contexts `IMC_Default` (0), `IMC_MouseLook` (0) and `IMC_Farming` (1); `BP_PlayerController` has no mapping contexts any more.
 - [x] **Contexts don't stack**: while playing, open the console and type `showdebug enhancedinput`. `IMC_Default`, `IMC_MouseLook` and `IMC_Farming` each show once. Then have the farmer possessed again and check that each still shows once. There is no console command that only re-possesses: try F8 twice in Play in Editor (eject, then possess); if `showdebug enhancedinput` shows the contexts the whole time, ejecting didn't unpossess him, so tell the agent, and a `RepossessPlayer` cheat or an automated test takes this check's place ([Roadmap.md, 4.0](Roadmap.md#40-structure-from-the-code-review)).
-- [ ] **Packaged build**: a packaged Development build has working input: move, look, jump, E, F, 1 to 9 and the mouse wheel.
+- [ ] **Packaged build** (why a person: hardware; at the first packaged build, with the other packaged-build checks below): a packaged Development build has working input: move, look, jump, E, F, 1 to 9 and the mouse wheel.
 
 ### The HUD in UMG, 2026-11-08
 
@@ -102,7 +78,7 @@ The HUD is UMG now instead of C++ Slate: `WBP_Hud` and `WBP_HudMessage` in `Cont
 - [x] **Designer**: open `Content/Vestige/UI/WBP_Hud`. The Hierarchy shows the overlay with `StatusPanel`, `PromptBox`, `MessageList` and `KeyHintsText`, and the Designer shows the HUD with preview texts. Select `StatusPanel`, change its Brush Color, Compile and press Play: the panel shows the new colour without building. Then put the colour back (or close without saving). `WBP_HudMessage` opens too and shows "Game saved." in its box.
 - [x] **Widget Reflector**: while playing, press Ctrl+Shift+W, then **Pick Hit-Testable Widgets** and hover over the HUD: it picks the game viewport, never a HUD widget. **Pick Painted Widgets** over the status line finds `StatusText` inside `WBP_Hud`.
 - [x] **No widget class**: open `Content/Vestige/Blueprints/BP_HUD` and clear **HUD Widget Class**, Compile, and press Play: no HUD shows and the Output Log has the error "No HUD Widget Class is set, so the HUD shows nothing". Then set it back to `WBP_Hud` (or close without saving).
-- [ ] **Packaged build**: a packaged Development build shows the HUD as in the editor.
+- [ ] **Packaged build** (why a person: first look at the packaged game; at the first packaged build): a packaged Development build shows the HUD as in the editor.
 
 ### Gamepad key hints, 2026-11-08
 
@@ -111,11 +87,11 @@ The key hints and the prompt name the keys of the device you used last, keyboard
 - [x] **Solution**: regenerate the project files (right-click `Vestige.uproject` > Generate Visual Studio project files): the solution lists `Player/VestigeKeyHints.h` and `.cpp`.
 - [x] **Editor starts**: the editor opens without asking about plugins, and Edit > Plugins shows **Common UI Plugin** ticked. The Output Log at start has no `LogUIActionRouter` error (one Display line, "Found 0 derived classes", is expected).
 - [x] **Keyboard first**: press Play and use only the keyboard and mouse. The hints read as before, "1 Hoe   2 Turnip Seeds   3 Watering Can   |   E Use tool   |   F Interact", and the bed shows "F Sleep".
-- [ ] **Switch to the gamepad**: press any gamepad button, a trigger or push a stick all the way. The hints change at once to "LB / RB Hotbar   |   X Use tool   |   B Interact", and facing the bed shows "B Sleep" (a ripe crop "B Harvest"). The gamepad plays exactly as before: X uses, B interacts, the shoulders step the hotbar, A jumps, the sticks walk and look.
-- [ ] **Back to the keyboard**: press a key, click, scroll or move the mouse: the keyboard hints come back. Switch back and forth a few times; the hints follow each time and don't flicker while you use only one device.
-- [ ] **No cursor**: after using the gamepad, Alt-Tab out of the editor and back, click into the game and move the mouse: the camera turns and no mouse cursor shows. Then use the gamepad and stop Play (Esc): the editor's mouse cursor shows. If it stays hidden, it comes back with the next Play; say so.
-- [ ] **Touch screen** (Dunder-YOGA): touch the game view while playing: the keyboard hints stay (the game has no touch controls).
-- [ ] **Packaged build**: a packaged Development build switches the hints the same way.
+- [ ] **Switch to the gamepad** (why a person: input on real hardware; the hint device and the hotbar hint are `Vestige.UI.TheHintDeviceFollowsTheInputType` and a `Vestige.PlayerCharacter` test): press any gamepad button, a trigger or push a stick all the way. The hints change at once to "LB / RB Hotbar   |   X Use tool   |   B Interact", and facing the bed shows "B Sleep" (a ripe crop "B Harvest"). The gamepad plays exactly as before: X uses, B interacts, the shoulders step the hotbar, A jumps, the sticks walk and look.
+- [ ] **Back to the keyboard** (why a person: input on real hardware): press a key, click, scroll or move the mouse: the keyboard hints come back. Switch back and forth a few times; the hints follow each time and don't flicker while you use only one device.
+- [ ] **No cursor** (why a person: input on real hardware): after using the gamepad, Alt-Tab out of the editor and back, click into the game and move the mouse: the camera turns and no mouse cursor shows. Then use the gamepad and stop Play (Esc): the editor's mouse cursor shows. If it stays hidden, it comes back with the next Play; say so.
+- [ ] **Touch screen** (Dunder-YOGA; why a person: input on real hardware): touch the game view while playing: the keyboard hints stay (the game has no touch controls).
+- [ ] **Packaged build** (why a person: hardware; at the first packaged build): a packaged Development build switches the hints the same way.
 
 ### The splash at the well, 2026-11-21
 
@@ -130,7 +106,7 @@ Filling the watering can at the well now plays a splash (the first sound in the 
 
 ### Editor chores
 
-Changes only the editor can make safely. The steps are in [RoadmapArchive.md, Housekeeping](RoadmapArchive.md#3-housekeeping): re-saving the template Blueprints and `L_Farm`, moving `BP_FarmTile` and the materials with redirectors fixed, and regenerating the Android File Server token if it was ever used. After each one, run the [smoke test](#3-smoke-test).
+Changes only the editor can make safely. None are open: the earlier ones (re-saving the template Blueprints, moving `BP_FarmTile` and the materials with redirectors fixed, the Android File Server token) are done and recorded in [RoadmapArchive.md, Housekeeping](RoadmapArchive.md#3-housekeeping). The one editor save still waiting is the `L_Farm` save under "Sky lighting". After an editor chore, run the [smoke test](#3-smoke-test).
 
 ## 3. Smoke test
 
