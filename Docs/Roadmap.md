@@ -3,6 +3,8 @@
 Everything we know we still have to build, in the order we plan to build it. Finished items are in [RoadmapArchive.md](RoadmapArchive.md), under the same headings.
 
 - [GameDesign.md](GameDesign.md) says what the game is and why. This roadmap only tracks the work, and links to the design for details.
+- [RoadmapSuggestions.md](RoadmapSuggestions.md) holds exploratory roadmap proposals that are not
+  approved items yet.
 - [Architecture.md](Architecture.md) says how the code fits together. Many items in the foundations section come from its known gaps and expected changes.
 - [Lore.md](Spoilers/Lore.md) holds the story, characters and names.
 
@@ -325,5 +327,9 @@ Collected from the other documents. Each one is settled in its own document and 
 - **Mutated crops:** which effects are good and which are risky, and how often normal crops mutate. ([GameDesign.md](GameDesign.md#15-open-questions))
 - **Knock-out penalty:** what exactly is lost. ([GameDesign.md](GameDesign.md#15-open-questions))
 - **Multiplayer:** shared farm or separate farms, shared clock and sleep. ([GameDesign.md](GameDesign.md#15-open-questions))
+- **A pet:** whether there is one, and whether it is a robot or a mutated animal. ([GameDesign.md](GameDesign.md#15-open-questions))
+- **Fishing:** out, after the first release, or part of the first release's gathering loop. ([GameDesign.md](GameDesign.md#15-open-questions))
+- **A handheld target:** whether handheld PCs are a target, and how much is built for them now. ([GameDesign.md](GameDesign.md#15-open-questions))
+- **Languages of the first release:** which languages ship, and whether the interface is built for translation from the HUD layout pass on. ([GameDesign.md](GameDesign.md#15-open-questions))
 - **Names:** the game, the world, the town, the coin, the caretaker, the robot makers. ([Lore.md](Spoilers/Lore.md#14-open-questions))
 - **Story:** the sibling's survival path, role and whether the story ever says who struck first. ([Lore.md](Spoilers/Lore.md#14-open-questions))
