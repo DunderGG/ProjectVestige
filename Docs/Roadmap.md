@@ -34,7 +34,7 @@ Contents
   3. Hob's relationship track, and how the player sees his opinion change ([4.4](#44-the-caretaker-robot)).
   4. [4.5](#45-automation-and-selling): placing objects on the farm grid, and the sprinkler, bought at the seed shop.
   5. Dirty water and its source ([4.2](#42-farming-depth)).
-  6. Lay out the home farm ([4.7](#47-starting-and-testing-the-slice)): the farmhouse with the bed inside, the service yard, Hob's spot and the dirty water source, as a blockout, once every slice prop exists. Any art pass for screenshots comes after it, so it doesn't dress a layout that still moves.
+  6. Lay out the home farm ([4.7](#47-starting-and-testing-the-slice)): the farmhouse with the bed inside, the service yard, Hob's spot and the dirty water source, as a blockout, once every slice prop exists. The screenshot art pass's ground dressing comes after it, so it doesn't dress a layout that still moves; its meshes and sky don't wait for it.
   7. What a first-time player needs to see: the hotbar and the bag on screen ([4.6](#46-interface-and-input)), a dry crop that looks thirsty and item descriptions ([4.2](#42-farming-depth)), then the HUD layout pass.
   8. [4.7](#47-starting-and-testing-the-slice): the title screen and the day-1 save.
   9. Hob's tutorial and his reminders of crops at risk ([4.4](#44-the-caretaker-robot), [4.2](#42-farming-depth)), which need Hob and dialogue.
