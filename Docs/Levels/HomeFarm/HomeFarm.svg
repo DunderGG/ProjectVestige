@@ -1,229 +1,152 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1120" viewBox="0 0 1600 1120" style="width: 100%; height: auto; max-width: 1600px;" role="img" aria-labelledby="title description">
-  <title id="title">Home farm master blockout plan</title>
-  <desc id="description">A relative 2.5D plan for the walkable home farm, with textured terrain, defined optional routes, arrival, farmhouse, an existing eight by eight field, a field apron sized by testing, service yard, and open farmyard. The Editor measurements are to be supplied later.</desc>
-  <defs>
-    <pattern id="groundDots" width="22" height="22" patternUnits="userSpaceOnUse">
-      <circle cx="3" cy="3" r="1.5" fill="#72826c" opacity=".22"/>
-    </pattern>
-    <pattern id="grassTexture" width="58" height="44" patternUnits="userSpaceOnUse">
-      <path d="M9 29l3-6m0 7 4-5m18 13 3-6m0 7 4-5M43 12l3-6m0 7 4-5" fill="none" stroke="#52684f" stroke-width="1.5" stroke-linecap="round" opacity=".2"/>
-      <circle cx="28" cy="10" r="1.2" fill="#52684f" opacity=".18"/>
-      <circle cx="52" cy="34" r="1.1" fill="#52684f" opacity=".16"/>
-    </pattern>
-    <pattern id="soilTexture" width="28" height="24" patternUnits="userSpaceOnUse">
-      <circle cx="6" cy="7" r="1.2" fill="#5c4935" opacity=".28"/>
-      <circle cx="20" cy="17" r="1.1" fill="#e1c79b" opacity=".5"/>
-      <path d="M13 3l2 2m-9 13 2 2" stroke="#5c4935" stroke-width="1" opacity=".2"/>
-    </pattern>
-    <pattern id="apronHatch" width="18" height="18" patternUnits="userSpaceOnUse" patternTransform="rotate(35)">
-      <path d="M0 0V18" stroke="#73856c" stroke-width="2" opacity=".16"/>
-    </pattern>
-    <linearGradient id="farmGround" x1="0" y1="0" x2=".85" y2="1">
-      <stop offset="0" stop-color="#b4c29b"/>
-      <stop offset=".52" stop-color="#9bad88"/>
-      <stop offset="1" stop-color="#899c79"/>
-    </linearGradient>
-    <style>
-      text { font-family: "Segoe UI", Arial, sans-serif; fill: #263638; }
-      .title { font-size: 34px; font-weight: 700; }
-      .subtitle { font-size: 18px; fill: #536365; }
-      .zone { font-size: 22px; font-weight: 700; }
-      .label { font-size: 18px; font-weight: 700; }
-      .small { font-size: 16px; }
-      .tiny { font-size: 14px; }
-      .stepNumber { fill: #fff; font-weight: 700; }
-      .callout { fill: #fffdf6; stroke: #536365; stroke-width: 2; }
-      .leader { fill: none; stroke: #536365; stroke-width: 1.6; stroke-linecap: round; }
-      .leaderDot { fill: #fffdf6; stroke: #536365; stroke-width: 2; }
-      .blockout { fill: #d7d9d2; fill-opacity: .92; stroke: #515c59; stroke-width: 3; stroke-dasharray: 9 7; }
-      .routeEdge { fill: none; stroke: #755d43; stroke-width: 14; stroke-linecap: round; stroke-linejoin: round; opacity: .46; }
-      .routeBed { fill: none; stroke: #decda9; stroke-width: 9; stroke-linecap: round; stroke-linejoin: round; }
-      .routeCenterline { fill: none; stroke: #a35f38; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 8 7; }
-      .utilityEdge { fill: none; stroke: #315e67; stroke-width: 9; stroke-linecap: round; stroke-linejoin: round; opacity: .5; }
-      .utilityBed { fill: none; stroke: #a7c7c1; stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; }
-      .utilityCenterline { fill: none; stroke: #477f8a; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 3 6; }
-    </style>
-  </defs>
-
-  <rect width="1600" height="1120" fill="#e9e6d9"/>
-  <rect x="28" y="28" width="1544" height="1064" rx="20" fill="#f5f2e7" stroke="#b8b8a6" stroke-width="2"/>
-
-  <text x="66" y="78" class="title">Home farm — master blockout plan</text>
-  <text x="68" y="112" class="subtitle">Whole planned footprint is walkable • optional direct routes, not a daily circuit • measure tile pitch P before setting dimensions</text>
-
-  <!-- One connected, traversable farm footprint. The edge is not a map exit. -->
-  <polygon points="150,320 845,142 1450,356 758,760 150,424" fill="url(#farmGround)" stroke="#52684f" stroke-width="4"/>
-  <polygon points="150,424 758,760 758,796 150,460" fill="#73866c" stroke="#52684f" stroke-width="3"/>
-  <polygon points="758,760 1450,356 1450,392 758,796" fill="#667a64" stroke="#52684f" stroke-width="3"/>
-  <polygon points="150,320 845,142 1450,356 758,760 150,424" fill="url(#groundDots)" opacity=".8"/>
-  <polygon points="150,320 845,142 1450,356 758,760 150,424" fill="url(#grassTexture)"/>
-  <path d="M161 323 845 149 1438 357 758 749 161 418Z" fill="none" stroke="#d8dfc0" stroke-width="2" opacity=".58"/>
-  <g fill="#d5ddbf" opacity=".22">
-    <path d="M220 345q35-25 76-13 22 8 34 25-42 17-83 8-20-4-27-20Z"/>
-    <path d="M567 232q43-24 88-8 22 8 34 24-37 18-82 10-28-5-40-26Z"/>
-    <path d="M1154 359q42-23 81-7 22 9 31 25-42 16-82 8-20-4-30-26Z"/>
-    <path d="M826 683q43-26 83-9 20 8 32 22-38 20-78 12-24-5-37-25Z"/>
-  </g>
-  <g fill="#647b59" opacity=".19">
-    <path d="M288 367q34-18 65-6 15 6 24 17-32 14-63 7-18-4-26-18Z"/>
-    <path d="M1014 241q34-19 65-6 16 6 24 17-32 14-63 7-18-4-26-18Z"/>
-    <path d="M1296 383q30-17 58-5 15 6 22 16-29 12-56 6-16-4-24-17Z"/>
-    <path d="M590 632q34-18 65-6 15 6 24 17-32 14-63 7-18-4-26-18Z"/>
-  </g>
-
-  <!-- Farmhouse zone close to the route, deliberately outside the field apron. -->
-  <polygon points="338,342 472,297 584,346 449,392" fill="#d8c8a9" fill-opacity=".72" stroke="#806d54" stroke-width="3" stroke-dasharray="10 7"/>
-  <path d="M348 343 472 302 573 347 449 384Z" fill="none" stroke="#f4e8cc" stroke-width="2" opacity=".75"/>
-  <polygon points="374,325 450,301 520,331 444,357" fill="#a98968" stroke="#634e3d" stroke-width="2"/>
-  <polygon points="374,325 444,357 444,409 374,377" fill="#b99470" stroke="#634e3d" stroke-width="2"/>
-  <polygon points="444,357 520,331 520,382 444,409" fill="#98785e" stroke="#634e3d" stroke-width="2"/>
-  <polygon points="374,325 425,290 520,315 470,341 444,357" fill="#73583f" stroke="#634e3d" stroke-width="2"/>
-  <path d="M385 324 426 296 508 317M382 330l55 24m-51-17 1 36m68-11 0 42" fill="none" stroke="#d8c09c" stroke-width="2" opacity=".62"/>
-  <!-- Arrival court and start marker. -->
-  <polygon points="192,420 302,382 388,421 278,461" fill="#d8c8a9" fill-opacity=".78" stroke="#806d54" stroke-width="2"/>
-  <path d="M220 410 306 449m-41-55 86 39m-145 1 87 39" fill="none" stroke="#a58d69" stroke-width="1.5" opacity=".48"/>
-  <circle cx="250" cy="430" r="17" fill="#fffdf6" stroke="#354447" stroke-width="4"/>
-  <path d="M240 430h20 M250 420v20" stroke="#354447" stroke-width="3"/>
-  <circle cx="552" cy="410" r="20" fill="#f5f2e7" stroke="#477f8a" stroke-width="4"/>
-  <circle cx="552" cy="410" r="7" fill="#477f8a"/>
-  <!-- Field apron width remains open until pawn, targeting, and camera clearance are tested. -->
-  <polygon points="603,288 903,188 1071,308 771,408" fill="#e0e2d2" fill-opacity=".88" stroke="#62775e" stroke-width="3" stroke-dasharray="12 8"/>
-  <polygon points="603,288 903,188 1071,308 771,408" fill="url(#apronHatch)" opacity=".68"/>
-
-  <!-- Existing field, shown as a raised 8 by 8 plane. -->
-  <polygon points="650,306 890,226 1040,306 784,414" fill="#594b39" opacity=".22"/>
-  <polygon points="650,290 784,386 784,402 650,306" fill="#806346"/>
-  <polygon points="784,386 1024,306 1024,322 784,402" fill="#70573f"/>
-  <g transform="matrix(.75,-.25,.42,.3,650,290)">
-    <rect x="0" y="0" width="320" height="320" fill="#9a7652" stroke="#594a38" stroke-width="5"/>
-    <rect x="3" y="3" width="314" height="314" fill="url(#soilTexture)" opacity=".72"/>
-    <path d="M40 0V320 M80 0V320 M120 0V320 M160 0V320 M200 0V320 M240 0V320 M280 0V320
-             M0 40H320 M0 80H320 M0 120H320 M0 160H320 M0 200H320 M0 240H320 M0 280H320"
-          fill="none" stroke="#d6c39b" stroke-width="2"/>
-    <path d="M2 3H318M2 317H318" fill="none" stroke="#ead7ad" stroke-width="2" opacity=".68"/>
-  </g>
-
-  <!-- Planned service yard. These are footprint markers, not functioning features. -->
-  <polygon points="1092,372 1214,330 1318,376 1196,419" fill="#ded4bd" fill-opacity=".92" stroke="#6b6656" stroke-width="3" stroke-dasharray="10 7"/>
-  <path d="M1103 372 1214 336 1305 376 1196 412Z" fill="none" stroke="#f5ebd6" stroke-width="2" opacity=".8"/>
-  <g transform="translate(1127 352)">
-    <ellipse cx="22" cy="10" rx="22" ry="9" fill="#8bb4b2" stroke="#466d70" stroke-width="2"/>
-    <path d="M0 10v27c0 5 10 9 22 9s22-4 22-9V10" fill="#6f9c9b" stroke="#466d70" stroke-width="2"/>
-    <ellipse cx="22" cy="37" rx="22" ry="9" fill="#6f9c9b" stroke="#466d70" stroke-width="2"/>
-    <path d="M6 17v18m32-18v18" stroke="#b8d5cf" stroke-width="2" opacity=".68"/>
-  </g>
-  <g transform="translate(1221 368)">
-    <polygon points="0,10 38,0 66,13 28,24" fill="#8e6949" stroke="#594a38" stroke-width="2"/>
-    <polygon points="28,24 66,13 66,45 28,56" fill="#6e523b" stroke="#594a38" stroke-width="2"/>
-    <polygon points="0,10 28,24 28,56 0,42" fill="#a77c55" stroke="#594a38" stroke-width="2"/>
-    <path d="M8 13 35 27m-26 1 19 10m7-12v28m21-37v31" fill="none" stroke="#d0a676" stroke-width="2" opacity=".6"/>
-  </g>
-  <!-- Open farmyard: playable ground now, not a locked future reserve. -->
-  <polygon points="836,506 1006,440 1144,500 973,571" fill="#c9d5b9" fill-opacity=".72" stroke="#64765f" stroke-width="3" stroke-dasharray="11 8"/>
-  <path d="M851 506 1006 448 1127 500 973 562Z" fill="none" stroke="#edf0dc" stroke-width="2" opacity=".72"/>
-  <g fill="none" stroke="#718767" stroke-width="2" stroke-linecap="round" opacity=".46">
-    <path d="m862 522 4-7m1 8 5-6m41 22 4-7m1 8 5-6m99-32 4-7m1 8 5-6m39 14 4-7m1 8 5-6"/>
-  </g>
-  <!-- Direct connections and the optional yard circuit. The lines do not prescribe direction. -->
-  <path class="routeEdge" d="M270 448 C324 446 355 433 388 425 C430 414 462 417 490 425 C550 440 615 450 680 458 C715 461 740 461 763 458 C760 440 760 423 771 408"/>
-  <path class="routeBed" d="M270 448 C324 446 355 433 388 425 C430 414 462 417 490 425 C550 440 615 450 680 458 C715 461 740 461 763 458 C760 440 760 423 771 408"/>
-  <path class="routeEdge" d="M771 408 C782 425 790 440 780 458 C889 461 1000 466 1090 458"/>
-  <path class="routeBed" d="M771 408 C782 425 790 440 780 458 C889 461 1000 466 1090 458"/>
-  <path class="routeEdge" d="M1090 458 C1135 490 1132 520 1070 538 C1006 557 930 565 840 566 C700 568 600 568 500 568 C420 568 350 560 320 535 C295 513 280 485 274 453"/>
-  <path class="routeBed" d="M1090 458 C1135 490 1132 520 1070 538 C1006 557 930 565 840 566 C700 568 600 568 500 568 C420 568 350 560 320 535 C295 513 280 485 274 453"/>
-  <path class="routeCenterline" d="M270 448 C324 446 355 433 388 425 C430 414 462 417 490 425 C550 440 615 450 680 458 C715 461 740 461 763 458 C760 440 760 423 771 408"/>
-  <path class="routeCenterline" d="M771 408 C782 425 790 440 780 458 C889 461 1000 466 1090 458"/>
-  <path class="routeCenterline" d="M1090 458 C1135 490 1132 520 1070 538 C1006 557 930 565 840 566 C700 568 600 568 500 568 C420 568 350 560 320 535 C295 513 280 485 274 453"/>
-
-  <!-- Utility access spur from the loop into the service yard. -->
-  <path class="utilityEdge" d="M1090 458 C1122 432 1154 411 1190 394"/>
-  <path class="utilityBed" d="M1090 458 C1122 432 1154 411 1190 394"/>
-  <path class="utilityCenterline" d="M1090 458 C1122 432 1154 411 1190 394"/>
-
-  <!-- Callouts sit on empty grass or in the margin, never over a zone, route, marker, or terrain edge.
-       Leaders follow the route layers so they stay visible; boxes come last so nothing covers their text. -->
-  <g class="leader">
-    <path d="M640 180 735 285"/>
-    <path d="M410 240 440 303"/>
-    <path d="M1100 206 980 250"/>
-    <path d="M1320 296 1214 350"/>
-    <path d="M250 580V451"/>
-    <path d="M552 475V433"/>
-    <path d="M890 582 935 522"/>
-  </g>
-  <g class="leaderDot">
-    <circle cx="735" cy="285" r="4.5"/>
-    <circle cx="440" cy="303" r="4.5"/>
-    <circle cx="980" cy="250" r="4.5"/>
-    <circle cx="1214" cy="350" r="4.5"/>
-    <circle cx="935" cy="522" r="4.5"/>
-  </g>
-
-  <rect x="450" y="128" width="220" height="52" rx="8" fill="#fffdf6" fill-opacity=".96" stroke="#7b654b" stroke-width="2"/>
-  <text x="560" y="151" text-anchor="middle" class="label">CROP FIELD</text>
-  <text x="560" y="170" text-anchor="middle" class="tiny">existing 8 × 8 grid</text>
-
-  <rect x="172" y="186" width="262" height="54" rx="9" class="callout"/>
-  <text x="303" y="210" text-anchor="middle" class="zone">HOME ZONE</text>
-  <text x="303" y="229" text-anchor="middle" class="tiny">farmhouse massing; bed moves here</text>
-
-  <rect x="1080" y="128" width="340" height="78" rx="9" class="callout"/>
-  <text x="1250" y="154" text-anchor="middle" class="zone">FIELD APRON</text>
-  <text x="1250" y="176" text-anchor="middle" class="tiny">standable around every field edge</text>
-  <text x="1250" y="195" text-anchor="middle" class="tiny">size after pawn, tool-reach, and camera tests</text>
-
-  <rect x="1300" y="222" width="256" height="74" rx="9" class="callout"/>
-  <text x="1428" y="248" text-anchor="middle" class="zone">SERVICE YARD</text>
-  <text x="1428" y="268" text-anchor="middle" class="tiny">planned water source + shipping bin</text>
-  <text x="1428" y="286" text-anchor="middle" class="tiny">placeholders; keep off the apron</text>
-
-  <rect x="50" y="580" width="285" height="67" rx="9" class="callout"/>
-  <text x="67" y="606" class="label">ARRIVAL / PLAYER START</text>
-  <text x="67" y="628" class="tiny">current anchor: locate and verify</text>
-
-  <rect x="385" y="475" width="250" height="56" rx="9" class="callout"/>
-  <text x="510" y="498" text-anchor="middle" class="small" font-weight="700">Caretaker welcome spot</text>
-  <text x="510" y="518" text-anchor="middle" class="tiny">clear standing room for two</text>
-
-  <rect x="678" y="582" width="226" height="74" rx="9" class="callout"/>
-  <text x="791" y="607" text-anchor="middle" class="zone">OPEN FARMYARD</text>
-  <text x="791" y="627" text-anchor="middle" class="tiny">walkable and connected</text>
-  <text x="791" y="645" text-anchor="middle" class="tiny">from the first blockout</text>
-
-  <rect x="50" y="668" width="380" height="96" rx="10" fill="#fffdf6" stroke="#b8b8a6" stroke-width="2"/>
-  <text x="72" y="696" class="label">OPTIONAL ROUTES</text>
-  <text x="72" y="722" class="small">Direct home, field, and service links.</text>
-  <text x="72" y="746" class="small">The yard circuit is optional.</text>
-
-  <rect x="650" y="810" width="886" height="196" rx="14" fill="#fffdf6" stroke="#b8b8a6" stroke-width="2"/>
-  <text x="681" y="847" class="zone">Build the level in this order</text>
-  <g class="small">
-    <circle cx="692" cy="876" r="15" fill="#354447"/><text x="692" y="882" text-anchor="middle" class="stepNumber">1</text>
-    <text x="720" y="882">Survey current Player Start, 8 × 8 grid, bed, tile pitch P, pawn capsule, and camera view.</text>
-    <circle cx="692" cy="911" r="15" fill="#354447"/><text x="692" y="917" text-anchor="middle" class="stepNumber">2</text>
-    <text x="720" y="917">Duplicate L_Farm; block the full walkable area and connect home, field, and services.</text>
-    <circle cx="692" cy="946" r="15" fill="#354447"/><text x="692" y="952" text-anchor="middle" class="stepNumber">3</text>
-    <text x="720" y="952">Add home, service yard, arrival, and open-yard massing; leave field apron clear.</text>
-    <circle cx="692" cy="981" r="15" fill="#354447"/><text x="692" y="987" text-anchor="middle" class="stepNumber">4</text>
-    <text x="720" y="987">Play-test direct routes, optional yard circuit, and field access before adding art.</text>
-  </g>
-
-  <rect x="66" y="810" width="548" height="196" rx="14" fill="#fffdf6" stroke="#b8b8a6" stroke-width="2"/>
-  <text x="96" y="847" class="zone">How to read the plan</text>
-  <path class="routeEdge" d="M100 885 H185"/>
-  <path class="routeBed" d="M100 885 H185"/>
-  <path class="routeCenterline" d="M100 885 H185"/>
-  <text x="211" y="891" class="small">optional player route (dashed centerline)</text>
-  <path class="utilityEdge" d="M100 923 H185"/>
-  <path class="utilityBed" d="M100 923 H185"/>
-  <path class="utilityCenterline" d="M100 923 H185"/>
-  <text x="211" y="929" class="small">service spur (dashed centerline)</text>
-  <rect x="100" y="945" width="49" height="24" fill="#e0e2d2" stroke="#62775e" stroke-width="2" stroke-dasharray="7 5"/>
-  <text x="211" y="964" class="small">clear field work apron</text>
-  <rect x="100" y="978" width="49" height="20" fill="#d7d9d2" stroke="#515c59" stroke-width="2" stroke-dasharray="7 5"/>
-  <text x="211" y="995" class="small">new blockout or planned-feature placeholder</text>
-
-  <text x="68" y="1040" class="small" font-weight="700">Scale key: P = measured center-to-center tile pitch. Convert P to centimeters in the Editor; the drawing is a spatial plan, not a measured survey.</text>
-  <text x="68" y="1070" class="tiny">Farmhouse, services, caretaker, and terrain/art are planned or placeholder content. The whole boundary is walkable but is not an exit to town.</text>
-  <text x="68" y="1090" class="tiny">The current outdoor Player Start is for the prototype blockout; the planned story opening is at the cryo pod under the farmhouse.</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="1160" height="780" viewBox="0 0 1160 780" role="img" aria-labelledby="t d">
+<title id="t">Home farm layout, top-down</title>
+<desc id="d">Top-down sketch of L_Farm for the vertical slice, north up, east = +X: the 8 by 8 field in the middle; the farmhouse with the bed inside to the west, on the clean side; Hob's spot by its door and the Player Start south-east of it; the service yard to the east, on the heavy side, with the well, the shipping bin and the seed dispensers in a north-south line; a reserved dirty water spot north-east of the field, nearer than the well; and a blocking boundary round about 50 by 35 metres. Drawn to the plan's targets at 16 pixels per metre; the map is the measurement.</desc>
+<style>text{font-family:"Segoe UI",Arial,sans-serif;fill:#263638}.h{font-size:26px;font-weight:700}.s{font-size:15px;fill:#4a5a5c}.l{font-size:15px;font-weight:700}.n{font-size:13px}.m{font-size:12px;fill:#4a5a5c}</style>
+<rect width="1160" height="780" fill="#f4f2ea"/>
+<text class="h" x="60" y="50">Home farm layout (top-down)</text>
+<text class="s" x="60" y="76">L_Farm for the vertical slice. Drawn to the plan's targets at 1 square = 5 m; the map, not the drawing, is the measurement.</text>
+<rect x="60" y="110" width="800" height="560" fill="#a9bb92" stroke="#3d4a3a" stroke-width="5"/>
+<line x1="140" y1="110" x2="140" y2="670" stroke="#3d4a3a" stroke-opacity=".12"/>
+<line x1="220" y1="110" x2="220" y2="670" stroke="#3d4a3a" stroke-opacity=".12"/>
+<line x1="300" y1="110" x2="300" y2="670" stroke="#3d4a3a" stroke-opacity=".12"/>
+<line x1="380" y1="110" x2="380" y2="670" stroke="#3d4a3a" stroke-opacity=".12"/>
+<line x1="460" y1="110" x2="460" y2="670" stroke="#3d4a3a" stroke-opacity=".12"/>
+<line x1="540" y1="110" x2="540" y2="670" stroke="#3d4a3a" stroke-opacity=".12"/>
+<line x1="620" y1="110" x2="620" y2="670" stroke="#3d4a3a" stroke-opacity=".12"/>
+<line x1="700" y1="110" x2="700" y2="670" stroke="#3d4a3a" stroke-opacity=".12"/>
+<line x1="780" y1="110" x2="780" y2="670" stroke="#3d4a3a" stroke-opacity=".12"/>
+<line x1="60" y1="190" x2="860" y2="190" stroke="#3d4a3a" stroke-opacity=".12"/>
+<line x1="60" y1="270" x2="860" y2="270" stroke="#3d4a3a" stroke-opacity=".12"/>
+<line x1="60" y1="350" x2="860" y2="350" stroke="#3d4a3a" stroke-opacity=".12"/>
+<line x1="60" y1="430" x2="860" y2="430" stroke="#3d4a3a" stroke-opacity=".12"/>
+<line x1="60" y1="510" x2="860" y2="510" stroke="#3d4a3a" stroke-opacity=".12"/>
+<line x1="60" y1="590" x2="860" y2="590" stroke="#3d4a3a" stroke-opacity=".12"/>
+<text class="n" x="69.6" y="657.2">Boundary: blocking volume (blocks the pawn, not the camera) with a visible low edge; no exit</text>
+<path d="M228.0 390.0 L316 390.0" fill="none" stroke="#d9c79f" stroke-width="32" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M316 390.0 L316 278.0 L524 278.0 L596.0 334" fill="none" stroke="#d9c79f" stroke-width="32" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M316 390.0 L316 502.0 L524 502.0 L596.0 462" fill="none" stroke="#d9c79f" stroke-width="32" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="324.0" y="294.0" width="176" height="176" fill="#c9d6b4" stroke="#6b7b62" stroke-dasharray="6 5"/>
+<text class="m" x="327.2" y="289.2">apron 1.5 m min.</text>
+<rect x="348" y="318" width="16" height="16" fill="#8a6a48" stroke="#4a3626" stroke-width="1"/>
+<rect x="348" y="334" width="16" height="16" fill="#8a6a48" stroke="#4a3626" stroke-width="1"/>
+<rect x="348" y="350" width="16" height="16" fill="#8a6a48" stroke="#4a3626" stroke-width="1"/>
+<rect x="348" y="366" width="16" height="16" fill="#8a6a48" stroke="#4a3626" stroke-width="1"/>
+<rect x="348" y="382" width="16" height="16" fill="#8a6a48" stroke="#4a3626" stroke-width="1"/>
+<rect x="348" y="398" width="16" height="16" fill="#8a6a48" stroke="#4a3626" stroke-width="1"/>
+<rect x="348" y="414" width="16" height="16" fill="#8a6a48" stroke="#4a3626" stroke-width="1"/>
+<rect x="348" y="430" width="16" height="16" fill="#8a6a48" stroke="#4a3626" stroke-width="1"/>
+<rect x="364" y="318" width="16" height="16" fill="#8a6a48" stroke="#4a3626" stroke-width="1"/>
+<rect x="364" y="334" width="16" height="16" fill="#8a6a48" stroke="#4a3626" stroke-width="1"/>
+<rect x="364" y="350" width="16" height="16" fill="#8a6a48" stroke="#4a3626" stroke-width="1"/>
+<rect x="364" y="366" width="16" height="16" fill="#8a6a48" stroke="#4a3626" stroke-width="1"/>
+<rect x="364" y="382" width="16" height="16" fill="#8a6a48" stroke="#4a3626" stroke-width="1"/>
+<rect x="364" y="398" width="16" height="16" fill="#8a6a48" stroke="#4a3626" stroke-width="1"/>
+<rect x="364" y="414" width="16" height="16" fill="#8a6a48" stroke="#4a3626" stroke-width="1"/>
+<rect x="364" y="430" width="16" height="16" fill="#8a6a48" stroke="#4a3626" stroke-width="1"/>
+<rect x="380" y="318" width="16" height="16" fill="#7d5f4a" stroke="#4a3626" stroke-width="1"/>
+<rect x="380" y="334" width="16" height="16" fill="#7d5f4a" stroke="#4a3626" stroke-width="1"/>
+<rect x="380" y="350" width="16" height="16" fill="#7d5f4a" stroke="#4a3626" stroke-width="1"/>
+<rect x="380" y="366" width="16" height="16" fill="#7d5f4a" stroke="#4a3626" stroke-width="1"/>
+<rect x="380" y="382" width="16" height="16" fill="#7d5f4a" stroke="#4a3626" stroke-width="1"/>
+<rect x="380" y="398" width="16" height="16" fill="#7d5f4a" stroke="#4a3626" stroke-width="1"/>
+<rect x="380" y="414" width="16" height="16" fill="#7d5f4a" stroke="#4a3626" stroke-width="1"/>
+<rect x="380" y="430" width="16" height="16" fill="#7d5f4a" stroke="#4a3626" stroke-width="1"/>
+<rect x="396" y="318" width="16" height="16" fill="#7d5f4a" stroke="#4a3626" stroke-width="1"/>
+<rect x="396" y="334" width="16" height="16" fill="#7d5f4a" stroke="#4a3626" stroke-width="1"/>
+<rect x="396" y="350" width="16" height="16" fill="#7d5f4a" stroke="#4a3626" stroke-width="1"/>
+<rect x="396" y="366" width="16" height="16" fill="#7d5f4a" stroke="#4a3626" stroke-width="1"/>
+<rect x="396" y="382" width="16" height="16" fill="#7d5f4a" stroke="#4a3626" stroke-width="1"/>
+<rect x="396" y="398" width="16" height="16" fill="#7d5f4a" stroke="#4a3626" stroke-width="1"/>
+<rect x="396" y="414" width="16" height="16" fill="#7d5f4a" stroke="#4a3626" stroke-width="1"/>
+<rect x="396" y="430" width="16" height="16" fill="#7d5f4a" stroke="#4a3626" stroke-width="1"/>
+<rect x="412" y="318" width="16" height="16" fill="#7d5f4a" stroke="#4a3626" stroke-width="1"/>
+<rect x="412" y="334" width="16" height="16" fill="#7d5f4a" stroke="#4a3626" stroke-width="1"/>
+<rect x="412" y="350" width="16" height="16" fill="#7d5f4a" stroke="#4a3626" stroke-width="1"/>
+<rect x="412" y="366" width="16" height="16" fill="#7d5f4a" stroke="#4a3626" stroke-width="1"/>
+<rect x="412" y="382" width="16" height="16" fill="#7d5f4a" stroke="#4a3626" stroke-width="1"/>
+<rect x="412" y="398" width="16" height="16" fill="#7d5f4a" stroke="#4a3626" stroke-width="1"/>
+<rect x="412" y="414" width="16" height="16" fill="#7d5f4a" stroke="#4a3626" stroke-width="1"/>
+<rect x="412" y="430" width="16" height="16" fill="#7d5f4a" stroke="#4a3626" stroke-width="1"/>
+<rect x="428" y="318" width="16" height="16" fill="#7d5f4a" stroke="#4a3626" stroke-width="1"/>
+<rect x="428" y="334" width="16" height="16" fill="#7d5f4a" stroke="#4a3626" stroke-width="1"/>
+<rect x="428" y="350" width="16" height="16" fill="#7d5f4a" stroke="#4a3626" stroke-width="1"/>
+<rect x="428" y="366" width="16" height="16" fill="#7d5f4a" stroke="#4a3626" stroke-width="1"/>
+<rect x="428" y="382" width="16" height="16" fill="#7d5f4a" stroke="#4a3626" stroke-width="1"/>
+<rect x="428" y="398" width="16" height="16" fill="#7d5f4a" stroke="#4a3626" stroke-width="1"/>
+<rect x="428" y="414" width="16" height="16" fill="#7d5f4a" stroke="#4a3626" stroke-width="1"/>
+<rect x="428" y="430" width="16" height="16" fill="#7d5f4a" stroke="#4a3626" stroke-width="1"/>
+<rect x="444" y="318" width="16" height="16" fill="#6e4f4d" stroke="#4a3626" stroke-width="1"/>
+<rect x="444" y="334" width="16" height="16" fill="#6e4f4d" stroke="#4a3626" stroke-width="1"/>
+<rect x="444" y="350" width="16" height="16" fill="#6e4f4d" stroke="#4a3626" stroke-width="1"/>
+<rect x="444" y="366" width="16" height="16" fill="#6e4f4d" stroke="#4a3626" stroke-width="1"/>
+<rect x="444" y="382" width="16" height="16" fill="#6e4f4d" stroke="#4a3626" stroke-width="1"/>
+<rect x="444" y="398" width="16" height="16" fill="#6e4f4d" stroke="#4a3626" stroke-width="1"/>
+<rect x="444" y="414" width="16" height="16" fill="#6e4f4d" stroke="#4a3626" stroke-width="1"/>
+<rect x="444" y="430" width="16" height="16" fill="#6e4f4d" stroke="#4a3626" stroke-width="1"/>
+<rect x="460" y="318" width="16" height="16" fill="#6e4f4d" stroke="#4a3626" stroke-width="1"/>
+<rect x="460" y="334" width="16" height="16" fill="#6e4f4d" stroke="#4a3626" stroke-width="1"/>
+<rect x="460" y="350" width="16" height="16" fill="#6e4f4d" stroke="#4a3626" stroke-width="1"/>
+<rect x="460" y="366" width="16" height="16" fill="#6e4f4d" stroke="#4a3626" stroke-width="1"/>
+<rect x="460" y="382" width="16" height="16" fill="#6e4f4d" stroke="#4a3626" stroke-width="1"/>
+<rect x="460" y="398" width="16" height="16" fill="#6e4f4d" stroke="#4a3626" stroke-width="1"/>
+<rect x="460" y="414" width="16" height="16" fill="#6e4f4d" stroke="#4a3626" stroke-width="1"/>
+<rect x="460" y="430" width="16" height="16" fill="#6e4f4d" stroke="#4a3626" stroke-width="1"/>
+<text class="l" x="348" y="310.0">Field 8 x 8 m</text>
+<text class="m" x="348" y="465.2" dy="12">clean</text>
+<text class="m" x="396" y="465.2" dy="12">light</text>
+<text class="m" x="447.2" y="465.2" dy="12">heavy</text>
+<text class="m" x="348" y="489.2" dy="10">columns 0-1 | 2-5 | 6-7</text>
+<rect x="124" y="326.0" width="96" height="128" fill="#c7b59a" stroke="#4f3e2c" stroke-width="5"/>
+<rect x="128.8" y="330.8" width="86.4" height="118.4" fill="#efe6d4"/>
+<rect x="136.8" y="407.6" width="32" height="19.2" fill="#7b8fa6" stroke="#2f3d4d"/>
+<text class="n" x="136.8" y="436.4" dy="6">bed</text>
+<rect x="149.6" y="343.6" width="25.6" height="25.6" fill="none" stroke="#7a6a55" stroke-dasharray="3 3"/>
+<text class="m" x="133.6" y="383.6">hatch later</text>
+<rect x="215.2" y="380.4" width="9.6" height="20.8" fill="#4f3e2c"/>
+<text class="l" x="124" y="316.4">Farmhouse</text>
+<text class="m" x="69.6" y="471.6" dy="10">8 x 6 m outside, one room,</text>
+<text class="m" x="69.6" y="487.6" dy="10">5 x 5 m clear min., 3 m ceiling,</text>
+<text class="m" x="69.6" y="503.6" dy="10">door 1.2 m min., walls 20-30 cm</text>
+<circle cx="260.0" cy="354.8" r="14.4" fill="#e1a84a" stroke="#6b4a12" stroke-width="2"/>
+<text class="l" x="236" y="327.6">Hob</text>
+<g transform="rotate(-25 303.2 465.2)"><circle cx="303.2" cy="465.2" r="9.6" fill="#fff" stroke="#263638" stroke-width="2"/><path d="M303.2 453.2 l0 -18 m-6 6 l6 -6 l6 6" stroke="#263638" stroke-width="2" fill="none"/></g>
+<text class="n" x="213.6" y="529.2">Player Start, about 6 m out,</text><text class="n" x="213.6" y="545.2">turned to Hob and the field</text>
+<rect x="596.0" y="318" width="184.0" height="176" fill="#d8d3c4" stroke="#5a5a52" stroke-dasharray="7 5" stroke-width="2"/>
+<text class="l" x="596.0" y="308.4">Service yard</text>
+<circle cx="636" cy="350" r="16" fill="#58aeff" stroke="#24527a" stroke-width="2"/>
+<text class="n" x="658.4" y="356.4">well, 9 m from field</text>
+<rect x="623.2" y="388.4" width="25.6" height="19.2" fill="#8a6a48" stroke="#3d2c1c" stroke-width="2"/>
+<text class="n" x="658.4" y="402.8">shipping bin</text>
+<rect x="628.8" y="423.6" width="14.4" height="14.4" fill="#2f7f7a" stroke="#173f3c" stroke-width="2"/>
+<rect x="628.8" y="439.6" width="14.4" height="14.4" fill="#2f7f7a" stroke="#173f3c" stroke-width="2"/>
+<rect x="628.8" y="455.6" width="14.4" height="14.4" fill="#2f7f7a" stroke="#173f3c" stroke-width="2"/>
+<text class="n" x="658.4" y="447.6">seed dispensers,</text><text class="n" x="658.4" y="463.6">1 m apart</text>
+<rect x="524" y="215.6" width="48" height="40.0" fill="#d63a9c" fill-opacity=".35" stroke="#8a1f62" stroke-width="2" stroke-dasharray="5 4"/>
+<text class="l" x="532.0" y="164.4">Dirty water spot</text>
+<text class="m" x="532.0" y="182.0">placeholder, 3-5 m from the field's corner,</text><text class="m" x="532.0" y="194.8">nearer than the well</text>
+<path d="M796 582.0 l0 -26" stroke="#263638" stroke-width="2"/><path d="M796 558 m-6 0 l6 -10 l6 10 z" fill="#263638"/>
+<text class="l" x="789.6" y="606">N</text>
+<rect x="700" y="626.8" width="80" height="6" fill="#263638"/><text class="m" x="700" y="622">5 m = 1 s walking</text>
+<text class="m" x="700" y="644.4" dy="6">east = +X, south = +Y</text>
+<text class="l" x="900" y="130">Walking targets</text>
+<text class="n" x="900" y="154">(5 m/s, so 1 s = 5 m)</text>
+<text class="n" x="900" y="175">Door to field: 1.5 s, 6-8 m</text>
+<text class="n" x="900" y="196">Field to well: 2 s, 9 m</text>
+<text class="n" x="900" y="217">Well, bin, dispensers:</text>
+<text class="n" x="900" y="238">  a few steps apart</text>
+<text class="n" x="900" y="259">Door to well: 6 s or less</text>
+<text class="n" x="900" y="280">Long side: 10 s or less</text>
+<text class="l" x="900" y="315">Fixed by earlier decisions</text>
+<text class="n" x="900" y="336">Field: stays put, the anchor</text>
+<text class="n" x="900" y="357">House: west, clean side</text>
+<text class="n" x="900" y="378">Yard: east, heavy side</text>
+<text class="n" x="900" y="399">Bed: indoors</text>
+<text class="n" x="900" y="420">No exit until the town</text>
+<text class="l" x="900" y="455">Key</text>
+<text class="n" x="900" y="476">route, 2 m wide min.</text>
+<text class="n" x="900" y="497">field apron, kept clear</text>
+<text class="n" x="900" y="518">blockout placeholder</text>
+<rect x="872" y="464" width="20" height="12" fill="#d9c79f"/>
+<rect x="872" y="485" width="20" height="12" fill="#c9d6b4" stroke="#6b7b62" stroke-dasharray="3 2"/>
+<rect x="872" y="506" width="20" height="12" fill="#d8d3c4" stroke="#5a5a52" stroke-dasharray="3 2"/>
 </svg>

@@ -34,10 +34,11 @@ Contents
   3. Hob's relationship track, and how the player sees his opinion change ([4.4](#44-the-caretaker-robot)).
   4. [4.5](#45-automation-and-selling): placing objects on the farm grid, and the sprinkler, bought at the seed shop.
   5. Dirty water and its source ([4.2](#42-farming-depth)).
-  6. What a first-time player needs to see: the hotbar and the bag on screen ([4.6](#46-interface-and-input)), a dry crop that looks thirsty and item descriptions ([4.2](#42-farming-depth)), then the HUD layout pass.
-  7. [4.7](#47-starting-and-testing-the-slice): the title screen and the day-1 save.
-  8. Hob's tutorial and his reminders of crops at risk ([4.4](#44-the-caretaker-robot), [4.2](#42-farming-depth)), which need Hob and dialogue.
-  9. The slice play-test with players who haven't seen the game ([4.7](#47-starting-and-testing-the-slice)).
+  6. Lay out the home farm ([4.7](#47-starting-and-testing-the-slice)): the farmhouse with the bed inside, the service yard, Hob's spot and the dirty water source, as a blockout, once every slice prop exists. Any art pass for screenshots comes after it, so it doesn't dress a layout that still moves.
+  7. What a first-time player needs to see: the hotbar and the bag on screen ([4.6](#46-interface-and-input)), a dry crop that looks thirsty and item descriptions ([4.2](#42-farming-depth)), then the HUD layout pass.
+  8. [4.7](#47-starting-and-testing-the-slice): the title screen and the day-1 save.
+  9. Hob's tutorial and his reminders of crops at risk ([4.4](#44-the-caretaker-robot), [4.2](#42-farming-depth)), which need Hob and dialogue.
+  10. The slice play-test with players who haven't seen the game ([4.7](#47-starting-and-testing-the-slice)).
 
   Polish that isn't on this path (the sun and the moon, the per-minute clock, the ripe-crop glow, held meshes, automated play-tests, the performance agent) waits until after it unless it is cheap to do alongside.
 
@@ -210,6 +211,7 @@ What the slice's "done when" needs besides its features: a player who can start 
 
 - [ ] A small title screen: Continue, New game (asking for confirmation before it replaces a save) and Quit, built with Common UI ([4.0](#40-structure-from-the-code-review), H7). Today a new game is only the `NewGame` console command. The settings and save slots stay in [section 6](#6-before-a-public-release)
 - [ ] Start a new game with a save: `NewGame` deletes both slots, so quitting before the first night leaves no save at all. Write a day-1 save once the new map has begun play instead (found in the save registry review, 2026-11-06)
+- [ ] Lay out the home farm in `L_Farm` as the [home farm plan](Levels/HomeFarm/README.md) says: floor and a blocking boundary with a visible edge, a farmhouse with a small interior and `BP_Bed` moved inside (@DunderGG, 2026-11-25), the service yard east of the field with the dirty water source nearer than the well, Hob's spot by the door and the Player Start facing the field, timed against the plan's walking targets and checked with `stat unit`. Blockout shapes only; meshes and scenery are a separate art pass after it. A level, not a system: no new class, the bed's rule unchanged
 - [ ] The slice play-test, which ends the milestone: a packaged build, two or three people who haven't seen the game, a sheet with one line per goal in [GameDesign.md, section 13](GameDesign.md#next-vertical-slice) (what they did, where they got stuck, without help from the person watching), and a round of fixes from what it finds, each a roadmap item
    - The end-of-season recap ([section 5](#seasons-and-weather)) stays later, as @DunderGG chose on 2026-11-14; it is cheap once the title screen and Common UI exist, if the play-test shows the season's end falls flat
 

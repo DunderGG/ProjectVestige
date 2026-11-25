@@ -4,10 +4,8 @@ This folder holds level blockout plans and editor notes. These documents describ
 
 ## Home farm
 
-- [Home farm plan](./HomeFarm/README.md) describes the full walkable farm layout, player routes, landmarks, scale survey, and Editor build order.
-- [Home farm layout diagram](./HomeFarm/HomeFarm.svg) is an editable, relative-scale 2.5D master plan, not a survey of the current map.
-
-The existing map is `/Game/Maps/L_Farm`. Verify actor locations and dimensions in the Editor before treating the diagram as a measured plan. Keep experimental changes in a duplicate map until the layout is agreed.
+- [Home farm plan](./HomeFarm/README.md): the layout of `/Game/Maps/L_Farm` for the vertical slice, with what is fixed, size targets in walking time, the build order and when it is done.
+- [Home farm diagram](./HomeFarm/HomeFarm.svg): a top-down sketch of that plan, drawn to the targets; the map, not the drawing, is the measurement.
 
 ## Shared level-authoring tools
 

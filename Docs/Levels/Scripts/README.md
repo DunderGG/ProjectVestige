@@ -15,7 +15,7 @@ The shared tools must not hard-code `/Game/Maps/L_Farm`, farm actor names, an 8 
 | **Adjustment widget** | A friendly interface could help frequent edits, but Unreal's viewport already moves and scales actors. Keeping a widget, actors, and a layout file synchronized is additional work. | Defer until editing the layout file and rebuilding is demonstrably awkward. |
 | **Route and clearance checks** | Useful for finding mistakes in explicitly described routes and obstacles, but cannot prove a route is playable. Setting up accurate input data can cost more than walking a small level. | Add specific checks only when repeated use justifies them. Play-testing remains necessary. |
 
-**Recommendation:** begin the HomeFarm blockout manually on a duplicate map. Do not build all four tools just to place the first few shapes. A small, reusable survey is the best first automation; a generator is a separate, optional investment.
+**Recommendation:** lay out the home farm by hand in `L_Farm`, with the map committed first so Git can restore it. Do not build all four tools just to place the first few shapes. A small, reusable survey is the best first automation; a generator is a separate, optional investment.
 
 **Unreal terms:** an *actor* is an object placed in a level; its *components* can draw a mesh or provide collision. A *static mesh* is a reusable geometry asset. A map has a persistent level, while the Editor's *current level* is where it places new actors. *Play-in-Editor* (PIE) runs a game session for testing. A *dry-run* describes proposed changes without making them; an Editor *transaction* groups supported edits for Undo.
 
