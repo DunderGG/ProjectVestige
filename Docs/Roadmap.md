@@ -41,6 +41,8 @@ Contents
 
   Polish that isn't on this path (the sun and the moon, the per-minute clock, the ripe-crop glow, held meshes, automated play-tests, the performance agent) waits until after it unless it is cheap to do alongside.
 
+  The screenshot art pass ([4.6](#46-interface-and-input)) comes before the first devlog post, outside the numbered order: the dispenser mesh, the bed and the sky depend on nothing else and can come after item 1, and the ground dressing comes after the home farm's layout (2026-11-25).
+
 ## 2. Milestone 1: playable prototype (done)
 
 A third-person farmer on a small field who can till, plant, water and harvest, with a day and night cycle, a HUD and saving.
@@ -168,7 +170,7 @@ The code changes that the slice's content depends on. Doing them first means add
 - [ ] Placing objects on the farm grid
 - [ ] A sprinkler that waters nearby tiles each morning from the farm's water store
    - How the player gets it: recommended in [GameDesign.md, section 15](GameDesign.md#15-open-questions), bought at the seed shop for about 500 coins, repeatable, as a line in `DA_Shop_Farm`. Decide with @DunderGG, with its range (3 by 3 recommended)
-- [ ] The seed dispensers' real mesh: the artist's `SM_ShopDispenser` (0.9 by 0.9 by 1.5 m, pivot on the floor at its centre, front towards +X) with hull `UCX_SM_ShopDispenser_00` and a window material per seed so the three tell apart at a glance; then rerun `EditorScripts/SetUpSeedShop.py` (it sets the mesh at scale 1 and location 0 in place of the stand-in cube) and re-check the interaction box numbers ([Systems.md, section 26](Systems/26-Shops.md))
+- The seed dispensers' real mesh: moved into the screenshot art pass in [4.6](#46-interface-and-input) (2026-11-25)
 
 ### 4.6 Interface and input
 
@@ -189,6 +191,11 @@ Polish, after the slice's features unless cheap alongside them:
 - [ ] Meshes for the new crops, the sprinkler, the shipping bin, the water source and the bed
    - 2026-11-14: the new crops are done, and the bed, shipping bin, well and sprinkler are built as scripts (`Art/Blender/make_<asset>.py`, FBX in `Art/Export/`: `SM_Bed` 694 triangles, `SM_ShippingBin` 466, `SM_Well` 434, `SM_Sprinkler` 228) on new shared helpers in `Art/Blender/vestige_art/`, reviewed by the art reviewer, on the recommended options of the open questions in [GameDesign.md, section 15](GameDesign.md#15-open-questions) (colour cues, sizes, looks), which @DunderGG can overrule. Not imported yet: the steps are in [Art/README.md, Importing into Unreal](../Art/README.md#importing-into-unreal) (`M_Prop` as the parent of the `MI_Prop_*` instances, Nanite on as Epic recommends with virtual shadow maps and no LODs, the sprinkler's cast shadow off on the mesh, and `BP_Bed`'s `BedMesh` set to scale 1 and location 0, since the placeholder scale of 2, 1, 0.5 would make the mesh 4 m long), and the well's `Stone` colour still needs a look against `L_Farm`'s ground. Still to build: the rain collector, purifier and dirty water source, and the placement ghosts that use the same meshes
    - 2026-11-20: `SM_Well` is imported with `M_Prop` and `MI_Prop_*`, and `BP_Well` stands in `L_Farm` (clean water, 4.2), with a rust crust on the pump from the art review
+- [ ] A short art pass so screenshots for a devlog look like the game, not a test map, without building the full level yet (@DunderGG said yes, 2026-11-25). It follows the art direction in [GameDesign.md, section 12](GameDesign.md#12-presentation): one stylized style, low-poly first passes improved in place with the same IDs, sizes and pivots, made by the artist as Blender scripts, and no store-licensed assets (Fab Standard License, Megascans). Each mesh goes through the art review, and anything placed in `L_Farm` through the code review
+   - The seed dispensers' real mesh: the artist's `SM_ShopDispenser` (0.9 by 0.9 by 1.5 m, pivot on the floor at its centre, front towards +X) with hull `UCX_SM_ShopDispenser_00` and a window material per seed so the three tell apart at a glance; then rerun `EditorScripts/SetUpSeedShop.py` (it sets the mesh at scale 1 and location 0 in place of the stand-in cube) and re-check the interaction box numbers ([Systems.md, section 26](Systems/26-Shops.md))
+   - The other stand-ins the camera sees: import `SM_Bed` with `EditorScripts/ImportProp.py` and set `BP_Bed`'s `BedMesh` as the meshes item above says, and check that `L_Farm` shows `SM_ShippingBin` (imported 2026-11-22) with no cube left in its place. The sprinkler's mesh comes with the sprinkler ([4.5](#45-automation-and-selling))
+   - A simple sky: tune the sky atmosphere, height fog and clouds in `L_Farm` to the washed-out, hazy wasteland look, with no new code. The sun and the moon below stay a separate item
+   - Ground dressing around the field (dead grass, rocks, a broken fence, a ruin or two towards the horizon), placed after the home farm's layout so nothing is placed twice, and instanced so it stays inside the frame budget ([Architecture.md, section 10](Architecture.md#10-performance-by-design))
 - [ ] Prop import as a committed editor script: the well's Interchange import (Nanite with a 100% fallback, UCX collision only, `MI_Prop_*` by slot name, the cast shadow check) ran from a script outside the repository, and the bin, sprinkler and bed need the same steps; make it `EditorScripts/ImportProp.py` with the asset as an argument, and with it move `SM_WateringCan` onto `MI_Prop_PaintTeal` and `MI_Prop_Brass` so each colour lives in one material. The well's rust crust reads as a neat painted collar from the game camera: a ragged top edge or a lopsided patch when the well gets another pass (art reviewer, 2026-11-20)
    - 2026-11-22: `EditorScripts/ImportProp.py <SM_Name>` is in and imported `SM_ShippingBin` (art review approved). Still to do: moving `SM_WateringCan` onto `MI_Prop_*`, tests in `EditorScripts/Tests/`, and running it on the bed and the sprinkler when they are imported
 - [ ] Move `make_farm_assets.py` onto the shared helpers in `Art/Blender/vestige_art/` (one script per asset, a `--check-only` run, `--export-dir`, the budget check), keeping every existing asset's geometry identical, and add what the crops and tools need (tubes, `SOCKET_` empties, their pivot and collision rules); the old script rewrites every tracked FBX on each run (art reviewer, 2026-11-14). With it, move `--save-blend`'s default file out of `Art/Blender/` (into `Saved/`), since a scripted mesh's `.blend` isn't committed, and drop `FarmAssets.blend` once nothing writes it (reviewer, 2026-11-15)
@@ -209,6 +216,10 @@ What the slice's "done when" needs besides its features: a player who can start 
 ## 5. Milestone 3 and later
 
 Roughly in the order from [GameDesign.md section 13](GameDesign.md#13-scope-and-milestones). Each group becomes its own milestone with a short plan when we get to it.
+
+### The farmer
+
+- [ ] A player character more appealing than the Unreal template's mannequin, in the game's style (@DunderGG, 2026-11-25): a concept with the game designer, then a rigged mesh by the artist and its animations (idle, walk, run, jump, tool uses). A large job, so it comes after the slice play-test. A cheap stopgap before then, if screenshots need it: a restyle of the mannequin (our materials and colours, a hat or overalls as attached meshes) that keeps its skeleton and animations
 
 ### Seasons and weather
 
