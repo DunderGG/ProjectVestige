@@ -82,6 +82,8 @@ namespace VestigeFeedbackTests
 
 			UVestigeFeedbackSubsystem::Report(&Spawner.GetWorld(), MoveTemp(Filled));
 			UVestigeFeedbackSubsystem::Report(&Spawner.GetWorld(), MoveTemp(Empty));
+			// The log is buffered; flush so the lines reach the capture before it is removed.
+			GLog->Flush();
 			GLog->RemoveOutputDevice(&Capture);
 
 			ASSERT_THAT(IsTrue(Capture.Lines.ContainsByPredicate(

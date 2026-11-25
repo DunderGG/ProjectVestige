@@ -29,7 +29,7 @@ Contents
 - **Done:** milestone 1, the playable prototype, and most of the farming core of milestone 2: crops and the season, planting rules, water and the well, withering, contamination with a mutated crop, selling and the seed shop.
 - **Now:** the rest of milestone 2, the one-season vertical slice. What is left is the caretaker robot, the sprinkler, dirty water, the screens a first-time player needs, and the slice play-test that ends the milestone.
 - **Next up**, in order (reviewed 2026-11-24, @DunderGG said yes):
-  1. The quick fixes at the top of [section 3](#3-housekeeping), then the open play-tests of contamination and the seed shop.
+  1. The open play-tests of contamination and the seed shop (the housekeeping quick fixes before them were done on 2026-11-25).
   2. [4.4](#44-the-caretaker-robot): Hob in the game with data-driven dialogue, its dialogue box built with Common UI ([4.0](#40-structure-from-the-code-review)), and characters as data.
   3. Hob's relationship track, and how the player sees his opinion change ([4.4](#44-the-caretaker-robot)).
   4. [4.5](#45-automation-and-selling): placing objects on the farm grid, and the sprinkler, bought at the seed shop.
@@ -49,9 +49,8 @@ All its items are done and listed in [RoadmapArchive.md](RoadmapArchive.md#2-mil
 
 ## 3. Housekeeping
 
-Work outside the milestones' features: the tools, the tests and the rules. The first one is a quick fix to do before the next roadmap item (roadmap review, 2026-11-24).
+Work outside the milestones' features: the tools, the tests and the rules.
 
-- [ ] Fix the flaky `Vestige.Feedback.TheLogShowsAReportsClauses`: its `FReportLogCapture` is a buffered output device (it doesn't override `CanBeUsedOnMultipleThreads`), so its lines arrive only when the redirector flushes, and the test removes it without a flush. Call `GLog->Flush()` before `GLog->RemoveOutputDevice`, as `VestigeLogTests.cpp` does, or share one capture helper between the two files; in a commit of its own (code review, 2026-11-22). A flaky test weakens the check that the whole suite passes before each commit
 - [ ] Rename the two event handlers named for when they run, `UFarmingComponent::HandleItemInHandChanged` and `AVestigeHUD::HandleInputMethodChanged`, for what they do ([CodingGuidelines.md, section 2.3](CodingGuidelines.md#23-case-and-wording)), in a small commit of its own (code review of the contamination slice, 2026-11-22)
 - [ ] Check automatically that every file under `Art/` and `Content/Vestige/` matches a row of the path table in `LICENSING.md`, so no asset is left without a record of who or what made it (asked by @DunderGG, 2026-11-23, instead of a README per `Art/` folder, which would repeat the table in many places and drift). To decide through the architect and the reviewer: a `Vestige` automation test or a script in `Tools/`, and how the table's patterns are read
 - [ ] Check every static mesh in `Content/Vestige/` automatically against its triangle budget and for missing collision, so a mistake in an asset nobody re-checks by hand is caught (asked by @DunderGG, 2026-11-12). To decide through the architect and the reviewer: an editor data validator (the Data Validation plugin's `UEditorValidatorBase`, which runs when an asset is saved and on Validate Assets) or a `Vestige` automation test, where the budgets per kind of asset live (crop, tool, building, from [CONTRIBUTING.md, Budgets](../CONTRIBUTING.md#budgets)) and how a mesh's kind is known, how Nanite meshes are counted, and which meshes need no collision (crops). Cheap to add to the same check: textures over 1024, small props that cast shadows, and any asset or map that references the store-asset folders `.gitignore` keeps out of the repository (`Content/Fab/`, `Content/Megascans/`...), which would break in a fresh clone (art direction review, 2026-11-13). A validator needs an editor-only module or dependency, since `Vestige` is a runtime module; an automation test doesn't
