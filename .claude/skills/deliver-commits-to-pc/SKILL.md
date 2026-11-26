@@ -19,20 +19,17 @@ git format-patch <base>..HEAD -o /mnt/project-files/<slug>/
 grep -l -E '^(Co-Authored-By|Claude-Session):' /mnt/project-files/<slug>/*.patch
 ```
 
-`<base>` is the last commit that isn't yours (the clone's `origin/main`, or the last waiting patch you applied). The `grep` must print nothing; if it prints a file, fix the commit message and make the patches again. Number the folder's patches only with your own commits: patches from another thread stay in their own folder.
+`<base>` is the last commit that isn't yours (the clone's `origin/main`, or the last waiting patch you applied). The `grep` must print nothing; if it prints a file, fix the commit message and make the patches again. Number the folder's patches only with your own commits: patches from another thread stay in their own folder. A patch carries only the pointer of a Git LFS file (meshes, textures, sounds, maps), not the file, and `Tools/apply_patches.py` refuses it: commit binary files on the PC from the files themselves, put in `/mnt/project-files/<slug>/` beside the patches.
 
 ## 3. Apply them on the PC
 
 If the PC is reachable (`list_devices` shows it online), start a Remote Control session in its project folder, `C:\Projects\ProjectVestige`, after copying the patch files into `Saved\AgentWork\<slug>\` there with `device_commit_files`. Tell it to run, in PowerShell from the project folder:
 
 ```powershell
-git status --short
-git am -3 (Get-ChildItem Saved\AgentWork\<slug>\*.patch | Sort-Object Name).FullName
-git rebase --exec "git commit --amend --no-edit --reset-author" HEAD~<count>
-git log --format='%h %an <%ae> | %s' -n <count>
+python Tools/apply_patches.py Saved\AgentWork\<slug>
 ```
 
-and to report the output (`<count>` is the number of patch files). `git status` first: if the files the patches touch have uncommitted changes, it stops and asks instead of applying. If `git am` stops on a conflict, it runs `git am --abort` and reports the conflicting files; it never resolves a conflict on its own. The rebase only rewrites the `<count>` commits just applied, which nobody has pushed, so each takes the author from his git config; the log must then show his name on every new commit.
+and to report its output. `Tools/apply_patches.py` checks first and changes nothing if a patch has an attribution line or touches a file with uncommitted changes, applies the patches with `git am -3`, aborts the whole run on a conflict and names the files, gives the new commits the author from his git config, and lists them. The session never resolves a conflict on its own: it reports it. Patches waiting from another thread go first on the same command line, as their own folder. If the PC's checkout doesn't have the script yet, copy `Tools/apply_patches.py` from the clone into `Saved\AgentWork\<slug>\` with the patches and run that copy from the project folder: it works on the checkout of the folder it is run in.
 
 Don't commit through `device_bash`: it runs in a Linux shell without Git LFS or the PC's line-ending settings, so `git status` there shows nearly every file as changed.
 
