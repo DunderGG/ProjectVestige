@@ -31,7 +31,7 @@ These documents are the rules. Point at them; don't restate them.
 ## Sources to check against
 
 - **Engine source** for UE 5.8, in the engine's install folder (by default `C:\Program Files\Epic Games\UE_5.8`), under `Engine\Source` and `Engine\Plugins`. Check that every engine class, function and setting you rely on exists in 5.8 and does what you think. APIs change between versions.
-- **Lyra**, a local copy of the Lyra Starter Game (free on Fab, installed as a project from the Epic launcher; on the maintainer's PC, `C:\Unreal Projects\LyraStarterGame`), in `Source/LyraGame` and `Plugins/`. Find how Lyra solves the same problem and say what you take and what you skip. Lyra is built for a big team and multiplayer; we take its structure and skip its machinery, as `Docs/Architecture.md` section 11 says.
+- **Lyra**, a local copy of the Lyra Starter Game (free on Fab, installed as a project from the Epic launcher; on the maintainer's PC, `C:\Projects\Lyra`), in `Source/LyraGame` and `Plugins/`. Find how Lyra solves the same problem and say what you take and what you skip. Lyra is built for a big team and multiplayer; we take its structure and skip its machinery, as `Docs/Architecture.md` section 11 says.
 - **Epic's documentation** (dev.epicgames.com) through WebFetch. Name the page when a choice rests on it.
 
 If a source isn't on this machine, say so and say what you relied on instead.

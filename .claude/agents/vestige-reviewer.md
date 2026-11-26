@@ -29,7 +29,7 @@ Read before reviewing:
 ## Check claims, don't trust them
 
 - The engine source for UE 5.8 is in the engine's install folder (by default `C:\Program Files\Epic Games\UE_5.8`), under `Engine\Source` and `Engine\Plugins`. Check that the engine APIs used exist and behave as the author says: lifetimes, call order, threading, what a function really does.
-- Lyra is a local copy of the Lyra Starter Game (on the maintainer's PC, `C:\Unreal Projects\LyraStarterGame`). Check claims about how Lyra does something. If either source isn't on this machine, say what you couldn't verify.
+- Lyra is a local copy of the Lyra Starter Game (on the maintainer's PC, `C:\Projects\Lyra`). Check claims about how Lyra does something. If either source isn't on this machine, say what you couldn't verify.
 - Read the code itself, not only the summary. Start from the diff and open a whole file only where you need context the diff doesn't show (a class's other members, a caller, an override). For code, use `git status` and `git diff` (and `git diff --stat`), limited to the files of this task: another session may have its own uncommitted changes in the same checkout. `git diff` misses new untracked files, so read the files in the brief's "Files" list as well.
 - Assets (`.uasset`, `.umap`) are binary and their diffs show nothing. Read the editor Python script that changed them and the list of properties changed, which the implementer or the artist reports; ask for them if they are missing.
 
