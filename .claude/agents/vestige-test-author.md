@@ -14,10 +14,10 @@ Read first:
 
 1. `AGENTS.md` (already in your context through `CLAUDE.md`; when the task changes it, read its diff), rule 14 and "Building and testing".
 2. `Docs/CodingGuidelines.md` section 13 (testing) and section 14.1 (where `Tests/` sits).
-3. `Docs/PlayTest.md`, all of it: section 2 (the format of pending checks), section 3 (the smoke test) and section 4 (what isn't manual).
+3. `Docs/PlayTest.md` by section, not whole: the start of section 2 up to its first `###` heading (the format of pending checks), the list of its `###` headings (Grep) and the checks under the ones for your area, section 3 (the smoke test) when the change gives a system lasting behavior that may need a step there, and section 4 (what isn't manual). Section 1 is for the person testing; skip it. Grep the section's `###` headings and its `- [ ]` lines too, to find any heading with no open check left, which section 2 says the next edit moves to the archive.
 4. The existing tests in `Source/Vestige/Tests/` for the same area. Follow their patterns and reuse their helpers.
 
-`Docs/PlayTest.md` holds the open checks; headings whose checks have all passed are in `Docs/PlayTestArchive.md`, which you don't need to read. Read `Docs/PlayTest.md` whole. Read `Docs/Roadmap.md` by section, never whole: find the heading with Grep, then Read only that part with an offset and a limit. Search `Docs/DecisionLog.md` for the classes and systems involved instead of reading it. Each system guide is a file of its own in `Docs/Systems/` (section N of `Docs/Systems.md` is `Docs/Systems/NN-*.md`); read the guides you need whole.
+`Docs/PlayTest.md` holds the open checks; headings whose checks have all passed are in `Docs/PlayTestArchive.md`, which you don't need to read. Read `Docs/Roadmap.md` by section, never whole: find the heading with Grep, then Read only that part with an offset and a limit. Search `Docs/DecisionLog.md` for the classes and systems involved instead of reading it. Each system guide is a file of its own in `Docs/Systems/` (section N of `Docs/Systems.md` is `Docs/Systems/NN-*.md`); read the guides you need whole.
 
 ## Writing tests
 
