@@ -28,18 +28,21 @@ Contents
 
 - **Done:** milestone 1, the playable prototype, and most of the farming core of milestone 2: crops and the season, planting rules, water and the well, withering, contamination with a mutated crop, selling and the seed shop.
 - **Now:** the rest of milestone 2, the one-season vertical slice. What is left is the caretaker robot, the sprinkler, dirty water, the screens a first-time player needs, and the slice play-test that ends the milestone.
-- **Next up**, in order (reviewed 2026-11-24, @DunderGG said yes):
+- **Next up**, in order (reviewed 2026-11-24, @DunderGG said yes; the hotbar moved before the sprinkler and the feel pass and the day-one test added on 2026-11-26, from [RoadmapSuggestions.md](RoadmapSuggestions.md) items 1, 2, 16 and 17):
   1. The open play-tests of contamination and the seed shop (the housekeeping quick fixes before them were done on 2026-11-25).
-  2. Hob's relationship track, and how the player sees his opinion change ([4.4](#44-the-caretaker-robot)).
-  3. [4.5](#45-automation-and-selling): placing objects on the farm grid, and the sprinkler, bought at the seed shop.
-  4. Dirty water and its source ([4.2](#42-farming-depth)).
-  5. Lay out the home farm ([4.7](#47-starting-and-testing-the-slice)): the farmhouse with the bed inside, the service yard, Hob's spot and the dirty water source, as a blockout, once every slice prop exists. The screenshot art pass's ground dressing comes after it, so it doesn't dress a layout that still moves; its meshes and sky don't wait for it.
-  6. What a first-time player needs to see: the hotbar and the bag on screen ([4.6](#46-interface-and-input)), a dry crop that looks thirsty and item descriptions ([4.2](#42-farming-depth)), then the HUD layout pass.
-  7. [4.7](#47-starting-and-testing-the-slice): the title screen and the day-1 save.
-  8. Hob's tutorial and his reminders of crops at risk ([4.4](#44-the-caretaker-robot), [4.2](#42-farming-depth)), which need Hob and dialogue.
-  9. The slice play-test with players who haven't seen the game ([4.7](#47-starting-and-testing-the-slice)).
+  2. Hob's relationship track, and how the player sees his opinion change, with his short lines on events ([4.4](#44-the-caretaker-robot)).
+  3. The hotbar and the bag on screen ([4.6](#46-interface-and-input)), before the sprinkler, so the player buys and places it with an inventory they can see (2026-11-26).
+  4. [4.5](#45-automation-and-selling): placing objects on the farm grid, and the sprinkler, bought at the seed shop.
+  5. Dirty water and its source ([4.2](#42-farming-depth)).
+  6. Lay out the home farm ([4.7](#47-starting-and-testing-the-slice)): the farmhouse with the bed inside, the service yard, Hob's spot and the dirty water source, as a blockout, once every slice prop exists. The screenshot art pass's ground dressing comes after it, so it doesn't dress a layout that still moves; its meshes and sky don't wait for it.
+  7. What a first-time player needs to see: a dry crop that looks thirsty, the mutated ripe meshes and item descriptions ([4.2](#42-farming-depth)), and the feel pass on the four farming actions ([4.6](#46-interface-and-input)).
+  8. The HUD layout pass ([4.6](#46-interface-and-input)), laid out for handheld PCs and for translation, as @DunderGG decided on 2026-11-26 ([GameDesign.md, section 14](GameDesign.md#14-decision-log)).
+  9. [4.7](#47-starting-and-testing-the-slice): the title screen and the day-1 save.
+  10. A day-one test with one person who hasn't seen the game ([4.7](#47-starting-and-testing-the-slice)), so Hob's tutorial teaches what that person actually missed.
+  11. Hob's tutorial and his reminders of crops at risk ([4.4](#44-the-caretaker-robot), [4.2](#42-farming-depth)), which need Hob and dialogue.
+  12. The slice play-test with players who haven't seen the game ([4.7](#47-starting-and-testing-the-slice)).
 
-  Polish that isn't on this path (the sun and the moon, the per-minute clock, the ripe-crop glow, held meshes, automated play-tests, the performance agent) waits until after it unless it is cheap to do alongside.
+  Polish that isn't on this path (the sun and the moon, the per-minute clock, held meshes, automated play-tests, the performance agent) waits until after it unless it is cheap to do alongside.
 
   The screenshot art pass ([4.6](#46-interface-and-input)) comes before the first devlog post, outside the numbered order: the dispenser mesh, the bed and the sky depend on nothing else and can come after item 1, and the ground dressing comes after the home farm's layout (2026-11-25).
 
@@ -93,6 +96,7 @@ When working nearby:
 - [ ] Write saves with `AsyncSaveGameToSlot` once they grow ([L4](CodeReview.md#low)). First measure saving and loading on the 60 by 60 benchmark field: each tile is about five tagged properties with their names as text, so a large field is a large record. Saving only the tiles that differ from grass is the likely fix, since tiles carry their coordinates. `AsyncSaveGameToSlot` still builds the bytes on the game thread
 - [ ] The content catalogue sees content added while a game runs (a mod's game feature plugin turned on mid-game) by listening for new primary assets, when mod support is designed; until then it sees it at the next game (found with M5, 2026-11-08)
 - [ ] A script that builds and runs the tests before each commit ([L5](CodeReview.md#low))
+- [ ] A devlog capture kit, so screenshots and clips need no photo mode (2026-11-26): a cheat command in `UVestigeCheatManager` that hides and shows the HUD, and a short note in `Docs/` on taking shots (Unreal's built-in `HighResShot` console command) and on a season's time-lapse of the field (`SkipDay` with a fixed camera, recorded with Movie Render Queue or a screen recorder). A real photo mode stays a later decision ([RoadmapSuggestions.md](RoadmapSuggestions.md) item 18)
 - [ ] Remove the template's touch controls when the character is reparented ([M6](CodeReview.md#m6--the-template-code-is-load-bearing)): nothing shows them since 2026-11-06, but `BP_PlayerCharacter` still implements `BPI_TouchInterface`, so `Content/Input/Touch/` stays until then
    - The template's `IA_Move`, `IA_Look`, `IA_MouseLook` and `IA_Jump` have no player-mappable names and are bound through the template's own properties; when the template goes they get mappable names (their input tags), join `DA_InputConfig_Player` and are bound by tag, and their contexts move to `Content/Vestige/Input` (found with H6, 2026-11-07)
    - The gamepad layout is provisional: interact (B today) likely moves to A when jumping moves with the template's replacement (H6, 2026-11-07)
@@ -132,6 +136,7 @@ The code changes that the slice's content depends on. Doing them first means add
 - [ ] A dry crop looks thirsty (paler, a little drooped) while its tile is dry, so the player notices a crop that won't grow. Needed for the slice play-test's first goal ([GameDesign.md, section 6](GameDesign.md#tiles), decided by @DunderGG 2026-11-20)
 - [ ] Rename the soil's Blender material `M_Soil` in `Art/Blender/make_farm_assets.py` (`SM_Soil_Tilled`'s slot still carries the deleted material's name) at the next re-export, and reimport with no materials made (art review, 2026-11-20)
 - Replacing the well splash: moved to [section 6](#6-before-a-public-release) with the rest of the sound work (@DunderGG, 2026-11-22)
+- [ ] Mutated ripe crops that read at a glance: the mutated ripe meshes the [contamination guide](Systems/27-Contamination.md) plans (`MutatedRipeMesh`, one per spring crop) in place of the pink tint alone, striking enough (oversized, twisted or faintly glowing) to read in a greyscale screenshot from the game camera, so they work for colour-blind players and in devlog images. How they look is @DunderGG's art-direction call, prepared by the artist with options (2026-11-26, [RoadmapSuggestions.md](RoadmapSuggestions.md) item 16)
 - [ ] Dirty water: easy to get, but raises tile radiation. It is the slice's clean versus dirty choice, one of the play-test goals ([GameDesign.md, section 13](GameDesign.md#next-vertical-slice))
    - Decide the dirty water source with @DunderGG, open in [GameDesign.md, section 15](GameDesign.md#15-open-questions); assumed until then: unlimited, a prop of its own, its water in the contamination cue
    - The source's mesh by the artist, and the prop in `L_Farm`
@@ -156,7 +161,9 @@ The code changes that the slice's content depends on. Doing them first means add
 - [ ] Hob's Blender model, replacing the placeholder body (`BP_Hob`'s cubes, built 2026-11-26) and keeping the cyan eyes material `M_HobEyes` for the eye slot
 - [ ] One relationship track with Hob, who starts as a dutiful servant rather than a sceptic; trust grows through talking, gifts and working together, and the slice arc is in [Hob's character sheet](Spoilers/Characters/Hob.md#vertical-slice-arc)
    - How the player sees his opinion change, one of the play-test goals: his lines change and he helps on his own initiative ([GameDesign.md, section 8](GameDesign.md#relationships)), with no number on screen unless the play-test shows it is needed. Designed with the game designer and the writer (roadmap review, 2026-11-24)
+- [ ] Hob's short lines on events, said once each in passing with no dialogue box (the player's first mutated crop, watering in the rain once there is rain, still awake past midnight, the first sale): they make him react to the world with no new system, using the dialogue data above. The lines are the writer's; which events, and how often he may speak, are designed with the game designer (2026-11-26, [RoadmapSuggestions.md](RoadmapSuggestions.md) item 16)
 - [ ] Hob guides the player through the first days as a tutorial
+   - A new game opens with a fade-in on the farm and a few lines from Hob, not the cryo-pod scene, which stays in [Story](#story): a level, a sequence and writing for one minute is too much before the slice play-test (2026-11-26)
 
 ### 4.5 Automation and selling
 
@@ -172,6 +179,7 @@ Needed for the slice play-test, so a first-time player sees what they carry:
 - [ ] The hotbar and the bag on screen, built in UMG with C++ base classes: the hotbar as a row of slots with the selected one marked (its rules are built since 2026-11-07, [4.0](#40-structure-from-the-code-review), H2), and an inventory screen for moving items between slots
    - Item icons come with it: a soft texture on `UVestigeItemData` in an `Icons` bundle of its own, which the content catalogue never loads, preloaded by the row and the screen with a handle each owns while it shows them. Design there the empty or unknown list (no handle), icons already in memory (the callback still comes a frame later) and a callback for a replaced handle ([Systems.md, section 2](Systems.md#2-content-and-the-asset-manager), the content catalogue; M5, 2026-11-08)
 - [ ] A layout pass on the HUD once the vertical slice's features are in: the status line now carries the date, the clock, the item in hand with a seed's days to ripen, and the stamina, and @DunderGG expects the interface to need a rework anyway (play-test note, 2026-11-20). Plan it with the hotbar and the bag on screen, and design it first with the game designer
+   - Laid out for handheld PCs and for translation (@DunderGG, 2026-11-26): every screen reads at 1280x800 and 16:10 with the smallest text at least 12 pixels tall there, every menu works with a gamepad alone, room for text a third longer than English, no text in fixed-size boxes or images, and a font set with fallbacks for Cyrillic, Chinese, Japanese and Korean. English only ships for now; the rules are in [GameDesign.md, section 14](GameDesign.md#14-decision-log)
 
 Polish, after the slice's features unless cheap alongside them:
 
@@ -181,6 +189,13 @@ Polish, after the slice's features unless cheap alongside them:
 - [ ] A marker on what F would use (an outline on the bed, a highlight on the ripe tile), if the prompt and the tile frame aren't enough in play
 - [ ] A held mesh for items that aren't tools (a turnip in the hand), with the meshes for the new crops
 - Input actions as assets: moved to [4.0](#40-structure-from-the-code-review) and decided as now (code review, 2026-11-04)
+- [ ] A feel pass on the four farming actions, after Hob's dialogue (2026-11-26, [RoadmapSuggestions.md](RoadmapSuggestions.md) item 17): they fill most of a day, so how they feel is most of how the game feels, and they are what clips of the game show
+   - An animation per action (till, plant, water, harvest): a montage played by the tool ability in place of its timed wait, timed so the effect starts when the tool meets the soil; it is also the montage that [4.3](#43-stamina-and-late-nights)'s use time comes from
+   - A short effect per action (a puff of soil, a splash, seeds dropping, a burst of leaves) as Niagara systems, and a sound per action, all through one gameplay cue per action, as [Systems.md, section 15](Systems.md#15-visual-effects-and-feedback) says: game code never spawns an effect. The sounds are the exception to the sound deferral in [section 6](#6-before-a-public-release); each gets a listening check
+   - The morning payout as a moment: the HUD's coin count ticks up from the old total to the new one with a coin sound, alongside "The bin paid N." in the morning message
+   - The ripe-crop glow below is built with it, since it is the same effects work
+   - Camera shake and gamepad rumble wait until the play-test asks for them
+   - The slice play-test's sheet asks whether the actions feel satisfying
 - [ ] Ripe crops show that they are ready to harvest, for example small glowing particles hovering around the crop (@DunderGG, 2026-11-07). The field draws its tiles as instanced meshes with no actor per tile ([4.0](#40-structure-from-the-code-review), C2), so not a particle system per crop: one Niagara system per field fed the ripe tiles' positions when the field changes, or a glow in the crop material driven by per-instance custom data, as the tiles' colour and wetness are. Measure on the 20 by 20 benchmark field of ripe turnips. Design it in [Systems.md, section 15](Systems.md#15-visual-effects-and-feedback) first
 - [ ] Meshes for the new crops, the sprinkler, the shipping bin, the water source and the bed
    - 2026-11-14: the new crops are done, and the bed, shipping bin, well and sprinkler are built as scripts (`Art/Blender/make_<asset>.py`, FBX in `Art/Export/`: `SM_Bed` 694 triangles, `SM_ShippingBin` 466, `SM_Well` 434, `SM_Sprinkler` 228) on new shared helpers in `Art/Blender/vestige_art/`, reviewed by the art reviewer, on the recommended options of the open questions in [GameDesign.md, section 15](GameDesign.md#15-open-questions) (colour cues, sizes, looks), which @DunderGG can overrule. Not imported yet: the steps are in [Art/README.md, Importing into Unreal](../Art/README.md#importing-into-unreal) (`M_Prop` as the parent of the `MI_Prop_*` instances, Nanite on as Epic recommends with virtual shadow maps and no LODs, the sprinkler's cast shadow off on the mesh, and `BP_Bed`'s `BedMesh` set to scale 1 and location 0, since the placeholder scale of 2, 1, 0.5 would make the mesh 4 m long), and the well's `Stone` colour still needs a look against `L_Farm`'s ground. Still to build: the rain collector, purifier and dirty water source, and the placement ghosts that use the same meshes
@@ -205,6 +220,7 @@ What the slice's "done when" needs besides its features: a player who can start 
 - [ ] A small title screen: Continue, New game (asking for confirmation before it replaces a save) and Quit, built with Common UI ([4.0](#40-structure-from-the-code-review), H7). Today a new game is only the `NewGame` console command. The settings and save slots stay in [section 6](#6-before-a-public-release)
 - [ ] Start a new game with a save: `NewGame` deletes both slots, so quitting before the first night leaves no save at all. Write a day-1 save once the new map has begun play instead (found in the save registry review, 2026-11-06)
 - [ ] Lay out the home farm in `L_Farm` as the [home farm plan](Levels/HomeFarm/README.md) says: floor and a blocking boundary with a visible edge, a farmhouse with a small interior and `BP_Bed` moved inside (@DunderGG, 2026-11-25), the service yard east of the field with the dirty water source nearer than the well, Hob's spot by the door (move `BP_Hob` there from its stand-in place north of the field, and change Hob's `Vestige.Level` test to check they stand west of the field by the door) and the Player Start facing the field, timed against the plan's walking targets and checked with `stat unit`. Blockout shapes only; meshes and scenery are a separate art pass after it. A level, not a system: no new class, the bed's rule unchanged
+- [ ] A day-one test before the slice play-test: one person who hasn't seen the game plays a packaged build from the title screen to the first sleep, with nobody helping, once the title screen, the HUD layout and Hob's dialogue exist. It shows what the tutorial must teach before it is written. The sheet records what they did, not what they say they did: found the seeds and the item in hand, noticed dry and contaminated soil, noticed Hob, went to bed (2026-11-26, [RoadmapSuggestions.md](RoadmapSuggestions.md) item 2)
 - [ ] The slice play-test, which ends the milestone: a packaged build, two or three people who haven't seen the game, a sheet with one line per goal in [GameDesign.md, section 13](GameDesign.md#next-vertical-slice) (what they did, where they got stuck, without help from the person watching), and a round of fixes from what it finds, each a roadmap item
    - The end-of-season recap ([section 5](#seasons-and-weather)) stays later, as @DunderGG chose on 2026-11-14; it is cheap once the title screen and Common UI exist, if the play-test shows the season's end falls flat
 
@@ -286,7 +302,7 @@ Roughly in the order from [GameDesign.md section 13](GameDesign.md#13-scope-and-
 - [ ] The family mystery: letters, recordings and Hob's returning memories
 - [ ] The humans, about four to six, each found as a story moment
 - [ ] The parents' sealed message, delivered when the farm is whole again
-- [ ] The opening: waking from the cryo pod under the farmhouse
+- [ ] The opening: waking from the cryo pod under the farmhouse. Not in the slice, which opens with a fade-in and Hob's lines ([4.4](#44-the-caretaker-robot), 2026-11-26)
 
 ### Later still
 
@@ -313,7 +329,7 @@ Roughly in the order from [GameDesign.md section 13](GameDesign.md#13-scope-and-
 - [ ] Add a UI designer agent (`vestige-ui-designer`) with the first menu: it designs screens and the HUD for the player (layout, readability at a distance, gamepad navigation, accessibility, the pre-war interface style in [GameDesign.md, section 12](GameDesign.md#12-presentation)) before the architect designs them in UMG and Common UI. Made like the other agents, with @DunderGG's yes on its instructions (asked by @DunderGG, 2026-11-12)
 - Moving the test keys F9 and N into a cheat manager: moved to [4.0](#40-structure-from-the-code-review), because F9 deletes the saves (code review, 2026-11-04)
 - [ ] Turn save compatibility on at the first public build: a version per saved owner, with upgrades from then on ([CodeReview.md, H4](CodeReview.md#h4--save-upgrade-code-for-a-game-nobody-else-has-played))
-- [ ] Music and sound effects. Sound polish waits until the game's basic functionality is in, so milestone 2 builds the season loop first and the HUD's text carries the feedback meanwhile (@DunderGG, 2026-11-22). The audio set-up and the agent stay, so a sound can still go in early where a feature needs one
+- [ ] Music and sound effects. Sound polish waits until the game's basic functionality is in, so milestone 2 builds the season loop first and the HUD's text carries the feedback meanwhile (@DunderGG, 2026-11-22). The audio set-up and the agent stay, so a sound can still go in early where a feature needs one. The first exception: the four farming actions and the morning payout get their sounds in the feel pass ([4.6](#46-interface-and-input), 2026-11-26)
    - Replace the well splash with one that sounds like water into a can: the script-made one sounds artificial and has a metallic cling at the start (@DunderGG's play-test, 2026-11-21). Options: @DunderGG's own recording, a CC0 library sound (license checked and recorded in [LICENSING.md](../LICENSING.md) and [CREDITS.md](../CREDITS.md)), or a better synthesis script; same import through `EditorScripts/SetUpAudio.py`. Moved here from [4.2](#42-farming-depth) on 2026-11-22
 - [ ] Settle how many feedback messages the HUD shows at once (Project Settings > Game > Vestige HUD; five while the game is being built, 2026-10-30)
 - [ ] Final names for the game, the world, the town, the coin, the caretaker and the robot makers
@@ -333,7 +349,5 @@ Collected from the other documents. Each one is settled in its own document and 
 - **Multiplayer:** shared farm or separate farms, shared clock and sleep. ([GameDesign.md](GameDesign.md#15-open-questions))
 - **A pet:** whether there is one, and whether it is a robot or a mutated animal. ([GameDesign.md](GameDesign.md#15-open-questions))
 - **Fishing:** out, after the first release, or part of the first release's gathering loop. ([GameDesign.md](GameDesign.md#15-open-questions))
-- **A handheld target:** whether handheld PCs are a target, and how much is built for them now. ([GameDesign.md](GameDesign.md#15-open-questions))
-- **Languages of the first release:** which languages ship, and whether the interface is built for translation from the HUD layout pass on. ([GameDesign.md](GameDesign.md#15-open-questions))
 - **Names:** the game, the world, the town, the coin, the caretaker, the robot makers. ([Lore.md](Spoilers/Lore.md#14-open-questions))
 - **Story:** the sibling's survival path, role and whether the story ever says who struck first. ([Lore.md](Spoilers/Lore.md#14-open-questions))

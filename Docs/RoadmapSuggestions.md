@@ -4,6 +4,8 @@ Exploratory suggestions for the current and future roadmap. These are not approv
 [Roadmap.md](Roadmap.md), scope, or design; they describe things to evaluate when the relevant
 milestone is planned.
 
+**Taken up on 2026-11-26** ([Roadmap.md](Roadmap.md#1-where-we-are), decision log): item 1's hotbar before the sprinkler, item 2's day-one test, item 16's mutated ripe meshes (its cryo-pod opening rejected for the slice), and item 17 as a feel pass with sounds, a payout moment and the ripe-crop glow. Item 19 is decided: handheld-ready and English only, built for translation ([GameDesign.md, section 14](GameDesign.md#14-decision-log)). The rest stays here.
+
 The priorities below are advisory. "Now" means that the item should be settled before nearby
 Milestone 2 work. "Milestone 3" means it should shape the first post-slice milestone. "Later" means
 it should wait until the named systems exist and have been playtested.
