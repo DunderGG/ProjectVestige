@@ -8,7 +8,7 @@ Instructions for AI coding agents working in this repository. Humans can read it
 - Unreal Engine 5.8, C++ first, Blueprints for content. Art made in Blender.
 - Single game module `Vestige` in `Source/Vestige/`, built from the Third Person C++ template, with its code in folders by architecture layer. Include our headers by folder path (`#include "Farming/FarmGrid.h"`).
 - Main level: `/Game/Maps/L_Farm`. Our assets live under `Content/Vestige/`. Blender sources in `Art/Blender/`, exports in `Art/Export/`.
-- Developed by one person ([@DunderGG](https://github.com/DunderGG), the maintainer) on Windows, in `C:\Unreal Projects\Vestige`. Open the editor via `Vestige.uproject`.
+- Developed by one person ([@DunderGG](https://github.com/DunderGG), the maintainer) on Windows, in `C:\Projects\ProjectVestige`. Open the editor via `Vestige.uproject`.
 - Use `@DunderGG` for personal references to the maintainer in rules, docs, records and code comments. Keep "the maintainer" for generic role references. Leave legal names, copyright and credit records, and Git authorship unchanged.
 
 ## Read first

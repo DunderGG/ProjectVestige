@@ -86,7 +86,7 @@ A graphical Git client (GitHub Desktop, the one built into Visual Studio, or ano
 
 **Contributors** work in a fork: on [the repository's GitHub page](https://github.com/DunderGG/ProjectVestige), press *Fork*, then clone your fork. **The maintainer** clones the main repository directly.
 
-Pick a short path without unusual characters. Unreal has trouble with very long paths, and some tools with non-English characters in them. `C:\Unreal Projects\Vestige` is what the maintainer uses, and the examples below use it; replace it with your own path.
+Pick a short path without unusual characters. Unreal has trouble with very long paths, and some tools with non-English characters in them. The examples below use `C:\Unreal Projects\Vestige`; replace it with your own path.
 
 ```
 cd "C:\Unreal Projects"
