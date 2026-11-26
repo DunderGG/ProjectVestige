@@ -31,7 +31,7 @@ C:\Program Files\Epic Games\UE_<version>, where <version> is the project's Engin
 Stops the test run after this many minutes and counts it as a failure.
 
 .EXAMPLE
-& "C:\Unreal Projects\Vestige\Tools\Verify-Vestige.ps1" -Task crops-stage-days
+.\Tools\Verify-Vestige.ps1 -Task crops-stage-days
 #>
 [CmdletBinding()]
 param(
