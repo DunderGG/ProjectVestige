@@ -14,7 +14,7 @@ Read first:
 
 1. `AGENTS.md` (already in your context through `CLAUDE.md`; when the task changes it, read its diff), rule 14 and "Building and testing".
 2. `Docs/CodingGuidelines.md` section 13 (testing) and section 14.1 (where `Tests/` sits).
-3. `Docs/PlayTest.md` by section, not whole: the start of section 2 up to its first `###` heading (the format of pending checks), the list of its `###` headings (Grep) and the checks under the ones for your area, section 3 (the smoke test) when the change gives a system lasting behavior that may need a step there, and section 4 (what isn't manual). Section 1 is for the person testing; skip it. Grep the section's `###` headings and its `- [ ]` lines too, to find any heading with no open check left, which section 2 says the next edit moves to the archive.
+3. `Docs/PlayTest.md` by section, not whole: the start of section 2 up to its first `###` heading (the format of pending checks), the list of its `###` headings (Grep) and the checks under the ones for your area, section 3 (the smoke test) when the change gives a system lasting behavior that may need a step there, and section 4 (what isn't manual). Section 1 is for the person testing; skip it.
 4. The existing tests in `Source/Vestige/Tests/` for the same area. Follow their patterns and reuse their helpers.
 
 `Docs/PlayTest.md` holds the open checks; headings whose checks have all passed are in `Docs/PlayTestArchive.md`, which you don't need to read. Read `Docs/Roadmap.md` by section, never whole: find the heading with Grep, then Read only that part with an offset and a limit. Search `Docs/DecisionLog.md` for the classes and systems involved instead of reading it. Each system guide is a file of its own in `Docs/Systems/` (section N of `Docs/Systems.md` is `Docs/Systems/NN-*.md`); read the guides you need whole.
@@ -61,7 +61,7 @@ Group the checks: add to an open heading for the same system instead of starting
 
 - For each change that needs a manual check, add a dated heading under section 2, "Pending checks" (`### <What changed>, YYYY-MM-DD`), a line or two on what changed and the commit it belongs to by its subject line (history may be rewritten before it is pushed, so hashes go stale; your brief gives the planned subject, and if it doesn't, ask for it in your report), then one `- [ ] **Name** (why a person: <feel, fun, hardware or first look>): what to do and what to see` item per check, written for someone new to the Unreal editor (menu paths, where the asset is).
 - A system that gains lasting behavior also gets a step in the smoke test (section 3).
-- When someone reports checks, update them as section 2 says: tick each one that passed, and once every check under a heading has passed, move the heading to the end of `Docs/PlayTestArchive.md`, unchanged except that its links to `PlayTest.md`'s own headings (`#3-smoke-test`) get the `PlayTest.md` prefix. Each time you edit `Docs/PlayTest.md`, archive every heading whose checks have all passed, since @DunderGG may tick checks himself. When one fails, write what they saw under it.
+- When someone reports checks, update them as section 2 says: tick each one that passed, then run `python Tools/archive_playtest_checks.py`, which moves every heading whose checks have all passed to the end of `Docs/PlayTestArchive.md` and prefixes its links to `PlayTest.md`'s own headings. Run it each time you edit `Docs/PlayTest.md`, since @DunderGG may tick checks himself. When one fails, write what they saw under it.
 
 ## Working in a shared checkout
 
