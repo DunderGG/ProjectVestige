@@ -45,6 +45,7 @@
 namespace VestigeHudWidgetTests
 {
 	const TCHAR* const HudWidgetPath = TEXT("/Game/Vestige/UI/WBP_Hud.WBP_Hud_C");
+	const TCHAR* const LayoutWidgetPath = TEXT("/Game/Vestige/UI/WBP_Layout.WBP_Layout_C");
 	const TCHAR* const MessageWidgetPath = TEXT("/Game/Vestige/UI/WBP_HudMessage.WBP_HudMessage_C");
 	const TCHAR* const GameModePath = TEXT("/Game/Vestige/Blueprints/BP_GameMode.BP_GameMode_C");
 	constexpr double Lifetime = 3.0;
@@ -229,6 +230,22 @@ namespace VestigeHudWidgetTests
 			ASSERT_THAT(IsNotNull(HudDefaults->GetLayoutWidgetClass().Get()));
 			ASSERT_THAT(IsNotNull(HudDefaults->GetDialogueWidgetClass().Get()));
 			ASSERT_THAT(IsFalse(HudDefaults->GetDialogueWidgetClass()->HasAnyClassFlags(CLASS_Abstract)));
+		}
+
+		TEST_METHOD(TheLayersHaveNoTransition)
+		{
+			// A running transition stops the gamepad's focus moving to the widget just pushed (Lyra sets 0 on every layer).
+			UClass* LayoutClass = LoadClass<UVestigeLayoutWidget>(nullptr, LayoutWidgetPath);
+			ASSERT_THAT(IsNotNull(LayoutClass));
+			const UVestigeLayoutWidget* Layout = CreateWidget<UVestigeLayoutWidget>(&Spawner.GetWorld(), LayoutClass);
+			ASSERT_THAT(IsNotNull(Layout));
+
+			for (const EVestigeUILayer Layer : {EVestigeUILayer::Game, EVestigeUILayer::Menu})
+			{
+				const UCommonActivatableWidgetStack* Stack = Layout->GetLayer(Layer);
+				ASSERT_THAT(IsNotNull(Stack));
+				ASSERT_THAT(IsTrue(FMath::IsNearlyZero(Stack->GetTransitionDuration())));
+			}
 		}
 
 		TEST_METHOD(TheHudTakesTheGameInputAndTheBoxTheMenuInput)

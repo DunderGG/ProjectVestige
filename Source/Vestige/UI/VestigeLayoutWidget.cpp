@@ -3,6 +3,22 @@
 
 #include "UI/VestigeLayoutWidget.h"
 
+void UVestigeLayoutWidget::NativeOnInitialized()
+{
+	Super::NativeOnInitialized();
+
+	// As Lyra's UPrimaryGameLayout does for every layer: while a stack's transition runs, the gamepad's focus can't move to the
+	// widget just pushed, so the layers never have one, whatever the Blueprint says.
+	constexpr double NoTransitionSeconds = 0.0;
+	for (UCommonActivatableWidgetStack* Stack : {GameLayer.Get(), MenuLayer.Get()})
+	{
+		if (Stack)
+		{
+			Stack->SetTransitionDuration(NoTransitionSeconds);
+		}
+	}
+}
+
 UCommonActivatableWidgetStack* UVestigeLayoutWidget::GetLayer(EVestigeUILayer Layer) const
 {
 	switch (Layer)

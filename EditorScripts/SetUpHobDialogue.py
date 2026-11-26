@@ -10,12 +10,12 @@ with the editor closed and VestigeEditor built:
 Needs /Game/Vestige/Dialogue/ST_Dialogue (the string table, keyed by the writer's line IDs) and the widget Blueprints in
 /Game/Vestige/UI (WBP_Layout, WBP_Dialogue, WBP_DialogueChoice). It makes or updates, and saves:
 
-1. IA_DialogueNext, IA_DialogueEnd and IMC_Dialogue in /Game/Vestige/Input (F, Space, Enter, gamepad B and A for Next, B first as the key that opened the talk; Escape for End).
+1. IA_DialogueNext, IA_DialogueEnd and IMC_Dialogue in /Game/Vestige/Input (F, Space, Enter, gamepad B and A for Next, B first as the key that opened the talk; Escape and gamepad Start for End).
 2. DA_Character_Hob (Base.Hob, robot) in /Game/Vestige/Characters.
 3. The six conversations in /Game/Vestige/Dialogue (first meeting 100, four greetings 50, again today 10), each text linked to
    its ST_Dialogue entry with TextFromStringTable, never a plain string.
 4. DA_FeedbackResponses: the row Vestige.Feedback.Dialogue.NothingToSay.
-5. WBP_Dialogue's defaults (choice button, actions, mapping context, typing speed) and BP_HUD's layout and dialogue classes.
+5. WBP_Dialogue's defaults (choice button, actions, mapping context, typing speed), BP_HUD's layout and dialogue classes.
 
 It changes nothing else. A rerun rewrites the same values. Every line it prints starts with "SetUpHobDialogue:".
 """
@@ -34,7 +34,7 @@ NOTHING_TO_SAY = ("Vestige.Feedback.Dialogue.NothingToSay", "Nothing to say righ
 ACTIONS = [
     ("IA_DialogueNext", "Vestige.Input.DialogueNext", "UI.DialogueNext",
      ["F", "SpaceBar", "Enter", "Gamepad_FaceButton_Right", "Gamepad_FaceButton_Bottom"]),
-    ("IA_DialogueEnd", "Vestige.Input.DialogueEnd", "UI.DialogueEnd", ["Escape"]),
+    ("IA_DialogueEnd", "Vestige.Input.DialogueEnd", "UI.DialogueEnd", ["Escape", "Gamepad_Special_Right"]),
 ]
 
 CHARACTER_NAME = "DA_Character_Hob"

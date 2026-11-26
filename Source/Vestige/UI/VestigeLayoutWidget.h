@@ -43,6 +43,9 @@ public:
 	/** The stack of Layer, or nullptr when the Blueprint lacks it. */
 	UCommonActivatableWidgetStack* GetLayer(EVestigeUILayer Layer) const;
 
+protected:
+	virtual void NativeOnInitialized() override;
+
 private:
 	/** The game layer's stack, which holds the HUD. */
 	UPROPERTY(meta = (BindWidget))

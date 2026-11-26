@@ -972,7 +972,7 @@ namespace VestigeDialogueTests
 			ASSERT_THAT(IsTrue(GamepadKeys >= 1));
 		}
 
-		TEST_METHOD(TheBoxsKeysAreFSpaceEnterAndAGamepadButtonToAdvanceAndEscapeToEnd)
+		TEST_METHOD(TheBoxsKeysAreFSpaceEnterAndAGamepadButtonToAdvanceAndEscapeAndStartToEnd)
 		{
 			const UInputMappingContext* DialogueKeys =
 				LoadObject<UInputMappingContext>(nullptr, TEXT("/Game/Vestige/Input/IMC_Dialogue.IMC_Dialogue"));
@@ -990,6 +990,7 @@ namespace VestigeDialogueTests
 			ASSERT_THAT(IsTrue(NextKeys.Contains(EKeys::Enter)));
 			ASSERT_THAT(IsTrue(NextKeys.Contains(EKeys::Gamepad_FaceButton_Bottom)));
 			ASSERT_THAT(IsTrue(EndKeys.Contains(EKeys::Escape)));
+			ASSERT_THAT(IsTrue(EndKeys.Contains(EKeys::Gamepad_Special_Right)));
 			// Nothing both advances and ends.
 			for (const FKey& Key : EndKeys)
 			{

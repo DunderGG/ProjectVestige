@@ -24,6 +24,7 @@
 #include "Farming/FarmTargetingComponent.h"
 #include "Farming/FarmTileState.h"
 #include "Farming/FarmWateringCan.h"
+#include "Framework/Application/SlateApplication.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/PlayerState.h"
@@ -129,6 +130,14 @@ void AVestigeHUD::BeginPlay()
 		return;
 	}
 	Layout->AddToPlayerScreen();
+#if WITH_EDITOR
+	// As Lyra's UGameUIPolicy does in the editor: so a gamepad works in Play in Editor without a click in the viewport first.
+	if (GIsEditor)
+	{
+		constexpr int32 PrimaryUserIndex = 0;
+		FSlateApplication::Get().SetUserFocusToGameViewport(PrimaryUserIndex);
+	}
+#endif
 	HudWidget = Layout->PushToLayer(EVestigeUILayer::Game, HudWidgetClass);
 	if (!HudWidget)
 	{
