@@ -198,6 +198,7 @@ The farming component posts "Tilled the soil." and "Watered." on every successfu
 - **L3 — Home-made ability idioms.** The use-tool ability waits on an `FTimerManager` timer instead of a wait-delay or montage task, to avoid one small task object per use. The saving is negligible, and standard ability tasks are what other Unreal developers and contributors expect to read. **Status: Resolved (2026-11-07)** with H1: the tool abilities wait with `WaitDelay` and `WaitMovementModeChange`, an exception recorded in [CodingGuidelines.md, section 12.3](CodingGuidelines.md#123-memory-and-allocation).
 - **L4 — Synchronous save on the game thread.** Fine at today's size. When saves grow, serialise on the game thread and write with `AsyncSaveGameToSlot`.
 - **L5 — No CI.** The 181 tests only run when someone runs them on the maintainer's PC. A script that builds and runs them before each commit is enough for a solo project.
+  **Status: Resolved (2026-11-26).** `Tools/Verify-Vestige.ps1` builds `VestigeEditor` and runs the whole suite in one call, and the workflow in `AGENTS.md` runs it before every commit that changes source or tests. No Git hook: it would make every docs commit wait minutes.
 
 ## Project rules that are themselves wrong
 

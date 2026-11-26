@@ -175,6 +175,9 @@ When working nearby:
 - [x] Common UI with the first menu ([H7](CodeReview.md#h7--the-hud-is-raw-slate-written-in-c)): reparent the widget bases to `UCommonUserWidget`, set `UCommonGameViewportClient` as the game viewport client, remove the `CommonUI.Debug.CheckGameViewportClientValid` setting and its test `Vestige.Input.TheActionRouterCheckIsOff`, and log the decision ([Systems.md, section 6](Systems.md#6-user-interface)). The plugin and Common Input are already on since the gamepad key hints (2026-11-08). Due with Hob's dialogue box ([4.4](#44-the-caretaker-robot)) or the title screen ([4.7](#47-starting-and-testing-the-slice)), whichever comes first (roadmap review, 2026-11-24)
    - Done 2026-11-26 with Hob ([4.4](#44-the-caretaker-robot)): `UCommonGameViewportClient`, a root layout with a game and a menu layer, the HUD as the game layer's activatable widget (not a `UCommonUserWidget`, so input returns to the game when a screen closes), and the setting and its test removed ([Systems/06-UserInterface.md](Systems/06-UserInterface.md))
 
+- [x] A script that builds and runs the tests before each commit ([L5](CodeReview.md#low))
+   - Done by `Tools/Verify-Vestige.ps1`, which every commit with a source or test change already needs. A Git pre-commit hook was rejected (2026-11-26): a build and the suite take minutes, so a hook would hold up every docs commit and would soon be skipped
+
 ### 4.1 Foundations
 
 **Engine** (added 2026-10-30: @DunderGG is installing Unreal Engine 5.8.4)
