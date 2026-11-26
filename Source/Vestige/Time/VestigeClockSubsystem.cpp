@@ -225,10 +225,23 @@ void UVestigeClockSubsystem::StartSeasonIfNew()
 	OnSeasonStarted.Broadcast(Today);
 }
 
+void UVestigeClockSubsystem::Hold(FName Reason)
+{
+	Holds.Add(Reason);
+}
+
+void UVestigeClockSubsystem::Release(FName Reason)
+{
+	if (Holds.Remove(Reason) == 0)
+	{
+		VESTIGE_LOG(this, LogVestigeTime, Warning, "The clock isn't held for {Reason}, so there is nothing to release.", Reason.ToString());
+	}
+}
+
 bool UVestigeClockSubsystem::IsTickable() const
 {
 	const UWorld* World = GetTickableGameObjectWorld();
-	return !bDayEndReached && World && World->IsGameWorld();
+	return !bDayEndReached && !IsHeld() && World && World->IsGameWorld();
 }
 
 UWorld* UVestigeClockSubsystem::GetTickableGameObjectWorld() const

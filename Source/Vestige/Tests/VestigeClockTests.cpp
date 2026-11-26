@@ -699,6 +699,54 @@ namespace VestigeClockTests
 			ASSERT_THAT(IsTrue(GameClock->GetCurrentDay() == 5));
 			ASSERT_THAT(IsTrue(GameClock->GetTimeOfDay() == 12.f));
 		}
+
+		TEST_METHOD(AHeldClockDoesNotRun)
+		{
+			ASSERT_THAT(IsTrue(GameClock->IsTickable()));
+			ASSERT_THAT(IsFalse(GameClock->IsHeld()));
+
+			GameClock->Hold(TEXT("Test"));
+
+			ASSERT_THAT(IsTrue(GameClock->IsHeld()));
+			ASSERT_THAT(IsFalse(GameClock->IsTickable()));
+		}
+
+		TEST_METHOD(TheClockRunsWhenTheLastHoldIsReleased)
+		{
+			GameClock->Hold(TEXT("Test"));
+			GameClock->Hold(TEXT("Test"));
+			GameClock->Hold(TEXT("Other"));
+
+			// One reason held twice is held once.
+			GameClock->Release(TEXT("Test"));
+			ASSERT_THAT(IsTrue(GameClock->IsHeld()));
+			GameClock->Release(TEXT("Other"));
+
+			ASSERT_THAT(IsFalse(GameClock->IsHeld()));
+			ASSERT_THAT(IsTrue(GameClock->IsTickable()));
+		}
+
+		TEST_METHOD(ReleasingAnotherReasonKeepsTheHold)
+		{
+			GameClock->Hold(TEXT("Dialogue"));
+			TestRunner->AddExpectedMessagePlain(TEXT("nothing to release"), ELogVerbosity::Warning);
+
+			GameClock->Release(TEXT("Menu"));
+
+			ASSERT_THAT(IsTrue(GameClock->IsHeld()));
+			ASSERT_THAT(IsFalse(GameClock->IsTickable()));
+		}
+
+		TEST_METHOD(AHoldDoesNotStopAnExplicitAdvance)
+		{
+			// Only the running of the clock stops: a jump or the end of the day is asked for, so it still happens.
+			GameClock->Hold(TEXT("Test"));
+			const float Start = GameClock->GetTimeOfDay();
+
+			GameClock->AdvanceTo(Start + 1.f);
+
+			ASSERT_THAT(IsTrue(FMath::IsNearlyEqual(GameClock->GetTimeOfDay(), Start + 1.f)));
+		}
 	};
 }
 

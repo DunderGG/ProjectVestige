@@ -4,6 +4,7 @@
 #include "Player/VestigeKeyHints.h"
 
 #include "InputCoreTypes.h"
+#include "InputMappingContext.h"
 
 #define LOCTEXT_NAMESPACE "VestigeKeyHints"
 
@@ -44,6 +45,25 @@ namespace VestigeKeyHints
 			}
 		}
 		return Key.GetDisplayName(false);
+	}
+
+	FKey FindHintKey(const UInputMappingContext& Context, const UInputAction& Action, EVestigeHintDevice Device)
+	{
+		for (const FEnhancedActionKeyMapping& Mapping : Context.GetMappings())
+		{
+			if (Mapping.Action != &Action)
+			{
+				continue;
+			}
+			const bool bOnDevice = Device == EVestigeHintDevice::Gamepad
+				? Mapping.Key.IsGamepadKey()
+				: !Mapping.Key.IsGamepadKey() && !Mapping.Key.IsTouch() && !Mapping.Key.IsGesture();
+			if (bOnDevice)
+			{
+				return Mapping.Key;
+			}
+		}
+		return EKeys::Invalid;
 	}
 }
 

@@ -4,6 +4,7 @@
 #include "Player/VestigePlayerCharacter.h"
 
 #include "AbilitySystem/VestigeGameplayTags.h"
+#include "Characters/VestigeConversationComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Content/VestigeItemData.h"
@@ -91,6 +92,7 @@ void AVestigePlayerCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	Farming->OnToolChanged.RemoveAll(this);
 	Interaction->FacingDirection.Unbind();
 	Farming->OnToolUseHeldChanged.RemoveAll(GetCharacterMovement());
+	StopFollowingConversation();
 	Super::EndPlay(EndPlayReason);
 }
 
@@ -190,7 +192,41 @@ void AVestigePlayerCharacter::UnPossessed()
 
 	// Removed while the old controller is still known, so a later possession doesn't stack a second copy.
 	RemoveMappingContexts();
+	StopFollowingConversation();
 	Super::UnPossessed();
+}
+
+void AVestigePlayerCharacter::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+
+	// The player state is set by now. It outlives this body, so the farmer lets go of it when the body goes.
+	StopFollowingConversation();
+	FollowedConversation = UVestigeConversationComponent::Find(this);
+	if (UVestigeConversationComponent* Talk = FollowedConversation.Get())
+	{
+		Talk->OnConversationStarted.AddUObject(this, &AVestigePlayerCharacter::FaceSpeaker);
+	}
+}
+
+void AVestigePlayerCharacter::StopFollowingConversation()
+{
+	if (UVestigeConversationComponent* Talk = FollowedConversation.Get())
+	{
+		Talk->OnConversationStarted.RemoveAll(this);
+	}
+	FollowedConversation.Reset();
+}
+
+void AVestigePlayerCharacter::FaceSpeaker()
+{
+	const UVestigeConversationComponent* Talk = FollowedConversation.Get();
+	const AActor* Speaker = Talk ? Talk->GetSpeakerActor() : nullptr;
+	if (!Speaker)
+	{
+		return;
+	}
+	FaceDirection((Speaker->GetActorLocation() - GetActorLocation()) * FVector(1.0, 1.0, 0.0));
 }
 
 void AVestigePlayerCharacter::DoMove(float Right, float Forward)
@@ -204,14 +240,19 @@ void AVestigePlayerCharacter::DoMove(float Right, float Forward)
 	// The same camera-relative direction the template's DoMove walks in.
 	const FRotationMatrix YawRotation(FRotator(0.f, CurrentController->GetControlRotation().Yaw, 0.f));
 	const FVector MoveDirection = YawRotation.GetUnitAxis(EAxis::X) * Forward + YawRotation.GetUnitAxis(EAxis::Y) * Right;
-	Targeting->AimAt(MoveDirection);
+	FaceDirection(MoveDirection);
+
+	const float InputScale = GetMoveInputScale(GetMoveHeldSeconds(), MoveRampSeconds);
+	Super::DoMove(Right * InputScale, Forward * InputScale);
+}
+
+void AVestigePlayerCharacter::FaceDirection(const FVector& WorldDirection)
+{
+	Targeting->AimAt(WorldDirection);
 	if (UVestigeCharacterMovementComponent* Movement = GetCharacterMovement<UVestigeCharacterMovementComponent>())
 	{
 		Movement->SetIdleFacing(Targeting->GetAimDirection());
 	}
-
-	const float InputScale = GetMoveInputScale(GetMoveHeldSeconds(), MoveRampSeconds);
-	Super::DoMove(Right * InputScale, Forward * InputScale);
 }
 
 float AVestigePlayerCharacter::GetMoveInputScale(float HeldSeconds, float RampSeconds)
@@ -343,23 +384,10 @@ FKey AVestigePlayerCharacter::FindHintKey(const UInputAction* Action, EVestigeHi
 	}
 	for (const FVestigeMappingContextAndPriority& Entry : MappingContexts)
 	{
-		if (!Entry.MappingContext)
+		const FKey Key = Entry.MappingContext ? VestigeKeyHints::FindHintKey(*Entry.MappingContext, *Action, Device) : EKeys::Invalid;
+		if (Key.IsValid())
 		{
-			continue;
-		}
-		for (const FEnhancedActionKeyMapping& Mapping : Entry.MappingContext->GetMappings())
-		{
-			if (Mapping.Action != Action)
-			{
-				continue;
-			}
-			const bool bOnDevice = Device == EVestigeHintDevice::Gamepad
-				? Mapping.Key.IsGamepadKey()
-				: !Mapping.Key.IsGamepadKey() && !Mapping.Key.IsTouch() && !Mapping.Key.IsGesture();
-			if (bOnDevice)
-			{
-				return Mapping.Key;
-			}
+			return Key;
 		}
 	}
 	return EKeys::Invalid;

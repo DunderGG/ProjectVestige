@@ -7,7 +7,9 @@
 #include "Content/FarmCropData.h"
 #include "Content/FarmSeedFragment.h"
 #include "Content/VestigeAssetManager.h"
+#include "Content/VestigeCharacterData.h"
 #include "Content/VestigeContentCatalog.h"
+#include "Content/VestigeDialogueData.h"
 #include "Content/VestigeItemData.h"
 #include "Content/VestigeToolData.h"
 #include "Content/VestigeToolFragment.h"
@@ -34,6 +36,28 @@ namespace VestigeContentTests
 		{
 			// Set by AssetManagerClassName in Config/DefaultEngine.ini. Without it, duplicate content IDs go unreported.
 			ASSERT_THAT(IsTrue(UAssetManager::Get().IsA<UVestigeAssetManager>()));
+		}
+
+		TEST_METHOD(TheCharacterAndDialogueTypesAreScanned)
+		{
+			const struct
+			{
+				const FPrimaryAssetType& Type;
+				const TCHAR* Folder;
+				int32 Count;
+			} Types[] = {{UVestigeCharacterData::AssetType, TEXT("/Game/Vestige/Characters"), 1},
+				{UVestigeDialogueData::AssetType, TEXT("/Game/Vestige/Dialogue"), 6}};
+			for (const auto& Expected : Types)
+			{
+				FPrimaryAssetTypeInfo Info;
+				ASSERT_THAT(IsTrue(UAssetManager::Get().GetPrimaryAssetTypeInfo(Expected.Type, Info), *Expected.Type.ToString()));
+				ASSERT_THAT(IsTrue(Info.AssetScanPaths.Contains(Expected.Folder), *Expected.Type.ToString()));
+				ASSERT_THAT(IsTrue(Info.Rules.CookRule == EPrimaryAssetCookRule::AlwaysCook, *Expected.Type.ToString()));
+
+				TArray<FPrimaryAssetId> Ids;
+				UAssetManager::Get().GetPrimaryAssetIdList(Expected.Type, Ids);
+				ASSERT_THAT(IsTrue(Ids.Num() >= Expected.Count, *Expected.Type.ToString()));
+			}
 		}
 
 		TEST_METHOD(WellFormedContentIdsAreAccepted)

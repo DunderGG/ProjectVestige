@@ -30,15 +30,14 @@ Contents
 - **Now:** the rest of milestone 2, the one-season vertical slice. What is left is the caretaker robot, the sprinkler, dirty water, the screens a first-time player needs, and the slice play-test that ends the milestone.
 - **Next up**, in order (reviewed 2026-11-24, @DunderGG said yes):
   1. The open play-tests of contamination and the seed shop (the housekeeping quick fixes before them were done on 2026-11-25).
-  2. [4.4](#44-the-caretaker-robot): Hob in the game with data-driven dialogue, its dialogue box built with Common UI ([4.0](#40-structure-from-the-code-review)), and characters as data.
-  3. Hob's relationship track, and how the player sees his opinion change ([4.4](#44-the-caretaker-robot)).
-  4. [4.5](#45-automation-and-selling): placing objects on the farm grid, and the sprinkler, bought at the seed shop.
-  5. Dirty water and its source ([4.2](#42-farming-depth)).
-  6. Lay out the home farm ([4.7](#47-starting-and-testing-the-slice)): the farmhouse with the bed inside, the service yard, Hob's spot and the dirty water source, as a blockout, once every slice prop exists. The screenshot art pass's ground dressing comes after it, so it doesn't dress a layout that still moves; its meshes and sky don't wait for it.
-  7. What a first-time player needs to see: the hotbar and the bag on screen ([4.6](#46-interface-and-input)), a dry crop that looks thirsty and item descriptions ([4.2](#42-farming-depth)), then the HUD layout pass.
-  8. [4.7](#47-starting-and-testing-the-slice): the title screen and the day-1 save.
-  9. Hob's tutorial and his reminders of crops at risk ([4.4](#44-the-caretaker-robot), [4.2](#42-farming-depth)), which need Hob and dialogue.
-  10. The slice play-test with players who haven't seen the game ([4.7](#47-starting-and-testing-the-slice)).
+  2. Hob's relationship track, and how the player sees his opinion change ([4.4](#44-the-caretaker-robot)).
+  3. [4.5](#45-automation-and-selling): placing objects on the farm grid, and the sprinkler, bought at the seed shop.
+  4. Dirty water and its source ([4.2](#42-farming-depth)).
+  5. Lay out the home farm ([4.7](#47-starting-and-testing-the-slice)): the farmhouse with the bed inside, the service yard, Hob's spot and the dirty water source, as a blockout, once every slice prop exists. The screenshot art pass's ground dressing comes after it, so it doesn't dress a layout that still moves; its meshes and sky don't wait for it.
+  6. What a first-time player needs to see: the hotbar and the bag on screen ([4.6](#46-interface-and-input)), a dry crop that looks thirsty and item descriptions ([4.2](#42-farming-depth)), then the HUD layout pass.
+  7. [4.7](#47-starting-and-testing-the-slice): the title screen and the day-1 save.
+  8. Hob's tutorial and his reminders of crops at risk ([4.4](#44-the-caretaker-robot), [4.2](#42-farming-depth)), which need Hob and dialogue.
+  9. The slice play-test with players who haven't seen the game ([4.7](#47-starting-and-testing-the-slice)).
 
   Polish that isn't on this path (the sun and the moon, the per-minute clock, the ripe-crop glow, held meshes, automated play-tests, the performance agent) waits until after it unless it is cheap to do alongside.
 
@@ -84,10 +83,6 @@ Work outside the milestones' features: the tools, the tests and the rules.
 ### 4.0 Structure from the code review
 
 The fixes from the [code review](CodeReview.md) of 2026-11-04, in the order to do them. C1 and C2 come before [4.2](#42-farming-depth), because water and radiation on every tile build on the world structure and the tile representation. Each item names its finding; tick the item and add a status line under the finding in the same commit.
-
-Before more tools and [4.6](#46-interface-and-input):
-
-- [ ] Common UI with the first menu ([H7](CodeReview.md#h7--the-hud-is-raw-slate-written-in-c)): reparent the widget bases to `UCommonUserWidget`, set `UCommonGameViewportClient` as the game viewport client, remove the `CommonUI.Debug.CheckGameViewportClientValid` setting and its test `Vestige.Input.TheActionRouterCheckIsOff`, and log the decision ([Systems.md, section 6](Systems.md#6-user-interface)). The plugin and Common Input are already on since the gamepad key hints (2026-11-08). Due with Hob's dialogue box ([4.4](#44-the-caretaker-robot)) or the title screen ([4.7](#47-starting-and-testing-the-slice)), whichever comes first (roadmap review, 2026-11-24)
 
 When working nearby:
 
@@ -158,10 +153,7 @@ The code changes that the slice's content depends on. Doing them first means add
 
 ### 4.4 The caretaker robot
 
-- [ ] Hob *(working name)* in the game: placeholder body first, then a Blender model
-- [ ] Simple data-driven dialogue
-   - Its dialogue box is the first screen that takes the input focus, so it is built with Common UI ([4.0](#40-structure-from-the-code-review), H7) and designed with the game designer
-- [ ] Characters as data assets, so more robots and humans can be added the same way
+- [ ] Hob's Blender model, replacing the placeholder body (`BP_Hob`'s cubes, built 2026-11-26) and keeping the cyan eyes material `M_HobEyes` for the eye slot
 - [ ] One relationship track with Hob, who starts as a dutiful servant rather than a sceptic; trust grows through talking, gifts and working together, and the slice arc is in [Hob's character sheet](Spoilers/Characters/Hob.md#vertical-slice-arc)
    - How the player sees his opinion change, one of the play-test goals: his lines change and he helps on his own initiative ([GameDesign.md, section 8](GameDesign.md#relationships)), with no number on screen unless the play-test shows it is needed. Designed with the game designer and the writer (roadmap review, 2026-11-24)
 - [ ] Hob guides the player through the first days as a tutorial
@@ -185,6 +177,7 @@ Polish, after the slice's features unless cheap alongside them:
 
 - [ ] Holding F to harvest along a row of ripe crops, as holding E repeats a tool (found with harvesting with F, 2026-11-07)
 - [ ] Tests for the HUD's other bindings (the prompt, the money and the stamina lines: binding on a new pawn, unbinding when the pawn changes and when the HUD ends), which have none; they can use the test hooks `AVestigeHUD::SetHudWidgetForTests` and `FollowPawnForTests` added for the tile line (code review, 2026-11-22)
+- [ ] Test the dialogue box's typing over time: move the characters-shown count out of `UVestigeDialogueWidget::NativeTick` into a function a test can call with a time step (code review of Hob's dialogue, 2026-11-26)
 - [ ] A marker on what F would use (an outline on the bed, a highlight on the ripe tile), if the prompt and the tile frame aren't enough in play
 - [ ] A held mesh for items that aren't tools (a turnip in the hand), with the meshes for the new crops
 - Input actions as assets: moved to [4.0](#40-structure-from-the-code-review) and decided as now (code review, 2026-11-04)
@@ -211,7 +204,7 @@ What the slice's "done when" needs besides its features: a player who can start 
 
 - [ ] A small title screen: Continue, New game (asking for confirmation before it replaces a save) and Quit, built with Common UI ([4.0](#40-structure-from-the-code-review), H7). Today a new game is only the `NewGame` console command. The settings and save slots stay in [section 6](#6-before-a-public-release)
 - [ ] Start a new game with a save: `NewGame` deletes both slots, so quitting before the first night leaves no save at all. Write a day-1 save once the new map has begun play instead (found in the save registry review, 2026-11-06)
-- [ ] Lay out the home farm in `L_Farm` as the [home farm plan](Levels/HomeFarm/README.md) says: floor and a blocking boundary with a visible edge, a farmhouse with a small interior and `BP_Bed` moved inside (@DunderGG, 2026-11-25), the service yard east of the field with the dirty water source nearer than the well, Hob's spot by the door and the Player Start facing the field, timed against the plan's walking targets and checked with `stat unit`. Blockout shapes only; meshes and scenery are a separate art pass after it. A level, not a system: no new class, the bed's rule unchanged
+- [ ] Lay out the home farm in `L_Farm` as the [home farm plan](Levels/HomeFarm/README.md) says: floor and a blocking boundary with a visible edge, a farmhouse with a small interior and `BP_Bed` moved inside (@DunderGG, 2026-11-25), the service yard east of the field with the dirty water source nearer than the well, Hob's spot by the door (move `BP_Hob` there from its stand-in place north of the field, and change Hob's `Vestige.Level` test to check they stand west of the field by the door) and the Player Start facing the field, timed against the plan's walking targets and checked with `stat unit`. Blockout shapes only; meshes and scenery are a separate art pass after it. A level, not a system: no new class, the bed's rule unchanged
 - [ ] The slice play-test, which ends the milestone: a packaged build, two or three people who haven't seen the game, a sheet with one line per goal in [GameDesign.md, section 13](GameDesign.md#next-vertical-slice) (what they did, where they got stuck, without help from the person watching), and a round of fixes from what it finds, each a roadmap item
    - The end-of-season recap ([section 5](#seasons-and-weather)) stays later, as @DunderGG chose on 2026-11-14; it is cheap once the title screen and Common UI exist, if the play-test shows the season's end falls flat
 

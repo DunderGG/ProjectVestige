@@ -10,13 +10,16 @@
 
 class UAbilitySystemComponent;
 class UVestigeAbilitySet;
+class UVestigeConversationComponent;
 class UVestigeInventoryComponent;
+class UVestigeRelationshipComponent;
 class UVestigeRestComponent;
 class UVestigeWalletComponent;
 
 /**
- * The player's data that outlives the pawn: the inventory, the wallet, the ability system with its abilities and stamina, and the
- * rest component, whose night refills the stamina and sets exhaustion with or without a body.
+ * The player's data that outlives the pawn: the inventory, the wallet, the ability system with its abilities and stamina, the
+ * rest component, whose night refills the stamina and sets exhaustion with or without a body, and the relationship and
+ * conversation components (whom the player has met, the talk they are in).
  * BP_PlayerState sets its values (the starting items, the ability sets), and the game mode names it. Code below the
  * player layer doesn't know this class: it finds the inventory, the wallet and the rest component by class on the player's
  * APlayerState, and the ability system through the pawn's IAbilitySystemInterface.
@@ -63,6 +66,14 @@ private:
 
 	UPROPERTY(VisibleAnywhere, Category = "Rest", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UVestigeRestComponent> Rest;
+
+	/** Whom the player has met and how many times they talked today. */
+	UPROPERTY(VisibleAnywhere, Category = "Characters", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UVestigeRelationshipComponent> Relationships;
+
+	/** The player's talk with a character. */
+	UPROPERTY(VisibleAnywhere, Category = "Characters", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UVestigeConversationComponent> Conversation;
 
 	/** What the player can do and the attributes they have from the start (DA_AbilitySet_Player). */
 	UPROPERTY(EditDefaultsOnly, Category = "Abilities", meta = (AllowPrivateAccess = "true"))

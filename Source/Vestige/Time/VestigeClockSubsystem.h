@@ -84,6 +84,19 @@ public:
 	 */
 	void StartNextDay();
 
+	/**
+	 * Stops game time for Reason while the world keeps running (no world pause): no minute or hour event fires and the late-night
+	 * drain waits. Holds are a set of reasons, so two owners can't release each other's; the clock runs again when the set is
+	 * empty. Holding a reason already held changes nothing. Doesn't stop AdvanceTo or EndDay, which are explicit. Not saved.
+	 */
+	void Hold(FName Reason);
+
+	/** Lets go of Reason. Logs a warning, changing nothing, for a reason that isn't held. */
+	void Release(FName Reason);
+
+	/** Whether any reason holds the clock. */
+	bool IsHeld() const { return !Holds.IsEmpty(); }
+
 	/** Puts the clock back to the morning of day 1 for a new game, without broadcasting anything. */
 	virtual void StartNewGame() override;
 
@@ -154,7 +167,7 @@ public:
 	/** Runs the clock forward by DeltaSeconds of the world's time. The engine calls it every frame while IsTickable. */
 	virtual void Tick(float DeltaSeconds) override;
 
-	/** True while the clock runs and its game instance has a game world. */
+	/** True while the clock runs, nothing holds it and its game instance has a game world. */
 	virtual bool IsTickable() const override;
 
 	/** The game instance's current world, so the clock ticks with it: paused when it is, dilated when it is. */
@@ -254,4 +267,7 @@ private:
 
 	/** How the last day ended. Not saved: the next day starts in the same frame the day ends. */
 	FVestigeDayEnd LastDayEnd;
+
+	/** The reasons the clock is held for (Hold). Not saved: every holder releases when it goes. */
+	TSet<FName> Holds;
 };

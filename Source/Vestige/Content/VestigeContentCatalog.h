@@ -38,6 +38,12 @@ public:
 	/** The definition with this primary asset ID if it is a T, or nullptr. Never loads. */
 	template <typename T> const T* Find(const FPrimaryAssetId& Id) const { return Cast<T>(Find(Id)); }
 
+	/**
+	 * Fills OutContent with every definition of Type, in primary asset ID order so a caller that chooses among them chooses the
+	 * same way every time. A loop over the map, never a load: call it on a player action, never per frame.
+	 */
+	void FindAll(const FPrimaryAssetType& Type, TArray<const UVestigeContentData*>& OutContent) const;
+
 #if WITH_DEV_AUTOMATION_TESTS
 	/** For tests only: adds Content (a transient asset) or replaces the one with its ID. Refuses content without a valid ID. */
 	bool AddForTests(const UVestigeContentData& Content);

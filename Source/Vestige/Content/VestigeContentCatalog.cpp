@@ -106,6 +106,24 @@ const UVestigeContentData* UVestigeContentCatalog::Find(const FPrimaryAssetId& I
 	return Found ? Found->Get() : nullptr;
 }
 
+void UVestigeContentCatalog::FindAll(const FPrimaryAssetType& Type, TArray<const UVestigeContentData*>& OutContent) const
+{
+	OutContent.Reset();
+	for (const TPair<FPrimaryAssetId, TObjectPtr<const UVestigeContentData>>& Entry : Content)
+	{
+		if (Entry.Key.PrimaryAssetType == Type && Entry.Value)
+		{
+			OutContent.Add(Entry.Value);
+		}
+	}
+	// Sorting an array of pointers passes the predicate what they point to.
+	OutContent.Sort(
+		[](const UVestigeContentData& A, const UVestigeContentData& B)
+		{
+			return A.GetPrimaryAssetId().ToString() < B.GetPrimaryAssetId().ToString();
+		});
+}
+
 #if WITH_DEV_AUTOMATION_TESTS
 bool UVestigeContentCatalog::AddForTests(const UVestigeContentData& InContent)
 {

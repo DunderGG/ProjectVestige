@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Blueprint/UserWidget.h"
+#include "CommonActivatableWidget.h"
 #include "CoreMinimal.h"
 #include "Styling/SlateColor.h"
 #include "VestigeHudWidget.generated.h"
@@ -19,9 +19,11 @@ struct FVestigeHudMessage;
  * or the HUD, so it has no bindings and no tick. Each setter sets its parts first and then fires its event, so a
  * Blueprint can restyle from the event (a stamina bar from the numbers) without C++, and needs no graph to work.
  * Each feedback message shows in a box of its own (UVestigeHudMessageWidget), made once and reused.
+ * It is the game layer's activatable widget (Systems.md, section 6, Common UI): while it is the active screen, input goes to the
+ * game, so closing the last screen on the menu layer hands the input back. It never takes the mouse or the focus.
  */
 UCLASS(Abstract, meta = (DisableNativeTick))
-class UVestigeHudWidget : public UUserWidget
+class UVestigeHudWidget : public UCommonActivatableWidget
 {
 	GENERATED_BODY()
 
@@ -53,6 +55,15 @@ public:
 	void SetTileText(const FText& Text);
 
 	/**
+	 * Hides the prompt box and the key hints while a talk runs, and shows them again after: the box has its own hint, and the
+	 * prompt is about the world. The clock, date, stamina and bag stay. Fires OnTalkingChanged.
+	 */
+	void SetTalking(bool bInTalking);
+
+	/** The input config while the HUD is the active screen: the game's, with the mouse captured and hidden. */
+	virtual TOptional<FUIInputConfig> GetDesiredInputConfig() const override;
+
+	/**
 	 * Shows each message in its own box, oldest first, fading over Lifetime seconds, and collapses the boxes beyond the
 	 * list. Boxes are made only when the list is longer than any before and are never removed.
 	 */
@@ -70,7 +81,20 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent, Category = "HUD")
 	void OnPromptChanged(bool bShown);
 
+	/** After the prompt and key hints have been hidden for a talk or shown again. */
+	UFUNCTION(BlueprintImplementableEvent, Category = "HUD")
+	void OnTalkingChanged(bool bInTalking);
+
 private:
+	/** Shows or collapses the prompt box: shown while the prompt has a text and no talk runs. */
+	void ApplyPromptVisibility();
+
+	/** Whether the prompt has a text to show, kept so a talk can hide the box and give it back. */
+	bool bPromptHasText = false;
+
+	/** Whether a talk runs, which hides the prompt and the key hints. */
+	bool bTalking = false;
+
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UTextBlock> StatusText;
 

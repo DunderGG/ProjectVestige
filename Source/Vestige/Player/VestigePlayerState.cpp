@@ -6,6 +6,8 @@
 #include "AbilitySystem/VestigeAbilitySet.h"
 #include "AbilitySystemComponent.h"
 #include "AttributeSet.h"
+#include "Characters/VestigeConversationComponent.h"
+#include "Characters/VestigeRelationshipComponent.h"
 #include "Core/VestigeSaveRegistry.h"
 #include "Core/VestigeSaveable.h"
 #include "Farming/VestigeRestComponent.h"
@@ -23,6 +25,8 @@ AVestigePlayerState::AVestigePlayerState()
 	AbilitySystem->SetReplicationMode(EGameplayEffectReplicationMode::Minimal);
 
 	Rest = CreateDefaultSubobject<UVestigeRestComponent>(TEXT("Rest"));
+	Relationships = CreateDefaultSubobject<UVestigeRelationshipComponent>(TEXT("Relationships"));
+	Conversation = CreateDefaultSubobject<UVestigeConversationComponent>(TEXT("Conversation"));
 }
 
 void AVestigePlayerState::PostInitializeComponents()

@@ -104,12 +104,17 @@ namespace VestigeGameplayTags
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(
 		Feedback_Save_PartTooNew, "Vestige.Feedback.Save.PartTooNew", "Feedback: part of the save is newer; saving is off.");
 
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Feedback_Dialogue_NothingToSay, "Vestige.Feedback.Dialogue.NothingToSay",
+		"Feedback: the character has nothing to say now, so no talk starts.");
+
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(
 		Season, "Vestige.Season", "The parent of every season tag; the calendar in DA_GameData lists the seasons.");
 
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Input, "Vestige.Input", "The parent of every input tag, which an input config binds actions to.");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Input_UseTool, "Vestige.Input.UseTool", "Input: use the item in hand while held.");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Input_Interact, "Vestige.Input.Interact", "Input: use the focused interactable.");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Input_DialogueNext, "Vestige.Input.DialogueNext", "Input: advance the dialogue box.");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Input_DialogueEnd, "Vestige.Input.DialogueEnd", "Input: end the talk early.");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Input_HotbarSlot1, "Vestige.Input.HotbarSlot.1", "Input: select the first hotbar slot.");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Input_HotbarSlot2, "Vestige.Input.HotbarSlot.2", "Input: select the second hotbar slot.");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Input_HotbarSlot3, "Vestige.Input.HotbarSlot.3", "Input: select the third hotbar slot.");

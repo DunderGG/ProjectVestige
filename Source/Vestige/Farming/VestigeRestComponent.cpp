@@ -9,6 +9,7 @@
 #include "AbilitySystemGlobals.h"
 #include "Content/VestigeGameData.h"
 #include "Core/VestigeFeedbackSubsystem.h"
+#include "Core/VestigePlayerComponents.h"
 #include "Core/VestigeSaveRegistry.h"
 #include "Engine/World.h"
 #include "Farming/FarmLog.h"
@@ -34,17 +35,7 @@ UVestigeRestComponent::UVestigeRestComponent()
 
 UVestigeRestComponent* UVestigeRestComponent::Find(const AActor* PlayerActor)
 {
-	if (!PlayerActor)
-	{
-		return nullptr;
-	}
-	if (UVestigeRestComponent* Own = PlayerActor->FindComponentByClass<UVestigeRestComponent>())
-	{
-		return Own;
-	}
-	const APawn* Pawn = Cast<APawn>(PlayerActor);
-	const APlayerState* PlayerState = Pawn ? Pawn->GetPlayerState() : nullptr;
-	return PlayerState ? PlayerState->FindComponentByClass<UVestigeRestComponent>() : nullptr;
+	return VestigePlayerComponents::Find<UVestigeRestComponent>(PlayerActor);
 }
 
 void UVestigeRestComponent::BeginPlay()

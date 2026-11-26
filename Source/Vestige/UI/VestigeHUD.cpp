@@ -14,6 +14,7 @@
 #include "Content/VestigeCalendar.h"
 #include "Content/VestigeContentCatalog.h"
 #include "Content/VestigeItemData.h"
+#include "Characters/VestigeConversationComponent.h"
 #include "Core/VestigeFeedbackSubsystem.h"
 #include "Core/VestigeLog.h"
 #include "Engine/GameViewportClient.h"
@@ -34,9 +35,11 @@
 #include "Player/VestigePlayerCharacter.h"
 #include "Time/VestigeClockSubsystem.h"
 #include "TimerManager.h"
+#include "UI/VestigeDialogueWidget.h"
 #include "UI/VestigeFeedbackResponses.h"
 #include "UI/VestigeHudSettings.h"
 #include "UI/VestigeHudWidget.h"
+#include "UI/VestigeLayoutWidget.h"
 
 #define LOCTEXT_NAMESPACE "VestigeHUD"
 
@@ -101,19 +104,37 @@ void AVestigeHUD::BeginPlay()
 		SetActorTickEnabled(false);
 		return;
 	}
+	if (!LayoutWidgetClass)
+	{
+		VESTIGE_LOG(this, LogVestige, Error, "No Layout Widget Class is set, so the HUD shows nothing. Set it on BP_HUD.");
+		SetActorTickEnabled(false);
+		return;
+	}
 	if (!HudWidgetClass)
 	{
 		VESTIGE_LOG(this, LogVestige, Error, "No HUD Widget Class is set, so the HUD shows nothing. Set it on BP_HUD.");
 		SetActorTickEnabled(false);
 		return;
 	}
-	HudWidget = CreateWidget<UVestigeHudWidget>(PlayerOwner, HudWidgetClass);
+	if (!DialogueWidgetClass)
+	{
+		VESTIGE_LOG(this, LogVestige, Error, "No Dialogue Widget Class is set, so talks show no box. Set it on BP_HUD.");
+	}
+
+	// The layout is the one widget added to the screen; the HUD and the screens are pushed onto its layers.
+	Layout = CreateWidget<UVestigeLayoutWidget>(PlayerOwner, LayoutWidgetClass);
+	if (!Layout)
+	{
+		SetActorTickEnabled(false);
+		return;
+	}
+	Layout->AddToPlayerScreen();
+	HudWidget = Layout->PushToLayer(EVestigeUILayer::Game, HudWidgetClass);
 	if (!HudWidget)
 	{
 		SetActorTickEnabled(false);
 		return;
 	}
-	HudWidget->AddToPlayerScreen();
 
 	// First, so the first hints and prompt already name the keys of the device in use.
 	FollowInputMethod();
@@ -125,6 +146,7 @@ void AVestigeHUD::BeginPlay()
 	FollowPawn(nullptr, PlayerOwner->GetPawn());
 	FollowInventory();
 	FollowWallet();
+	FollowConversation();
 	FollowAbilitySystem();
 	if (!FeedbackResponses)
 	{
@@ -153,6 +175,11 @@ void AVestigeHUD::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	{
 		CurrentWallet->OnMoneyChanged.RemoveAll(this);
 	}
+	if (UVestigeConversationComponent* CurrentConversation = Conversation.Get())
+	{
+		CurrentConversation->OnConversationStarted.RemoveAll(this);
+		CurrentConversation->OnConversationEnded.RemoveAll(this);
+	}
 	if (UAbilitySystemComponent* CurrentAbilitySystem = AbilitySystem.Get())
 	{
 		CurrentAbilitySystem->GetGameplayAttributeValueChangeDelegate(UVestigeStaminaSet::GetStaminaAttribute()).RemoveAll(this);
@@ -169,12 +196,18 @@ void AVestigeHUD::EndPlay(const EEndPlayReason::Type EndPlayReason)
 		CurrentInputMethod->OnInputMethodChangedNative.RemoveAll(this);
 	}
 
-	// The widget's outer is the game instance, which outlives this map, so it is let go here.
-	if (HudWidget)
+	// The widgets' outer is the game instance, which outlives this map, so they are let go here. The layout takes the HUD and the
+	// screens on its stacks with it.
+	if (Layout)
+	{
+		Layout->RemoveFromParent();
+		Layout = nullptr;
+	}
+	else if (HudWidget)
 	{
 		HudWidget->RemoveFromParent();
-		HudWidget = nullptr;
 	}
+	HudWidget = nullptr;
 	Super::EndPlay(EndPlayReason);
 }
 
@@ -436,6 +469,41 @@ void AVestigeHUD::FollowInventory()
 	}
 	RefreshInventoryTexts();
 	RefreshItemInHandText();
+}
+
+void AVestigeHUD::FollowConversation()
+{
+	const APlayerState* PlayerState = PlayerOwner ? PlayerOwner->PlayerState.Get() : nullptr;
+	Conversation = PlayerState ? PlayerState->FindComponentByClass<UVestigeConversationComponent>() : nullptr;
+	if (UVestigeConversationComponent* CurrentConversation = Conversation.Get())
+	{
+		CurrentConversation->OnConversationStarted.AddUObject(this, &AVestigeHUD::ShowDialogue);
+		CurrentConversation->OnConversationEnded.AddUObject(this, &AVestigeHUD::HideDialogue);
+	}
+}
+
+void AVestigeHUD::ShowDialogue()
+{
+	if (HudWidget)
+	{
+		HudWidget->SetTalking(true);
+	}
+
+	// The box finds the conversation component itself and closes when the talk ends. Without a box the talk would run unseen with
+	// the clock held and nothing to end it, so it ends at once.
+	const bool bBoxShown = Layout && DialogueWidgetClass && Layout->PushToLayer(EVestigeUILayer::Menu, DialogueWidgetClass);
+	if (UVestigeConversationComponent* CurrentConversation = Conversation.Get(); !bBoxShown && CurrentConversation)
+	{
+		CurrentConversation->EndConversation();
+	}
+}
+
+void AVestigeHUD::HideDialogue()
+{
+	if (HudWidget)
+	{
+		HudWidget->SetTalking(false);
+	}
 }
 
 FText AVestigeHUD::FormatMoney(int32 Money)

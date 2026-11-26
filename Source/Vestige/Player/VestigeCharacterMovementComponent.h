@@ -27,6 +27,9 @@ public:
 	/** The direction to turn toward while there is no movement input. A zero vector leaves the farmer facing as he is. */
 	void SetIdleFacing(const FVector& Direction) { IdleFacing = Direction; }
 
+	/** The direction set by SetIdleFacing, or zero. */
+	const FVector& GetIdleFacing() const { return IdleFacing; }
+
 	/** Whether the farmer is holding the use key, so he walks at ToolUseSpeedScale of his speed. */
 	void SetToolUseHeld(bool bHeld) { bToolUseHeld = bHeld; }
 

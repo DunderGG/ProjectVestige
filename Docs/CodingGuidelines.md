@@ -441,6 +441,8 @@ Game rules get automated tests. They run in seconds without playing the game, an
   - A test that listens to a Blueprint (dynamic) delegate needs a reflected `UFUNCTION` listener: reuse `UVestigeTestEventRecorder` in `Tests/`. UHT accepts test `UCLASS`es inside `#if WITH_TESTS`, not inside `WITH_DEV_AUTOMATION_TESTS`.
   - A multicast delegate calls its listeners in reverse order of binding, and removing one reorders them, so a test never asserts the order between listeners of one delegate.
   - A `TEST_CLASS` fixture named like a namespace hides the namespace inside the test; qualify it with `::` (`::FarmTileLooks::GetLook`).
+  - A plain `AActor` has no root component, so `SetActorLocation` on it does nothing: give a test's stand-in actor a `USceneComponent` root (`SetRootComponent`, `RegisterComponent`) before placing it.
+  - A widget that finds the player through `GetOwningPlayerState()` needs a local player: make one with `NewObject<ULocalPlayer>(GEngine, GEngine->LocalPlayerClass)`, set `Controller.Player` and `LocalPlayer->PlayerController`, then `CreateWidget<T>(&Controller, Class)`; `ActivateWidget()` works with no container. `NativeTick` is protected, so typing over time is an off-screen check, not a test (`Vestige.DialogueBox`).
   - From the command line, add `-abslog=<file>` and search that file for `Result=`: piping the editor's output in PowerShell doesn't capture the automation lines.
 - **Checking the game off-screen** (an agent, for what a test can't see, such as the HUD as drawn): run the game with the editor closed, in a temporary `-userdir` (below, `<temp>` is `Saved\AgentWork\<slug>`, which Git ignores) so the user's own `Saved/` is never touched, and take screenshots from a Python tick callback. Proven 2026-11-14 (the season date line):
 
@@ -462,7 +464,7 @@ Game rules get automated tests. They run in seconds without playing the game, an
   unreal.register_slate_post_tick_callback(tick)
   ```
 
-  The screenshots land in `<temp>\user\Saved\Screenshots\WindowsEditor\ScreenShot0000N.png`; crop a corner before reading one to keep the image small. The map is up about 15 seconds into the first run in a new `-userdir`, which is why the first step waits 12 seconds after the script loads. Traps: `HighResShot` leaves the HUD out (use `Shot ShowUI`); a console command with no world object (`None`) reaches `Quit` but not the cheat manager or the viewport, so pass the map's world object as above; `unreal.EditorLevelLibrary.get_game_world()` crashes the game in `-game`; and kill the process if it hasn't quit after a few minutes.
+  The screenshots land in `<temp>\user\Saved\Screenshots\WindowsEditor\ScreenShot0000N.png`; crop a corner before reading one to keep the image small. The map is up about 15 seconds into the first run in a new `-userdir`, which is why the first step waits 12 seconds after the script loads. Traps: `HighResShot` leaves the HUD out (use `Shot ShowUI`); a console command with no world object (`None`) reaches `Quit` but not the cheat manager or the viewport, so pass the map's world object as above; `unreal.EditorLevelLibrary.get_game_world()` crashes the game in `-game`; and kill the process if it hasn't quit after a few minutes. Launching from Git Bash rewrites `/Game/Maps/L_Farm` into a path under `C:/Program Files/Git`: start it from PowerShell with `Start-Process` and one quoted argument string (`-ExecCmds="..."` in quotes), and kill only the process it returns. A Python step can start a talk with `hob.call_method("Interact", args=(player_state, option))` (set `option`'s `action` to `"Talk"`) and move the farmer with `pawn.set_actor_location` and `controller.set_control_rotation`.
 
 ## 14. Project layout and assets
 
@@ -480,6 +482,7 @@ Source/Vestige/
     Time/           The clock, its settings and save struct, and the day cycle's lighting
     Inventory/      The inventory component, its slot rules and save struct
     Farming/        Tiles and tile state, the grid, the farming, targeting, rest and highlight components, the bed, the tool abilities, their save structs
+    Characters/     The characters the player talks to: their bodies, the conversation and relationship components
     Save/           UVestigeSaveGame and UVestigeSaveSubsystem: the save files
     Player/         The player character, its input config, its movement component, the player state and the cheat manager
     UI/             The HUD and its widgets

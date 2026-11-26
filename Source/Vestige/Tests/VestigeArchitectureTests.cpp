@@ -17,7 +17,7 @@ namespace VestigeArchitectureTests
 	 * added here, in its layer, before files go in it.
 	 */
 	const TCHAR* const LayerOrder[] = {TEXT("Core"), TEXT("AbilitySystem"), TEXT("Interaction"), TEXT("Content"), TEXT("Time"),
-		TEXT("Inventory"), TEXT("Farming"), TEXT("Save"), TEXT("Player"), TEXT("UI"), TEXT("Game")};
+		TEXT("Inventory"), TEXT("Farming"), TEXT("Characters"), TEXT("Save"), TEXT("Player"), TEXT("UI"), TEXT("Game")};
 
 	/** Tests may include anything, and nothing may include a test. Their files aren't checked. */
 	const TCHAR* const TestsFolder = TEXT("Tests");

@@ -8,7 +8,9 @@ One of the [system guides](../Systems.md); read [How to use this document](../Sy
 
 **Rules:**
 
-- **Every string the player reads is `FText`**: `LOCTEXT` in C++ with a `LOCTEXT_NAMESPACE` per file, `FText` properties in data assets, string tables for shared UI strings.
+- **Every string the player reads is `FText`**: `LOCTEXT` in C++ with a `LOCTEXT_NAMESPACE` per file, `FText` properties in data assets, string tables for shared UI strings and for dialogue. Dialogue lines are entries of `ST_Dialogue` keyed by the writer's stable line IDs (`Hob.Meet.010`), and the dialogue assets' texts are linked to them ([section 11](11-Dialogue.md)); the gather includes `Content/Vestige/Dialogue` and `Content/Vestige/Characters`.
+- **`ST_Dialogue` is edited as an asset**, in the String Table editor, using its CSV import and export, with the writer's line IDs as the keys; the scripts that make dialogue assets (`EditorScripts/SetUpHobDialogue.py`) need it to exist and link texts to its keys, and a string table must be loaded before a script links text to it.
+- **An asset script never sets player text from a plain string**: that text is culture-invariant and never gathered. It links a string table entry (`UKismetTextLibrary::TextFromStringTable`) instead.
 - **Build sentences with `FText::Format`** and named arguments (`{Day}`), never by concatenating strings, so translators can reorder words.
 - Numbers, dates and the clock go through culture-aware formatting; the 24-hour clock stays the default.
 - Set up the Localization Dashboard's gather once there is a menu, so missing text shows up early. It gathers from assets as well as code: the input actions' descriptions and mappable display names are asset text since H6 (2026-11-07), so the gather includes `Content/Vestige/Input`, and the feedback texts are asset text since M4 (2026-11-08, `DA_FeedbackResponses`), so it includes `Content/Vestige/UI`, and the seasons' names are asset text in the calendar (`Content/Vestige/DA_GameData`, [section 4](04-Time.md)).

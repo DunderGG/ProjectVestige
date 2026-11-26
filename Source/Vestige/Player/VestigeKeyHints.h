@@ -5,6 +5,8 @@
 
 #include "CoreMinimal.h"
 
+class UInputAction;
+class UInputMappingContext;
 struct FKey;
 
 /** A key the player can press and what it does, for on-screen hints. */
@@ -28,4 +30,11 @@ namespace VestigeKeyHints
 	 * controller data gives each gamepad its own icons; every other key is its short display name, as "E" or "1".
 	 */
 	FText GetKeyName(const FKey& Key);
+
+	/**
+	 * The first key on Device that Action is mapped to in Context (its default mappings), or an invalid key: a gamepad key for
+	 * the gamepad, and for the keyboard a key that is neither a gamepad, touch nor gesture key. With rebinding, this asks Enhanced
+	 * Input for the player's current key instead (Roadmap.md, the settings item).
+	 */
+	FKey FindHintKey(const UInputMappingContext& Context, const UInputAction& Action, EVestigeHintDevice Device);
 }

@@ -31,5 +31,8 @@ The six phase files follow the timeline's story order. Each scene has a stable d
 | [Middle](Phase-04-Middle.md) | M-01 The institute; M-02 First contact with the living exhibit; M-03 Separate evidence wings; M-04 After the discovery |
 | [Late response](Phase-05-Response.md) | R-01 Ask what help is wanted; R-02 Records on the survivor's terms; R-03 Specific accountability; R-04 Wellspring decides its own limits; R-05 An unfinished aftermath; R-06 The route continues by choice; R-07 The aquifer overhaul |
 | [Family thread](Phase-06-Family.md) | F-01 The family in fragments; F-02 Hob's sealed message; F-03 The sibling remains their own person |
+| [Hob, everyday](Hob-Everyday.md) (Ready, not a story phase) | H-01 First meeting (slice); H-02 Daily greeting; H-03 Again today |
+
+Repeatable and slice lines that sit outside the story phases have their own files and are not beats in the phase diagrams. Unlike the phase drafts, they are marked Ready for the game, with a stable line ID per line.
 
 Some timeline beats share a scene where that keeps the exchange natural. The optional survivor encounters and open family outcomes are adaptable placeholders, not commitments to add every character or branch to the final cast.

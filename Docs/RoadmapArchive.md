@@ -172,6 +172,8 @@ When working nearby:
 
 - [x] Remove the data field nothing reads (`ContaminationTolerance` on crops) until its feature is designed ([L2](CodeReview.md#low))
    - Done 2026-11-22 with contamination: each crop states how it grows on each contamination level instead ([Systems/27-Contamination.md](Systems/27-Contamination.md))
+- [x] Common UI with the first menu ([H7](CodeReview.md#h7--the-hud-is-raw-slate-written-in-c)): reparent the widget bases to `UCommonUserWidget`, set `UCommonGameViewportClient` as the game viewport client, remove the `CommonUI.Debug.CheckGameViewportClientValid` setting and its test `Vestige.Input.TheActionRouterCheckIsOff`, and log the decision ([Systems.md, section 6](Systems.md#6-user-interface)). The plugin and Common Input are already on since the gamepad key hints (2026-11-08). Due with Hob's dialogue box ([4.4](#44-the-caretaker-robot)) or the title screen ([4.7](#47-starting-and-testing-the-slice)), whichever comes first (roadmap review, 2026-11-24)
+   - Done 2026-11-26 with Hob ([4.4](#44-the-caretaker-robot)): `UCommonGameViewportClient`, a root layout with a game and a menu layer, the HUD as the game layer's activatable widget (not a `UCommonUserWidget`, so input returns to the game when a screen closes), and the setting and its test removed ([Systems/06-UserInterface.md](Systems/06-UserInterface.md))
 
 ### 4.1 Foundations
 
@@ -325,6 +327,14 @@ When working nearby:
    - Tools don't work in the air, and jumps with E held are slowed too (@DunderGG, 2026-11-03): otherwise jumping along a row got round the slower walk
 - [x] A bed in the farmhouse to sleep in, instead of a key that works anywhere
    - Done 2026-11-01 without the farmhouse: `AVestigeBed` (`BP_Bed`), a placeholder box along the near edge of the field in `L_Farm`, used with F. N stays as a test key, "Skip day (test)", until the cheat manager (decided with @DunderGG). The bed moves into the farmhouse when there is one, and gets its mesh with [4.6](Roadmap.md#46-interface-and-input)
+
+### 4.4 The caretaker robot
+
+- [x] Hob *(working name)* in the game with a placeholder body
+- [x] Simple data-driven dialogue
+   - Its dialogue box is the first screen that takes the input focus, so it is built with Common UI ([4.0](#40-structure-from-the-code-review), H7) and designed with the game designer
+- [x] Characters as data assets, so more robots and humans can be added the same way
+   - Done 2026-11-26, designed by the architect agent and approved by a senior Unreal C++ reviewer agent after two design rounds and two code rounds, whose approval counts as @DunderGG's on technical choices: `UVestigeCharacterData` (`Base.Hob`), talks as `UVestigeDialogueData` run by `UVestigeConversationComponent`, "has met" saved by `UVestigeRelationshipComponent`, `AVestigeNpcCharacter` (`BP_Hob`) in `L_Farm`, the lines in `ST_Dialogue` from the writer's [Hob-Everyday.md](Spoilers/Dialogue/Hob-Everyday.md), and the Common UI dialogue box ([Systems/11-Dialogue.md](Systems/11-Dialogue.md), [Systems/10-Robots.md](Systems/10-Robots.md))
 
 ### 4.5 Automation and selling
 

@@ -38,7 +38,7 @@
 ## F-02 - Hob's sealed message
 
 **Placement:** Late in the family thread, after the farmhouse is weather-safe, clean water runs, the garden produces food, and Hob has chosen a future alongside the sleeper.
-**Knowledge:** The parents stayed to keep the sleeper's shelter running, became fatally ill through repeated Cinderium exposure, and died at the farm. The message gives their own account of that choice; Hob confirms that it laid them to rest beneath the old pear tree. The sibling's location remains unknown.
+**Knowledge:** The parents stayed to keep the sleeper's shelter running, became fatally ill through repeated Cinderium exposure, and died at the farm. The message gives their own account of that choice; Hob confirms laying them to rest beneath the old pear tree. The sibling's location remains unknown.
 
 **HOB:** Your parents left you a message. They asked me to give it to you when the farm was whole again.
 

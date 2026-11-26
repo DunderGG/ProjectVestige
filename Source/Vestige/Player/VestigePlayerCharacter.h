@@ -22,6 +22,7 @@ class UInputAction;
 class UInputMappingContext;
 class UStaticMesh;
 class UStaticMeshComponent;
+class UVestigeConversationComponent;
 struct FGameplayTag;
 
 /** A mapping context the pawn adds to its player while it is possessed, and its priority. */
@@ -109,7 +110,22 @@ protected:
 	/** Releases a held use key and removes MappingContexts while the old controller is known, so contexts never stack. */
 	virtual void UnPossessed() override;
 
+	/** Follows the player state's conversation component, so the farmer turns to the speaker when a talk starts. */
+	virtual void PossessedBy(AController* NewController) override;
+
 private:
+	/**
+	 * Aims the targeting component along WorldDirection and makes the movement component turn the farmer to the aim when there is
+	 * no movement input. DoMove and the start of a talk both turn the farmer this way.
+	 */
+	void FaceDirection(const FVector& WorldDirection);
+
+	/** Turns the farmer toward the speaker of the talk that has just started. Bound to the conversation component's OnConversationStarted. */
+	void FaceSpeaker();
+
+	/** Lets go of the conversation component followed since possession. */
+	void StopFollowingConversation();
+
 	/** Binds each action of the input config, found by its tag, to the call that owns it. Logs an error without a config. */
 	void BindNativeActions(UEnhancedInputComponent& EnhancedInput);
 
@@ -163,6 +179,9 @@ private:
 	/** Frames the tile the targeting component aims at. */
 	UPROPERTY(VisibleAnywhere, Category = "Farming")
 	TObjectPtr<UFarmTargetHighlightComponent> TargetHighlight;
+
+	/** The conversation component of the player state while possessed, which the farmer listens to for the start of a talk. */
+	TWeakObjectPtr<UVestigeConversationComponent> FollowedConversation;
 
 	/** Attached to the right hand. Move and rotate it in the Blueprint to line up each tool's grip. */
 	UPROPERTY(VisibleAnywhere, Category = "Tool")

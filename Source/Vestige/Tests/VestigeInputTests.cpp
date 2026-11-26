@@ -210,13 +210,6 @@ namespace VestigeInputTests
 			ASSERT_THAT(IsTrue(Settings->GetDefaultInputType() == ECommonInputType::MouseAndKeyboard));
 		}
 
-		TEST_METHOD(TheActionRouterCheckIsOff)
-		{
-			// Until the first menu sets Common UI's viewport client; then the setting and this test go (Systems.md, section 5).
-			const IConsoleVariable* Check = IConsoleManager::Get().FindConsoleVariable(TEXT("CommonUI.Debug.CheckGameViewportClientValid"));
-			ASSERT_THAT(IsNotNull(Check));
-			ASSERT_THAT(IsFalse(Check->GetBool()));
-		}
 		TEST_METHOD(EveryFarmingActionHasAUniqueMappableName)
 		{
 			const AVestigePlayerCharacter* Defaults = GetFarmerDefaults();

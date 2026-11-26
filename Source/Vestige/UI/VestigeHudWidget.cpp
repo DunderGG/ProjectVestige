@@ -7,6 +7,7 @@
 #include "Components/VerticalBox.h"
 #include "Components/VerticalBoxSlot.h"
 #include "Core/VestigeLog.h"
+#include "Engine/EngineBaseTypes.h"
 #include "UI/VestigeHudMessageWidget.h"
 #include "UI/VestigeHudMessages.h"
 
@@ -15,6 +16,19 @@ UVestigeHudWidget::UVestigeHudWidget(const FObjectInitializer& ObjectInitializer
 	// The HUD never takes the mouse, and stays out of the hit-test grid. Internal, as UUserWidget's own constructor does,
 	// so no visibility event fires on the class default object.
 	SetVisibilityInternal(ESlateVisibility::HitTestInvisible);
+
+	// Common UI sets the visibility again when the stack activates it, to SelfHitTestInvisible unless told otherwise.
+	bSetVisibilityOnActivated = true;
+	ActivatedVisibility = ESlateVisibility::HitTestInvisible;
+
+	// It holds no reply or button, so nothing should take the focus from the game.
+	bSupportsActivationFocus = false;
+}
+
+TOptional<FUIInputConfig> UVestigeHudWidget::GetDesiredInputConfig() const
+{
+	// Menu with no capture is Common UI's default config, which would take the input from the game.
+	return FUIInputConfig(ECommonInputMode::Game, EMouseCaptureMode::CapturePermanently_IncludingInitialMouseDown);
 }
 
 void UVestigeHudWidget::SetStatusText(const FText& Text)
@@ -44,10 +58,24 @@ void UVestigeHudWidget::SetBagText(const FText& Text)
 
 void UVestigeHudWidget::SetPromptText(const FText& Text)
 {
-	const bool bShown = !Text.IsEmpty();
+	bPromptHasText = !Text.IsEmpty();
 	PromptText->SetText(Text);
+	ApplyPromptVisibility();
+	OnPromptChanged(bPromptHasText);
+}
+
+void UVestigeHudWidget::ApplyPromptVisibility()
+{
+	const bool bShown = bPromptHasText && !bTalking;
 	PromptBox->SetVisibility(bShown ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
-	OnPromptChanged(bShown);
+}
+
+void UVestigeHudWidget::SetTalking(bool bInTalking)
+{
+	bTalking = bInTalking;
+	ApplyPromptVisibility();
+	KeyHintsText->SetVisibility(bTalking ? ESlateVisibility::Collapsed : ESlateVisibility::HitTestInvisible);
+	OnTalkingChanged(bTalking);
 }
 
 void UVestigeHudWidget::SetKeyHintsText(const FText& Text)

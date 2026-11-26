@@ -19,10 +19,13 @@ class UCommonInputSubsystem;
 class UFarmCropData;
 enum class ECommonInputType : uint8;
 class UVestigeClockSubsystem;
+class UVestigeConversationComponent;
+class UVestigeDialogueWidget;
 class UVestigeFeedbackResponses;
 class UVestigeHudWidget;
 class UVestigeInteractionComponent;
 class UVestigeInventoryComponent;
+class UVestigeLayoutWidget;
 class UVestigeWalletComponent;
 struct FGameplayTag;
 struct FVestigeDate;
@@ -34,9 +37,11 @@ struct FVestigeFeedbackReport;
  * the prompt for the interactable the pawn's UVestigeInteractionComponent focuses, the contamination of the tile its
  * UFarmTargetingComponent targets (from the targeting component's and its grid's field's events), and the message FeedbackResponses gives
  * each report UVestigeFeedbackSubsystem carries, with the report's sound. It only presents: texts and sounds.
- * It creates its HudWidgetClass widget (WBP_Hud, set on BP_HUD) for a local player at BeginPlay, builds each text when an
- * event says what it shows has changed, and pushes it to the widget; the messages are the one thing it keeps, and only
- * until they fade. New HUD parts find their own data rather than growing this class (Systems.md, section 6).
+ * It creates the root layout (LayoutWidgetClass, WBP_Layout) for a local player at BeginPlay, adds it to the screen, pushes its
+ * HudWidgetClass widget (WBP_Hud, set on BP_HUD) onto the layout's game layer, builds each text when an event says what it shows
+ * has changed, and pushes it to the widget; the messages are the one thing it keeps, and only until they fade. When a talk starts
+ * it pushes DialogueWidgetClass (WBP_Dialogue) onto the menu layer and has the HUD widget hide the prompt and hints until the
+ * talk ends; the box runs itself. New HUD parts find their own data rather than growing this class (Systems.md, section 6).
  */
 UCLASS()
 class AVestigeHUD : public AHUD
@@ -53,6 +58,12 @@ public:
 
 	/** The widget class this HUD shows, WBP_Hud on BP_HUD. */
 	TSubclassOf<UVestigeHudWidget> GetHudWidgetClass() const { return HudWidgetClass; }
+
+	/** The root layout class, WBP_Layout on BP_HUD. */
+	TSubclassOf<UVestigeLayoutWidget> GetLayoutWidgetClass() const { return LayoutWidgetClass; }
+
+	/** The dialogue box class, WBP_Dialogue on BP_HUD. */
+	TSubclassOf<UVestigeDialogueWidget> GetDialogueWidgetClass() const { return DialogueWidgetClass; }
 
 	/** The responses this HUD shows for feedback reports, DA_FeedbackResponses on BP_HUD. */
 	const UVestigeFeedbackResponses* GetFeedbackResponses() const { return FeedbackResponses; }
@@ -98,9 +109,21 @@ protected:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 private:
-	/** The widget the HUD shows. Without one the HUD logs an error and shows nothing. */
+	/** The root layout with the game and menu layers (WBP_Layout). Without one the HUD logs an error and shows nothing. */
+	UPROPERTY(EditDefaultsOnly, Category = "HUD", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UVestigeLayoutWidget> LayoutWidgetClass;
+
+	/** The widget the HUD shows on the game layer. Without one the HUD logs an error and shows nothing. */
 	UPROPERTY(EditDefaultsOnly, Category = "HUD", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UVestigeHudWidget> HudWidgetClass;
+
+	/** The dialogue box pushed onto the menu layer when a talk starts (WBP_Dialogue). Without one the HUD logs an error and talks have no box. */
+	UPROPERTY(EditDefaultsOnly, Category = "HUD", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UVestigeDialogueWidget> DialogueWidgetClass;
+
+	/** The layout added to the screen, removed in EndPlay. */
+	UPROPERTY(Transient)
+	TObjectPtr<UVestigeLayoutWidget> Layout;
 
 	/** What each feedback report shows. Without it the HUD logs an error and shows no messages. */
 	UPROPERTY(EditDefaultsOnly, Category = "HUD", meta = (AllowPrivateAccess = "true"))
@@ -170,6 +193,15 @@ private:
 
 	void RefreshBagText();
 
+	/** Follows the conversation component on the player state, which outlives the pawn, so this happens once, at BeginPlay. */
+	void FollowConversation();
+
+	/** Pushes the dialogue box onto the menu layer and hides the prompt and hints. Bound to OnConversationStarted. */
+	void ShowDialogue();
+
+	/** Shows the prompt and hints again. Bound to OnConversationEnded; the box closes itself. */
+	void HideDialogue();
+
 	/** Follows the wallet on the player state, which outlives the pawn, so this happens once, at BeginPlay. */
 	void FollowWallet();
 
@@ -233,6 +265,7 @@ private:
 	TWeakObjectPtr<AFarmGrid> FieldReadyGrid;
 	TWeakObjectPtr<UVestigeInventoryComponent> Inventory;
 	TWeakObjectPtr<UVestigeWalletComponent> Wallet;
+	TWeakObjectPtr<UVestigeConversationComponent> Conversation;
 	TWeakObjectPtr<UAbilitySystemComponent> AbilitySystem;
 	TWeakObjectPtr<const AVestigePlayerCharacter> Farmer;
 	TWeakObjectPtr<UCommonInputSubsystem> InputMethod;

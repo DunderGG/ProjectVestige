@@ -16,6 +16,7 @@ The documents in this folder reveal the story, its secrets and the characters' b
 - [Characters/AuthorityIntermediary.md](Characters/AuthorityIntermediary.md): Morrow, a human-origin covert recruiter with a fully mechanical interior and a convincing human exterior.
 - [Items/Contamination.md](Items/Contamination.md): names and descriptions for the cleaning crop and the mutated crops, and the lore of the farm's contaminated rows.
 - [Dialogue/README.md](Dialogue/README.md): voice-ready draft scenes organized by story phase.
+- [Dialogue/Hob-Everyday.md](Dialogue/Hob-Everyday.md): Hob's first meeting in the slice, daily greetings and repeat lines, Ready for the game.
 - [Factions/IronCreed.md](Factions/IronCreed.md): the Iron Creed's beliefs, symbol and story direction.
 - [Factions/Index.md](Factions/Index.md): the Index's beliefs, symbol and story direction.
 - [Factions/Keepers.md](Factions/Keepers.md): the Keepers' beliefs, symbol and story direction.

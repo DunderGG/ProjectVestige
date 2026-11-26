@@ -4,6 +4,8 @@
 #if WITH_DEV_AUTOMATION_TESTS
 
 #include "Content/VestigeContentData.h"
+#include "Content/VestigeDialogueCondition.h"
+#include "Content/VestigeDialogueOutcome.h"
 #include "CQTest.h"
 #include "Farming/FarmingComponent.h"
 #include "Interaction/VestigeInteractable.h"
@@ -50,6 +52,8 @@ namespace VestigeExtensionPointTests
 			const FExtensionPoint Functions[] = {
 				{UVestigeInteractable::StaticClass(), GET_FUNCTION_NAME_CHECKED(IVestigeInteractable, GetInteractionOptions)},
 				{UVestigeInteractable::StaticClass(), GET_FUNCTION_NAME_CHECKED(IVestigeInteractable, Interact)},
+				{UVestigeDialogueCondition::StaticClass(), GET_FUNCTION_NAME_CHECKED(UVestigeDialogueCondition, IsMet)},
+				{UVestigeDialogueOutcome::StaticClass(), GET_FUNCTION_NAME_CHECKED(UVestigeDialogueOutcome, Apply)},
 			};
 			for (const FExtensionPoint& Function : Functions)
 			{

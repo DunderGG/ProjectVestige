@@ -8,6 +8,8 @@
 #include "Blueprint/WidgetBlueprintGeneratedClass.h"
 #include "Components/ActorTestSpawner.h"
 #include "Components/PanelWidget.h"
+#include "CommonGameViewportClient.h"
+#include "CommonInputSettings.h"
 #include "CommonInputTypeEnum.h"
 #include "Components/TextBlock.h"
 #include "Core/VestigeFeedbackSubsystem.h"
@@ -19,15 +21,19 @@
 #include "Farming/FarmFieldSubsystem.h"
 #include "Farming/FarmGrid.h"
 #include "Farming/FarmTargetingComponent.h"
+#include "Engine/Engine.h"
 #include "GameFramework/GameModeBase.h"
+#include "Input/UIActionBindingHandle.h"
 #include "Player/VestigePlayerCharacter.h"
 #include "UObject/UnrealType.h"
 #include "Sound/SoundWave.h"
 #include "UI/VestigeHUD.h"
+#include "UI/VestigeDialogueWidget.h"
 #include "UI/VestigeFeedbackResponses.h"
 #include "UI/VestigeHudMessageWidget.h"
 #include "UI/VestigeHudMessages.h"
 #include "UI/VestigeHudWidget.h"
+#include "UI/VestigeLayoutWidget.h"
 
 #if WITH_EDITOR
 #include "Misc/DataValidation.h"
@@ -154,6 +160,99 @@ namespace VestigeHudWidgetTests
 
 			Hud->SetPromptText(FText::GetEmpty());
 			ASSERT_THAT(IsTrue(PromptBox->GetVisibility() == ESlateVisibility::Collapsed));
+		}
+
+		TEST_METHOD(TheHudHidesThePromptAndHintsDuringATalk)
+		{
+			const UWidget* PromptBox = Hud->GetWidgetFromName(TEXT("PromptBox"));
+			const UWidget* KeyHints = Hud->GetWidgetFromName(TEXT("KeyHintsText"));
+			const UWidget* StatusText = Hud->GetWidgetFromName(TEXT("StatusText"));
+			ASSERT_THAT(IsNotNull(PromptBox));
+			ASSERT_THAT(IsNotNull(KeyHints));
+			ASSERT_THAT(IsNotNull(StatusText));
+			Hud->SetPromptText(LOCTEXT("Talk", "F Talk to Hob"));
+			ASSERT_THAT(IsTrue(PromptBox->GetVisibility() == ESlateVisibility::HitTestInvisible));
+
+			Hud->SetTalking(true);
+
+			ASSERT_THAT(IsTrue(PromptBox->GetVisibility() == ESlateVisibility::Collapsed));
+			ASSERT_THAT(IsTrue(KeyHints->GetVisibility() == ESlateVisibility::Collapsed));
+			// The clock, date and stamina stay.
+			ASSERT_THAT(IsTrue(StatusText->GetVisibility() != ESlateVisibility::Collapsed));
+
+			// A prompt that changes during the talk stays hidden.
+			Hud->SetPromptText(LOCTEXT("Sleep", "F Sleep"));
+			ASSERT_THAT(IsTrue(PromptBox->GetVisibility() == ESlateVisibility::Collapsed));
+
+			Hud->SetTalking(false);
+
+			ASSERT_THAT(IsTrue(PromptBox->GetVisibility() == ESlateVisibility::HitTestInvisible));
+			ASSERT_THAT(IsTrue(KeyHints->GetVisibility() == ESlateVisibility::HitTestInvisible));
+		}
+
+		TEST_METHOD(AnEmptyPromptStaysHiddenAfterATalk)
+		{
+			const UWidget* PromptBox = Hud->GetWidgetFromName(TEXT("PromptBox"));
+			ASSERT_THAT(IsNotNull(PromptBox));
+
+			Hud->SetTalking(true);
+			Hud->SetTalking(false);
+
+			ASSERT_THAT(IsTrue(PromptBox->GetVisibility() == ESlateVisibility::Collapsed));
+		}
+
+		TEST_METHOD(TheGameViewportClientIsCommonUIs)
+		{
+			// Common UI's action router needs its own viewport client to see the keys; the engine reads the setting at startup.
+			const UEngine* EngineDefaults = GetDefault<UEngine>();
+			ASSERT_THAT(IsTrue(EngineDefaults->GameViewportClientClassName.ToString().EndsWith(TEXT("CommonUI.CommonGameViewportClient"))));
+			if (GEngine && GEngine->GameViewportClientClass)
+			{
+				ASSERT_THAT(IsTrue(GEngine->GameViewportClientClass->IsChildOf(UCommonGameViewportClient::StaticClass())));
+			}
+		}
+
+		TEST_METHOD(EnhancedInputSupportIsOn)
+		{
+			// Without it a box's input mapping context is never added.
+			ASSERT_THAT(IsTrue(GetDefault<UCommonInputSettings>()->GetEnableEnhancedInputSupport()));
+		}
+
+		TEST_METHOD(TheGameModeShowsTheLayoutAndTheBox)
+		{
+			const UClass* GameModeClass = LoadClass<AGameModeBase>(nullptr, GameModePath);
+			ASSERT_THAT(IsNotNull(GameModeClass));
+			const UClass* HudActorClass = GameModeClass->GetDefaultObject<AGameModeBase>()->HUDClass;
+			ASSERT_THAT(IsTrue(HudActorClass && HudActorClass->IsChildOf<AVestigeHUD>()));
+			const AVestigeHUD* HudDefaults = HudActorClass->GetDefaultObject<AVestigeHUD>();
+
+			ASSERT_THAT(IsNotNull(HudDefaults->GetLayoutWidgetClass().Get()));
+			ASSERT_THAT(IsNotNull(HudDefaults->GetDialogueWidgetClass().Get()));
+			ASSERT_THAT(IsFalse(HudDefaults->GetDialogueWidgetClass()->HasAnyClassFlags(CLASS_Abstract)));
+		}
+
+		TEST_METHOD(TheHudTakesTheGameInputAndTheBoxTheMenuInput)
+		{
+			const TOptional<FUIInputConfig> HudConfig = Hud->GetDesiredInputConfig();
+			ASSERT_THAT(IsTrue(HudConfig.IsSet()));
+			ASSERT_THAT(IsTrue(HudConfig->GetInputMode() == ECommonInputMode::Game));
+
+			const UClass* GameModeClass = LoadClass<AGameModeBase>(nullptr, GameModePath);
+			ASSERT_THAT(IsNotNull(GameModeClass));
+			const AVestigeHUD* HudDefaults = GameModeClass->GetDefaultObject<AGameModeBase>()->HUDClass->GetDefaultObject<AVestigeHUD>();
+			const UVestigeDialogueWidget* BoxDefaults = HudDefaults->GetDialogueWidgetClass()->GetDefaultObject<UVestigeDialogueWidget>();
+			const TOptional<FUIInputConfig> BoxConfig = BoxDefaults->GetDesiredInputConfig();
+			ASSERT_THAT(IsTrue(BoxConfig.IsSet()));
+			ASSERT_THAT(IsTrue(BoxConfig->GetInputMode() == ECommonInputMode::Menu));
+		}
+
+		TEST_METHOD(TheHudIsInvisibleToTheMouseWhenActive)
+		{
+			// Common UI sets the visibility again when its stack activates the widget; the Game input mode must not become a click-eater.
+			Hud->ActivateWidget();
+
+			ASSERT_THAT(IsTrue(Hud->IsActivated()));
+			ASSERT_THAT(IsTrue(Hud->GetVisibility() == ESlateVisibility::HitTestInvisible));
 		}
 
 		TEST_METHOD(TheStaminaLineWarnsWhileOutOfStamina)
@@ -723,6 +822,7 @@ namespace VestigeHudWidgetTests
 				{VestigeGameplayTags::Feedback_Save_Unreadable, NoValues},
 				{VestigeGameplayTags::Feedback_Save_TooNew, NoValues},
 				{VestigeGameplayTags::Feedback_Save_PartTooNew, NoValues},
+				{VestigeGameplayTags::Feedback_Dialogue_NothingToSay, NoValues},
 			};
 
 			ASSERT_THAT(IsTrue(Responses->GetResponses().Num() == Expected.Num()));

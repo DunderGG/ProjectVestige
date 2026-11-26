@@ -28,6 +28,9 @@ The one relationship arc the vertical slice builds and tests (see [GameDesign.md
 - **Visible response:** Hob starts saying "I'd like to" and helps on their own initiative.
 - **Payoff:** the first returning memory of the family, not an item.
 
+In the game so far: the slice's first meeting, daily greetings and repeat lines are in [Dialogue/Hob-Everyday.md](../Dialogue/Hob-Everyday.md). When not needed, Hob stands by the farmhouse door.
+
 ## Open decisions
 
 - Whether Hob remains the final name.
+- **Pronouns, put to @DunderGG on 2026-11-25.** Hob is gender-neutral (decision log, 2026-10-26) and this sheet says "they"; other docs say "he" or "it". Until he answers, the Spoilers docs use "they" or the name, and Hob's in-game lines use no third-person pronoun for Hob.

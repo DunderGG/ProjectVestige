@@ -54,6 +54,9 @@ public:
 #if WITH_DEV_AUTOMATION_TESTS
 	/** For tests only. Content assets get their ID in the editor, and it never changes after that. */
 	void SetContentIdForTests(FName InContentId) { ContentId = InContentId; }
+
+	/** For tests only. Content assets get their name in the editor. */
+	void SetDisplayNameForTests(const FText& InDisplayName) { DisplayName = InDisplayName; }
 #endif
 
 protected:

@@ -201,6 +201,9 @@ namespace VestigeGameplayTags
 	/** The save subsystem: part of the save is from a newer version of the game, so saving is off until a new game. */
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Feedback_Save_PartTooNew);
 
+	/** The conversation component: the character has nothing to say now, so no talk starts. */
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Feedback_Dialogue_NothingToSay);
+
 	/** The parent of every season tag. The seasons themselves are data: the calendar in DA_GameData names them (Systems.md, section 4). */
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Season);
 
@@ -215,6 +218,15 @@ namespace VestigeGameplayTags
 
 	/** Uses the focused interactable (F). */
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Input_Interact);
+
+	/**
+	 * Advances the dialogue box (F, Space, Enter; gamepad A and B). The name of the dialogue's action in the key settings. Not in the
+	 * input config: the box binds the action itself, in its own mapping context (Systems.md, section 6).
+	 */
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Input_DialogueNext);
+
+	/** Ends the talk early (Escape). The same: the dialogue box's own action. */
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Input_DialogueEnd);
 
 	/** Selects one hotbar slot (keys 1 to 9). Input_HotbarSlots lists them in slot order. */
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Input_HotbarSlot1);
