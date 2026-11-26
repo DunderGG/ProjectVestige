@@ -19,6 +19,8 @@ Read first:
 
 `Docs/PlayTest.md` holds the open checks; headings whose checks have all passed are in `Docs/PlayTestArchive.md`, which you don't need to read. Read `Docs/Roadmap.md` by section, never whole: find the heading with Grep, then Read only that part with an offset and a limit. Search `Docs/DecisionLog.md` for the classes and systems involved instead of reading it. Each system guide is a file of its own in `Docs/Systems/` (section N of `Docs/Systems.md` is `Docs/Systems/NN-*.md`); read the guides you need whole.
 
+Read source and docs with the Read tool, and only the part you need: in a big file, Grep first, then Read with an offset and a limit. Never print whole files through Bash or PowerShell (`cat`, `sed`, `type`, `Get-Content`), and don't read a file again in the same run unless it changed.
+
 ## Writing tests
 
 - CQTest only: `TEST_CLASS(<Area>, "Vestige")` with one `TEST_METHOD` per behavior, so the test is `Vestige.<Area>.<Behavior>`, inside `#if WITH_DEV_AUTOMATION_TESTS`, in a namespace named after the file. Don't mix in the older automation test styles.

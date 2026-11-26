@@ -19,6 +19,8 @@ Read before coding:
 
 Read `Docs/Roadmap.md` by section, never whole: find the heading with Grep, then Read only that part with an offset and a limit. Search `Docs/DecisionLog.md` for the classes and systems involved instead of reading it. Each system guide is a file of its own in `Docs/Systems/` (section N of `Docs/Systems.md` is `Docs/Systems/NN-*.md`); read the guides you need whole. On a fix round you already have them; read only what changed.
 
+Read source and docs with the Read tool, and only the part you need: in a big file, Grep first, then Read with an offset and a limit. Never print whole files through Bash or PowerShell (`cat`, `sed`, `type`, `Get-Content`), and don't read a file again in the same run unless it changed.
+
 The rules most often missed, with where they are written:
 
 - Ownership and one job per class: guidelines section 1.
