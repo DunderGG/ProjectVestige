@@ -39,6 +39,34 @@ namespace VestigeMilestoneTests
 			ASSERT_THAT(IsTrue(Subsystem->GetReached().Num() == 1));
 		}
 
+		TEST_METHOD(ReachingANewMilestoneBroadcastsOnceAndLoadingDoesNot)
+		{
+			TArray<FGameplayTag> Heard;
+			Subsystem->OnMilestoneReached.AddLambda(
+				[&Heard](const FGameplayTag& Milestone)
+				{
+					Heard.Add(Milestone);
+				});
+			const FGameplayTag Harvested = VestigeGameplayTags::Milestone_Farm_Harvested;
+
+			ASSERT_THAT(IsTrue(Subsystem->Reach(Harvested)));
+			// The milestone is recorded when listeners hear of it, so they can read it.
+			ASSERT_THAT(IsTrue(Heard == TArray<FGameplayTag>{Harvested}));
+			ASSERT_THAT(IsFalse(Subsystem->Reach(Harvested)));
+			ASSERT_THAT(IsFalse(Subsystem->Reach(FGameplayTag())));
+			ASSERT_THAT(IsTrue(Heard.Num() == 1));
+
+			// A load puts back what was reached before: nothing new happened, so nothing is heard.
+			FVestigeMilestoneSaveData Data;
+			Data.Reached.Add(TEXT("Vestige.Milestone.Farm.Sold"));
+			int32 LeftOut = 0;
+			ASSERT_THAT(IsTrue(Subsystem->ReadSaveRecord(FVestigeSaveRecord::Write(Data), LeftOut)));
+			ASSERT_THAT(IsTrue(Subsystem->HasReached(VestigeGameplayTags::Milestone_Farm_Sold)));
+			ASSERT_THAT(IsTrue(Heard.Num() == 1));
+			Subsystem->StartNewGame();
+			ASSERT_THAT(IsTrue(Heard.Num() == 1));
+		}
+
 		TEST_METHOD(AnInvalidTagIsNeverReached)
 		{
 			ASSERT_THAT(IsFalse(Subsystem->Reach(FGameplayTag())));

@@ -60,6 +60,10 @@ struct FVestigeDialogueContext
 	UPROPERTY(BlueprintReadOnly, Category = "Dialogue")
 	FGameplayTagContainer Milestones;
 
+	/** The milestones reached on today's game day, for a line that is due only on the day of its event (Systems.md, section 11). */
+	UPROPERTY(BlueprintReadOnly, Category = "Dialogue")
+	FGameplayTagContainer MilestonesToday;
+
 	/** Today's season tag, empty when the calendar has no seasons. */
 	UPROPERTY(BlueprintReadOnly, Category = "Dialogue")
 	FGameplayTag Season;

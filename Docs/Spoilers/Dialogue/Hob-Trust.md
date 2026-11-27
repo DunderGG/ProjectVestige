@@ -290,8 +290,25 @@ Seven topics can come up before day 16 (eight with a Bloom), so the designer's p
 
 - No number: Hob may water fewer than four when fewer are dry or the store runs short.
 
+## H-10 - Passing lines
+
+**When:** once per game each, shown as a caption with Hob's name while the player keeps working (no box, no reply), only within earshot of Hob, at most one a day, as the game designer's step 0 for "Hob's short lines on events" sets (`Saved/AgentWork/hob-event-lines/design-questions.md`, assumed until @DunderGG answers). They give no trust and are not a talk. Hob says them at any trust step, so they are in the dutiful voice that stays true after the steps too.
+**For:** Hob notices the farm and the farmer in the moment, unasked; the topics and greetings do the talking later.
+
+| Event | Line ID | Speaker | Text |
+|---|---|---|---|
+| First harvest | `Hob.Passing.Harvest` | HOB | That's the first one in. I've noted the time. |
+| First Bloom crop harvested | `Hob.Passing.Bloom` | HOB | One of yours had its own ideas about how to grow. |
+| First time near Hob after midnight | `Hob.Passing.Late` | HOB | Careful out there. The rows all look alike in the dark. |
+
+- **No reused line fits.** The phase drafts have no farm reactions, and every greeting and topic line about these events is said in talk already; using one again here would be the repetition the design forbids.
+- **Not repeating:** `Harvest` says nothing of what Hob felt or did with their hands (the Harvest topic) and gives no count (its order answer). `Bloom` doesn't name the Bloom or say odd, safe or sells (the Bloom topic). `Late` says nothing of bed, sleep, the hour, company or the quiet house (`Hob.Greet.Late.*`, `Hob.Greet.Warm.Late.*`); it is true because the nights are properly dark.
+- **Stays true later the same day:** both farm lines read right if the player comes into earshot an hour after the event. `Bloom` must play only on the day of that harvest: on a later day "one of yours" points at nothing, so drop it then and let the Bloom topic carry the event, as the harvest line is dropped.
+- **For translators:** "had its own ideas about how to grow" personifies the plant: it grew differently from what was expected. Keep the gentle joke; don't make it sound like a fault. "Noted the time" means a note in Hob's records, not a look at a clock.
+
 ## Length check and counts
 
 - Longest HOB lines: `Hob.Step.Wish.020` and `Hob.Step.Memory.Answer.Else`, 106 characters each; longest reply `Hob.Topic.Sinkwort.Reply.Order`, 36. All inside 110 and 40.
-- Lines: H-04 69 (9 openings, 26 replies, 34 answers), H-05 5, H-06 7, H-07 11, H-08 11, H-09 3: **106 lines**.
+- Passing lines (H-10) have their own limit of 80 characters (a caption of two short lines): `Hob.Passing.Harvest` 44, `Hob.Passing.Bloom` 49, `Hob.Passing.Late` 55.
+- Lines: H-04 69 (9 openings, 26 replies, 34 answers), H-05 5, H-06 7, H-07 11, H-08 11, H-09 3, H-10 3: **109 lines**.
 - **For translators:** "It isn't going anywhere" (`Hob.Topic.Well`) means "it will still be there later"; "good for the spirits" means "cheering". "That's a new sentence for me" is Hob noticing their own words; keep it literal.

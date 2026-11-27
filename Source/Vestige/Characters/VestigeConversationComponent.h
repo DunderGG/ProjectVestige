@@ -6,11 +6,17 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Content/VestigeDialogueContext.h"
+#include "Engine/TimerHandle.h"
+#include "GameplayTagContainer.h"
 #include "VestigeConversationComponent.generated.h"
 
 class UVestigeCharacterData;
 class UVestigeClockSubsystem;
 class UVestigeDialogueData;
+class UVestigeDialogueSettings;
+class UVestigeMilestoneSubsystem;
+enum class EVestigeDialogueDelivery : uint8;
+struct FVestigeDayEnd;
 struct FVestigeDialogueLine;
 
 namespace VestigeDialogue
@@ -22,13 +28,16 @@ namespace VestigeDialogue
 DECLARE_MULTICAST_DELEGATE(FOnVestigeConversationStarted);
 DECLARE_MULTICAST_DELEGATE(FOnVestigeLineChanged);
 DECLARE_MULTICAST_DELEGATE(FOnVestigeConversationEnded);
+DECLARE_MULTICAST_DELEGATE(FOnVestigePassingLineStarted);
+DECLARE_MULTICAST_DELEGATE(FOnVestigePassingLineEnded);
 
 /**
  * Runs the player's one talk at a time (Systems.md, section 11): chooses the speaker's conversation from the catalogue by its
  * conditions and priority, keeps the current line and the replies listed under it, applies the outcomes of lines shown and
  * replies chosen, records the talk with the relationship component and holds the clock while it runs. It shows nothing: the
- * dialogue box reads it and reports presses back through Advance, Choose and EndConversation. Lives on the player state. Not
- * saved: a talk never spans a save point.
+ * dialogue box reads it and reports presses back through Advance, Choose and EndConversation. It also says a character's lines in
+ * passing (SayPassingLine): one unasked line shown as a caption while the player keeps playing, never a talk. Lives on the
+ * player state. Not saved: a talk never spans a save point, and the milestones of the day are kept in memory only.
  */
 UCLASS(ClassGroup = (Characters), meta = (BlueprintSpawnableComponent))
 class UVestigeConversationComponent : public UActorComponent
@@ -64,6 +73,37 @@ public:
 	/** Ends the talk now, as Escape does. Does nothing when none runs. */
 	void EndConversation();
 
+	/**
+	 * Says one of Speaker's passing lines, asked by the speaker's passing line component, whose body is InSpeakerActor. Returns false,
+	 * changing nothing, while a talk runs, while a passing line shows, within the quiet after a talk, and once the clock's day end
+	 * is reached; and when no passing conversation of the speaker holds. Otherwise it applies the line's outcomes, shows the line
+	 * for GetPassingLineSeconds, broadcasts OnPassingLineStarted and returns true. It records no talk, holds no clock and gives no trust.
+	 */
+	bool SayPassingLine(AActor& InSpeakerActor, const UVestigeCharacterData& Speaker);
+
+	/** How many seconds a passing line of this text shows: at least the minimum, else the base plus its length at the reading rate. */
+	static float GetPassingLineSeconds(const FText& Line, const UVestigeDialogueSettings& Settings);
+
+	bool IsSayingPassingLine() const { return bSayingPassingLine; }
+
+	/** The character saying the passing line, or nullptr when none shows. */
+	const UVestigeCharacterData* GetPassingSpeaker() const { return PassingSpeakerData; }
+
+	/** The body saying the passing line, or nullptr when none shows or it is gone. Still the speaker while OnPassingLineEnded runs. */
+	AActor* GetPassingSpeakerActor() const { return PassingSpeakerActor.Get(); }
+
+	/** The passing line shown. Empty when none shows. */
+	const FText& GetPassingLineText() const { return PassingLineText; }
+
+	/** World time, in seconds, when the passing line appeared. */
+	double GetPassingLineStartTime() const { return PassingLineStartTime; }
+
+	/** How long the passing line shows, in seconds. */
+	double GetPassingLineDuration() const { return PassingLineDuration; }
+
+	/** Seconds until a passing line may be said again after the last talk ended, or 0 when no quiet runs. */
+	double GetPassingQuietSecondsLeft() const;
+
 	bool IsInConversation() const { return Dialogue != nullptr; }
 
 	/** The character talked to, or nullptr when no talk runs. */
@@ -90,8 +130,17 @@ public:
 	/** Broadcast once when a talk ends, however it ends. No talk runs by then. */
 	FOnVestigeConversationEnded OnConversationEnded;
 
+	/** Broadcast once a passing line has started showing, its text and speaker readable. */
+	FOnVestigePassingLineStarted OnPassingLineStarted;
+
+	/** Broadcast once when a passing line ends, however it ends: its time, a talk, the day's end or EndPlay. */
+	FOnVestigePassingLineEnded OnPassingLineEnded;
+
 protected:
-	/** Ends a running talk, so the clock is never left held. */
+	/** Starts keeping the day's milestones and listens for the day's end. */
+	virtual void BeginPlay() override;
+
+	/** Ends a running talk and a showing passing line, so the clock is never left held. */
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 private:
@@ -101,8 +150,20 @@ private:
 	/** The values conditions and outcomes read, for Speaker now. */
 	FVestigeDialogueContext MakeContext(const UVestigeCharacterData& Speaker) const;
 
-	/** The speaker's conversation to play for Context, or nullptr: the highest priority whose conditions hold, the lowest ID on a tie. */
-	const UVestigeDialogueData* ChooseDialogue(const FVestigeDialogueContext& Context) const;
+	/**
+	 * The speaker's conversation of this delivery to play for Context, or nullptr: the highest priority whose conditions hold, the
+	 * lowest ID on a tie.
+	 */
+	const UVestigeDialogueData* ChooseDialogue(const FVestigeDialogueContext& Context, EVestigeDialogueDelivery Delivery) const;
+
+	/** Remembers Milestone as reached today. Bound to the milestone subsystem's OnMilestoneReached. */
+	void RecordMilestone(const FGameplayTag& Milestone);
+
+	/** Ends a showing passing line. Bound to the clock's OnDayEnded, so a caption never carries into the morning. */
+	void HandleDayEnded(const FVestigeDayEnd& /* DayEnd */);
+
+	/** Ends the showing passing line: clears it, stops its timer and broadcasts OnPassingLineEnded. Does nothing when none shows. */
+	void EndPassingLine();
 
 	/** Makes the line at Index the current one: its text, its listed replies and its outcomes. Broadcasts nothing. */
 	void EnterLine(int32 Index);
@@ -139,4 +200,25 @@ private:
 	/** The day the talk started on, and how many talks with the speaker came before it that day, for choosing a pool's text. */
 	int32 TalkDay = 0;
 	int32 TalksTodayBefore = 0;
+
+	/** The milestones reached, each with the game day it was reached on. Memory only: saves are written at a day's start. */
+	TMap<FGameplayTag, int32> MilestoneDays;
+
+	/** The subsystems listened to, so EndPlay unbinds from the same ones. */
+	TWeakObjectPtr<UVestigeMilestoneSubsystem> MilestoneSource;
+	TWeakObjectPtr<UVestigeClockSubsystem> ClockSource;
+
+	/** The passing line showing, if any. */
+	UPROPERTY()
+	TObjectPtr<const UVestigeCharacterData> PassingSpeakerData;
+
+	TWeakObjectPtr<AActor> PassingSpeakerActor;
+	FText PassingLineText;
+	double PassingLineStartTime = 0.0;
+	double PassingLineDuration = 0.0;
+	bool bSayingPassingLine = false;
+	FTimerHandle PassingLineTimer;
+
+	/** World time when the last talk ended, or a time far in the past when none has. */
+	double LastTalkEndTime = -TNumericLimits<double>::Max();
 };

@@ -437,6 +437,9 @@ Game rules get automated tests. They run in seconds without playing the game, an
 - **Pitfalls** found in this project's tests (add each new one here):
   - The C++ `AVestigePlayerState` has no ability sets; a test that needs stamina or abilities spawns `BP_PlayerState`.
   - A CQTest world's timer manager can't be ticked more than once a frame, so a test ends a tool use with `CancelAllAbilities()` instead of waiting for its timer.
+  - To run a timer in a test, `++GFrameCounter; Timers.Tick(0.f); ++GFrameCounter; Timers.Tick(Seconds);` (as `TickTimers` in `VestigePassingLineTests.cpp`): a timer set since the manager's last tick only starts at its next tick, and a tick in a frame that was already ticked does nothing, so one tick never fires a timer set before it. A timer set for the next tick (`SetTimerForNextTick`) fires at the first one.
+  - World time doesn't move in a test world: advance `World.TimeSeconds` (a public member) by hand for a rule that reads it, such as the quiet after a talk.
+  - Two `TEST_CLASS`es of one name in different files and namespaces: the second one's tests silently never run (`Vestige.UI` in the caption tests did not appear in the suite's count). Give each class a name no other file uses, and check that a new file's tests are in the run's count.
   - A test that sleeps needs the game mode: spawn `AVestigeGameMode` and call its `DispatchBeginPlay()`, since it starts the next day. Rest tests also call `DispatchBeginPlay()` on the player state.
   - A test that listens to a Blueprint (dynamic) delegate needs a reflected `UFUNCTION` listener: reuse `UVestigeTestEventRecorder` in `Tests/`. UHT accepts test `UCLASS`es inside `#if WITH_TESTS`, not inside `WITH_DEV_AUTOMATION_TESTS`.
   - A multicast delegate calls its listeners in reverse order of binding, and removing one reorders them, so a test never asserts the order between listeners of one delegate.

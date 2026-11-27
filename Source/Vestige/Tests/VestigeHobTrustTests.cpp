@@ -231,7 +231,8 @@ namespace VestigeHobTrustTests
 			for (const UVestigeContentData* Content : All)
 			{
 				const UVestigeDialogueData* Dialogue = Cast<UVestigeDialogueData>(Content);
-				if (Dialogue && Dialogue->GetSpeaker() == HobId() && Dialogue->AreConditionsMet(Context))
+				if (Dialogue && Dialogue->GetSpeaker() == HobId() && Dialogue->GetDelivery() == EVestigeDialogueDelivery::Talk &&
+					Dialogue->AreConditionsMet(Context))
 				{
 					Matching.Add(Dialogue);
 				}

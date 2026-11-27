@@ -22,12 +22,26 @@ namespace VestigeDialogue
 	/** Longest reply text, in characters (English). */
 	constexpr int32 MaxReplyLength = 40;
 
+	/** Longest line said in passing, in characters (English): a caption of two short lines. */
+	constexpr int32 MaxPassingLineLength = 80;
+
 	/**
 	 * The reserved Next that ends the talk after the line or reply, in place of naming a line: a line with no Next goes to the
 	 * following line of the asset, so a line in the middle of the list (a reply's answer) needs this to be the last one played.
 	 */
 	inline const FName EndTalk(TEXT("End"));
 }
+
+/** How a conversation reaches the player. A conversation is chosen only among those of its own delivery. */
+UENUM()
+enum class EVestigeDialogueDelivery : uint8
+{
+	/** A talk in the dialogue box, started by the player. */
+	Talk,
+
+	/** One line said unasked as a caption while the player keeps playing: no box, no reply, no trust, not a talk. */
+	Passing
+};
 
 /** One reply the player can pick under a line. */
 USTRUCT()
@@ -112,6 +126,8 @@ public:
 
 	int32 GetPriority() const { return Priority; }
 
+	EVestigeDialogueDelivery GetDelivery() const { return Delivery; }
+
 	const TArray<TObjectPtr<UVestigeDialogueCondition>>& GetConditions() const { return Conditions; }
 
 	/** The lines in play order: the talk starts at the first. */
@@ -127,7 +143,7 @@ public:
 	/**
 	 * Reports what would break the talk: an unknown speaker, no lines, a missing or repeated ID, a Next that names no line, a
 	 * line without text, more than the most replies without conditions, a null condition or outcome, and what each condition or
-	 * outcome reports of itself. A text that isn't from a string table is a warning.
+	 * outcome reports of itself. A Passing conversation must also be exactly one line with exactly one text, no replies and no Next. A text that isn't from a string table is a warning.
 	 */
 	virtual EDataValidationResult IsDataValid(FDataValidationContext& Context) const override;
 #endif
@@ -136,6 +152,7 @@ public:
 	/** For tests only. Conversations get their data in the editor. */
 	void SetSpeakerForTests(const FPrimaryAssetId& InSpeaker) { Speaker = InSpeaker; }
 	void SetPriorityForTests(int32 InPriority) { Priority = InPriority; }
+	void SetDeliveryForTests(EVestigeDialogueDelivery InDelivery) { Delivery = InDelivery; }
 	void SetConditionsForTests(TArray<TObjectPtr<UVestigeDialogueCondition>> InConditions) { Conditions = MoveTemp(InConditions); }
 	void SetLinesForTests(TArray<FVestigeDialogueLine> InLines) { Lines = MoveTemp(InLines); }
 #endif
@@ -151,6 +168,10 @@ private:
 	/** Among the speaker's conversations whose conditions all hold, the highest priority is the one played. */
 	UPROPERTY(EditDefaultsOnly, Category = "Dialogue", meta = (AllowPrivateAccess = "true"))
 	int32 Priority = 0;
+
+	/** Talk opens the dialogue box; Passing is one caption line said in passing (Systems.md, section 11). */
+	UPROPERTY(EditDefaultsOnly, Category = "Dialogue", meta = (AllowPrivateAccess = "true"))
+	EVestigeDialogueDelivery Delivery = EVestigeDialogueDelivery::Talk;
 
 	/** All of these must hold for the conversation to be a candidate. */
 	UPROPERTY(EditDefaultsOnly, Instanced, Category = "Dialogue", meta = (AllowPrivateAccess = "true"))

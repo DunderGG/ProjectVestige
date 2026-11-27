@@ -11,6 +11,8 @@
 
 class UVestigeSaveRegistry;
 
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnVestigeMilestoneReached, const FGameplayTag& /* Milestone */);
+
 /**
  * The game's one-time milestones, such as the farm's firsts: each is a gameplay tag (Vestige.Milestone.Farm.Harvested), reached
  * once per game. It knows no game rule: the owner of each event reaches its milestone, and whoever cares (Hob's trust, later Hob's
@@ -31,6 +33,9 @@ public:
 
 	/** Reaches Milestone. Returns whether it was new; an invalid tag or one already reached changes nothing. Logs the first time. */
 	bool Reach(const FGameplayTag& Milestone);
+
+	/** Broadcast each time a milestone is reached for the first time, after it is recorded. Not for a milestone restored from a save. */
+	FOnVestigeMilestoneReached OnMilestoneReached;
 
 	/** Whether Milestone has been reached. */
 	bool HasReached(const FGameplayTag& Milestone) const;

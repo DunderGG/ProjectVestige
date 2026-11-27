@@ -1186,7 +1186,8 @@ namespace VestigeDialogueTests
 			for (const UVestigeContentData* Content : All)
 			{
 				const UVestigeDialogueData* Dialogue = Cast<UVestigeDialogueData>(Content);
-				if (Dialogue && Dialogue->GetSpeaker() == HobId() && Dialogue->AreConditionsMet(Context))
+				if (Dialogue && Dialogue->GetSpeaker() == HobId() && Dialogue->GetDelivery() == EVestigeDialogueDelivery::Talk &&
+					Dialogue->AreConditionsMet(Context))
 				{
 					Matching.Add(Dialogue);
 				}
@@ -1199,7 +1200,8 @@ namespace VestigeDialogueTests
 			return Matching;
 		}
 
-		TArray<const UVestigeDialogueData*> GetHobTalks() const
+		/** Hob's conversations of a delivery: his talks, which a talk is chosen among, or his lines said in passing. */
+		TArray<const UVestigeDialogueData*> GetHobTalks(EVestigeDialogueDelivery Delivery = EVestigeDialogueDelivery::Talk) const
 		{
 			TArray<const UVestigeContentData*> All;
 			Catalog->FindAll(UVestigeDialogueData::AssetType, All);
@@ -1207,7 +1209,7 @@ namespace VestigeDialogueTests
 			for (const UVestigeContentData* Content : All)
 			{
 				const UVestigeDialogueData* Dialogue = Cast<UVestigeDialogueData>(Content);
-				if (Dialogue && Dialogue->GetSpeaker() == HobId())
+				if (Dialogue && Dialogue->GetSpeaker() == HobId() && Dialogue->GetDelivery() == Delivery)
 				{
 					Talks.Add(Dialogue);
 				}
@@ -1224,8 +1226,9 @@ namespace VestigeDialogueTests
 			ASSERT_THAT(IsTrue(Hob->GetDisplayName().ToString() == TEXT("Hob")));
 			ASSERT_THAT(IsTrue(Hob->GetCharacterTags().HasTag(FGameplayTag::RequestGameplayTag(TEXT("Vestige.Character.Robot")))));
 			// The first meeting, the greetings (everyday, warm and memory, four bands each), again today, the three steps (two attentive
-			// talks), the nine topics and the two watered-morning lines.
+			// talks), the nine topics and the two watered-morning lines; and the three lines he says in passing, counted apart.
 			ASSERT_THAT(IsTrue(GetHobTalks().Num() == 29));
+			ASSERT_THAT(IsTrue(GetHobTalks(EVestigeDialogueDelivery::Passing).Num() == 3));
 		}
 
 		TEST_METHOD(HobsFirstTalkIsTheFirstMeeting)

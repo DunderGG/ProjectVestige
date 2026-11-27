@@ -30,17 +30,16 @@ Contents
 - **Now:** the rest of milestone 2, the one-season vertical slice. What is left is the caretaker robot, the sprinkler, dirty water, the screens a first-time player needs, and the slice play-test that ends the milestone.
 - **Next up**, in order (reviewed 2026-11-24, @DunderGG said yes; the hotbar moved before the sprinkler and the feel pass and the day-one test added on 2026-11-26, from [RoadmapSuggestions.md](RoadmapSuggestions.md) items 1, 2, 16 and 17):
   1. The open play-tests of contamination and the seed shop (the housekeeping quick fixes before them were done on 2026-11-25).
-  2. Hob's short lines on events ([4.4](#44-the-caretaker-robot)); Hob's trust track, before them, was done on 2026-11-27.
-  3. The hotbar and the bag on screen ([4.6](#46-interface-and-input)), before the sprinkler, so the player buys and places it with an inventory they can see (2026-11-26).
-  4. [4.5](#45-automation-and-selling): placing objects on the farm grid, and the sprinkler, bought at the seed shop.
-  5. Dirty water and its source ([4.2](#42-farming-depth)).
-  6. Lay out the home farm ([4.7](#47-starting-and-testing-the-slice)): the farmhouse with the bed inside, the service yard, Hob's spot and the dirty water source, as a blockout, once every slice prop exists. The screenshot art pass's ground dressing comes after it, so it doesn't dress a layout that still moves; its meshes and sky don't wait for it.
-  7. What a first-time player needs to see: a dry crop that looks thirsty, the mutated ripe meshes and item descriptions ([4.2](#42-farming-depth)), and the feel pass on the four farming actions ([4.6](#46-interface-and-input)).
-  8. The HUD layout pass ([4.6](#46-interface-and-input)), laid out for handheld PCs and for translation, as @DunderGG decided on 2026-11-26 ([GameDesign.md, section 14](GameDesign.md#14-decision-log)).
-  9. [4.7](#47-starting-and-testing-the-slice): the title screen and the day-1 save.
-  10. A day-one test with one person who hasn't seen the game ([4.7](#47-starting-and-testing-the-slice)), so Hob's tutorial teaches what that person actually missed.
-  11. Hob's tutorial and his reminders of crops at risk ([4.4](#44-the-caretaker-robot), [4.2](#42-farming-depth)), which need Hob and dialogue.
-  12. The slice play-test with players who haven't seen the game ([4.7](#47-starting-and-testing-the-slice)).
+  2. The hotbar and the bag on screen ([4.6](#46-interface-and-input)), before the sprinkler, so the player buys and places it with an inventory they can see (2026-11-26). Hob's trust track and his short lines on events, before it, were done on 2026-11-27.
+  3. [4.5](#45-automation-and-selling): placing objects on the farm grid, and the sprinkler, bought at the seed shop.
+  4. Dirty water and its source ([4.2](#42-farming-depth)).
+  5. Lay out the home farm ([4.7](#47-starting-and-testing-the-slice)): the farmhouse with the bed inside, the service yard, Hob's spot and the dirty water source, as a blockout, once every slice prop exists. The screenshot art pass's ground dressing comes after it, so it doesn't dress a layout that still moves; its meshes and sky don't wait for it.
+  6. What a first-time player needs to see: a dry crop that looks thirsty, the mutated ripe meshes and item descriptions ([4.2](#42-farming-depth)), and the feel pass on the four farming actions ([4.6](#46-interface-and-input)).
+  7. The HUD layout pass ([4.6](#46-interface-and-input)), laid out for handheld PCs and for translation, as @DunderGG decided on 2026-11-26 ([GameDesign.md, section 14](GameDesign.md#14-decision-log)).
+  8. [4.7](#47-starting-and-testing-the-slice): the title screen and the day-1 save.
+  9. A day-one test with one person who hasn't seen the game ([4.7](#47-starting-and-testing-the-slice)), so Hob's tutorial teaches what that person actually missed.
+  10. Hob's tutorial and his reminders of crops at risk ([4.4](#44-the-caretaker-robot), [4.2](#42-farming-depth)), which need Hob and dialogue.
+  11. The slice play-test with players who haven't seen the game ([4.7](#47-starting-and-testing-the-slice)).
 
   Polish that isn't on this path (the sun and the moon, the per-minute clock, held meshes, automated play-tests, the performance agent) waits until after it unless it is cheap to do alongside.
 
@@ -167,7 +166,7 @@ The code changes that the slice's content depends on. Doing them first means add
 ### 4.4 The caretaker robot
 
 - [ ] Hob's Blender model, replacing the placeholder body (`BP_Hob`'s cubes, built 2026-11-26) and keeping the cyan eyes material `M_HobEyes` for the eye slot
-- [ ] Hob's short lines on events, said once each in passing with no dialogue box (the player's first mutated crop, watering in the rain once there is rain, still awake past midnight, the first sale): they make him react to the world with no new system, using the dialogue data above. The lines are the writer's; which events, and how often he may speak, are designed with the game designer (2026-11-26, [RoadmapSuggestions.md](RoadmapSuggestions.md) item 16)
+- [ ] Hob's passing lines on rain and on withered crops, once there is weather and a season change inside play: the same passing-line data, a new trigger each (left out of the first passing lines on 2026-11-27, as neither can happen in the slice)
 - [ ] Hob guides the player through the first days as a tutorial
    - A new game opens with a fade-in on the farm and a few lines from Hob, not the cryo-pod scene, which stays in [Story](#story): a level, a sequence and writing for one minute is too much before the slice play-test (2026-11-26)
 

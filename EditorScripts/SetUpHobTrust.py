@@ -1,7 +1,7 @@
 # Copyright (C) 2026 David Bennehag and the Project Vestige contributors.
 # SPDX-License-Identifier: GPL-3.0-or-later WITH AdditionRef-Vestige-Unreal-Exception
 
-"""Set up Hob's trust track (Docs/Systems/10-Robots.md, 11-Dialogue.md), headless, with the editor closed and VestigeEditor built:
+"""Set up Hob's trust track and passing lines (Docs/Systems/10-Robots.md, 11-Dialogue.md), headless, with the editor closed and VestigeEditor built:
 
     UnrealEditor-Cmd.exe Vestige.uproject -run=pythonscript -script=EditorScripts/SetUpHobTrust.py
         -EnablePlugins=PythonScriptPlugin -unattended -nopause -nullrhi -nosplash
@@ -17,6 +17,9 @@ updates, and saves:
    without the memory lines). Every text is linked to its ST_Dialogue entry with TextFromStringTable, never a plain string.
    The priorities, the topic spacing and the thresholds are the TOPICS, STEPS and GREETINGS tables below, typed once.
 4. BP_Hob: a UVestigeWateringHelpComponent with the help flags and 4 tiles.
+5. The three passing lines (H-10, "Passing lines" in 11-Dialogue.md): DA_Dialogue_HobPassingHarvest, ...Bloom and ...Late, with
+   delivery Passing, and the Harvest and Bloom topics' condition that keeps them off the day their passing line was said.
+6. BP_Hob: a UVestigePassingLineComponent (its earshot is the component's default, 1800 cm, not overridden).
 
 It changes nothing else. A rerun rewrites the same values. Every line it prints starts with "SetUpHobTrust:".
 """
@@ -70,6 +73,15 @@ TOPICS = [
     ("Dispensers", 58, []),
     ("FarRows", 57, []),
     ("Well", 56, []),
+]
+
+# The passing lines (H-10), one asset each: (name, line ID, priority, event conditions, flag it sets). At most one a day (PassingSaid
+# set today blocks the rest), once per game (its own flag), never after a talk about the event (the topic's flag), and never to a
+# stranger. The first harvest and Bloom lines are due only on the day of their milestone ("today"); the late line from 00:15 on.
+PASSING_LINES = [
+    ("Harvest", 30, [("milestone", "Farm.Harvested", True)], "Topic.Harvest"),
+    ("Bloom", 20, [("milestone", "Farm.HarvestedMutated", True)], "Topic.Bloom"),
+    ("Late", 10, [("band", 24.25, 30.0)], None),
 ]
 
 # The watered-morning lines (H-09). The first outranks every topic, a later one ranks below them and plays only when none was said in
@@ -228,8 +240,9 @@ def new_condition(owner, spec):
         return configure(unreal.new_object(unreal.VestigeDialogueCondition_Flag, outer=owner), flag=make_tag(FLAG_ROOT + flag),
                          set=is_set, min_days_since=min_days, max_days_since=max_days)
     if kind == "milestone":
+        today = len(spec) > 2 and spec[2]
         return configure(unreal.new_object(unreal.VestigeDialogueCondition_Milestone, outer=owner),
-                         milestone=make_tag(MILESTONE_ROOT + spec[1]), reached=True)
+                         milestone=make_tag(MILESTONE_ROOT + spec[1]), reached=True, today=today)
     if kind == "date":
         _, from_day, season, from_day_of_season, to_day_of_season = spec
         return configure(unreal.new_object(unreal.VestigeDialogueCondition_Date, outer=owner), from_day=from_day,
@@ -288,12 +301,13 @@ def realize_line(owner, spec):
     return result
 
 
-def write_dialogue(name, priority, conditions, lines):
+def write_dialogue(name, priority, conditions, lines, delivery=unreal.VestigeDialogueDelivery.TALK):
     dialogue = get_or_create(DIALOGUE_FOLDER, "DA_Dialogue_" + name, unreal.VestigeDialogueData, unreal.DataAssetFactory())
     dialogue.modify()
     dialogue.set_editor_property("content_id", "Base." + name)
     dialogue.set_editor_property("speaker", unreal.PrimaryAssetId(unreal.PrimaryAssetType("VestigeCharacter"), CHARACTER_ID))
     dialogue.set_editor_property("priority", priority)
+    dialogue.set_editor_property("delivery", delivery)
     dialogue.set_editor_property("conditions", [new_condition(dialogue, c) for c in conditions])
     dialogue.set_editor_property("lines", [realize_line(dialogue, spec) for spec in lines])
     save(dialogue)
@@ -329,8 +343,11 @@ def topic_lines(name, line_ids):  # line_ids: the file's line IDs in order
 
 
 def set_up_topics(order):
+    passing_topics = {line[3] for line in PASSING_LINES if line[3]}
     for name, priority, gate in TOPICS:
         conditions = [("talked", False), not_flag("Topic." + name), not_flag("TopicOffered", TOPIC_SPACING_DAYS)] + gate
+        if "Topic." + name in passing_topics:
+            conditions.append(not_flag("Passing." + name, 0))
         if not any(condition[0] == "date" for condition in gate):
             conditions.append(("date", TOPIC_FROM_DAY, "", 1, 0))
         write_dialogue("HobTopic" + name, priority, conditions, topic_lines(name, order))
@@ -391,6 +408,17 @@ def set_up_greetings():
                        [line("Hob.Greet.Memory." + band, texts=everyday + warm + memory)])
 
 
+def set_up_passing_lines():
+    for name, priority, event, topic in PASSING_LINES:
+        line_id = "Hob.Passing." + name
+        conditions = [("met", True)] + event + [not_flag("Passing." + name), not_flag("PassingSaid", 0)]
+        if topic:
+            conditions.append(not_flag(topic))
+        outcomes = [("flag", "Passing." + name), ("flag", "PassingSaid")]
+        write_dialogue("HobPassing" + name, priority, conditions, [line(line_id, outcomes=outcomes)],
+                       delivery=unreal.VestigeDialogueDelivery.PASSING)
+
+
 # ---- BP_Hob
 
 def set_up_watering_help():
@@ -428,6 +456,34 @@ def set_up_watering_help():
         component.get_editor_property("max_tiles")))
 
 
+def set_up_passing_line_component():
+    blueprint = load(CHARACTER_FOLDER + "/" + BLUEPRINT_NAME)
+    subsystem = unreal.get_engine_subsystem(unreal.SubobjectDataSubsystem)
+    library = unreal.SubobjectDataBlueprintFunctionLibrary
+    root_handle = None
+    component = None
+    for handle in subsystem.k2_gather_subobject_data_for_blueprint(blueprint):
+        obj = library.get_associated_object(subsystem.k2_find_subobject_data_from_handle(handle))
+        if isinstance(obj, unreal.CapsuleComponent):
+            root_handle = handle
+        elif isinstance(obj, unreal.VestigePassingLineComponent):
+            component = obj
+    if component is None:
+        if root_handle is None:
+            fail("BP_Hob has no capsule to add the passing line component to")
+        params = unreal.AddNewSubobjectParams(parent_handle=root_handle, new_class=unreal.VestigePassingLineComponent,
+                                              blueprint_context=blueprint)
+        handle, reason = subsystem.add_new_subobject(params)
+        if not library.is_handle_valid(handle):
+            fail("Can't add the passing line component: " + str(reason))
+        subsystem.rename_subobject(handle, "PassingLine")
+        component = library.get_associated_object(subsystem.k2_find_subobject_data_from_handle(handle))
+        log("added the passing line component to " + BLUEPRINT_NAME)
+    unreal.BlueprintEditorLibrary.compile_blueprint(blueprint)
+    save(blueprint)
+    log("fact: PassingLine earshot radius {0}".format(component.get_editor_property("sphere_radius")))
+
+
 def main():
     lines, order = read_lines()
     load(TABLE_PATH)
@@ -438,6 +494,8 @@ def main():
     set_up_watered()
     set_up_greetings()
     set_up_watering_help()
+    set_up_passing_lines()
+    set_up_passing_line_component()
     log("done")
 
 

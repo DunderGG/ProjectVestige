@@ -8,6 +8,7 @@
 #include "AbilitySystemGlobals.h"
 #include "Algo/AllOf.h"
 #include "Characters/VestigeDialogueLog.h"
+#include "Characters/VestigeDialogueSettings.h"
 #include "Characters/VestigeRelationshipComponent.h"
 #include "Content/VestigeCharacterData.h"
 #include "Content/VestigeContentCatalog.h"
@@ -17,9 +18,11 @@
 #include "Core/VestigeFeedbackSubsystem.h"
 #include "Core/VestigeMilestoneSubsystem.h"
 #include "Core/VestigePlayerComponents.h"
+#include "Engine/World.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerState.h"
 #include "ProfilingDebugging/CpuProfilerTrace.h"
+#include "TimerManager.h"
 #include "Time/VestigeClockSubsystem.h"
 
 UVestigeConversationComponent::UVestigeConversationComponent()
@@ -32,9 +35,36 @@ UVestigeConversationComponent* UVestigeConversationComponent::Find(const AActor*
 	return VestigePlayerComponents::Find<UVestigeConversationComponent>(PlayerActor);
 }
 
+void UVestigeConversationComponent::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if (UVestigeMilestoneSubsystem* MilestoneSubsystem = UVestigeMilestoneSubsystem::Get(GetWorld()))
+	{
+		MilestoneSubsystem->OnMilestoneReached.AddUObject(this, &UVestigeConversationComponent::RecordMilestone);
+		MilestoneSource = MilestoneSubsystem;
+	}
+	if (UVestigeClockSubsystem* ClockSubsystem = UVestigeClockSubsystem::Get(GetWorld()))
+	{
+		ClockSubsystem->OnDayEnded.AddUObject(this, &UVestigeConversationComponent::HandleDayEnded);
+		ClockSource = ClockSubsystem;
+	}
+}
+
 void UVestigeConversationComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	EndConversation();
+	EndPassingLine();
+	if (UVestigeMilestoneSubsystem* MilestoneSubsystem = MilestoneSource.Get())
+	{
+		MilestoneSubsystem->OnMilestoneReached.RemoveAll(this);
+	}
+	if (UVestigeClockSubsystem* ClockSubsystem = ClockSource.Get())
+	{
+		ClockSubsystem->OnDayEnded.RemoveAll(this);
+	}
+	MilestoneSource.Reset();
+	ClockSource.Reset();
 	Super::EndPlay(EndPlayReason);
 }
 
@@ -48,7 +78,7 @@ bool UVestigeConversationComponent::StartConversation(AActor& InSpeakerActor, co
 	}
 
 	const FVestigeDialogueContext Context = MakeContext(Speaker);
-	const UVestigeDialogueData* Chosen = ChooseDialogue(Context);
+	const UVestigeDialogueData* Chosen = ChooseDialogue(Context, EVestigeDialogueDelivery::Talk);
 	if (!Chosen || Chosen->GetLines().IsEmpty())
 	{
 		VESTIGE_LOG(this, LogVestigeDialogue, Warning, "{Speaker} has no conversation to play, so the talk doesn't start.",
@@ -58,6 +88,9 @@ bool UVestigeConversationComponent::StartConversation(AActor& InSpeakerActor, co
 	}
 	VESTIGE_LOG(this, LogVestigeDialogue, Verbose, "Talking to {Speaker}: {Conversation}.", Speaker.GetContentId().ToString(),
 		Chosen->GetContentId().ToString());
+
+	// The box takes over from a caption.
+	EndPassingLine();
 
 	Dialogue = Chosen;
 	SpeakerData = &Speaker;
@@ -146,7 +179,101 @@ void UVestigeConversationComponent::EndConversation()
 	ChoiceTexts.Reset();
 	ListedChoices.Reset();
 	CurrentLine = INDEX_NONE;
+	if (const UWorld* World = GetWorld())
+	{
+		LastTalkEndTime = World->GetTimeSeconds();
+	}
 	OnConversationEnded.Broadcast();
+}
+
+bool UVestigeConversationComponent::SayPassingLine(AActor& InSpeakerActor, const UVestigeCharacterData& Speaker)
+{
+	TRACE_CPUPROFILER_EVENT_SCOPE(UVestigeConversationComponent::SayPassingLine);
+
+	const UWorld* World = GetWorld();
+	const UVestigeClockSubsystem* ClockSubsystem = ClockSource.Get();
+	const bool bDayOver = ClockSubsystem && !ClockSubsystem->IsRunning();
+	if (!World || IsInConversation() || bSayingPassingLine || GetPassingQuietSecondsLeft() > 0.0 || bDayOver)
+	{
+		VESTIGE_LOG(this, LogVestigeDialogue, Verbose, "{Speaker} says no line in passing now.", Speaker.GetContentId().ToString());
+		return false;
+	}
+
+	const FVestigeDialogueContext Context = MakeContext(Speaker);
+	const UVestigeDialogueData* Chosen = ChooseDialogue(Context, EVestigeDialogueDelivery::Passing);
+	if (!Chosen || Chosen->GetLines().IsEmpty())
+	{
+		return false;
+	}
+	const FVestigeDialogueLine& Line = Chosen->GetLines()[0];
+	for (const UVestigeDialogueOutcome* Outcome : Line.Outcomes)
+	{
+		if (Outcome)
+		{
+			Outcome->Apply(Context);
+		}
+	}
+
+	PassingSpeakerData = &Speaker;
+	PassingSpeakerActor = &InSpeakerActor;
+	PassingLineText = Line.PickText(Context.Day, 0);
+	PassingLineStartTime = World->GetTimeSeconds();
+	PassingLineDuration = GetPassingLineSeconds(PassingLineText, UVestigeDialogueSettings::Get());
+	bSayingPassingLine = true;
+	World->GetTimerManager().SetTimer(PassingLineTimer, this, &UVestigeConversationComponent::EndPassingLine, PassingLineDuration);
+	VESTIGE_LOG(this, LogVestigeDialogue, Log, "{Speaker} says {Line}.", Speaker.GetContentId().ToString(), Line.LineId.ToString());
+	OnPassingLineStarted.Broadcast();
+	return true;
+}
+
+float UVestigeConversationComponent::GetPassingLineSeconds(const FText& Line, const UVestigeDialogueSettings& Settings)
+{
+	const float ReadingSeconds = Line.ToString().Len() / Settings.GetPassingLineCharactersPerSecond();
+	return FMath::Max(Settings.GetPassingLineMinSeconds(), Settings.GetPassingLineBaseSeconds() + ReadingSeconds);
+}
+
+double UVestigeConversationComponent::GetPassingQuietSecondsLeft() const
+{
+	const UWorld* World = GetWorld();
+	if (!World)
+	{
+		return 0.0;
+	}
+	const double QuietEnd = LastTalkEndTime + UVestigeDialogueSettings::Get().GetPassingQuietAfterTalkSeconds();
+	return FMath::Max(QuietEnd - World->GetTimeSeconds(), 0.0);
+}
+
+void UVestigeConversationComponent::EndPassingLine()
+{
+	if (!bSayingPassingLine)
+	{
+		return;
+	}
+	bSayingPassingLine = false;
+	if (const UWorld* World = GetWorld())
+	{
+		World->GetTimerManager().ClearTimer(PassingLineTimer);
+	}
+
+	// The speaker is still named while the listeners hear it, so a body can tell its own line from another's.
+	OnPassingLineEnded.Broadcast();
+	PassingSpeakerData = nullptr;
+	PassingSpeakerActor.Reset();
+	PassingLineText = FText::GetEmpty();
+	PassingLineDuration = 0.0;
+}
+
+void UVestigeConversationComponent::RecordMilestone(const FGameplayTag& Milestone)
+{
+	if (const UVestigeClockSubsystem* ClockSubsystem = ClockSource.Get())
+	{
+		MilestoneDays.Add(Milestone, ClockSubsystem->GetCurrentDay());
+	}
+}
+
+void UVestigeConversationComponent::HandleDayEnded(const FVestigeDayEnd& /* DayEnd */)
+{
+	EndPassingLine();
 }
 
 bool UVestigeConversationComponent::IsLastLine() const
@@ -180,14 +307,22 @@ FVestigeDialogueContext UVestigeConversationComponent::MakeContext(const UVestig
 		Context.Trust = Relationships->GetTrust(Speaker);
 		Context.FlagDays = Relationships->GetFlagDays(Speaker.GetPrimaryAssetId());
 	}
-	if (const UVestigeMilestoneSubsystem* Milestones = UVestigeMilestoneSubsystem::Get(GetWorld()))
+	if (const UVestigeMilestoneSubsystem* MilestoneSubsystem = UVestigeMilestoneSubsystem::Get(GetWorld()))
 	{
-		Context.Milestones = Milestones->GetReached();
+		Context.Milestones = MilestoneSubsystem->GetReached();
+	}
+	for (const TPair<FGameplayTag, int32>& Reached : MilestoneDays)
+	{
+		if (Reached.Value == Context.Day)
+		{
+			Context.MilestonesToday.AddTag(Reached.Key);
+		}
 	}
 	return Context;
 }
 
-const UVestigeDialogueData* UVestigeConversationComponent::ChooseDialogue(const FVestigeDialogueContext& Context) const
+const UVestigeDialogueData* UVestigeConversationComponent::ChooseDialogue(
+	const FVestigeDialogueContext& Context, EVestigeDialogueDelivery Delivery) const
 {
 	const UVestigeContentCatalog* Catalog = UVestigeContentCatalog::Get(GetWorld());
 	if (!Catalog)
@@ -204,7 +339,8 @@ const UVestigeDialogueData* UVestigeConversationComponent::ChooseDialogue(const 
 	for (const UVestigeContentData* Content : All)
 	{
 		const UVestigeDialogueData* Candidate = Cast<UVestigeDialogueData>(Content);
-		if (!Candidate || Candidate->GetSpeaker() != SpeakerId || !Candidate->AreConditionsMet(Context))
+		if (!Candidate || Candidate->GetDelivery() != Delivery || Candidate->GetSpeaker() != SpeakerId ||
+			!Candidate->AreConditionsMet(Context))
 		{
 			continue;
 		}

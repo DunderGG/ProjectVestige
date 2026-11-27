@@ -49,6 +49,12 @@ public:
 	/** Starts the talk with Interactor's conversation component and turns to face Interactor. */
 	virtual void Interact_Implementation(AActor* Interactor, const FVestigeInteractionOption& Option) override;
 
+	/** Faces Target through the AI controller's focus. Does nothing without a controller. Public for the passing line component. */
+	void FaceActor(AActor& Target);
+
+	/** Faces the placed facing again, through the controller's focal point. Does nothing without a controller. */
+	void FaceHome();
+
 protected:
 	/** Finds the character's definition, builds the prompt text and holds the placed facing. */
 	virtual void BeginPlay() override;
@@ -57,12 +63,6 @@ protected:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 private:
-	/** Faces Target through the AI controller's focus. Does nothing without a controller. */
-	void FaceActor(AActor& Target);
-
-	/** Faces the placed facing again, through the controller's focal point. Does nothing without a controller. */
-	void FaceHome();
-
 	/** Turns back to the placed facing and stops listening. Bound to the conversation component's OnConversationEnded. */
 	void FinishTalk();
 

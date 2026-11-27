@@ -44,6 +44,7 @@ bool UVestigeMilestoneSubsystem::Reach(const FGameplayTag& Milestone)
 	}
 	Reached.AddTag(Milestone);
 	VESTIGE_LOG(this, LogVestige, Log, "Milestone reached: {Milestone}.", Milestone.ToString());
+	OnMilestoneReached.Broadcast(Milestone);
 	return true;
 }
 

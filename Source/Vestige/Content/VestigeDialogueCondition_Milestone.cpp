@@ -11,7 +11,8 @@
 
 bool UVestigeDialogueCondition_Milestone::IsMet_Implementation(const FVestigeDialogueContext& Context) const
 {
-	return Context.Milestones.HasTagExact(Milestone) == bReached;
+	const FGameplayTagContainer& Counted = bToday ? Context.MilestonesToday : Context.Milestones;
+	return Counted.HasTagExact(Milestone) == bReached;
 }
 
 #if WITH_EDITOR

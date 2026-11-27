@@ -8,7 +8,10 @@
 #include "GameplayTagContainer.h"
 #include "VestigeDialogueCondition_Milestone.generated.h"
 
-/** Holds when a milestone (Vestige.Milestone.Farm.Harvested) has been reached, or, with bReached off, hasn't. */
+/**
+ * Holds when a milestone (Vestige.Milestone.Farm.Harvested) has been reached, or, with bReached off, hasn't. With bToday it counts
+ * only a milestone reached on today's game day, so a line can be due only on the day of its event.
+ */
 UCLASS(meta = (DisplayName = "Milestone"))
 class UVestigeDialogueCondition_Milestone : public UVestigeDialogueCondition
 {
@@ -24,10 +27,11 @@ public:
 
 #if WITH_DEV_AUTOMATION_TESTS
 	/** For tests only. */
-	void SetForTests(const FGameplayTag& InMilestone, bool bInReached)
+	void SetForTests(const FGameplayTag& InMilestone, bool bInReached, bool bInToday = false)
 	{
 		Milestone = InMilestone;
 		bReached = bInReached;
+		bToday = bInToday;
 	}
 #endif
 
@@ -39,4 +43,8 @@ private:
 	/** Whether it must have been reached (true) or not (false). */
 	UPROPERTY(EditAnywhere, Category = "Dialogue", meta = (AllowPrivateAccess = "true"))
 	bool bReached = true;
+
+	/** Whether only a milestone reached today counts (the context's MilestonesToday), not one reached on an earlier day. */
+	UPROPERTY(EditAnywhere, Category = "Dialogue", meta = (AllowPrivateAccess = "true"))
+	bool bToday = false;
 };

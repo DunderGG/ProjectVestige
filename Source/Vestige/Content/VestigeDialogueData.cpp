@@ -116,6 +116,17 @@ EDataValidationResult UVestigeDialogueData::IsDataValid(FDataValidationContext& 
 		Context.AddError(LOCTEXT("NoLines", "Lines is empty, so the talk has nothing to say."));
 		bValid = false;
 	}
+	if (Delivery == EVestigeDialogueDelivery::Passing)
+	{
+		const bool bOneLine = Lines.Num() == 1;
+		const bool bPlain = bOneLine && Lines[0].Texts.Num() == 1 && Lines[0].Choices.IsEmpty() && Lines[0].Next.IsNone();
+		if (!bPlain)
+		{
+			Context.AddError(LOCTEXT("BadPassing",
+				"A passing conversation is exactly one line with exactly one text, no replies and no Next: it is shown as a caption."));
+			bValid = false;
+		}
+	}
 	bValid &= VestigeDialogueValidation::CheckNoNulls(Conditions, LOCTEXT("Conditions", "Conditions"), GetFName(), Context);
 	bValid &= VestigeDialogueValidation::CheckEntries(Conditions, Context);
 
