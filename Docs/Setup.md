@@ -210,7 +210,7 @@ The game rules have automated tests, named `Vestige.*`. Run them once now to kno
   ```
 
   Every test logs `Result={Success}`. Two `LogAutomationTest: Error: Condition failed` lines at startup come from the engine and can be ignored.
-- **Build and test in one go**, with the editor closed: in a PowerShell window in the repository folder, run `.\Tools\Verify-Vestige.ps1`. It builds the editor target, runs every `Vestige` test and prints a short summary; the full logs are in `Saved\AgentWork\verify\`. If PowerShell says running scripts is disabled, run `powershell -ExecutionPolicy Bypass -File .\Tools\Verify-Vestige.ps1` instead.
+- **Build and test in one go**, with the editor closed: in a PowerShell window in the repository folder, run `.\Tools\Verify-Vestige.ps1`. It builds the editor target, runs every `Vestige` test and prints a short summary; the full logs are in `Saved\AgentWork\verify\`. It finds the engine wherever you installed it: from `-EngineRoot <folder>` if you pass one, else the `UE_ROOT` environment variable, the launcher's install list, the registry (the engine list that the troubleshooting fix below writes, then the launcher's install entry) and the default folder, and names what it tried if none has the engine. If PowerShell says running scripts is disabled, run `powershell -ExecutionPolicy Bypass -File .\Tools\Verify-Vestige.ps1` instead.
 
 How to write tests is in [CodingGuidelines.md, section 13](CodingGuidelines.md#13-testing).
 
