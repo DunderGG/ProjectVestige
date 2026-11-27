@@ -51,14 +51,6 @@ The farming keys are input assets now: `IA_` actions and `IMC_Farming` in `Conte
 - [x] **Contexts don't stack**: while playing, open the console and type `showdebug enhancedinput`. `IMC_Default`, `IMC_MouseLook` and `IMC_Farming` each show once. Then have the farmer possessed again and check that each still shows once. There is no console command that only re-possesses: try F8 twice in Play in Editor (eject, then possess); if `showdebug enhancedinput` shows the contexts the whole time, ejecting didn't unpossess him, so tell the agent, and a `RepossessPlayer` cheat or an automated test takes this check's place ([Roadmap.md, 4.0](Roadmap.md#40-structure-from-the-code-review)).
 - [ ] **Packaged build** (why a person: hardware; at the first packaged build): a packaged Development build has working input: move, look, jump, E, F, 1 to 9 and the mouse wheel. The HUD shows as in the editor, and the key hints switch between keyboard and gamepad the same way.
 
-### Hob's short lines on farm events, 2026-11-27
-
-**For the milestone 2 play-test.** Hob says one short line in passing, as a caption with his name and no dialogue box, on three events: the first harvest and the first Bloom crop (on the day they happen) and the first time you are near him after midnight ([Systems/11-Dialogue.md, "Passing lines"](Systems/11-Dialogue.md)). Every rule is automated (`Vestige.PassingLines`, `Vestige.HobPassing`, `Vestige.Caption`, `Vestige.Milestones`): due days, once per game, one a day, earshot, the quiet after a talk, the topics waiting a day, saves, and the caption showing, hiding and fading. Only how it looks and reads is left. Start from `NewGame` and meet Hob; look at the commit "Add Hob's short lines on farm events" if something is wrong.
-
-- [ ] **The caption's look** (looks): when a line shows, it reads as the same family as the dialogue box and the message boxes, stays readable over the field while you walk, at 1280 by 800 too, and doesn't cover the key hints.
-- [ ] **The harvest and Bloom lines read as Hob noticing** (feel): with Hob nearby, harvest the first crop, and on a later day the first Bloom crop (or `ReachMilestone Vestige.Milestone.Farm.HarvestedMutated`). Each reads as him noticing in passing, not as a prompt, and the next day's Bloom topic still has something to add.
-- [ ] **The late line is kindly, not nagging** (feel; the writer's check): near Hob, `SkipToTime 0100` on a day with no line yet. It reads as someone noticing you are still up, never as telling you off.
-
 ### Editor chores
 
 Changes only the editor can make safely. None are open: the earlier ones (re-saving the template Blueprints, moving `BP_FarmTile` and the materials with redirectors fixed, the Android File Server token) are done and recorded in [RoadmapArchive.md, Housekeeping](RoadmapArchive.md#3-housekeeping). After an editor chore, run the [smoke test](#3-smoke-test).
