@@ -36,7 +36,7 @@ Checks for recent changes that haven't been confirmed in the editor yet. Each na
 
 `BP_Bed` uses the new `SM_Bed` mesh instead of the engine cube. Its mesh, scale and the interaction volume containing it are automated (`Vestige.Interaction.TheBedBlueprintHasItsMesh`). **For the milestone 2 play-test.** Look at the commit "Import the bed mesh and use it on BP_Bed" if something is wrong.
 
-- [ ] **Look and walk** (why a person: first look and feel): open `/Game/Maps/L_Farm` and press Play. From the game camera the bed reads as a bed, its colours sit well on the ground in the morning light, and the farmer walks around it without snagging.
+- [x] **Look and walk** (why a person: first look and feel): open `/Game/Maps/L_Farm` and press Play. From the game camera the bed reads as a bed, its colours sit well on the ground in the morning light, and the farmer walks around it without snagging.
 
 ### Message settings, 2026-10-30
 
