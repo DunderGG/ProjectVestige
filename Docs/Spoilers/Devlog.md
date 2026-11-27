@@ -2,7 +2,7 @@
 
 > **Spoilers.** This names the voice behind the devlog's postcards and what each piece commits to canon. The devlog itself never does.
 
-Some devlog posts, published at the separate devlog site, end with a short, clearly fictional piece from inside the world. @DunderGG decided this on 2026-11-27 ([Lore.md, section 13](Lore.md#13-decision-log)). For now the pieces are unnamed postcards; other in-world voices are allowed for variation, and radio transmissions come later, once the game has voices.
+Every devlog post, published at the separate devlog site, ends with a short, clearly fictional piece from inside the world. @DunderGG decided this on 2026-11-27 ([Lore.md, section 13](Lore.md#13-decision-log)), first for some posts and the same evening for every post, with the voice changing from post to post.
 
 ## The postcard voice
 
@@ -28,11 +28,15 @@ These hold for every piece, whatever the voice.
 
 ## Frequency
 
-About one post in four, irregular. Never two posts in a row. Never announced or labelled as a series.
+Every post (@DunderGG, 2026-11-27, replacing "about one in four, never two in a row"). Never announced or labelled as a series. The voice changes from post to post, so the same voice doesn't end two posts in a row.
 
 ## Other voices
 
-Old ads, notices, signs and other characters may write a piece for variation, under the same spoiler rules. Radio transmissions come later, once the game has voices.
+All under the same spoiler rules. The devlog site draws each with its own look, set by the piece's `kind`: `postcard`, `notice` or `transmission`.
+
+- **Old ads, notices and signs** (`notice`): printed things still around from before the war, or put up since.
+- **Characters the game already shows** (Hob, the farm's machines): only once a player has met them in the build, and never naming or introducing anyone a player hasn't met.
+- **Intercepted transmissions from Morrow** (`transmission`; approved by @DunderGG on 2026-11-27): occasional, a few lines, clearly fiction, hinting only at lore that won't change and checked against this folder. The speaker is never named and the transmission never reveals who they speak for or that they speak for anyone; all the postcard rules above apply.
 
 ## Who writes and approves
 
@@ -43,7 +47,7 @@ Before publishing, check:
 1. Every spoiler rule above.
 2. Lore consistency: each fact hinted is settled in this folder and matches the decision log.
 3. Length (3 to 6 lines, about 70 words) and the stamp line.
-4. The previous post didn't end with a piece.
+4. The previous post's piece used a different voice.
 5. @DunderGG's approval of this piece.
 
 Then add the piece's row to the table below.
@@ -57,3 +61,4 @@ One row per piece, by post and date only. Never quote a piece's text here.
 | Post | Date | Voice | Hint | Commits |
 |---|---|---|---|---|
 | How it started | 2026-11-08 | Postcard | The unassigned-want hint (Morrow's wish for a part of life no one assigned) | That this person once kept a small turnip patch where they were staying |
+| Hello from the farm | 2026-11-27 | Old seed ad (notice) | None beyond the early chapter: pre-war ads are still around, and robots once did the house chores | A pre-war seed brand, Sure-Sprout *(working name)* |
