@@ -22,6 +22,7 @@ These hold for every piece, whatever the voice.
 ## Form
 
 - 3 to 6 short lines, about 70 words.
+- Opens with a header: a short in-world description of what the piece is ("A postcard with no address, held at the post office for collection."). No "From the world of the game" label; the separate card under the sign-off marks it as fiction.
 - Ends with a stamp line: a 24-hour time and the weather ("18:20. Haze thinning.").
 - Echoes its post: the piece picks up the post's subject, mood or a detail of it, in the world's terms.
 
