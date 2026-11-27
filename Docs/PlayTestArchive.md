@@ -489,3 +489,75 @@ The tile actors are gone: the grid's new meshes component draws the whole field 
 - [x] **Big field**: in Play, `BenchmarkField 60 Base.Turnip` makes a 60 by 60 field of ripe turnips at once, without a long freeze.
 
 The optional placeholder colors check (clear **Tilled Soil Mesh** on the grid's Meshes component) was dropped on 2026-11-24 without being played, because `Vestige.FarmTileLooks.WithoutSoilArtThePlaceholderShowsTilledAndWateredColors` and `Vestige.FarmFieldMeshes.TheGridBlueprintSetsTheArtAndAPlaceholderMaterialForInstances` cover it.
+
+### Tile targeting, 2026-10-30
+
+The frame sits on a neighbouring tile chosen by the movement direction (GameDesign.md, section 6). The tap, walking and feel checks moved to [Smooth turning](PlayTestArchive.md#smooth-turning-2026-10-30), now in the archive; the results that led to it are in commit 8932448.
+
+- [x] **Field edge** (ce1f1dc): standing on an edge tile and turning to face outwards hides the frame; turning back shows it again.
+- [x] **Tools** (ce1f1dc): the tools act on the framed tile, never on the one the farmer stands on.
+- [x] **Gamepad** (ce1f1dc), if you have one: a flick of the left stick turns the farmer with barely a step, and holding it walks, the same as the keys.
+   - Unable to test Gamepad support now. Save this for later, when we have a gamepad to test with.
+
+### Sky lighting, 2026-11-05
+
+The day cycle actor is renamed `VestigeSkyLighting` for its one job, the lighting. `L_Farm` still names the old class until it is saved, and a redirect in `Config/DefaultEngine.ini` loads it as the new one; a test checks the redirect. The commit is the one titled "Rename the day cycle to sky lighting".
+
+- [x] **Level** (why a person: editor-only save; `L_Farm` still stores the old class name, `FarmDayCycle`): regenerate the project files (right-click `Vestige.uproject` > Generate Visual Studio project files) so the solution lists `Time/VestigeSkyLighting.h`. Open `L_Farm`. The Outliner still shows the actor as `FarmDayCycle` (its label), and selecting it shows class `VestigeSkyLighting` in the Details panel, with Sun Step Degrees and the other **Lighting** settings as before. The Output Log has no "can't find class" or "Failed to load" lines for it. Play: the sun, the night and the morning look as before. Save `L_Farm` (Ctrl+S) so it stores the new name, and commit the level.
+- [x] **Sun hours in the clock settings** (commit "Move the sunrise and sunset hours to the clock"; why a person: how the light looks; the hours rule is `Vestige.SkyLighting.SunRisesAndSetsAtTheClocksHours`): Project Settings > Game > **Vestige Clock** shows **Sunrise Hour** (6) and **Sunset Hour** (20) under **Sun**, and the sky lighting actor in `L_Farm` no longer has a **Time** category. With `slomo 20`, the sun comes up just after 06:00, the light warms and fades out toward 20:00, and the moon takes over after it, as before. For a quick check, set Sunset Hour to 12 for a session: the evening light and the moon arrive at noon. Put it back to 20 and don't commit the change to `Config/DefaultGame.ini`.
+
+### The HUD in UMG, 2026-11-08
+
+The HUD is UMG now instead of C++ Slate: `WBP_Hud` and `WBP_HudMessage` in `Content/Vestige/UI`, named by the new `BP_HUD`, which `BP_GameMode` uses as its HUD class ([Systems.md, section 6](Systems.md#6-user-interface)). It should look and behave exactly as before. The commit is the one titled "Move the HUD to UMG".
+
+- [x] **Solution**: regenerate the project files (right-click `Vestige.uproject` > Generate Visual Studio project files): the solution lists `UI/VestigeHudMessageWidget.h` and `.cpp` and `Tests/VestigeHudWidgetTests.cpp`.
+- [x] **Looks as before**: press Play. Top left, the status panel reads the day, clock and item in hand, then "Stamina 100 / 100" and the bag line, on the dark backdrop; the key hints run along the bottom; facing the bed shows "F Sleep" below the farmer, and a ripe crop "F Harvest". Fonts, sizes, colours, shadows and spacing match what you had. Say if anything moved or changed size.
+- [x] **Smaller window**: play in a smaller window (Play > New Editor Window, then resize it): the HUD scales down the same way it used to and nothing overlaps.
+- [x] **Messages**: sleep (F at the bed). "You slept. Day N begins." and the messages after it each appear in a box of their own, stacked above the key hints, fade in, and fade out one after another. Harvesting several crops quickly shows at most five boxes.
+- [x] **Out of stamina**: keep tilling and watering until "Stamina 0 / 100": the stamina line turns red with the out-of-stamina message, and goes white again after sleeping.
+- [x] **The mouse isn't caught**: while playing, the mouse still turns the camera everywhere on screen, including over the status panel and the messages.
+- [x] **Designer**: open `Content/Vestige/UI/WBP_Hud`. The Hierarchy shows the overlay with `StatusPanel`, `PromptBox`, `MessageList` and `KeyHintsText`, and the Designer shows the HUD with preview texts. Select `StatusPanel`, change its Brush Color, Compile and press Play: the panel shows the new colour without building. Then put the colour back (or close without saving). `WBP_HudMessage` opens too and shows "Game saved." in its box.
+- [x] **Widget Reflector**: while playing, press Ctrl+Shift+W, then **Pick Hit-Testable Widgets** and hover over the HUD: it picks the game viewport, never a HUD widget. **Pick Painted Widgets** over the status line finds `StatusText` inside `WBP_Hud`.
+- [x] **No widget class**: open `Content/Vestige/Blueprints/BP_HUD` and clear **HUD Widget Class**, Compile, and press Play: no HUD shows and the Output Log has the error "No HUD Widget Class is set, so the HUD shows nothing". Then set it back to `WBP_Hud` (or close without saving).
+
+### Gamepad key hints, 2026-11-08
+
+The key hints and the prompt name the keys of the device you used last, keyboard and mouse or gamepad, told by Common Input, part of the CommonUI plugin, which is now on ([Systems.md, section 5](Systems.md#5-input), gamepad key hints). The gamepad checks need an Xbox-style (XInput) pad: Unreal on Windows doesn't see plain HID pads such as the HORI Switch pad and the Stadia controller (support for those is a nice to have in [Roadmap.md, Later still](Roadmap.md#later-still)). Without one, do the checks that need no gamepad and leave the rest until one is at hand. The commit is the one titled "Key hints follow the device used last".
+
+- [x] **Solution**: regenerate the project files (right-click `Vestige.uproject` > Generate Visual Studio project files): the solution lists `Player/VestigeKeyHints.h` and `.cpp`.
+- [x] **Editor starts**: the editor opens without asking about plugins, and Edit > Plugins shows **Common UI Plugin** ticked. The Output Log at start has no `LogUIActionRouter` error (one Display line, "Found 0 derived classes", is expected).
+- [x] **Keyboard first**: press Play and use only the keyboard and mouse. The hints read as before, "1 Hoe   2 Turnip Seeds   3 Watering Can   |   E Use tool   |   F Interact", and the bed shows "F Sleep".
+- [x] **Switch to the gamepad** (why a person: input on real hardware; the hint device and the hotbar hint are `Vestige.UI.TheHintDeviceFollowsTheInputType` and a `Vestige.PlayerCharacter` test): press any gamepad button, a trigger or push a stick all the way. The hints change at once to "LB / RB Hotbar   |   X Use tool   |   B Interact", and facing the bed shows "B Sleep" (a ripe crop "B Harvest"). The gamepad plays exactly as before: X uses, B interacts, the shoulders step the hotbar, A jumps, the sticks walk and look.
+- [x] **Back to the keyboard** (why a person: input on real hardware): press a key, click, scroll or move the mouse: the keyboard hints come back. Switch back and forth a few times; the hints follow each time and don't flicker while you use only one device.
+- [x] **No cursor** (why a person: input on real hardware): after using the gamepad, Alt-Tab out of the editor and back, click into the game and move the mouse: the camera turns and no mouse cursor shows. Then use the gamepad and stop Play (Esc): the editor's mouse cursor shows. If it stays hidden, it comes back with the next Play; say so.
+
+### The splash at the well, 2026-11-21
+
+Filling the watering can at the well now plays a splash (the first sound in the game, a script-made one: [Systems.md, section 14](Systems.md#14-audio)), along with the "Can filled." message. The rules (which rows play it, a short mono one-shot, sound classes, nothing looping) are automated tests; the path from the HUD to the sound playing is not automated or seen in a run, so the first check also confirms it plays at all. The commit is the one titled "Play a splash when the can fills at the well".
+
+- [x] **The splash sounds like water into a can** (why a person: hearing, a new sound for the first time): in Play in Editor with speakers or headphones on, half empty the can and press F at the well. The splash plays at once (if you hear nothing, check the Output Log with `log LogVestigeFeedback Verbose` for "Playing S_Water_FillCan" and say which it was), about two thirds of a second, and sounds like water poured into a tin can (a slosh, small bubbles, a faint ring), with no click at the start or the end. If it sounds like a synthesizer, say so: the fallback is a recording.
+   - There is a weird metallic cling sound at the start of the splash, and the water sound sounds very artificial. This can be refined later on.
+   - Kept open for the roadmap item "Replace the well splash with one that sounds like water into a can" (@DunderGG, 2026-11-21).
+- [x] **The level is right** (why a person: loudness, hardware): it is clearly audible at your normal volume, not startling, and not buried. There is no other sound yet, so judge it against silence.
+- [x] **Both fills** (why a person: hearing): use the well up until it runs dry part-way through filling the can (the message says it ran dry): the splash plays with that message too. A full can ("The can is full") and a dry well make no sound.
+- [x] **Pause** (why a person: feel; only if the game can be paused): pause during the splash: it pauses with the game and goes on when you resume.
+
+### Hob and the dialogue box, 2026-11-26
+
+Hob is in `L_Farm` with a placeholder body, and talking to Hob opens a Common UI dialogue box (the HUD widgets moved onto Common UI too). The commit is the one titled "Add Hob and data-driven dialogue with a Common UI dialogue box". The rules (which conversation plays, the choices, "met" saved and "talked today" not, the clock held during a talk, the prompt and key hints hidden, the box's input config and context priority, Hob's focus and the farmer's facing, Hob's place in the level) are automated tests (`Vestige.Dialogue`, `Vestige.DialogueBox`, `Vestige.Robots`, `Vestige.UI`, `Vestige.Level`, `Vestige.Clock`), and an off-screen run showed the box, the held clock (06:20 before and during a talk) and the hidden hints. What is left is input on real devices and how it looks and feels. Regenerate the project files first (new `Characters/` folder).
+
+- [x] **Hob's look** (why a person: a new look for the first time): press Play. From where the farmer starts, Hob is in view ahead and to the left, a cream robot about 1.5 m tall with olive panels. Walk up: Hob's head shows a dark face screen with two cyan eyes that blink now and then, and Hob doesn't float or sink. The cyan reads as clearly greener than the water's azure. If the face screen or the eyes don't show from any side, say so.
+- [x] **Keyboard talk** (why a person: input on real hardware): walk to Hob and face the robot; the prompt reads "F Talk to Hob" and F opens the box (bottom centre, name tab "Hob", the line typing out, a hint at the bottom right such as "F Next"). While a line is typing, F, Space, Enter or a left click shows the whole line and does nothing else; the next press goes on. On the reply line, the arrow keys or the mouse move the highlight, F, Enter or a click picks one, and Hob answers. Escape ends the talk at any point. No single press skips a line.
+- [x] **While talking** (why a person: input feel): you can't walk, look, use E or F on the world; the clock and date don't move while you read, and the prompt and the key-hint line are hidden. If W was held when you pressed F, the farmer doesn't keep walking after the box closes. The mouse cursor shows during the talk and is gone afterwards, and the camera follows the mouse again.
+- [x] **Turning and typing feel** (why a person: feel): Hob turns to the farmer and the farmer to Hob in about a third of a second, and Hob turns back when the talk ends; the typing speed is comfortable, and the line wrapping to a new row while it types doesn't distract. Hob is solid: the farmer walks round him.
+- [x] **Which line** (why a person: reading it as a player): the first talk is the meeting, with three replies; a second talk the same day gives a short "again" line; sleep, and the next talk is a greeting for the time of day; after midnight the greeting is the late one. After a save and reload the greeting plays again (expected).
+- [x] **Gamepad** (why a person: input on real hardware; when an Xbox-style pad is at hand): B opens the talk and advances it, A advances too, B never closes it, Start (the menu button) ends a talk early, and the D-pad or the left stick moves the reply highlight; no mouse cursor shows. The hint reads "B Next". In the editor (PIE), the pad works at once without clicking into the viewport first, and the D-pad reaches the first reply as soon as the replies show.
+- [x] **The box at a small size** (why a person: layout; at the smoke test): in a 1280 by 800 window the box is readable, the three replies fit, and the name tab and hint don't overlap the text.
+- [x] **At night** (why a person: lighting; at the smoke test): with `SkipToTime 2130`, Hob is easy to find by Hob's eyes and still reads as a robot, not a pair of floating lights.
+
+### The controls after a talk, 2026-11-27
+
+The commit is the one titled "Give the farmer back the controls after a talk, and make Hob's eyes glow". After a talk the HUD takes the Game input config back (it had stopped being the router's leaf); an off-screen run showed the config change and the hidden cursor, and `Vestige.HudInput` covers the rule.
+
+- [x] **Controls after a talk** (why a person: the router needs a real viewport, and movement can't be injected off-screen): talk to Hob and end the talk three ways, by its last line, by Escape and by gamepad Start. Each time the farmer walks and looks around at once, the mouse cursor is hidden, and the tool works.
+- [x] **Hob's eyes, again** (why a person: a look): by day and at night (`SkipToTime 2130`) Hob's eyes are visibly cyan, greener than the water's azure, not white in the centre.
