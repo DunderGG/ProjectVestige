@@ -204,6 +204,29 @@ namespace VestigeGameplayTags
 	/** The conversation component: the character has nothing to say now, so no talk starts. */
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Feedback_Dialogue_NothingToSay);
 
+	// Milestone tags: the farm's firsts, each reached once per game through UVestigeMilestoneSubsystem (Systems.md, section 11).
+
+	/** The parent of every milestone tag. */
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Milestone);
+
+	/** Milestone: The first crop was harvested. */
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Milestone_Farm_Harvested);
+
+	/** Milestone: A harvest first cleaned the soil. */
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Milestone_Farm_Cleaned);
+
+	/** Milestone: A mutated crop was first harvested. */
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Milestone_Farm_HarvestedMutated);
+
+	/** Milestone: A seed was first planted. */
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Milestone_Farm_Planted);
+
+	/** Milestone: A crop that cleans the soil was first planted. */
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Milestone_Farm_PlantedCleaningCrop);
+
+	/** Milestone: The shipping bin first paid. */
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Milestone_Farm_Sold);
+
 	/** The parent of every season tag. The seasons themselves are data: the calendar in DA_GameData names them (Systems.md, section 4). */
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Season);
 

@@ -5,6 +5,8 @@
 
 #include "Content/VestigeContentCatalog.h"
 #include "Content/VestigeItemData.h"
+#include "AbilitySystem/VestigeGameplayTags.h"
+#include "Core/VestigeMilestoneSubsystem.h"
 #include "Core/VestigeSaveRegistry.h"
 #include "Engine/GameInstance.h"
 #include "Engine/World.h"
@@ -26,6 +28,7 @@ void UFarmShippingSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 	// The catalogue gives the items' prices at the sale; the registry holds the save part.
 	Catalog = Collection.InitializeDependency<UVestigeContentCatalog>();
 	SaveRegistry = Collection.InitializeDependency<UVestigeSaveRegistry>();
+	Milestones = Collection.InitializeDependency<UVestigeMilestoneSubsystem>();
 	if (SaveRegistry)
 	{
 		SaveRegistry->RegisterGameOwner(*this);
@@ -96,8 +99,8 @@ int32 UFarmShippingSubsystem::SellShipment(UVestigeWalletComponent& Wallet)
 		const UVestigeItemData* Item = Catalog ? Catalog->Find<UVestigeItemData>(Stack.ItemId) : nullptr;
 		if (!Item || !Item->CanBeSold())
 		{
-			VESTIGE_LOG(this, LogFarm, Warning, "{Count} of {Item} in the bin no longer sell, so they pay nothing and are dropped.", Stack.Count,
-				Stack.ItemId.PrimaryAssetName.ToString());
+			VESTIGE_LOG(this, LogFarm, Warning, "{Count} of {Item} in the bin no longer sell, so they pay nothing and are dropped.",
+				Stack.Count, Stack.ItemId.PrimaryAssetName.ToString());
 			continue;
 		}
 		Sum += static_cast<int64>(Stack.Count) * Item->GetSellPrice();
@@ -106,12 +109,17 @@ int32 UFarmShippingSubsystem::SellShipment(UVestigeWalletComponent& Wallet)
 
 	if (Sum > VestigeWallet::MaxMoney)
 	{
-		VESTIGE_LOG(this, LogFarm, Warning, "The sale of {Sum} is above the limit of {Max}, so it pays the limit.", Sum, VestigeWallet::MaxMoney);
+		VESTIGE_LOG(
+			this, LogFarm, Warning, "The sale of {Sum} is above the limit of {Max}, so it pays the limit.", Sum, VestigeWallet::MaxMoney);
 	}
 	const int32 Total = static_cast<int32>(FMath::Min<int64>(Sum, VestigeWallet::MaxMoney));
 	if (Total > 0)
 	{
 		Wallet.AddMoney(Total);
+		if (Milestones)
+		{
+			Milestones->Reach(VestigeGameplayTags::Milestone_Farm_Sold);
+		}
 	}
 	Shipment.Reset();
 	VESTIGE_LOG(this, LogFarm, Log, "Sold {Stacks} for {Total}.", FString::Join(Sold, TEXT(", ")), Total);

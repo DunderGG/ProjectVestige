@@ -11,6 +11,7 @@
 
 class UVestigeContentCatalog;
 class UVestigeItemData;
+class UVestigeMilestoneSubsystem;
 class UVestigeSaveRegistry;
 class UVestigeWalletComponent;
 
@@ -75,4 +76,8 @@ private:
 
 	UPROPERTY()
 	TObjectPtr<UVestigeSaveRegistry> SaveRegistry;
+
+	/** The first sale is reached here. */
+	UPROPERTY()
+	TObjectPtr<UVestigeMilestoneSubsystem> Milestones;
 };

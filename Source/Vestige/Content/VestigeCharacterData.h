@@ -25,9 +25,23 @@ public:
 	/** What the character is: Vestige.Character.Robot or Vestige.Character.Human. */
 	const FGameplayTagContainer& GetCharacterTags() const { return CharacterTags; }
 
+	/** The trust points each milestone gives toward this character: how the farm's firsts count (Systems.md, section 11). */
+	const TMap<FGameplayTag, int32>& GetTrustFromMilestones() const { return TrustFromMilestones; }
+
+#if WITH_EDITOR
+	/** Reports a TrustFromMilestones entry with an invalid tag or fewer than 1 point. */
+	virtual EDataValidationResult IsDataValid(FDataValidationContext& Context) const override;
+#endif
+
 #if WITH_DEV_AUTOMATION_TESTS
 	/** For tests only. Characters get their tags in the editor. */
 	void SetCharacterTagsForTests(const FGameplayTagContainer& InCharacterTags) { CharacterTags = InCharacterTags; }
+
+	/** For tests only. Characters get their trust points in the editor. */
+	void SetTrustFromMilestonesForTests(const TMap<FGameplayTag, int32>& InTrustFromMilestones)
+	{
+		TrustFromMilestones = InTrustFromMilestones;
+	}
 #endif
 
 protected:
@@ -37,4 +51,11 @@ private:
 	/** Whether the character is a robot or a human, under Vestige.Character. Nothing in C++ reads them yet. */
 	UPROPERTY(EditDefaultsOnly, Category = "Character", meta = (AllowPrivateAccess = "true", Categories = "Vestige.Character"))
 	FGameplayTagContainer CharacterTags;
+
+	/**
+	 * The trust points each milestone (Vestige.Milestone.Farm.Harvested) gives the player's trust with this character, at least 1.
+	 * Counted when asked, never stored, so a milestone reached before meeting the character still counts.
+	 */
+	UPROPERTY(EditDefaultsOnly, Category = "Character", meta = (AllowPrivateAccess = "true", Categories = "Vestige.Milestone"))
+	TMap<FGameplayTag, int32> TrustFromMilestones;
 };

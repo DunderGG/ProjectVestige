@@ -1138,6 +1138,46 @@ namespace FarmFieldTests
 			// At the settings' chance some crops of 64 ripen mutated and some don't, unless the chance is 0 or 1.
 			ASSERT_THAT(IsTrue(Chance <= 0.f || Chance >= 1.f || (MutatedCount > 0 && MutatedCount < 64)));
 		}
+
+		// ---- The night's work is done ----
+
+		TEST_METHOD(TheFieldsTellTheyAdvancedAfterEveryFieldsNight)
+		{
+			UFarmField& Farm = Fields->FindOrAddField(FarmId, FIntPoint(8, 8));
+			UFarmField& Other = Fields->FindOrAddField(TEXT("Base.Other"), FIntPoint(4, 4));
+			PlantTurnip(Farm, FIntPoint(0, 0));
+			PlantTurnip(Other, FIntPoint(1, 1));
+			TArray<int32> Days;
+			TArray<int32> GrowthAtTheEvent;
+			Fields->OnFieldsAdvanced.AddLambda(
+				[&](int32 Day)
+				{
+					Days.Add(Day);
+					GrowthAtTheEvent.Add(Farm.GetTile(FIntPoint(0, 0))->GetGrowthDays());
+					GrowthAtTheEvent.Add(Other.GetTile(FIntPoint(1, 1))->GetGrowthDays());
+				});
+
+			Clock->StartNextDay();
+
+			// Once, for the new day, when both fields had grown and their water had fallen.
+			ASSERT_THAT(IsTrue(Days == TArray<int32>{Clock->GetCurrentDay()}));
+			ASSERT_THAT(IsTrue(GrowthAtTheEvent == TArray<int32>{1, 1}));
+		}
+
+		TEST_METHOD(TheFieldsTellNothingWhenNoNightPasses)
+		{
+			Fields->FindOrAddField(FarmId, FIntPoint(8, 8));
+			int32 Events = 0;
+			Fields->OnFieldsAdvanced.AddLambda(
+				[&Events](int32)
+				{
+					++Events;
+				});
+
+			ASSERT_THAT(IsTrue(Clock->JumpToDay(5)));
+
+			ASSERT_THAT(IsTrue(Events == 0));
+		}
 	};
 }
 

@@ -15,6 +15,7 @@
 #include "Content/VestigeDialogueData.h"
 #include "Content/VestigeDialogueOutcome.h"
 #include "Core/VestigeFeedbackSubsystem.h"
+#include "Core/VestigeMilestoneSubsystem.h"
 #include "Core/VestigePlayerComponents.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerState.h"
@@ -168,11 +169,20 @@ FVestigeDialogueContext UVestigeConversationComponent::MakeContext(const UVestig
 	{
 		Context.Day = Clock->GetCurrentDay();
 		Context.TimeOfDay = Clock->GetTimeOfDay();
+		const FVestigeDate Date = Clock->GetDate();
+		Context.Season = Date.Season;
+		Context.DayOfSeason = Date.DayOfSeason;
 	}
 	if (const UVestigeRelationshipComponent* Relationships = UVestigeRelationshipComponent::Find(GetOwner()))
 	{
 		Context.bHasMet = Relationships->HasMet(Speaker.GetPrimaryAssetId());
 		Context.TalksToday = Relationships->GetTalksToday(Speaker.GetPrimaryAssetId(), Context.Day);
+		Context.Trust = Relationships->GetTrust(Speaker);
+		Context.FlagDays = Relationships->GetFlagDays(Speaker.GetPrimaryAssetId());
+	}
+	if (const UVestigeMilestoneSubsystem* Milestones = UVestigeMilestoneSubsystem::Get(GetWorld()))
+	{
+		Context.Milestones = Milestones->GetReached();
 	}
 	return Context;
 }
@@ -231,11 +241,21 @@ void UVestigeConversationComponent::EnterLine(int32 Index)
 			{
 				return Condition && Condition->IsMet(Context);
 			});
-		if (bListed)
+		if (!bListed)
 		{
-			ListedChoices.Add(ChoiceIndex);
-			ChoiceTexts.Add(Choice.Text);
+			continue;
 		}
+
+		// The box lists at most MaxChoices; more holding at once is a data mistake, and the box's buttons must match the list.
+		if (ListedChoices.Num() >= VestigeDialogue::MaxChoices)
+		{
+			VESTIGE_LOG(this, LogVestigeDialogue, Warning,
+				"{Conversation} line {Line} has more than {Max} replies holding at once, so {Reply} and any after it are left out.",
+				Dialogue->GetContentId().ToString(), Line.LineId.ToString(), VestigeDialogue::MaxChoices, Choice.ReplyId.ToString());
+			break;
+		}
+		ListedChoices.Add(ChoiceIndex);
+		ChoiceTexts.Add(Choice.Text);
 	}
 	for (const UVestigeDialogueOutcome* Outcome : Line.Outcomes)
 	{
@@ -254,6 +274,11 @@ void UVestigeConversationComponent::ShowLine(int32 Index)
 
 void UVestigeConversationComponent::GoToLine(FName LineId)
 {
+	if (LineId == VestigeDialogue::EndTalk)
+	{
+		EndConversation();
+		return;
+	}
 	const TArray<FVestigeDialogueLine>& Lines = Dialogue->GetLines();
 	const int32 Index = Lines.IndexOfByPredicate(
 		[LineId](const FVestigeDialogueLine& Line)
@@ -273,6 +298,10 @@ void UVestigeConversationComponent::GoToLine(FName LineId)
 int32 UVestigeConversationComponent::FindNextLineIndex(const FVestigeDialogueLine& Line) const
 {
 	const TArray<FVestigeDialogueLine>& Lines = Dialogue->GetLines();
+	if (Line.Next == VestigeDialogue::EndTalk)
+	{
+		return INDEX_NONE;
+	}
 	if (Line.Next.IsNone())
 	{
 		const int32 Following = CurrentLine + 1;

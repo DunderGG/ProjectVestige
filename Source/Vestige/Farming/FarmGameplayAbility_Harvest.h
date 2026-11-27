@@ -28,6 +28,9 @@ private:
 	/** Whether the inventory has room for Crop's yield of HarvestItemId, the tile's harvest item (the mutated one when mutated). */
 	bool HasRoomForHarvest(const FPrimaryAssetId& HarvestItemId, const UFarmCropData& Crop) const;
 
-	/** Tells the player a harvest cleaned its tile, when the level fell: Farm.Cleaned, or Farm.Cleaned.Clean at 0. */
+	/**
+	 * When a harvest cleaned its tile, the level fell: reaches the first-cleaning milestone and tells the player, Farm.Cleaned, or
+	 * Farm.Cleaned.Clean at 0.
+	 */
 	void ReportCleaning(int32 LevelBefore, int32 LevelAfter) const;
 };

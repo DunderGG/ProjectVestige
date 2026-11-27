@@ -6,6 +6,7 @@
 #include "AbilitySystem/VestigeGameplayTags.h"
 #include "Content/FarmCropData.h"
 #include "Core/VestigeFeedbackSubsystem.h"
+#include "Core/VestigeMilestoneSubsystem.h"
 #include "Farming/FarmField.h"
 #include "Farming/FarmingComponent.h"
 #include "Farming/FarmTileState.h"
@@ -51,6 +52,7 @@ bool UFarmGameplayAbility_Harvest::UseOn(const FIntPoint& Tile)
 	// Copied before the harvest, which clears the mutation and lowers the level of this same tile.
 	const FPrimaryAssetId HarvestItemId = State->GetHarvestItemId();
 	const int32 LevelBefore = State->GetContamination();
+	const bool bWasMutated = State->IsMutated();
 
 	// Room is asked before harvesting, so a full bag leaves the crop in the ground instead of destroying it.
 	if (!HasRoomForHarvest(HarvestItemId, *Crop) || !Field->Harvest(Tile))
@@ -59,6 +61,13 @@ bool UFarmGameplayAbility_Harvest::UseOn(const FIntPoint& Tile)
 	}
 	GetInventory()->AddItem(HarvestItemId, Crop->GetYield());
 	ReportCleaning(LevelBefore, State->GetContamination());
+	if (bWasMutated)
+	{
+		if (UVestigeMilestoneSubsystem* Milestones = UVestigeMilestoneSubsystem::Get(GetWorld()))
+		{
+			Milestones->Reach(VestigeGameplayTags::Milestone_Farm_HarvestedMutated);
+		}
+	}
 	if (UFarmingComponent* FarmingComponent = GetFarming())
 	{
 		FarmingComponent->ReportCropHarvested(*Crop, Tile);
@@ -77,6 +86,10 @@ void UFarmGameplayAbility_Harvest::ReportCleaning(int32 LevelBefore, int32 Level
 	if (LevelAfter >= LevelBefore)
 	{
 		return;
+	}
+	if (UVestigeMilestoneSubsystem* Milestones = UVestigeMilestoneSubsystem::Get(GetWorld()))
+	{
+		Milestones->Reach(VestigeGameplayTags::Milestone_Farm_Cleaned);
 	}
 	const FGameplayTag Reason =
 		LevelAfter == 0 ? VestigeGameplayTags::Feedback_Farm_Cleaned_Clean : VestigeGameplayTags::Feedback_Farm_Cleaned;

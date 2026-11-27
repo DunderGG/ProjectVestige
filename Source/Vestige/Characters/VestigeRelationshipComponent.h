@@ -6,14 +6,18 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Core/VestigeSaveable.h"
+#include "GameplayTagContainer.h"
 #include "UObject/PrimaryAssetId.h"
 #include "VestigeRelationshipComponent.generated.h"
 
+class UVestigeCharacterData;
+
 /**
  * How the player stands with each character (Systems.md, section 11), by the character's primary asset ID: whether they have
- * met, which is saved, and how many talks with them started today, which isn't (after a reload the day's greeting plays
- * again). Lives on the player state, so it outlives the pawn; characters themselves keep no feelings about the player.
- * Saves under Base.Relationships through UVestigeSaveRegistry while it is in play. The trust track adds trust and flags.
+ * met, the trust earned by talking and the flags set (each with the day it was last set), which are saved, and how many talks
+ * with them started today, which isn't (after a reload the day's greeting plays again). Lives on the player state, so it
+ * outlives the pawn; characters themselves keep no feelings about the player.
+ * Saves under Base.Relationships through UVestigeSaveRegistry while it is in play.
  */
 UCLASS(ClassGroup = (Characters), meta = (BlueprintSpawnableComponent))
 class UVestigeRelationshipComponent : public UActorComponent, public IVestigeSaveable
@@ -34,6 +38,28 @@ public:
 
 	/** A talk with Character starts on Day: counts it, and marks Character met. */
 	void RecordTalk(const FPrimaryAssetId& Character, int32 Day);
+
+	/** Adds Amount to the trust Character has earned by talking. Does nothing for an Amount below 1. Logs the new trust. */
+	void AddTrust(const UVestigeCharacterData& Character, int32 Amount);
+
+	/** The trust points Character has earned by talking, not counting the farm's firsts. */
+	int32 GetEarnedTrust(const FPrimaryAssetId& Character) const;
+
+	/**
+	 * How much the player trusts Character: the points earned plus, for each of the character's TrustFromMilestones that
+	 * UVestigeMilestoneSubsystem has reached, its points. Worked out now, never stored, so a first reached before meeting the
+	 * character still counts and nothing counts twice.
+	 */
+	int32 GetTrust(const UVestigeCharacterData& Character) const;
+
+	/** Sets Flag for Character on Day, or moves its day to Day if it is set. Does nothing for an invalid tag. */
+	void SetFlag(const UVestigeCharacterData& Character, const FGameplayTag& Flag, int32 Day);
+
+	/** Whether Character's Flag is set, whenever it was set. */
+	bool HasFlag(const FPrimaryAssetId& Character, const FGameplayTag& Flag) const;
+
+	/** Character's flags, each with the day it was last set. Empty for a character with none. */
+	const TMap<FGameplayTag, int32>& GetFlagDays(const FPrimaryAssetId& Character) const;
 
 	virtual FName GetSaveKey() const override;
 	virtual int32 GetSaveVersion() const override;
@@ -58,6 +84,11 @@ private:
 		int32 Count = 0;
 	};
 
+	/** Forgets all of it. */
+	void Clear();
+
 	TSet<FPrimaryAssetId> Met;
 	TMap<FPrimaryAssetId, FTalksOnDay> Talks;
+	TMap<FPrimaryAssetId, int32> EarnedTrust;
+	TMap<FPrimaryAssetId, TMap<FGameplayTag, int32>> Flags;
 };

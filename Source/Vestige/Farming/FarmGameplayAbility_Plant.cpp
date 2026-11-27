@@ -9,6 +9,7 @@
 #include "Content/VestigeCalendar.h"
 #include "Content/VestigeContentCatalog.h"
 #include "Core/VestigeFeedbackSubsystem.h"
+#include "Core/VestigeMilestoneSubsystem.h"
 #include "Farming/FarmField.h"
 #include "Farming/FarmingComponent.h"
 #include "Farming/FarmTileState.h"
@@ -101,6 +102,15 @@ bool UFarmGameplayAbility_Plant::UseOn(const FIntPoint& Tile)
 	// ability back once its use has finished.
 	UVestigeInventoryComponent* Inventory = GetInventory();
 	Inventory->RemoveItemFromSlot(Inventory->GetSelectedHotbarSlot(), 1);
+
+	if (UVestigeMilestoneSubsystem* Milestones = UVestigeMilestoneSubsystem::Get(GetWorld()))
+	{
+		Milestones->Reach(VestigeGameplayTags::Milestone_Farm_Planted);
+		if (Crop->GetContaminationCleanedPerHarvest() > 0)
+		{
+			Milestones->Reach(VestigeGameplayTags::Milestone_Farm_PlantedCleaningCrop);
+		}
+	}
 	return true;
 }
 

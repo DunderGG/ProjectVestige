@@ -107,6 +107,18 @@ namespace VestigeGameplayTags
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Feedback_Dialogue_NothingToSay, "Vestige.Feedback.Dialogue.NothingToSay",
 		"Feedback: the character has nothing to say now, so no talk starts.");
 
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Milestone, "Vestige.Milestone", "The parent of every milestone tag: the farm's firsts.");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(
+		Milestone_Farm_Harvested, "Vestige.Milestone.Farm.Harvested", "Milestone: The first crop was harvested.");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(
+		Milestone_Farm_Cleaned, "Vestige.Milestone.Farm.Cleaned", "Milestone: A harvest first cleaned the soil.");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(
+		Milestone_Farm_HarvestedMutated, "Vestige.Milestone.Farm.HarvestedMutated", "Milestone: A mutated crop was first harvested.");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Milestone_Farm_Planted, "Vestige.Milestone.Farm.Planted", "Milestone: A seed was first planted.");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Milestone_Farm_PlantedCleaningCrop, "Vestige.Milestone.Farm.PlantedCleaningCrop",
+		"Milestone: A crop that cleans the soil was first planted.");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Milestone_Farm_Sold, "Vestige.Milestone.Farm.Sold", "Milestone: The shipping bin first paid.");
+
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(
 		Season, "Vestige.Season", "The parent of every season tag; the calendar in DA_GameData lists the seasons.");
 

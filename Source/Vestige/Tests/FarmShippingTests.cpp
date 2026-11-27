@@ -11,6 +11,7 @@
 #include "Content/VestigeContentCatalog.h"
 #include "Content/VestigeItemData.h"
 #include "Core/VestigeFeedbackSubsystem.h"
+#include "Core/VestigeMilestoneSubsystem.h"
 #include "Core/VestigeSaveRecord.h"
 #include "Core/VestigeSaveRegistry.h"
 #include "CQTest.h"
@@ -291,6 +292,22 @@ namespace FarmShippingTests
 
 			ASSERT_THAT(AreEqual(Paid, 580));
 			ASSERT_THAT(AreEqual(Purse.GetMoney(), 580));
+		}
+
+		TEST_METHOD(APaidSaleReachesTheFirstSale)
+		{
+			UVestigeMilestoneSubsystem* Milestones = UVestigeMilestoneSubsystem::Get(&Spawner.GetWorld());
+			ASSERT_THAT(IsNotNull(Milestones));
+			UVestigeWalletComponent& Purse = MakeWallet();
+
+			// An empty bin pays nothing, which is no sale.
+			ASSERT_THAT(AreEqual(Shipment->SellShipment(Purse), 0));
+			ASSERT_THAT(IsFalse(Milestones->HasReached(VestigeGameplayTags::Milestone_Farm_Sold)));
+
+			Ship(MakeItem(TEXT("Test.Beet"), 25), 2);
+			ASSERT_THAT(AreEqual(Shipment->SellShipment(Purse), 50));
+
+			ASSERT_THAT(IsTrue(Milestones->HasReached(VestigeGameplayTags::Milestone_Farm_Sold)));
 		}
 
 		TEST_METHOD(TheSaleEmptiesTheBinAndReturnsTheTotal)

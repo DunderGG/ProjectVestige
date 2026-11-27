@@ -30,7 +30,7 @@ Contents
 - **Now:** the rest of milestone 2, the one-season vertical slice. What is left is the caretaker robot, the sprinkler, dirty water, the screens a first-time player needs, and the slice play-test that ends the milestone.
 - **Next up**, in order (reviewed 2026-11-24, @DunderGG said yes; the hotbar moved before the sprinkler and the feel pass and the day-one test added on 2026-11-26, from [RoadmapSuggestions.md](RoadmapSuggestions.md) items 1, 2, 16 and 17):
   1. The open play-tests of contamination and the seed shop (the housekeeping quick fixes before them were done on 2026-11-25).
-  2. Hob's relationship track, and how the player sees his opinion change, with his short lines on events ([4.4](#44-the-caretaker-robot)).
+  2. Hob's short lines on events ([4.4](#44-the-caretaker-robot)); Hob's trust track, before them, was done on 2026-11-27.
   3. The hotbar and the bag on screen ([4.6](#46-interface-and-input)), before the sprinkler, so the player buys and places it with an inventory they can see (2026-11-26).
   4. [4.5](#45-automation-and-selling): placing objects on the farm grid, and the sprinkler, bought at the seed shop.
   5. Dirty water and its source ([4.2](#42-farming-depth)).
@@ -167,8 +167,6 @@ The code changes that the slice's content depends on. Doing them first means add
 ### 4.4 The caretaker robot
 
 - [ ] Hob's Blender model, replacing the placeholder body (`BP_Hob`'s cubes, built 2026-11-26) and keeping the cyan eyes material `M_HobEyes` for the eye slot
-- [ ] One relationship track with Hob, who starts as a dutiful servant rather than a sceptic; trust grows through talking, gifts and working together, and the slice arc is in [Hob's character sheet](Spoilers/Characters/Hob.md#vertical-slice-arc)
-   - How the player sees his opinion change, one of the play-test goals: his lines change and he helps on his own initiative ([GameDesign.md, section 8](GameDesign.md#relationships)), with no number on screen unless the play-test shows it is needed. Designed with the game designer and the writer (roadmap review, 2026-11-24)
 - [ ] Hob's short lines on events, said once each in passing with no dialogue box (the player's first mutated crop, watering in the rain once there is rain, still awake past midnight, the first sale): they make him react to the world with no new system, using the dialogue data above. The lines are the writer's; which events, and how often he may speak, are designed with the game designer (2026-11-26, [RoadmapSuggestions.md](RoadmapSuggestions.md) item 16)
 - [ ] Hob guides the player through the first days as a tutorial
    - A new game opens with a fade-in on the farm and a few lines from Hob, not the cryo-pod scene, which stays in [Story](#story): a level, a sequence and writing for one minute is too much before the slice play-test (2026-11-26)

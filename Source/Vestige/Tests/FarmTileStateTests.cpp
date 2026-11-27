@@ -441,15 +441,15 @@ namespace FarmTileStateTests
 		}
 
 		// Contamination (Systems/27-Contamination.md). A made-up crop keeps the C++ default response {1, 2, 0}.
-		static inline const FPrimaryAssetId MutatedItemId = FPrimaryAssetId(UVestigeItemData::AssetType, TEXT("Test.MutatedCrop"));
+		static FPrimaryAssetId MutatedItemId() { return FPrimaryAssetId(UVestigeItemData::AssetType, TEXT("Test.MutatedCrop")); }
 
-		/** A crop of Days that can mutate into MutatedItemId. */
+		/** A crop of Days that can mutate into MutatedItemId(). */
 		UFarmCropData& MakeMutableCrop(int32 Days = 3)
 		{
 			UFarmCropData& Crop = Spawner.SpawnObject<UFarmCropData>();
 			Crop.SetDaysToMatureForTests(Days);
 			Crop.SetHarvestItemIdForTests(FPrimaryAssetId(UVestigeItemData::AssetType, TEXT("Test.Crop")));
-			Crop.SetMutationForTests(MutatedItemId, TSoftObjectPtr<UStaticMesh>());
+			Crop.SetMutationForTests(MutatedItemId(), TSoftObjectPtr<UStaticMesh>());
 			return Crop;
 		}
 
@@ -643,7 +643,7 @@ namespace FarmTileStateTests
 
 			Ripe.Mutate();
 
-			ASSERT_THAT(IsTrue(Ripe.GetHarvestItemId() == MutatedItemId));
+			ASSERT_THAT(IsTrue(Ripe.GetHarvestItemId() == MutatedItemId()));
 			ASSERT_THAT(IsFalse(FFarmTileState().GetHarvestItemId().IsValid()));
 		}
 

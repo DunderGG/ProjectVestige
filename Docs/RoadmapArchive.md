@@ -338,6 +338,9 @@ When working nearby:
    - Its dialogue box is the first screen that takes the input focus, so it is built with Common UI ([4.0](#40-structure-from-the-code-review), H7) and designed with the game designer
 - [x] Characters as data assets, so more robots and humans can be added the same way
    - Done 2026-11-26, designed by the architect agent and approved by a senior Unreal C++ reviewer agent after two design rounds and two code rounds, whose approval counts as @DunderGG's on technical choices: `UVestigeCharacterData` (`Base.Hob`), talks as `UVestigeDialogueData` run by `UVestigeConversationComponent`, "has met" saved by `UVestigeRelationshipComponent`, `AVestigeNpcCharacter` (`BP_Hob`) in `L_Farm`, the lines in `ST_Dialogue` from the writer's [Hob-Everyday.md](Spoilers/Dialogue/Hob-Everyday.md), and the Common UI dialogue box ([Systems/11-Dialogue.md](Systems/11-Dialogue.md), [Systems/10-Robots.md](Systems/10-Robots.md))
+- [x] One relationship track with Hob, who starts as a dutiful servant rather than a sceptic; trust grows through talking, gifts and working together, and the slice arc is in [Hob's character sheet](Spoilers/Characters/Hob.md#vertical-slice-arc)
+   - Done 2026-11-27 as [GameDesign.md, section 8](GameDesign.md#relationships) decided: trust from asking Hob's opinion and the farm's firsts, four steps, Hob's dawn watering. Gifts are not in the slice; they come with the town's characters
+   - How the player sees his opinion change, one of the play-test goals: his lines change and he helps on his own initiative ([GameDesign.md, section 8](GameDesign.md#relationships)), with no number on screen unless the play-test shows it is needed. Designed with the game designer and the writer (roadmap review, 2026-11-24)
 
 ### 4.5 Automation and selling
 

@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayTagContainer.h"
 #include "VestigeDialogueContext.generated.h"
 
 class APlayerState;
@@ -12,7 +13,7 @@ class UVestigeCharacterData;
 /**
  * What a dialogue condition or outcome knows about the talk, filled by the conversation component before it chooses a
  * conversation: who speaks, who listens, today and the state of the player's relationship with the speaker. Our conditions
- * read only these values, so they are pure and need no world; the trust track adds Trust here (Systems.md, section 11).
+ * read only these values, so they are pure and need no world (Systems.md, section 11).
  */
 USTRUCT(BlueprintType)
 struct FVestigeDialogueContext
@@ -46,4 +47,24 @@ struct FVestigeDialogueContext
 	 */
 	UPROPERTY(BlueprintReadOnly, Category = "Dialogue")
 	int32 TalksToday = 0;
+
+	/** How much the player's trust with the speaker is: earned points plus the speaker's points for the milestones reached. */
+	UPROPERTY(BlueprintReadOnly, Category = "Dialogue")
+	int32 Trust = 0;
+
+	/** A copy of the speaker's relationship flags, each with the day it was last set. */
+	UPROPERTY(BlueprintReadOnly, Category = "Dialogue")
+	TMap<FGameplayTag, int32> FlagDays;
+
+	/** A copy of the milestones reached. */
+	UPROPERTY(BlueprintReadOnly, Category = "Dialogue")
+	FGameplayTagContainer Milestones;
+
+	/** Today's season tag, empty when the calendar has no seasons. */
+	UPROPERTY(BlueprintReadOnly, Category = "Dialogue")
+	FGameplayTag Season;
+
+	/** The day in the season, from 1. */
+	UPROPERTY(BlueprintReadOnly, Category = "Dialogue")
+	int32 DayOfSeason = 1;
 };

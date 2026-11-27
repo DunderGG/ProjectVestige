@@ -23,7 +23,11 @@
 namespace VestigeDialogueBoxTests
 {
 	const TCHAR* const BoxPath = TEXT("/Game/Vestige/UI/WBP_Dialogue.WBP_Dialogue_C");
-	const FPrimaryAssetId HobId(UVestigeCharacterData::AssetType, TEXT("Base.Hob"));
+	// A function, not a static: UVestigeCharacterData::AssetType is another file's static, which a unity build may initialize after this one.
+	FPrimaryAssetId HobId()
+	{
+		return FPrimaryAssetId(UVestigeCharacterData::AssetType, TEXT("Base.Hob"));
+	}
 
 	/** The key a text has in its string table, or an empty name. */
 	FName GetTableKey(const FText& Text)
@@ -49,7 +53,7 @@ namespace VestigeDialogueBoxTests
 			Spawner.InitializeGameSubsystems();
 			Catalog = UVestigeContentCatalog::Get(&Spawner.GetWorld());
 			ASSERT_THAT(IsNotNull(Catalog));
-			Hob = Catalog->Find<UVestigeCharacterData>(HobId);
+			Hob = Catalog->Find<UVestigeCharacterData>(HobId());
 			ASSERT_THAT(IsNotNull(Hob));
 			PlayerState = &Spawner.SpawnActor<AVestigePlayerState>();
 			PlayerState->DispatchBeginPlay();
@@ -248,8 +252,10 @@ namespace VestigeDialogueBoxTests
 			Dialogue.SetSpeakerForTests(Tester.GetPrimaryAssetId());
 			Dialogue.SetLinesForTests({Question});
 			Catalog->AddForTests(Dialogue);
+			// Four replies hold at once, which is a data mistake: the line lists the first three and says so.
+			TestRunner->AddExpectedMessagePlain(TEXT("replies holding at once"), ELogVerbosity::Warning);
 			ASSERT_THAT(IsTrue(Talk->StartConversation(*SpeakerActor, Tester)));
-			ASSERT_THAT(IsTrue(Talk->GetChoiceTexts().Num() == 4));
+			ASSERT_THAT(IsTrue(Talk->GetChoiceTexts().Num() == VestigeDialogue::MaxChoices));
 			Box->ActivateWidget();
 
 			Box->PressNext();

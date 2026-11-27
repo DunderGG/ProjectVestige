@@ -216,6 +216,8 @@ void UFarmFieldSubsystem::AdvanceFields(int32 NewDay)
 	{
 		Pair.Value->AdvanceDay(NewDay, MutationSeed);
 	}
+
+	OnFieldsAdvanced.Broadcast(NewDay);
 }
 
 void UFarmFieldSubsystem::WitherOutOfSeasonCrops(const FVestigeDate& Date)

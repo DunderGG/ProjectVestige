@@ -10,8 +10,8 @@
 
 /**
  * What showing a line or choosing a reply does: a small, named object chosen in a dialogue asset's data, as a condition is
- * (Systems.md, section 11). None is built yet; the trust track adds the first (trust, flags). An outcome changes state only
- * through its owners' functions, never by reaching into another class's data.
+ * (Systems.md, section 11). The built ones add trust and set flags. An outcome changes state only through its owners'
+ * functions, never by reaching into another class's data.
  */
 UCLASS(Abstract, Blueprintable, EditInlineNew, DefaultToInstanced)
 class UVestigeDialogueOutcome : public UObject

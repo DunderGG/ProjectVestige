@@ -85,7 +85,10 @@ public:
 	/** A tool ability changed the tile at Tile with Tool: broadcasts OnToolUsed. Called by the tool abilities only. */
 	void ReportToolUsed(const UVestigeToolData& Tool, const FIntPoint& Tile);
 
-	/** A tool ability harvested Crop from the tile at Tile: broadcasts OnCropHarvested. Called by the tool abilities only. */
+	/**
+	 * A tool ability harvested Crop from the tile at Tile: reaches the first-harvest milestone and broadcasts OnCropHarvested.
+	 * Called by the tool abilities only.
+	 */
 	void ReportCropHarvested(const UFarmCropData& Crop, const FIntPoint& Tile);
 
 	/**

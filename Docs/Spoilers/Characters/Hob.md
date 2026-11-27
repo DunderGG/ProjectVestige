@@ -28,7 +28,7 @@ The one relationship arc the vertical slice builds and tests (see [GameDesign.md
 - **Visible response:** Hob starts saying "I'd like to" and helps on their own initiative.
 - **Payoff:** the first returning memory of the family, not an item.
 
-In the game so far: the slice's first meeting, daily greetings and repeat lines are in [Dialogue/Hob-Everyday.md](../Dialogue/Hob-Everyday.md). When not needed, Hob stands by the farmhouse door.
+In the game so far: the slice's first meeting, daily greetings and repeat lines are in [Dialogue/Hob-Everyday.md](../Dialogue/Hob-Everyday.md). When not needed, Hob stands by the farmhouse door. The trust track's lines are in [Dialogue/Hob-Trust.md](../Dialogue/Hob-Trust.md): asked about the farm, Hob gives a view; told, Hob answers "as instructed". The first returning memory is of the sleeper's mother teaching Hob to judge soil by squeezing a handful in this field; Hob had forgotten the know-how was hers.
 
 ## Open decisions
 

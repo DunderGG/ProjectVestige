@@ -17,6 +17,9 @@ class UVestigeClockSubsystem;
 class UVestigeContentCatalog;
 class UVestigeSaveRegistry;
 
+/** The night's farm work is done on Day: every field has grown and dried. */
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnFarmFieldsAdvanced, int32 /*Day*/);
+
 /**
  * The farm data of every map: one UFarmField per field, by its ID, kept for the whole run of the game. A game-instance
  * subsystem, so a field outlives its map: every field grows on the clock's new day, loaded or not, and a map opened again
@@ -61,6 +64,12 @@ public:
 	 * farm until their level is replaced, so this happens before a map is opened or begins play.
 	 */
 	virtual void StartNewGame() override;
+
+	/**
+	 * Broadcast at the end of the new day, after every field has grown and its water has fallen: the place for dawn work on the
+	 * fields (Hob's watering, later the sprinkler). A listener of the clock's OnNewDay has no order against the fields.
+	 */
+	FOnFarmFieldsAdvanced OnFieldsAdvanced;
 
 	/** The seed of this game's mutation rolls: picked anew for each new game and saved, so a reloaded night rolls the same. */
 	int32 GetMutationSeed() const { return MutationSeed; }

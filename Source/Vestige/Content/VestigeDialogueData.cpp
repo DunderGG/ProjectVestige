@@ -9,6 +9,7 @@
 #include "Content/VestigeDialogueOutcome.h"
 
 #if WITH_EDITOR
+#include "Algo/Count.h"
 #include "Misc/DataValidation.h"
 #endif
 
@@ -67,6 +68,20 @@ namespace VestigeDialogueValidation
 		return false;
 	}
 
+	/** Whether every object in Objects passes its own IsDataValid (a null one is CheckNoNulls' to report). */
+	template <typename T> bool CheckEntries(const TArray<TObjectPtr<T>>& Objects, FDataValidationContext& Context)
+	{
+		bool bAllValid = true;
+		for (const T* Object : Objects)
+		{
+			if (Object && Object->IsDataValid(Context) == EDataValidationResult::Invalid)
+			{
+				bAllValid = false;
+			}
+		}
+		return bAllValid;
+	}
+
 	/** Whether Text is a usable text from a string table: warns when it isn't from one, errors when it is empty. */
 	bool CheckText(const FText& Text, FName Owner, FDataValidationContext& Context)
 	{
@@ -102,6 +117,7 @@ EDataValidationResult UVestigeDialogueData::IsDataValid(FDataValidationContext& 
 		bValid = false;
 	}
 	bValid &= VestigeDialogueValidation::CheckNoNulls(Conditions, LOCTEXT("Conditions", "Conditions"), GetFName(), Context);
+	bValid &= VestigeDialogueValidation::CheckEntries(Conditions, Context);
 
 	TSet<FName> LineIds;
 	TSet<FName> ReplyIds;
@@ -110,6 +126,11 @@ EDataValidationResult UVestigeDialogueData::IsDataValid(FDataValidationContext& 
 		if (Line.LineId.IsNone() || LineIds.Contains(Line.LineId))
 		{
 			Context.AddError(FText::Format(LOCTEXT("BadLineId", "Line ID \"{0}\" is empty or used twice."), FText::FromName(Line.LineId)));
+			bValid = false;
+		}
+		if (Line.LineId == VestigeDialogue::EndTalk)
+		{
+			Context.AddError(LOCTEXT("ReservedLineId", "Line ID \"End\" is reserved for ending the talk."));
 			bValid = false;
 		}
 		LineIds.Add(Line.LineId);
@@ -126,19 +147,29 @@ EDataValidationResult UVestigeDialogueData::IsDataValid(FDataValidationContext& 
 		{
 			bValid &= VestigeDialogueValidation::CheckText(Text, Line.LineId, Context);
 		}
-		if (!Line.Next.IsNone() && !LineIds.Contains(Line.Next))
+		if (!Line.Next.IsNone() && Line.Next != VestigeDialogue::EndTalk && !LineIds.Contains(Line.Next))
 		{
 			Context.AddError(FText::Format(LOCTEXT("BadLineNext", "Line {0} goes next to {1}, which isn't a line of this asset."),
 				FText::FromName(Line.LineId), FText::FromName(Line.Next)));
 			bValid = false;
 		}
-		if (Line.Choices.Num() > VestigeDialogue::MaxChoices)
+
+		// Replies with conditions may be more than the box lists, since the data keeps them apart; the ones without can't be.
+		const int32 UnconditionalChoices = Algo::CountIf(Line.Choices,
+			[](const FVestigeDialogueChoice& Choice)
+			{
+				return Choice.Conditions.IsEmpty();
+			});
+		if (UnconditionalChoices > VestigeDialogue::MaxChoices)
 		{
-			Context.AddError(FText::Format(LOCTEXT("TooManyChoices", "Line {0} lists more than {1} replies."), FText::FromName(Line.LineId),
-				VestigeDialogue::MaxChoices));
+			Context.AddError(
+				FText::Format(LOCTEXT("TooManyChoices",
+								  "Line {0} has more than {1} replies without conditions, so more than {1} could be listed at once."),
+					FText::FromName(Line.LineId), VestigeDialogue::MaxChoices));
 			bValid = false;
 		}
 		bValid &= VestigeDialogueValidation::CheckNoNulls(Line.Outcomes, LOCTEXT("Outcomes", "Outcomes"), Line.LineId, Context);
+		bValid &= VestigeDialogueValidation::CheckEntries(Line.Outcomes, Context);
 
 		for (const FVestigeDialogueChoice& Choice : Line.Choices)
 		{
@@ -150,7 +181,7 @@ EDataValidationResult UVestigeDialogueData::IsDataValid(FDataValidationContext& 
 			}
 			ReplyIds.Add(Choice.ReplyId);
 			bValid &= VestigeDialogueValidation::CheckText(Choice.Text, Choice.ReplyId, Context);
-			if (!LineIds.Contains(Choice.Next))
+			if (Choice.Next != VestigeDialogue::EndTalk && !LineIds.Contains(Choice.Next))
 			{
 				Context.AddError(FText::Format(LOCTEXT("BadReplyNext", "Reply {0} goes next to {1}, which isn't a line of this asset."),
 					FText::FromName(Choice.ReplyId), FText::FromName(Choice.Next)));
@@ -160,6 +191,8 @@ EDataValidationResult UVestigeDialogueData::IsDataValid(FDataValidationContext& 
 				Choice.Conditions, LOCTEXT("ReplyConditions", "Conditions"), Choice.ReplyId, Context);
 			bValid &=
 				VestigeDialogueValidation::CheckNoNulls(Choice.Outcomes, LOCTEXT("ReplyOutcomes", "Outcomes"), Choice.ReplyId, Context);
+			bValid &= VestigeDialogueValidation::CheckEntries(Choice.Conditions, Context);
+			bValid &= VestigeDialogueValidation::CheckEntries(Choice.Outcomes, Context);
 		}
 	}
 

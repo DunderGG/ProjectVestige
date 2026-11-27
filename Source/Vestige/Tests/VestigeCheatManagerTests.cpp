@@ -3,17 +3,22 @@
 
 #if WITH_DEV_AUTOMATION_TESTS
 
+#include "AbilitySystem/VestigeGameplayTags.h"
+#include "Characters/VestigeRelationshipComponent.h"
 #include "Components/ActorTestSpawner.h"
 #include "Content/FarmCropData.h"
 #include "CQTest.h"
 #include "Farming/FarmField.h"
 #include "Farming/FarmFieldMeshesComponent.h"
 #include "Farming/FarmGrid.h"
+#include "Core/VestigeMilestoneSubsystem.h"
+#include "Content/VestigeCharacterData.h"
 #include "Farming/VestigeRestComponent.h"
 #include "Game/VestigeGameMode.h"
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/PlayerState.h"
 #include "Player/VestigeCheatManager.h"
+#include "Player/VestigePlayerState.h"
 #include "Time/VestigeClockSubsystem.h"
 
 // A namespace keeps the fixture's short name from hiding other declarations in unity builds.
@@ -190,6 +195,37 @@ namespace VestigeCheatManagerTests
 				Cheats->SkipToTime(Time);
 				ASSERT_THAT(IsTrue(GetClock().GetTimeOfDay() == Skipped));
 			}
+		}
+
+		TEST_METHOD(AddTrustAndReachMilestoneAskTheirOwners)
+		{
+			AVestigePlayerState& PlayerState = Spawner.SpawnActor<AVestigePlayerState>();
+			PlayerState.DispatchBeginPlay();
+			APlayerController& Controller = Spawner.SpawnActor<APlayerController>();
+			Controller.PlayerState = &PlayerState;
+			UVestigeCheatManager* Cheats = NewObject<UVestigeCheatManager>(&Controller);
+			const UVestigeRelationshipComponent* Relationships = UVestigeRelationshipComponent::Find(&PlayerState);
+			ASSERT_THAT(IsNotNull(Relationships));
+			UVestigeMilestoneSubsystem* Milestones = UVestigeMilestoneSubsystem::Get(&Spawner.GetWorld());
+			ASSERT_THAT(IsNotNull(Milestones));
+			const FPrimaryAssetId Hob(UVestigeCharacterData::AssetType, TEXT("Base.Hob"));
+
+			Cheats->AddTrust(TEXT("Base.Hob"), 7);
+			ASSERT_THAT(IsTrue(Relationships->GetEarnedTrust(Hob) == 7));
+
+			// A bad amount or an unknown character says so and changes nothing.
+			TestRunner->AddExpectedMessagePlain(TEXT("Give a trust amount"), ELogVerbosity::Warning);
+			Cheats->AddTrust(TEXT("Base.Hob"), 0);
+			TestRunner->AddExpectedMessagePlain(TEXT("There is no character"), ELogVerbosity::Warning);
+			Cheats->AddTrust(TEXT("Base.Nobody"), 3);
+			ASSERT_THAT(IsTrue(Relationships->GetEarnedTrust(Hob) == 7));
+
+			Cheats->ReachMilestone(TEXT("Vestige.Milestone.Farm.Cleaned"));
+			ASSERT_THAT(IsTrue(Milestones->HasReached(VestigeGameplayTags::Milestone_Farm_Cleaned)));
+
+			TestRunner->AddExpectedMessagePlain(TEXT("There is no milestone tag"), ELogVerbosity::Warning);
+			Cheats->ReachMilestone(TEXT("Vestige.Milestone.Farm.NoSuchMilestone"));
+			ASSERT_THAT(IsTrue(Milestones->GetReached().Num() == 1));
 		}
 	};
 }

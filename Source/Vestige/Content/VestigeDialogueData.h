@@ -21,6 +21,12 @@ namespace VestigeDialogue
 
 	/** Longest reply text, in characters (English). */
 	constexpr int32 MaxReplyLength = 40;
+
+	/**
+	 * The reserved Next that ends the talk after the line or reply, in place of naming a line: a line with no Next goes to the
+	 * following line of the asset, so a line in the middle of the list (a reply's answer) needs this to be the last one played.
+	 */
+	inline const FName EndTalk(TEXT("End"));
 }
 
 /** One reply the player can pick under a line. */
@@ -37,7 +43,7 @@ struct FVestigeDialogueChoice
 	UPROPERTY(EditAnywhere, Category = "Dialogue")
 	FText Text;
 
-	/** The line that follows the reply. Required. */
+	/** The line that follows the reply, or VestigeDialogue::EndTalk to end the talk. Required. */
 	UPROPERTY(EditAnywhere, Category = "Dialogue")
 	FName Next;
 
@@ -64,11 +70,14 @@ struct FVestigeDialogueLine
 	UPROPERTY(EditAnywhere, Category = "Dialogue")
 	TArray<FText> Texts;
 
-	/** The line that follows. None is the next line in the asset's list, and the last line ends the talk. */
+	/** The line that follows. None is the next line in the asset's list, and the last line ends the talk; EndTalk ends it here. */
 	UPROPERTY(EditAnywhere, Category = "Dialogue")
 	FName Next;
 
-	/** The replies listed under the line, at most VestigeDialogue::MaxChoices. Nothing advances until one is chosen. */
+	/**
+	 * The replies under the line. At most VestigeDialogue::MaxChoices are listed at once, so a line may hold more entries only when
+	 * the ones beyond that carry conditions that keep them apart. Nothing advances until one is chosen.
+	 */
 	UPROPERTY(EditAnywhere, Category = "Dialogue")
 	TArray<FVestigeDialogueChoice> Choices;
 
@@ -117,8 +126,8 @@ public:
 #if WITH_EDITOR
 	/**
 	 * Reports what would break the talk: an unknown speaker, no lines, a missing or repeated ID, a Next that names no line, a
-	 * line without text, more than the most replies, a null condition or outcome. A text that isn't from a string table is a
-	 * warning.
+	 * line without text, more than the most replies without conditions, a null condition or outcome, and what each condition or
+	 * outcome reports of itself. A text that isn't from a string table is a warning.
 	 */
 	virtual EDataValidationResult IsDataValid(FDataValidationContext& Context) const override;
 #endif

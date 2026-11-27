@@ -58,4 +58,19 @@ public:
 	 */
 	UFUNCTION(Exec)
 	void SetTileContamination(int32 X, int32 Y, int32 Level);
+
+	/**
+	 * Console: AddTrust <Character> <Amount>, for example AddTrust Base.Hob 7. Gives the player that many trust points with the
+	 * character through the relationship component, as an Add Trust outcome does, so a tester reaches a step without playing
+	 * ten days. An unknown character or an Amount below 1 logs why and changes nothing.
+	 */
+	UFUNCTION(Exec)
+	void AddTrust(FName Character, int32 Amount);
+
+	/**
+	 * Console: ReachMilestone <Tag>, for example ReachMilestone Vestige.Milestone.Farm.Cleaned. Reaches the milestone through the
+	 * milestone subsystem, as the farm does. An unknown tag logs why and changes nothing.
+	 */
+	UFUNCTION(Exec)
+	void ReachMilestone(FName Tag);
 };

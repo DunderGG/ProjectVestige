@@ -13,6 +13,7 @@
 #include "Content/VestigeToolData.h"
 #include "Content/VestigeToolFragment.h"
 #include "Core/VestigeFeedbackSubsystem.h"
+#include "Core/VestigeMilestoneSubsystem.h"
 #include "Engine/World.h"
 #include "Farming/FarmLog.h"
 #include "GameFramework/Pawn.h"
@@ -202,6 +203,10 @@ void UFarmingComponent::ReportToolUsed(const UVestigeToolData& Tool, const FIntP
 
 void UFarmingComponent::ReportCropHarvested(const UFarmCropData& Crop, const FIntPoint& Tile)
 {
+	if (UVestigeMilestoneSubsystem* Milestones = UVestigeMilestoneSubsystem::Get(GetWorld()))
+	{
+		Milestones->Reach(VestigeGameplayTags::Milestone_Farm_Harvested);
+	}
 	OnCropHarvested.Broadcast(&Crop, Tile);
 }
 

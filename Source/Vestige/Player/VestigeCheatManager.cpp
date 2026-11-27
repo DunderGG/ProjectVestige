@@ -3,10 +3,14 @@
 
 #include "Player/VestigeCheatManager.h"
 
+#include "AbilitySystem/VestigeGameplayTags.h"
+#include "Characters/VestigeRelationshipComponent.h"
 #include "Content/FarmCropData.h"
+#include "Content/VestigeCharacterData.h"
 #include "Content/VestigeContentCatalog.h"
 #include "Algo/AllOf.h"
 #include "Core/VestigeLog.h"
+#include "Core/VestigeMilestoneSubsystem.h"
 #include "Engine/World.h"
 #include "Farming/FarmField.h"
 #include "Farming/FarmGrid.h"
@@ -16,6 +20,7 @@
 #include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/PlayerState.h"
+#include "GameplayTagContainer.h"
 #include "ProfilingDebugging/CpuProfilerTrace.h"
 #include "Save/VestigeSaveSubsystem.h"
 #include "Time/VestigeClockSubsystem.h"
@@ -197,5 +202,54 @@ void UVestigeCheatManager::SetTileContamination(int32 X, int32 Y, int32 Level)
 	{
 		VESTIGE_LOG(this, LogVestige, Log, "Tile {Tile} already has contamination {Level}.", Tile.ToString(),
 			Field->GetTile(Tile)->GetContamination());
+	}
+}
+
+void UVestigeCheatManager::AddTrust(FName Character, int32 Amount)
+{
+	if (Amount < 1)
+	{
+		VESTIGE_LOG(this, LogVestige, Warning, "Give a trust amount of 1 or more, for example AddTrust Base.Hob 7, not {Amount}.", Amount);
+		return;
+	}
+
+	const UVestigeContentCatalog* Catalog = UVestigeContentCatalog::Get(GetWorld());
+	const UVestigeCharacterData* Data =
+		Catalog ? Catalog->Find<UVestigeCharacterData>(FPrimaryAssetId(UVestigeCharacterData::AssetType, Character)) : nullptr;
+	if (!Data)
+	{
+		VESTIGE_LOG(this, LogVestige, Warning, "There is no character {Character}, for example Base.Hob.", Character.ToString());
+		return;
+	}
+
+	const APlayerController* Controller = GetPlayerController();
+	UVestigeRelationshipComponent* Relationships = Controller ? UVestigeRelationshipComponent::Find(Controller->PlayerState) : nullptr;
+	if (!Relationships)
+	{
+		VESTIGE_LOG(this, LogVestige, Warning, "The player has no relationship component to give trust to.");
+		return;
+	}
+	Relationships->AddTrust(*Data, Amount);
+}
+
+void UVestigeCheatManager::ReachMilestone(FName Tag)
+{
+	const FGameplayTag Milestone = FGameplayTag::RequestGameplayTag(Tag, false);
+	if (!Milestone.IsValid() || !Milestone.MatchesTag(VestigeGameplayTags::Milestone))
+	{
+		VESTIGE_LOG(
+			this, LogVestige, Warning, "There is no milestone tag {Tag}, for example Vestige.Milestone.Farm.Cleaned.", Tag.ToString());
+		return;
+	}
+
+	UVestigeMilestoneSubsystem* Milestones = UVestigeMilestoneSubsystem::Get(GetWorld());
+	if (!Milestones)
+	{
+		VESTIGE_LOG(this, LogVestige, Warning, "There are no milestones in this world to reach {Tag}.", Tag.ToString());
+		return;
+	}
+	if (!Milestones->Reach(Milestone))
+	{
+		VESTIGE_LOG(this, LogVestige, Log, "{Tag} was reached already.", Tag.ToString());
 	}
 }

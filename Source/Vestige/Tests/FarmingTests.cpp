@@ -16,6 +16,7 @@
 #include "Content/VestigeToolData.h"
 #include "Content/VestigeToolFragment.h"
 #include "Core/VestigeFeedbackSubsystem.h"
+#include "Core/VestigeMilestoneSubsystem.h"
 #include "CQTest.h"
 #include "Engine/AssetManager.h"
 #include "Farming/FarmField.h"
@@ -98,7 +99,7 @@ namespace FarmingTests
 
 		APlayerController* Controller = nullptr;
 
-		static inline const FPrimaryAssetId TurnipSeedsId = FPrimaryAssetId(UVestigeItemData::AssetType, TEXT("Base.TurnipSeeds"));
+		static FPrimaryAssetId TurnipSeedsId() { return FPrimaryAssetId(UVestigeItemData::AssetType, TEXT("Base.TurnipSeeds")); }
 
 		/** A loaded base item by its ContentId. */
 		/** The content catalogue of the fixture's game instance. */
@@ -142,7 +143,7 @@ namespace FarmingTests
 			{
 				if (Seeds > 0)
 				{
-					Slots.Add({0, TurnipSeedsId.PrimaryAssetName, Seeds});
+					Slots.Add({0, TurnipSeedsId().PrimaryAssetName, Seeds});
 				}
 			}
 			else
@@ -153,7 +154,7 @@ namespace FarmingTests
 				}
 				if (Seeds > 0)
 				{
-					Slots.Add({1, TurnipSeedsId.PrimaryAssetName, Seeds});
+					Slots.Add({1, TurnipSeedsId().PrimaryAssetName, Seeds});
 				}
 			}
 			SetBag(MoveTemp(Slots));
@@ -202,7 +203,7 @@ namespace FarmingTests
 			Timers.Tick(OneUseSeconds);
 			return true;
 		}
-		int32 GetSeeds() const { return Inventory->GetItemCount(TurnipSeedsId); }
+		int32 GetSeeds() const { return Inventory->GetItemCount(TurnipSeedsId()); }
 
 		float GetStamina() const { return AbilitySystem->GetNumericAttribute(UVestigeStaminaSet::GetStaminaAttribute()); }
 		float GetMaxStamina() const { return AbilitySystem->GetNumericAttribute(UVestigeStaminaSet::GetMaxStaminaAttribute()); }
@@ -468,7 +469,7 @@ namespace FarmingTests
 			Hold(TEXT("Base.Hand"), 0);
 
 			// Every slot holds a full stack, so the harvest has nowhere to go.
-			const UVestigeItemData* Seed = GetBaseItem(TurnipSeedsId.PrimaryAssetName);
+			const UVestigeItemData* Seed = GetBaseItem(TurnipSeedsId().PrimaryAssetName);
 			const UVestigeItemData* Turnip = GetBaseItem(TEXT("Base.Turnip"));
 			ASSERT_THAT(IsNotNull(Seed));
 			ASSERT_THAT(IsNotNull(Turnip));
@@ -651,7 +652,7 @@ namespace FarmingTests
 		{
 			ListenToFeedback();
 			Grid->GetField()->Till(TargetCoordinates);
-			HoldSeeds(TurnipSeedsId.PrimaryAssetName, 3);
+			HoldSeeds(TurnipSeedsId().PrimaryAssetName, 3);
 			ASSERT_THAT(IsTrue(Clock().JumpToDay(Clock().GetCalendar().GetDaysPerSeason() + 1)));
 
 			UseToolAndFinish();
@@ -667,7 +668,7 @@ namespace FarmingTests
 		TEST_METHOD(TheSeasonIsReportedBeforeTheTile)
 		{
 			ListenToFeedback();
-			HoldSeeds(TurnipSeedsId.PrimaryAssetName, 3);
+			HoldSeeds(TurnipSeedsId().PrimaryAssetName, 3);
 			ASSERT_THAT(IsTrue(Clock().JumpToDay(Clock().GetCalendar().GetDaysPerSeason() + 1)));
 
 			UseToolAndFinish();
@@ -961,8 +962,8 @@ namespace FarmingTests
 		/** A bag with the hoe, the watering can and two stacks of turnip seeds in hotbar slots 0 to 3, the hoe in hand. */
 		void FillHotbar()
 		{
-			SetBag({{0, TEXT("Base.Hoe"), 1}, {1, TEXT("Base.WateringCan"), 1}, {2, TurnipSeedsId.PrimaryAssetName, 5},
-				{3, TurnipSeedsId.PrimaryAssetName, 5}});
+			SetBag({{0, TEXT("Base.Hoe"), 1}, {1, TEXT("Base.WateringCan"), 1}, {2, TurnipSeedsId().PrimaryAssetName, 5},
+				{3, TurnipSeedsId().PrimaryAssetName, 5}});
 		}
 
 		/** The tool asset with this ContentId. */
@@ -1123,10 +1124,10 @@ namespace FarmingTests
 			UVestigeToolFragment* BeetTool = NewObject<UVestigeToolFragment>(BeetSeeds);
 			BeetTool->SetToolIdForTests(FPrimaryAssetId(UVestigeToolData::AssetType, TEXT("Base.Seeds")));
 			BeetSeeds->AddFragmentForTests(BeetTool);
-			const UVestigeItemData* TurnipSeeds = GetBaseItem(TurnipSeedsId.PrimaryAssetName);
+			const UVestigeItemData* TurnipSeeds = GetBaseItem(TurnipSeedsId().PrimaryAssetName);
 			ASSERT_THAT(IsNotNull(TurnipSeeds));
 			ASSERT_THAT(IsTrue(Catalog().AddForTests(*BeetSeeds)));
-			SetBag({{0, TurnipSeedsId.PrimaryAssetName, 3}, {1, BeetSeeds->GetContentId(), 3}, {5, TurnipSeedsId.PrimaryAssetName, 3}}, 1);
+			SetBag({{0, TurnipSeedsId().PrimaryAssetName, 3}, {1, BeetSeeds->GetContentId(), 3}, {5, TurnipSeedsId().PrimaryAssetName, 3}}, 1);
 			Grid->GetField()->Till(TargetCoordinates);
 
 			UseToolAndFinish();
@@ -1199,7 +1200,7 @@ namespace FarmingTests
 			// the watering can, whose grant is queued, and when the can comes into hand, the hoe, which takes the queued grant
 			// back.
 			Grid->GetField()->Till(TargetCoordinates);
-			SetBag({{0, TurnipSeedsId.PrimaryAssetName, 1}, {1, TEXT("Base.Hoe"), 1}, {2, TEXT("Base.WateringCan"), 1}});
+			SetBag({{0, TurnipSeedsId().PrimaryAssetName, 1}, {1, TEXT("Base.Hoe"), 1}, {2, TEXT("Base.WateringCan"), 1}});
 			const UVestigeToolData* Can = GetBaseTool(TEXT("Base.WateringCan"));
 			const FDelegateHandle Switcher = FarmingComponent->OnToolChanged.AddLambda(
 				[this, Can]()
@@ -1610,7 +1611,7 @@ namespace FarmingTests
 		{
 			WitherTargetCrop();
 			Hold(TEXT("Base.Hand"), 0);
-			const UVestigeItemData* Seed = GetBaseItem(TurnipSeedsId.PrimaryAssetName);
+			const UVestigeItemData* Seed = GetBaseItem(TurnipSeedsId().PrimaryAssetName);
 			ASSERT_THAT(IsNotNull(Seed));
 			TArray<FVestigeInventorySlotSaveData> FullBag;
 			for (int32 Slot = 0; Slot < Inventory->GetSlots().Num(); ++Slot)
@@ -1740,7 +1741,7 @@ namespace FarmingTests
 			ListenToFeedback();
 			Grid->GetField()->Till(TargetCoordinates);
 			Contaminate(TargetCoordinates, 2);
-			HoldSeeds(TurnipSeedsId.PrimaryAssetName, 3);
+			HoldSeeds(TurnipSeedsId().PrimaryAssetName, 3);
 			const TStrongObjectPtr<UVestigeTestEventRecorder> Recorder = ListenToBlueprintEvents();
 
 			UseToolAndFinish();
@@ -1773,7 +1774,7 @@ namespace FarmingTests
 
 		TEST_METHOD(OnLightSoilTooLateCountsTwiceTheDays)
 		{
-			const UFarmCropData* Turnip = GetCropOf(TurnipSeedsId.PrimaryAssetName);
+			const UFarmCropData* Turnip = GetCropOf(TurnipSeedsId().PrimaryAssetName);
 			ASSERT_THAT(IsNotNull(Turnip));
 			ASSERT_THAT(IsTrue(Turnip->GetWateredNightsPerGrowthDay(1) == 2));
 			// Exactly the turnip's days are left: clean soil ripens on the season's last day, light soil can't.
@@ -1781,7 +1782,7 @@ namespace FarmingTests
 			Grid->GetField()->Till(TargetCoordinates);
 			Grid->GetField()->Till(FIntPoint(4, 0));
 			Contaminate(TargetCoordinates, 1);
-			HoldSeeds(TurnipSeedsId.PrimaryAssetName, 3);
+			HoldSeeds(TurnipSeedsId().PrimaryAssetName, 3);
 			ListenToFeedback();
 
 			StepToNextTile();
@@ -1808,7 +1809,7 @@ namespace FarmingTests
 			UseToolAndFinish();
 			Contaminate(FIntPoint(4, 0), 2);
 			StepToNextTile();
-			HoldSeeds(TurnipSeedsId.PrimaryAssetName, 3);
+			HoldSeeds(TurnipSeedsId().PrimaryAssetName, 3);
 			UseToolAndFinish();
 			ASSERT_THAT(IsTrue(Reports
 				== TArray<FGameplayTag>{VestigeGameplayTags::Feedback_Farm_CantPlant, VestigeGameplayTags::Feedback_Farm_CantPlant}));
@@ -1841,7 +1842,7 @@ namespace FarmingTests
 			const UFarmCropData* Crop = RestoreRipeTarget(TEXT("Base.Turnip"), 1, true);
 			ASSERT_THAT(IsNotNull(Crop));
 			Hold(TEXT("Base.Hand"), 0);
-			const UVestigeItemData* Seed = GetBaseItem(TurnipSeedsId.PrimaryAssetName);
+			const UVestigeItemData* Seed = GetBaseItem(TurnipSeedsId().PrimaryAssetName);
 			const UVestigeItemData* Turnip = GetBaseItem(TEXT("Base.Turnip"));
 			const UVestigeItemData* Mutated = GetBaseItem(Crop->GetMutatedHarvestItemId().PrimaryAssetName);
 			ASSERT_THAT(IsTrue(Seed && Turnip && Mutated));
@@ -1908,6 +1909,109 @@ namespace FarmingTests
 			ASSERT_THAT(IsTrue(Reports.IsEmpty()));
 			ASSERT_THAT(IsTrue(TargetTile()->GetState() == EFarmTileState::Tilled));
 			ASSERT_THAT(IsTrue(TargetTile()->GetContamination() == 1));
+		}
+
+		// ---- The farm's firsts ----
+
+		UVestigeMilestoneSubsystem& GetMilestones() { return *UVestigeMilestoneSubsystem::Get(&Spawner.GetWorld()); }
+
+		TEST_METHOD(AHarvestReachesTheFirstHarvest)
+		{
+			ASSERT_THAT(IsNotNull(GrowRipeCrop()));
+			Hold(TEXT("Base.Hand"), 0);
+			ASSERT_THAT(IsFalse(GetMilestones().HasReached(VestigeGameplayTags::Milestone_Farm_Harvested)));
+
+			HarvestAndFinish();
+
+			ASSERT_THAT(IsTrue(GetMilestones().HasReached(VestigeGameplayTags::Milestone_Farm_Harvested)));
+			// A harvest on clean soil of a plain crop is neither a cleaning nor a mutated one.
+			ASSERT_THAT(IsFalse(GetMilestones().HasReached(VestigeGameplayTags::Milestone_Farm_Cleaned)));
+			ASSERT_THAT(IsFalse(GetMilestones().HasReached(VestigeGameplayTags::Milestone_Farm_HarvestedMutated)));
+		}
+
+		TEST_METHOD(AHarvestThatFailsReachesNothing)
+		{
+			// A full bag leaves the crop in the ground, so nothing was harvested.
+			const UFarmCropData* Crop = GrowRipeCrop();
+			ASSERT_THAT(IsNotNull(Crop));
+			Hold(TEXT("Base.Hand"), 0);
+			const UVestigeItemData* Seed = GetBaseItem(TurnipSeedsId().PrimaryAssetName);
+			ASSERT_THAT(IsNotNull(Seed));
+			TArray<FVestigeInventorySlotSaveData> Full;
+			for (int32 Slot = 0; Slot < Inventory->GetSlots().Num(); ++Slot)
+			{
+				Full.Add({Slot, Seed->GetContentId(), Seed->GetMaxStackSize()});
+			}
+			SetBag(MoveTemp(Full));
+
+			HarvestAndFinish();
+
+			ASSERT_THAT(IsTrue(TargetTile()->IsRipe()));
+			ASSERT_THAT(IsFalse(GetMilestones().HasReached(VestigeGameplayTags::Milestone_Farm_Harvested)));
+		}
+
+		TEST_METHOD(ACleaningHarvestReachesTheFirstCleaning)
+		{
+			// A plain crop on heavy soil is harvested but cleans nothing.
+			ASSERT_THAT(IsNotNull(RestoreRipeTarget(TEXT("Base.Turnip"), 1, false)));
+			Hold(TEXT("Base.Hand"), 0);
+			HarvestAndFinish();
+			ASSERT_THAT(IsTrue(GetMilestones().HasReached(VestigeGameplayTags::Milestone_Farm_Harvested)));
+			ASSERT_THAT(IsFalse(GetMilestones().HasReached(VestigeGameplayTags::Milestone_Farm_Cleaned)));
+
+			ASSERT_THAT(IsNotNull(RestoreRipeTarget(TEXT("Base.CleanupCrop"), 2, false)));
+			HarvestAndFinish();
+
+			ASSERT_THAT(IsTrue(GetMilestones().HasReached(VestigeGameplayTags::Milestone_Farm_Cleaned)));
+		}
+
+		TEST_METHOD(AMutatedHarvestReachesItsMilestone)
+		{
+			ASSERT_THAT(IsNotNull(RestoreRipeTarget(TEXT("Base.Turnip"), 0, false)));
+			Hold(TEXT("Base.Hand"), 0);
+			HarvestAndFinish();
+			ASSERT_THAT(IsFalse(GetMilestones().HasReached(VestigeGameplayTags::Milestone_Farm_HarvestedMutated)));
+
+			ASSERT_THAT(IsNotNull(RestoreRipeTarget(TEXT("Base.Turnip"), 0, true)));
+			HarvestAndFinish();
+
+			ASSERT_THAT(IsTrue(GetMilestones().HasReached(VestigeGameplayTags::Milestone_Farm_HarvestedMutated)));
+		}
+
+		TEST_METHOD(PlantingReachesThePlantedMilestones)
+		{
+			ASSERT_THAT(IsFalse(GetMilestones().HasReached(VestigeGameplayTags::Milestone_Farm_Planted)));
+			Grid->GetField()->Till(TargetCoordinates);
+			Hold(TEXT("Base.Seeds"), 1);
+
+			UseToolAndFinish();
+
+			ASSERT_THAT(IsTrue(TargetTile()->GetState() == EFarmTileState::Planted));
+			ASSERT_THAT(IsTrue(GetMilestones().HasReached(VestigeGameplayTags::Milestone_Farm_Planted)));
+			// A turnip does not clean the soil.
+			ASSERT_THAT(IsFalse(GetMilestones().HasReached(VestigeGameplayTags::Milestone_Farm_PlantedCleaningCrop)));
+		}
+
+		TEST_METHOD(PlantingACropThatCleansReachesItsMilestone)
+		{
+			Grid->GetField()->Till(TargetCoordinates);
+			Contaminate(TargetCoordinates, 1);
+			HoldSeeds(CleanupSeedsName, 1);
+
+			UseToolAndFinish();
+
+			ASSERT_THAT(IsTrue(TargetTile()->GetState() == EFarmTileState::Planted));
+			ASSERT_THAT(IsTrue(GetMilestones().HasReached(VestigeGameplayTags::Milestone_Farm_PlantedCleaningCrop)));
+		}
+
+		TEST_METHOD(APlantingThatIsRefusedReachesNothing)
+		{
+			// Seeds on soil that is not tilled are refused.
+			Hold(TEXT("Base.Seeds"), 1);
+
+			UseToolAndFinish();
+
+			ASSERT_THAT(IsFalse(GetMilestones().HasReached(VestigeGameplayTags::Milestone_Farm_Planted)));
 		}
 	};
 }

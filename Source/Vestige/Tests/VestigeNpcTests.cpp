@@ -6,11 +6,23 @@
 #include "AIController.h"
 #include "Characters/VestigeConversationComponent.h"
 #include "Characters/VestigeNpcCharacter.h"
+#include "Characters/VestigeRelationshipComponent.h"
+#include "Characters/VestigeWateringHelpComponent.h"
 #include "Components/ActorTestSpawner.h"
 #include "Components/CapsuleComponent.h"
+#include "Content/FarmCropData.h"
 #include "Content/VestigeCharacterData.h"
 #include "Content/VestigeContentCatalog.h"
 #include "CQTest.h"
+#include "Farming/FarmField.h"
+#include "Farming/FarmFieldSaveData.h"
+#include "Farming/FarmFieldSubsystem.h"
+#include "Farming/FarmGrid.h"
+#include "Farming/FarmTileState.h"
+#include "Farming/FarmWaterSettings.h"
+#include "Farming/FarmWaterSubsystem.h"
+#include "GameFramework/PlayerController.h"
+#include "GameplayTagContainer.h"
 #include "Interaction/VestigeInteractable.h"
 #include "Player/VestigePlayerState.h"
 #include "Time/VestigeClockSubsystem.h"
@@ -158,6 +170,224 @@ namespace VestigeNpcTests
 			Hob->Destroy();
 
 			ASSERT_THAT(IsFalse(IsValid(Hob)));
+		}
+
+		// ---- Hob's dawn watering ----
+
+		UFarmField* Field = nullptr;
+		AFarmGrid* Grid = nullptr;
+		UFarmFieldSubsystem* Fields = nullptr;
+		UFarmWaterSubsystem* Water = nullptr;
+		UVestigeRelationshipComponent* Relationships = nullptr;
+		UVestigeWateringHelpComponent* Help = nullptr;
+
+		FGameplayTag MakeTag(const TCHAR* Name) const { return FGameplayTag::RequestGameplayTag(FName(Name)); }
+
+		/** The farm, the player Hob helps and Hob on tile (0, 0); with the offer accepted, unless it is not. */
+		void SetUpFarm(bool bAccepted = true)
+		{
+			Grid = &Spawner.SpawnActor<AFarmGrid>();
+			Grid->DispatchBeginPlay();
+			Field = Grid->GetField();
+			Fields = UFarmFieldSubsystem::Get(&Spawner.GetWorld());
+			Water = UFarmWaterSubsystem::Get(&Spawner.GetWorld());
+			Relationships = PlayerState->FindComponentByClass<UVestigeRelationshipComponent>();
+			Help = Hob->FindComponentByClass<UVestigeWateringHelpComponent>();
+			ASSERT_THAT(IsNotNull(Field));
+			ASSERT_THAT(IsNotNull(Fields));
+			ASSERT_THAT(IsNotNull(Water));
+			ASSERT_THAT(IsNotNull(Relationships));
+			ASSERT_THAT(IsNotNull(Help));
+
+			APlayerController& PlayerController = Spawner.SpawnActor<APlayerController>();
+			PlayerController.PlayerState = PlayerState;
+			Hob->SetActorLocation(Grid->GetTileTransform(FIntPoint(0, 0)).GetLocation());
+			if (bAccepted)
+			{
+				Relationships->SetFlag(*Hob->GetCharacterData(), MakeTag(TEXT("Vestige.Relationship.Help.Watering")), 1);
+			}
+		}
+
+		const UFarmCropData* FindTurnip()
+		{
+			return UVestigeContentCatalog::Get(&Spawner.GetWorld())
+				->Find<UFarmCropData>(FPrimaryAssetId(UFarmCropData::AssetType, TEXT("Base.Turnip")));
+		}
+
+		/** Tills and plants a turnip: growing, dry. */
+		void PlantDry(const FIntPoint& Coordinates)
+		{
+			const UFarmCropData* Turnip = FindTurnip();
+			ASSERT_THAT(IsNotNull(Turnip));
+			Field->Till(Coordinates);
+			ASSERT_THAT(IsTrue(Field->Plant(Coordinates, Turnip)));
+		}
+
+		/** Puts a turnip of this state on the tile, as loading a save does. */
+		void RestoreTurnip(const FIntPoint& Coordinates, EFarmTileState State, int32 GrowthDays)
+		{
+			const UFarmCropData* Turnip = FindTurnip();
+			ASSERT_THAT(IsNotNull(Turnip));
+			FFarmTileSaveData Saved;
+			Saved.Coordinates = Coordinates;
+			Saved.State = State;
+			Saved.GrowthDays = GrowthDays;
+			Saved.CropId = TEXT("Base.Turnip");
+			Field->RestoreTilesFromSaveData({Saved}, {{TEXT("Base.Turnip"), Turnip}});
+		}
+
+		int32 GetTileWater(const FIntPoint& Coordinates) const { return Field->GetTile(Coordinates)->GetWaterLevel(); }
+
+		/** The night's farm work is done on Day, as the field subsystem tells. */
+		void Dawn(int32 Day = 2) { Fields->OnFieldsAdvanced.Broadcast(Day); }
+
+		int32 GetHelpedDay() const
+		{
+			const int32* Day =
+				Relationships->GetFlagDays(Hob->GetCharacterId()).Find(MakeTag(TEXT("Vestige.Relationship.Helped.Watering")));
+			return Day ? *Day : INDEX_NONE;
+		}
+
+		TEST_METHOD(HobWatersTheNearestDryGrowingTilesAtDawn)
+		{
+			SetUpFarm();
+			for (const FIntPoint& Tile : {FIntPoint(5, 5), FIntPoint(1, 0), FIntPoint(0, 1), FIntPoint(7, 7), FIntPoint(2, 2), FIntPoint(3, 0)})
+			{
+				PlantDry(Tile);
+			}
+			const int32 Left = Water->GetCleanWaterLeft();
+			ASSERT_THAT(IsTrue(Left >= 4));
+
+			Dawn(2);
+
+			// Hob stands on (0, 0): the four nearest are watered, the tie between (1, 0) and (0, 1) goes to the first row.
+			for (const FIntPoint& Tile : {FIntPoint(1, 0), FIntPoint(0, 1), FIntPoint(2, 2), FIntPoint(3, 0)})
+			{
+				ASSERT_THAT(IsTrue(GetTileWater(Tile) > 0, *Tile.ToString()));
+			}
+			ASSERT_THAT(IsTrue(GetTileWater(FIntPoint(5, 5)) == 0));
+			ASSERT_THAT(IsTrue(GetTileWater(FIntPoint(7, 7)) == 0));
+			ASSERT_THAT(IsTrue(Water->GetCleanWaterLeft() == Left - 4));
+			ASSERT_THAT(IsTrue(GetHelpedDay() == 2));
+		}
+
+		TEST_METHOD(HobDoesNotWaterWithoutTheAcceptedOffer)
+		{
+			SetUpFarm(false);
+			PlantDry(FIntPoint(1, 0));
+			const int32 Left = Water->GetCleanWaterLeft();
+
+			Dawn();
+
+			ASSERT_THAT(IsTrue(GetTileWater(FIntPoint(1, 0)) == 0));
+			ASSERT_THAT(IsTrue(Water->GetCleanWaterLeft() == Left));
+			ASSERT_THAT(IsTrue(GetHelpedDay() == INDEX_NONE));
+		}
+
+		TEST_METHOD(HobSkipsRipeWitheredAndWetTiles)
+		{
+			SetUpFarm();
+			PlantDry(FIntPoint(1, 0));
+			PlantDry(FIntPoint(2, 0));
+			Field->Water(FIntPoint(2, 0));
+			const int32 WetBefore = GetTileWater(FIntPoint(2, 0));
+			ASSERT_THAT(IsTrue(WetBefore > 0));
+			RestoreTurnip(FIntPoint(3, 0), EFarmTileState::Planted, FindTurnip()->GetDaysToMature());
+			RestoreTurnip(FIntPoint(4, 0), EFarmTileState::Withered, 1);
+			Field->Till(FIntPoint(0, 1));
+			ASSERT_THAT(IsTrue(Field->GetTile(FIntPoint(3, 0))->IsRipe()));
+			ASSERT_THAT(IsTrue(Field->GetTile(FIntPoint(4, 0))->IsWithered()));
+			const int32 Left = Water->GetCleanWaterLeft();
+
+			Dawn();
+
+			// Only the dry growing tile is watered, and only it is paid for.
+			ASSERT_THAT(IsTrue(GetTileWater(FIntPoint(1, 0)) > 0));
+			ASSERT_THAT(IsTrue(GetTileWater(FIntPoint(2, 0)) == WetBefore));
+			ASSERT_THAT(IsTrue(GetTileWater(FIntPoint(3, 0)) == 0));
+			ASSERT_THAT(IsTrue(GetTileWater(FIntPoint(4, 0)) == 0));
+			ASSERT_THAT(IsTrue(GetTileWater(FIntPoint(0, 1)) == 0));
+			ASSERT_THAT(IsTrue(Water->GetCleanWaterLeft() == Left - 1));
+		}
+
+		TEST_METHOD(HobWatersNoMoreThanTheWellHasLeft)
+		{
+			SetUpFarm();
+			for (const FIntPoint& Tile : {FIntPoint(1, 0), FIntPoint(0, 1), FIntPoint(1, 1), FIntPoint(2, 0)})
+			{
+				PlantDry(Tile);
+			}
+			Water->DrawCleanWater(Water->GetCleanWaterLeft() - 2);
+			ASSERT_THAT(IsTrue(Water->GetCleanWaterLeft() == 2));
+
+			Dawn();
+
+			ASSERT_THAT(IsTrue(GetTileWater(FIntPoint(1, 0)) > 0));
+			ASSERT_THAT(IsTrue(GetTileWater(FIntPoint(0, 1)) > 0));
+			ASSERT_THAT(IsTrue(GetTileWater(FIntPoint(1, 1)) == 0));
+			ASSERT_THAT(IsTrue(GetTileWater(FIntPoint(2, 0)) == 0));
+			ASSERT_THAT(IsTrue(Water->GetCleanWaterLeft() == 0));
+			ASSERT_THAT(IsTrue(GetHelpedDay() == 2));
+		}
+
+		TEST_METHOD(HobWatersNothingAndSaysNothingWhenTheWellIsDry)
+		{
+			SetUpFarm();
+			PlantDry(FIntPoint(1, 0));
+			Water->DrawCleanWater(Water->GetCleanWaterLeft());
+
+			Dawn();
+
+			ASSERT_THAT(IsTrue(GetTileWater(FIntPoint(1, 0)) == 0));
+			ASSERT_THAT(IsTrue(GetHelpedDay() == INDEX_NONE));
+		}
+
+		TEST_METHOD(HobsWateredTilesAreWetAfterTheNewDay)
+		{
+			SetUpFarm();
+			PlantDry(FIntPoint(1, 0));
+			UVestigeClockSubsystem* Clock = UVestigeClockSubsystem::Get(&Spawner.GetWorld());
+			ASSERT_THAT(IsNotNull(Clock));
+
+			// The night's fall comes before the help, so the tile does not dry again.
+			Clock->StartNextDay();
+
+			ASSERT_THAT(IsTrue(GetTileWater(FIntPoint(1, 0)) > 0));
+			ASSERT_THAT(IsTrue(GetHelpedDay() == Clock->GetCurrentDay()));
+			ASSERT_THAT(IsTrue(Water->GetCleanWaterLeft() == UFarmWaterSettings::Get().GetWellWaterPerDay() - 1));
+		}
+
+		TEST_METHOD(HobsWateringSetsTheMorningFlagOnlyWhenItWatered)
+		{
+			SetUpFarm();
+
+			Dawn(2);
+			ASSERT_THAT(IsTrue(GetHelpedDay() == INDEX_NONE));
+
+			PlantDry(FIntPoint(1, 0));
+			Dawn(3);
+			ASSERT_THAT(IsTrue(GetHelpedDay() == 3));
+		}
+
+		TEST_METHOD(TheHelpDoesNothingWithoutAFarmOrAPlayer)
+		{
+			// No grid and no player controller: the broadcast is no problem.
+			Fields = UFarmFieldSubsystem::Get(&Spawner.GetWorld());
+			ASSERT_THAT(IsNotNull(Fields));
+
+			Dawn();
+
+			ASSERT_THAT(IsTrue(IsValid(Hob)));
+		}
+
+		TEST_METHOD(BP_HobHelpsWithFourTilesAndTheHelpFlags)
+		{
+			const UVestigeWateringHelpComponent* Component = Hob->FindComponentByClass<UVestigeWateringHelpComponent>();
+			ASSERT_THAT(IsNotNull(Component));
+
+			ASSERT_THAT(IsTrue(Component->GetMaxTiles() == 4));
+			ASSERT_THAT(IsTrue(Component->GetRequiredFlag() == MakeTag(TEXT("Vestige.Relationship.Help.Watering"))));
+			ASSERT_THAT(IsTrue(Component->GetHelpedFlag() == MakeTag(TEXT("Vestige.Relationship.Helped.Watering"))));
 		}
 	};
 }
