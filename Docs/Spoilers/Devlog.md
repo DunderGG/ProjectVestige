@@ -23,7 +23,7 @@ These hold for every piece, whatever the voice.
 
 - 3 to 6 short lines, about 70 words.
 - Opens with a header: a short in-world description of what the piece is ("A postcard with no address, held at the post office for collection."). No "From the world of the game" label; the separate card under the sign-off marks it as fiction.
-- Ends with a stamp line: a 24-hour time and the weather ("18:20. Haze thinning.").
+- Ends with a stamp line. On a postcard or a transmission: a 24-hour time and the weather ("18:20. Haze thinning."). On a notice (an ad, notice or sign): the printed thing's own small line, such as a catalogue page or a print code ("Spring catalogue, page 12."), never a time, since a printed thing wasn't written at a moment.
 - Echoes its post: the piece picks up the post's subject, mood or a detail of it, in the world's terms.
 
 ## Frequency
