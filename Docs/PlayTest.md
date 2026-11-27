@@ -117,6 +117,13 @@ Hob is in `L_Farm` with a placeholder body, and talking to Hob opens a Common UI
 - [ ] **The box at a small size** (why a person: layout; at the smoke test): in a 1280 by 800 window the box is readable, the three replies fit, and the name tab and hint don't overlap the text.
 - [ ] **At night** (why a person: lighting; at the smoke test): with `SkipToTime 2130`, Hob is easy to find by Hob's eyes and still reads as a robot, not a pair of floating lights.
 
+### The controls after a talk, 2026-11-27
+
+The commit is the one titled "Give the farmer back the controls after a talk, and make Hob's eyes glow". After a talk the HUD takes the Game input config back (it had stopped being the router's leaf); an off-screen run showed the config change and the hidden cursor, and `Vestige.HudInput` covers the rule.
+
+- [ ] **Controls after a talk** (why a person: the router needs a real viewport, and movement can't be injected off-screen): talk to Hob and end the talk three ways, by its last line, by Escape and by gamepad Start. Each time the farmer walks and looks around at once, the mouse cursor is hidden, and the tool works.
+- [ ] **Hob's eyes, again** (why a person: a look): by day and at night (`SkipToTime 2130`) Hob's eyes are visibly cyan, greener than the water's azure, not white in the centre.
+
 ### Editor chores
 
 Changes only the editor can make safely. None are open: the earlier ones (re-saving the template Blueprints, moving `BP_FarmTile` and the materials with redirectors fixed, the Android File Server token) are done and recorded in [RoadmapArchive.md, Housekeeping](RoadmapArchive.md#3-housekeeping). The one editor save still waiting is the `L_Farm` save under "Sky lighting". After an editor chore, run the [smoke test](#3-smoke-test).

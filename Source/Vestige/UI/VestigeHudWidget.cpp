@@ -21,8 +21,10 @@ UVestigeHudWidget::UVestigeHudWidget(const FObjectInitializer& ObjectInitializer
 	bSetVisibilityOnActivated = true;
 	ActivatedVisibility = ESlateVisibility::HitTestInvisible;
 
-	// It holds no reply or button, so nothing should take the focus from the game.
-	bSupportsActivationFocus = false;
+	// Left on (the default), though the HUD has no reply or button to focus (GetDesiredFocusTarget is null, so nothing takes the
+	// focus from the game). Common UI's FindLeafmostActiveChild returns nothing for a widget without activation focus, so the HUD
+	// would never become the leaf again and the Menu input config of a closed dialogue box would stay.
+	bSupportsActivationFocus = true;
 }
 
 TOptional<FUIInputConfig> UVestigeHudWidget::GetDesiredInputConfig() const

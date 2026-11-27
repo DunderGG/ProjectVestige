@@ -94,10 +94,14 @@ def set_up_eyes():
         log("made " + path)
 
     # The look is three parameters, set on every run, so the model's eyes can reuse the material and a rerun tunes it.
-    for expression in lib.get_material_expressions(material):
-        name = str(expression.get_editor_property("parameter_name")) if hasattr(expression, "parameter_name") else ""
+    expressions = lib.get_material_expressions(material)
+    for expression in expressions:
+        if not isinstance(expression, (unreal.MaterialExpressionScalarParameter, unreal.MaterialExpressionVectorParameter)):
+            continue
+        name = str(expression.get_editor_property("parameter_name"))
         if name in EYE_PARAMETERS:
             expression.set_editor_property("default_value", EYE_PARAMETERS[name])
+            log("set " + name + " = " + str(expression.get_editor_property("default_value")))
     lib.recompile_material(material)
     save(material)
 
