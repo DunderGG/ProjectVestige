@@ -57,12 +57,12 @@ The maintainer asked for as little manual play-testing as possible (2026-11-13).
    - Say in your report what you looked at, what you saw and the screenshot paths (the main session lists them for the user to glance at); a screenshot shows the look, not the feel.
 3. **A manual check for a person,** only for what neither can judge: how something feels in play (movement, timing, responsiveness), whether it is fun or reads well to a player, input on real hardware, and approving a new look the first time. Each check says why it needs a person.
 
-Group the checks: add to an open heading for the same system instead of starting a new one, and mark a check that can wait for the milestone's smoke test "(at the smoke test)" so the maintainer can do them in one session.
+The rule since 2026-11-27 (@DunderGG): a manual check covers only feel and looks, at most three per feature, and every one waits for the batched play-test at the end of the current milestone, so the heading says which milestone (`**For the milestone 2 play-test.**`). Editor steps a person must do are not checks: say them in your report for the main session to ask for. Add to an open heading for the same system instead of starting a new one.
 
 ## Docs/PlayTest.md
 
 - For each change that needs a manual check, add a dated heading under section 2, "Pending checks" (`### <What changed>, YYYY-MM-DD`), a line or two on what changed and the commit it belongs to by its subject line (history may be rewritten before it is pushed, so hashes go stale; your brief gives the planned subject, and if it doesn't, ask for it in your report), then one `- [ ] **Name** (why a person: <feel, fun, hardware or first look>): what to do and what to see` item per check, written for someone new to the Unreal editor (menu paths, where the asset is).
-- A system that gains lasting behavior also gets a step in the smoke test (section 3).
+- A system that gains lasting behavior a person must see also gets a step in the smoke test (section 3); one whose rules are all automated doesn't.
 - When someone reports checks, update them as section 2 says: tick each one that passed, then run `python Tools/archive_playtest_checks.py`, which moves every heading whose checks have all passed to the end of `Docs/PlayTestArchive.md` and prefixes its links to `PlayTest.md`'s own headings. Run it each time you edit `Docs/PlayTest.md`, since @DunderGG may tick checks himself. When one fails, write what they saw under it.
 
 ## Working in a shared checkout
