@@ -32,6 +32,12 @@ The one place for what to check by hand in the editor.
 
 Checks for recent changes that haven't been confirmed in the editor yet. Each names the commit to look at if something is wrong. When a check passes, tick it (or tell the agent, who ticks it); once every check under a heading has passed, the heading moves to the end of [PlayTestArchive.md](PlayTestArchive.md), unchanged except that its links to this file's own headings (such as `#3-smoke-test`) get the `PlayTest.md` prefix. The agent that edits this file next archives every heading whose checks have all passed, so headings ticked by hand move too. When one fails, write what you saw under it; it is fixed before new work starts.
 
+### The bed mesh, 2026-11-27
+
+`BP_Bed` uses the new `SM_Bed` mesh instead of the engine cube. Its mesh, scale and the interaction volume containing it are automated (`Vestige.Interaction.TheBedBlueprintHasItsMesh`). **For the milestone 2 play-test.** Look at the commit "Import the bed mesh and use it on BP_Bed" if something is wrong.
+
+- [ ] **Look and walk** (why a person: first look and feel): open `/Game/Maps/L_Farm` and press Play. From the game camera the bed reads as a bed, its colours sit well on the ground in the morning light, and the farmer walks around it without snagging.
+
 ### Message settings, 2026-10-30
 
 The message cap and time are project settings. The cap rule, its clamps and the log line of each report are automated (`Vestige.HudMessages`, `Vestige.HudSettings`, `Vestige.Feedback.TheLogShowsAReportsClauses`), and the stack of at most five boxes was checked under "The HUD in UMG" below.

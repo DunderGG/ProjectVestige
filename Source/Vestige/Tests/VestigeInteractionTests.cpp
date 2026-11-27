@@ -4,8 +4,11 @@
 #if WITH_DEV_AUTOMATION_TESTS
 
 #include "Components/ActorTestSpawner.h"
+#include "Components/BoxComponent.h"
+#include "Components/StaticMeshComponent.h"
 #include "CQTest.h"
 #include "Engine/CollisionProfile.h"
+#include "Engine/StaticMesh.h"
 #include "Farming/VestigeBed.h"
 #include "Farming/VestigeRestComponent.h"
 #include "Game/VestigeGameMode.h"
@@ -284,6 +287,27 @@ namespace VestigeInteractionTests
 			IVestigeInteractable::Execute_GetInteractionOptions(&Bed, &Visitor, Options);
 
 			ASSERT_THAT(IsTrue(Options.IsEmpty()));
+		}
+
+		TEST_METHOD(TheBedBlueprintHasItsMesh)
+		{
+			UClass* BedClass = LoadClass<AVestigeBed>(nullptr, TEXT("/Game/Vestige/Blueprints/BP_Bed.BP_Bed_C"));
+			ASSERT_THAT(IsNotNull(BedClass));
+			AVestigeBed& Bed = Spawner.SpawnActor<AVestigeBed>(FActorSpawnParameters(), BedClass);
+
+			const UStaticMeshComponent* Mesh = Bed.FindComponentByClass<UStaticMeshComponent>();
+			ASSERT_THAT(IsNotNull(Mesh));
+			ASSERT_THAT(IsNotNull(Mesh->GetStaticMesh().Get()));
+			ASSERT_THAT(AreEqual(Mesh->GetStaticMesh()->GetPathName(), FString(TEXT("/Game/Vestige/Meshes/SM_Bed.SM_Bed"))));
+			ASSERT_THAT(IsTrue(Mesh->GetRelativeScale3D().Equals(FVector::OneVector)));
+			ASSERT_THAT(IsTrue(Mesh->GetRelativeLocation().Equals(FVector::ZeroVector)));
+
+			const UBoxComponent* Volume = Bed.FindComponentByClass<UBoxComponent>();
+			ASSERT_THAT(IsNotNull(Volume));
+			const FBox MeshBox = Mesh->Bounds.GetBox();
+			const FBox VolumeBox = Volume->Bounds.GetBox();
+			ASSERT_THAT(IsTrue(VolumeBox.IsInsideOrOn(MeshBox.Min)));
+			ASSERT_THAT(IsTrue(VolumeBox.IsInsideOrOn(MeshBox.Max)));
 		}
 	};
 }
