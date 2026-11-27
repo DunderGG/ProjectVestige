@@ -30,7 +30,7 @@ UVestigeHudWidget::UVestigeHudWidget(const FObjectInitializer& ObjectInitializer
 TOptional<FUIInputConfig> UVestigeHudWidget::GetDesiredInputConfig() const
 {
 	// Menu with no capture is Common UI's default config, which would take the input from the game.
-	return FUIInputConfig(ECommonInputMode::Game, EMouseCaptureMode::CapturePermanently_IncludingInitialMouseDown);
+	return FUIInputConfig(ECommonInputMode::Game, EMouseCaptureMode::CapturePermanently);
 }
 
 void UVestigeHudWidget::SetStatusText(const FText& Text)

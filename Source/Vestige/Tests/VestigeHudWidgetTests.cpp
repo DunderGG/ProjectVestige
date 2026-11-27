@@ -248,6 +248,17 @@ namespace VestigeHudWidgetTests
 			}
 		}
 
+		// Common UI's analog cursor takes the gamepad's A (its virtual accept key) as a mouse click whenever the active config's
+		// capture mode can release the mouse (CanReleaseMouseCapture), so A would never reach the game's jump.
+		TEST_METHOD(TheHudsMouseCaptureLeavesTheGamepadAToTheGame)
+		{
+			const TOptional<FUIInputConfig> HudConfig = Hud->GetDesiredInputConfig();
+			ASSERT_THAT(IsTrue(HudConfig.IsSet()));
+			const EMouseCaptureMode Capture = HudConfig->GetMouseCaptureMode();
+			ASSERT_THAT(IsFalse(Capture == EMouseCaptureMode::CaptureDuringMouseDown));
+			ASSERT_THAT(IsFalse(Capture == EMouseCaptureMode::CapturePermanently_IncludingInitialMouseDown));
+		}
+
 		TEST_METHOD(TheHudTakesTheGameInputAndTheBoxTheMenuInput)
 		{
 			const TOptional<FUIInputConfig> HudConfig = Hud->GetDesiredInputConfig();
