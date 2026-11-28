@@ -6,6 +6,7 @@ The documents in this folder reveal the story, its secrets and the characters' b
 - [StoryTimeline.md](StoryTimeline.md): the provisional story phases, reveal pacing and character knowledge guardrails.
 - [StoryFlow/](StoryFlow/README.md): the story-flow overview and phase diagrams.
 - [LoreAudit.md](LoreAudit.md): a critical review of lore coherence, characters, tone and writer-facing gaps.
+- [Brands.md](Brands.md): the pre-war companies and brands already in use, with their printed voice and guardrails; a new brand gets its entry here first.
 - [Devlog.md](Devlog.md): the rules for the short in-world pieces that end some devlog posts, and the list of published pieces.
 - [Characters/Engineer.md](Characters/Engineer.md): the engineer's character sheet.
 - [Characters/Hob.md](Characters/Hob.md): Hob's character sheet.

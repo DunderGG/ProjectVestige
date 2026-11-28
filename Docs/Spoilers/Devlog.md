@@ -34,7 +34,7 @@ Every post (@DunderGG, 2026-11-27, replacing "about one in four, never two in a 
 
 All under the same spoiler rules. The devlog site draws each with its own look, set by the piece's `kind`: `postcard`, `notice` or `transmission`.
 
-- **Old ads, notices and signs** (`notice`): printed things still around from before the war, or put up since.
+- **Old ads, notices and signs** (`notice`): printed things still around from before the war, or put up since. The brand behind a printed piece has its voice and guardrails in [Brands.md](Brands.md); a brand not yet listed there gets its entry before the piece is written.
 - **Characters the game already shows** (Hob, the farm's machines): only once a player has met them in the build, and never naming or introducing anyone a player hasn't met.
 - **Intercepted transmissions from Morrow** (`transmission`; approved by @DunderGG on 2026-11-27): occasional, a few lines, clearly fiction, hinting only at lore that won't change and checked against this folder. The speaker is never named and the transmission never reveals who they speak for or that they speak for anyone; all the postcard rules above apply.
 
@@ -61,4 +61,4 @@ One row per piece, by post and date only. Never quote a piece's text here.
 | Post | Date | Voice | Hint | Commits |
 |---|---|---|---|---|
 | How it started | 2026-11-08 | Postcard | The unassigned-want hint (Morrow's wish for a part of life no one assigned) | That this person once kept a small turnip patch where they were staying |
-| Hello from the farm | 2026-11-27 | Old seed ad (notice) | None beyond the early chapter: pre-war ads are still around, and robots once did the house chores | A pre-war seed brand, Sure-Sprout *(working name)* |
+| Hello from the farm | 2026-11-27 | Old seed ad (notice) | None beyond the early chapter: pre-war ads are still around, and robots once did the house chores | A pre-war seed brand, Sure-Sprout *(working name)* ([Brands.md](Brands.md#sure-sprout-working-name)) |
