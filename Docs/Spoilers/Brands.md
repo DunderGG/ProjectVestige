@@ -13,14 +13,17 @@ The pre-war companies and brands that already appear in the game's texts, the de
 
 Contents
 
-1. [Hearthwell Mechanical](#hearthwell-mechanical-working-name)
-2. [Civitas Automata](#civitas-automata-working-name)
-3. [Ironside Dynamics](#ironside-dynamics-working-name)
-4. [Sure-Sprout](#sure-sprout-working-name)
+- [Brands and companies](#brands-and-companies)
+  - [Hearthwell Mechanical *(working name)*](#hearthwell-mechanical-working-name)
+  - [Civitas Automata *(working name)*](#civitas-automata-working-name)
+  - [Ironside Dynamics *(working name)*](#ironside-dynamics-working-name)
+  - [Sure-Sprout *(working name)*](#sure-sprout-working-name)
 
 ---
 
 ## Hearthwell Mechanical *(working name)*
+
+<p align="center"><img src="../../Images/ConceptArt/HearthwellMechanical-GMN.jpg" alt="Hearthwell Mechanical concept art" width="50%"></p>
 
 - **What it made:** home and farm robots, appliances and home cryo pods; design language and company slogan in [Lore.md, section 7](Lore.md#7-the-robot-makers). Its home thinking machines also answered the household's questions ([section 3, "Thinking machines"](Lore.md#thinking-machines)).
 - **Era and status:** pre-war. Gone as a company; its machines and its spring festival survive.
@@ -41,6 +44,8 @@ Contents
   - Hob's own history, memory and the family stay out of any Hearthwell ad.
 
 ## Civitas Automata *(working name)*
+
+<p align="center"><img src="../../Images/ConceptArt/CivitasAutomata-GMN.jpg" alt="Civitas Automata concept art" width="50%"></p>
 
 - **What it made:** civic and service robots (mail, clinics, utilities, shops, traffic); design language and company slogan in [Lore.md, section 7](Lore.md#7-the-robot-makers). It made most of the robots in Wellspring and minted the pinions as company scrip ([section 8](Lore.md#8-the-currency)).
 - **Era and status:** pre-war. Gone as a company; its machines still run the town's shops, clinic and water, and its coin is still the town's money.
@@ -64,6 +69,8 @@ Contents
 
 ## Ironside Dynamics *(working name)*
 
+<p align="center"><img src="../../Images/ConceptArt/IronsideDynamics-GMN.jpg" alt="Ironside Dynamics concept art" width="50%"></p>
+
 - **What it made:** war machines, security and curfew robots; design language and company slogan in [Lore.md, section 7](Lore.md#7-the-robot-makers). It made most of the hostile robots.
 - **Era and status:** pre-war, built up in the years of the defence race. Gone as a company; its machines are among the hostile robots, and some, like Gage, chose other lives.
 - **Product lines already named:**
@@ -80,6 +87,8 @@ Contents
   - Its ads are the darkest of the makers' and the easiest to tip into bad taste; give the joke to the product's promise, not to what it was for.
 
 ## Sure-Sprout *(working name)*
+
+<p align="center"><img src="../../Images/ConceptArt/SureSprout-GMN.jpg" alt="Sure-Sprout concept art" width="50%"></p>
 
 - **What it sold:** garden seed, by catalogue, to households with a home robot. Its promise was that the garden would look like it was growing.
 - **Era and status:** pre-war. Who made it, and whether it belonged to one of the makers, is not settled; leave it open.
